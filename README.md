@@ -1,5 +1,7 @@
 # AAI Portal
 
+![Tests](https://github.com/AustralianBiocommons/aai-portal/actions/workflows/test.yml/badge.svg)
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
 
 ## Development server
