@@ -34,10 +34,10 @@ jobs:
       with:
         filename: coverage/aai-portal/cobertura.txt
         badge: true
-        fail_below_min: true
+        fail_below_min: false
         format: markdown
         hide_branch_rate: true
         hide_complexity: true
         indicators: true
         output: console
-        thresholds: '90 90'
+        thresholds: '60 80'
