@@ -19,10 +19,6 @@
 
 <Describe how reviewers can manually test the changes>
 
----
-
 ## Screenshots for any UI changes
 
 <Paste screenshots or screen recordings here if any updates to UI>
-
----
