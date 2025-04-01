@@ -8,7 +8,7 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 * Default branch: `test`, deploys to: https://aaiportal.test.biocommons.org.au/
   * Automated deployment will be added in [AAI-153](https://biocloud.atlassian.net/browse/AAI-153).
 * `main` branch is manually synced from `test` branch.
-  * Automated releases from `main` branch will be added at a later time.
+  * Automated releases from `main` branch will be added in [AAI-154](https://biocloud.atlassian.net/browse/AAI-154).
 
 ## Development server
 
