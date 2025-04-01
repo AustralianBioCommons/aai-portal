@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginButtonComponent } from './login-button.component';
+import {provideMockAuth0Service} from '../../../../../utils/testingUtils';
+import {provideHttpClient} from '@angular/common/http';
 
 describe('LoginButtonComponent', () => {
   let component: LoginButtonComponent;
@@ -8,7 +10,8 @@ describe('LoginButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoginButtonComponent]
+      imports: [LoginButtonComponent],
+      providers: [provideMockAuth0Service(), provideHttpClient()]
     })
     .compileComponents();
 
