@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PendingComponent } from './pending.component';
+import {provideMockAuth0Service} from '../../../../utils/testingUtils';
+import {provideHttpClient} from '@angular/common/http';
+import {provideRouter} from '@angular/router';
 
 describe('PendingComponent', () => {
   let component: PendingComponent;
@@ -8,7 +11,8 @@ describe('PendingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PendingComponent]
+      imports: [PendingComponent],
+      providers: [provideMockAuth0Service(), provideHttpClient(), provideRouter([])]
     })
     .compileComponents();
 
