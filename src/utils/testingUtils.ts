@@ -1,6 +1,11 @@
 import {of} from 'rxjs';
 import {AuthService as Auth0Service} from '@auth0/auth0-angular';
 
+/**
+ * Mock version of the AuthService from Auth0 that can be used in tests
+ * when components depend on this service. Can be passed to the providers
+ * field when configuring TestBed
+ */
 export function provideMockAuth0Service() {
   const mockAuth0Service = {
     isAuthenticated$: of(true),
