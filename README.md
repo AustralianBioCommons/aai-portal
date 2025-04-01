@@ -4,11 +4,11 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
 
-## Contribution Guide
+## Project Info
 * Default branch: `test`, deploys to: https://aaiportal.test.biocommons.org.au/
   * Automated deployment will be added in [AAI-153](https://biocloud.atlassian.net/browse/AAI-153).
 * `main` branch is manually synced from `test` branch.
-  * Automated releases from `main` branch will be added later.
+  * Automated releases from `main` branch will be added at a later time.
 
 ## Development server
 
