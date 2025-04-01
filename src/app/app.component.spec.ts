@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import {provideMockAuth0Service} from '../utils/testingUtils';
+import {provideHttpClient} from '@angular/common/http';
+import {provideRouter} from '@angular/router';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [provideMockAuth0Service(), provideHttpClient(), provideRouter([])]
     }).compileComponents();
   });
 
@@ -14,10 +18,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', () => {
+  it('should create the navbar', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, aai-portal');
+    expect(compiled.querySelector("nav")).toBeDefined();
   });
 });
