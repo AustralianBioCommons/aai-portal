@@ -3,7 +3,7 @@ name: Deploy to Test (S3 + CloudFront)
 on:
   push:
     branches:
-      - deploy-test-workflow
+      - test
 
 jobs:
   deploy:
@@ -14,29 +14,36 @@ jobs:
       contents: read
 
     steps:
+      # Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "node"
 
+      # Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # Build the project
       - name: Build the project
         run: npm run build
 
+      # Authenticate with AWS using OIDC
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::232870232581:role/aai-portal-test-github-oidc-role
           aws-region: ap-southeast-2
 
+      # Sync build output to S3
       - name: Deploy to S3
         run: aws s3 sync ./dist/aai-portal/browser/ s3://dev-test-aaiportal/ --delete
 
+      # Invalidate CloudFront cache
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation \
