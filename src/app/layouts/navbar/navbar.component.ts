@@ -37,7 +37,7 @@ export class NavbarComponent implements OnDestroy {
 
   isAuthenticated = this.auth.isAuthenticated();
   user!: any;
-  userType = 'admin';
+  userType = 'user';
   userMenuOpen = false;
 
   userPages = [
