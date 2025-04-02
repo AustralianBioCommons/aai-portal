@@ -26,7 +26,7 @@ jobs:
 
       # Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       # Build the project
       - name: Build the project
@@ -41,7 +41,7 @@ jobs:
 
       # Sync build output to S3
       - name: Deploy to S3
-        run: aws s3 sync ./dist/aai-portal/browser/ s3://dev-test-aaiportal/ --delete
+        run: aws s3 sync ./dist/aai-portal/browser/ s3://${{ secrets.S3_BUCKET_NAME }}/ --delete
 
       # Invalidate CloudFront cache
       - name: Invalidate CloudFront Cache
