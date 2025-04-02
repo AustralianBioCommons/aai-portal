@@ -3,7 +3,7 @@ name: Deploy to Test (S3 + CloudFront)
 on:
   push:
     branches:
-      - test
+      - deploy-test-workflow
 
 jobs:
   deploy:
@@ -36,7 +36,7 @@ jobs:
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::232870232581:role/aai-portal-test-github-oidc-role
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ap-southeast-2
 
       # Sync build output to S3
@@ -47,5 +47,5 @@ jobs:
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id EIO4K65C62R97 \
+            --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} \
             --paths "/*"
