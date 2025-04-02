@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies (optional)
         run: npm install
 
-      - name: Build the project (adjust for your stack)
+      - name: Build the project
         run: npm run build
 
       - name: Deploy to S3
