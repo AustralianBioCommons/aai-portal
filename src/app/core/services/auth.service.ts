@@ -30,7 +30,7 @@ export class AuthService {
   private http = inject(HttpClient);
 
   isAuthenticated = signal<boolean>(false);
-  user = signal<any>(null);
+  user = signal<UserWithMetadata | null>(null);
   user$ = toObservable(this.user);
 
   constructor() {
@@ -64,11 +64,11 @@ export class AuthService {
     });
   }
 
-  getUser(): Observable<any> {
+  getUser(){
     return this.user$;
   }
 
-  updateUserMetadata(userId: string, metadata: any): Observable<any> {
+  updateUserMetadata(userId: string, metadata: any) {
     return this.http
       .patch(
         `${environment.auth0.audience}users/${userId}`,
@@ -79,6 +79,6 @@ export class AuthService {
           },
         },
       )
-      .pipe(tap((updatedUser) => this.user.set(updatedUser)));
+      .pipe(tap((updatedUser: UserWithMetadata) => this.user.set(updatedUser)));
   }
 }
