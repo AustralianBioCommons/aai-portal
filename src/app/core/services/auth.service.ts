@@ -15,6 +15,7 @@ export interface BiocommonsUserMetadata {
   }
 }
 
+/** Define the extra fields we expect on top of the Auth0 User type */
 export interface UserWithMetadata extends User {
   user_metadata?: BiocommonsUserMetadata;
   user_id?: string;
