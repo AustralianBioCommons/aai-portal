@@ -4,7 +4,6 @@ import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
 import { HttpClient } from '@angular/common/http';
 import { concatMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface BiocommonsUserMetadata {
