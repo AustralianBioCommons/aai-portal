@@ -7,6 +7,20 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
+export interface BiocommonsUserMetadata {
+  first_name?: string;
+  last_name?: string;
+  systems?: {
+    approved?: string[];
+    requested?: string[];
+  }
+}
+
+export interface UserWithMetadata extends User {
+  user_metadata?: BiocommonsUserMetadata;
+  user_id?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
