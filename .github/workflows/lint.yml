@@ -1,6 +1,6 @@
 # This workflow will do a clean installation of node dependencies and run ng lint
 # to check for code style issues
-name: Tests
+name: Code Style/Lint
 
 on:
   push:
