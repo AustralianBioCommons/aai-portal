@@ -15,7 +15,7 @@ describe('RequestServiceComponent', () => {
       imports: [RequestServiceComponent],
       providers: [provideMockAuth0Service(), provideHttpClient(), provideRouter([])]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(RequestServiceComponent);
     component = fixture.componentInstance;
