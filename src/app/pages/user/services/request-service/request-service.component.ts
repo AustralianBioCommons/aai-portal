@@ -43,7 +43,7 @@ export class RequestServiceComponent implements OnInit {
         const excludedSystemIDs = [...approvedSystemIDs, ...requestedSystemIDs];
 
         this.remainingSystems = systemsList.filter(
-          (system: any) => !excludedSystemIDs.includes(system.id),
+          (system) => !excludedSystemIDs.includes(system.id),
         );
 
         // Dynamically add form controls for each remaining system
