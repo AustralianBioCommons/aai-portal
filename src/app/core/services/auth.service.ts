@@ -4,8 +4,22 @@ import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
 import { HttpClient } from '@angular/common/http';
 import { concatMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
+
+export interface BiocommonsUserMetadata {
+  first_name?: string;
+  last_name?: string;
+  systems?: {
+    approved?: string[];
+    requested?: string[];
+  }
+}
+
+/** Define the extra fields we expect on top of the Auth0 User type */
+export interface UserWithMetadata extends User {
+  user_metadata?: BiocommonsUserMetadata;
+  user_id?: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +30,7 @@ export class AuthService {
   private http = inject(HttpClient);
 
   isAuthenticated = signal<boolean>(false);
-  user = signal<any>(null);
+  user = signal<UserWithMetadata | null>(null);
   user$ = toObservable(this.user);
 
   constructor() {
@@ -50,11 +64,11 @@ export class AuthService {
     });
   }
 
-  getUser(): Observable<any> {
+  getUser(){
     return this.user$;
   }
 
-  updateUserMetadata(userId: string, metadata: any): Observable<any> {
+  updateUserMetadata(userId: string, metadata: any) {
     return this.http
       .patch(
         `${environment.auth0.audience}users/${userId}`,
@@ -65,6 +79,6 @@ export class AuthService {
           },
         },
       )
-      .pipe(tap((updatedUser) => this.user.set(updatedUser)));
+      .pipe(tap((updatedUser: UserWithMetadata) => this.user.set(updatedUser)));
   }
 }

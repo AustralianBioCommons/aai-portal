@@ -7,7 +7,7 @@ import {
   FormBuilder,
 } from '@angular/forms';
 import { systemsList } from '../../../../core/constants/constants';
-import { AuthService } from '../../../../core/services/auth.service';
+import {AuthService, UserWithMetadata} from '../../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
@@ -25,7 +25,7 @@ export class RequestServiceComponent implements OnInit {
   step = 0;
   remainingSystems: any[] = [];
   selectedSystems: any[] = [];
-  user: any = {};
+  user: UserWithMetadata | null = {};
   loading = true;
   submitted = false;
 
@@ -123,14 +123,14 @@ export class RequestServiceComponent implements OnInit {
   }
 
   submitForm() {
-    const userId = this.user.user_id;
+    const userId = this.user!.user_id!;
     const selectedSystemIDs = this.selectedSystems.map((system) => system.id);
 
     const updatePayload = {
       systems: {
-        ...this.user.user_metadata.systems,
+        ...this.user?.user_metadata?.systems || {},
         requested: [
-          ...(this.user.user_metadata.systems.requested || []),
+          ...(this.user?.user_metadata?.systems?.requested || []),
           ...selectedSystemIDs,
         ],
       },
