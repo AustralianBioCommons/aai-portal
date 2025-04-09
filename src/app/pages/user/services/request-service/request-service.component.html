@@ -44,10 +44,11 @@
                 <div
                   class="flex items-center justify-between gap-12 rounded-md bg-white p-5 font-light"
                 >
-                  <div class="text-gray-500">{{ system.name }}</div>
+                  <div class="text-gray-500" id="{{ system.id}}-label">{{ system.name }}</div>
                   <input
                     type="checkbox"
                     value=""
+                    name="{{ system.id }}"
                     [formControlName]="system.id"
                     class="h-6 w-6 shrink-0 rounded-md border border-sky-900"
                   />
