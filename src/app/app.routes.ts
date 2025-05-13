@@ -9,11 +9,15 @@ import { RequestsComponent } from './pages/admin/requests/requests.component';
 import { RevokedComponent } from './pages/admin/revoked/revoked.component';
 import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
 import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
+import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
 
 export const routes: Routes = [
   // Standalone route without DefaultLayout
-  { path: 'galaxy', redirectTo: 'galaxy/register', pathMatch: 'full' },
-  { path: 'galaxy/register', component: GalaxyRegisterComponent },
+  { path: 'galaxy', component: GalaxyLayoutComponent,
+    children: [
+      {path: '', redirectTo: 'register', pathMatch: 'full' },
+      { path: 'register', component: GalaxyRegisterComponent },
+    ]},
 
   // All other routes use DefaultLayoutComponent
   {
