@@ -21,10 +21,10 @@ interface GalaxyRegistrationForm {
 @Component({
   selector: 'app-register',
   imports: [ReactiveFormsModule, NgIf],
-  templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  templateUrl: './galaxy-register.component.html',
+  styleUrl: './galaxy-register.component.css'
 })
-export class RegisterComponent {
+export class GalaxyRegisterComponent {
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   passwordMatchValidator(group: AbstractControl<GalaxyRegistrationForm>): ValidationErrors | null {
