@@ -1,0 +1,63 @@
+<div class="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md my-4 gap-2">
+  <h1 class="font-semibold">Create a Galaxy account</h1>
+  <div class="m-2 mb-4 p-2 bg-blue-300 bg-opacity-50 rounded text-blue-900 text-sm">
+    Please register only one account to ensure fair sharing of computational resources.
+    Multiple registrations are monitored and will result in account termination and data deletion.
+  </div>
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6 my-2 max-w-lg">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Email:</label>
+      <input type="email" formControlName="email" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="mt-1 text-sm text-red-600">
+        <small *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</small>
+        <small *ngIf="registerForm.get('email')?.errors?.['email']">Invalid email.</small>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Password:</label>
+      <input type="password" formControlName="password" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="mt-1 text-sm text-red-600">
+        <small *ngIf="registerForm.get('password')?.errors?.['required']">Password is required.</small>
+        <small *ngIf="registerForm.get('password')?.errors?.['minlength']">Minimum 6 characters.</small>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password:</label>
+      <input type="password" formControlName="password_confirmation" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <div *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('password_confirmation')?.touched" class="mt-1 text-sm text-red-600">
+        <small>Passwords do not match.</small>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Public Name:</label>
+      <input type="text" formControlName="public_name" class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <div class="mt-1 text-sm text-gray-500">
+        <small>
+          Your public name is an identifier that will be used to generate addresses
+          for information you share publicly. Public names must be at least three
+          characters in length and contain only lower-case letters,
+          numbers, dots, underscores, and dashes ('.', '_', '-').
+        </small>
+      </div>
+      <div *ngIf="registerForm.get('public_name')?.touched && registerForm.get('public_name')?.invalid" class="mt-1 text-sm text-red-600">
+        <small *ngIf="registerForm.get('public_name')?.errors?.['required']">Please enter a public name that will be used to identify you</small>
+        <small *ngIf="registerForm.get('public_name')?.errors?.['minlength']">Your public name needs at least 3 characters</small>
+        <small *ngIf="registerForm.get('public_name')?.errors?.['pattern']">Your public name should contain only lower-case letters, numbers, dots, underscores and dashes.</small>
+      </div>
+    </div>
+
+    <button type="submit" class="w-full my-2 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition-colors">
+      Register
+    </button>
+  </form>
+  <span class="text-gray-500 my-4">Already have an account? Return to
+    <a class="text-blue-500" href="https://galaxy.test.biocommons.org.au/">Galaxy</a>
+    and log in.
+  </span>
+
+  <h1 class="font-semibold mt-4">Terms of Service</h1>
+  <iframe class="border-0 w-full h-96" title="terms-of-use" src="https://site.usegalaxy.org.au/about#terms-of-service"></iframe>
+</div>
