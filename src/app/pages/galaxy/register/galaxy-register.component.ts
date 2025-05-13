@@ -38,7 +38,7 @@ export class GalaxyRegisterComponent {
       email: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.email]}),
       password: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.minLength(6)]}),
       password_confirmation: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.minLength(6)]}),
-      public_name: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.minLength(3), Validators.pattern(/[a-z0-9._-]/)]}),
+      public_name: new FormControl('', {nonNullable: true, validators: [Validators.required, Validators.minLength(3), Validators.pattern(/^[a-z0-9._-]+$/)]}),
     }, {validators: [this.passwordMatchValidator]})
   }
 
