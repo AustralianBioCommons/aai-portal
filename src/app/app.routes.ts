@@ -8,24 +8,35 @@ import { ListUsersComponent } from './pages/admin/list-users/list-users.componen
 import { RequestsComponent } from './pages/admin/requests/requests.component';
 import { RevokedComponent } from './pages/admin/revoked/revoked.component';
 import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
+import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/services', pathMatch: 'full' },
+  // Standalone route without DefaultLayout
+  { path: 'galaxy', redirectTo: 'galaxy/register', pathMatch: 'full' },
+  { path: 'galaxy/register', component: GalaxyRegisterComponent },
+
+  // All other routes use DefaultLayoutComponent
   {
-    path: 'services',
-    component: ServicesComponent,
+    path: '',
+    component: DefaultLayoutComponent,
     children: [
+      { path: '', redirectTo: 'services', pathMatch: 'full' },
       {
-        path: 'request',
-        component: RequestServiceComponent,
+        path: 'services',
+        component: ServicesComponent,
+        children: [
+          {
+            path: 'request',
+            component: RequestServiceComponent,
+          },
+        ],
       },
+      { path: 'access', component: AccessComponent },
+      { path: 'pending', component: PendingComponent },
+      { path: 'all-users', component: ListUsersComponent },
+      { path: 'revoked', component: RevokedComponent },
+      { path: 'requests', component: RequestsComponent },
     ],
   },
-  { path: 'access', component: AccessComponent },
-  { path: 'pending', component: PendingComponent },
-  { path: 'all-users', component: ListUsersComponent },
-  { path: 'revoked', component: RevokedComponent },
-  { path: 'requests', component: RequestsComponent },
-  { path: 'galaxy/register', component: GalaxyRegisterComponent},
   { path: '**', component: NotFoundComponent },
 ];
