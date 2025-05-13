@@ -3,7 +3,11 @@ module.exports = {
     "./src/**/*.{html,ts}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        galaxy: {primary: "#243e8f"}
+      }
+    },
   },
   plugins: [],
 }
