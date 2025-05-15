@@ -8,7 +8,6 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
-import { NgIf } from '@angular/common';
 
 
 interface GalaxyRegistrationForm {
@@ -20,7 +19,7 @@ interface GalaxyRegistrationForm {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, NgIf],
+  imports: [ReactiveFormsModule],
   templateUrl: './galaxy-register.component.html',
   styleUrl: './galaxy-register.component.css'
 })
