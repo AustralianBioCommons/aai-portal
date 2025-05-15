@@ -7,25 +7,43 @@ import { NotFoundComponent } from './pages/shared/not-found/not-found.component'
 import { ListUsersComponent } from './pages/admin/list-users/list-users.component';
 import { RequestsComponent } from './pages/admin/requests/requests.component';
 import { RevokedComponent } from './pages/admin/revoked/revoked.component';
-import { BpaRegistrationComponent } from './pages/shared/bpa-registration/bpa-registration.component';
+import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
+import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
+import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/services', pathMatch: 'full' },
+  // Standalone route without DefaultLayout
   {
-    path: 'services',
-    component: ServicesComponent,
+    path: 'galaxy',
+    component: GalaxyLayoutComponent,
     children: [
-      {
-        path: 'request',
-        component: RequestServiceComponent,
-      },
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
+      { path: 'register', component: GalaxyRegisterComponent },
     ],
   },
-  { path: 'access', component: AccessComponent },
-  { path: 'pending', component: PendingComponent },
-  { path: 'all-users', component: ListUsersComponent },
-  { path: 'revoked', component: RevokedComponent },
-  { path: 'requests', component: RequestsComponent },
-  { path: 'bpa-register', component: BpaRegistrationComponent },
+
+  // All other routes use DefaultLayoutComponent
+  {
+    path: '',
+    component: DefaultLayoutComponent,
+    children: [
+      { path: '', redirectTo: 'services', pathMatch: 'full' },
+      {
+        path: 'services',
+        component: ServicesComponent,
+        children: [
+          {
+            path: 'request',
+            component: RequestServiceComponent,
+          },
+        ],
+      },
+      { path: 'access', component: AccessComponent },
+      { path: 'pending', component: PendingComponent },
+      { path: 'all-users', component: ListUsersComponent },
+      { path: 'revoked', component: RevokedComponent },
+      { path: 'requests', component: RequestsComponent },
+    ],
+  },
   { path: '**', component: NotFoundComponent },
 ];
