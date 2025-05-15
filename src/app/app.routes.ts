@@ -7,6 +7,7 @@ import { NotFoundComponent } from './pages/shared/not-found/not-found.component'
 import { ListUsersComponent } from './pages/admin/list-users/list-users.component';
 import { RequestsComponent } from './pages/admin/requests/requests.component';
 import { RevokedComponent } from './pages/admin/revoked/revoked.component';
+import { BpaRegistrationComponent } from './pages/shared/bpa-registration/bpa-registration.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/services', pathMatch: 'full' },
@@ -25,5 +26,6 @@ export const routes: Routes = [
   { path: 'all-users', component: ListUsersComponent },
   { path: 'revoked', component: RevokedComponent },
   { path: 'requests', component: RequestsComponent },
+  { path: 'bpa-register', component: BpaRegistrationComponent },
   { path: '**', component: NotFoundComponent },
 ];
