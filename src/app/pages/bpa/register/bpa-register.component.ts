@@ -8,13 +8,13 @@ import {
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-bpa-registration',
+  selector: 'app-bpa-register',
   imports: [ReactiveFormsModule, CommonModule],
   standalone: true,
-  templateUrl: './bpa-registration.component.html',
-  styleUrl: './bpa-registration.component.css',
+  templateUrl: './bpa-register.component.html',
+  styleUrl: './bpa-register.component.css',
 })
-export class BpaRegistrationComponent {
+export class BpaRegisterComponent {
   private formBuilder = inject(FormBuilder);
 
   checkboxes: string[] = [

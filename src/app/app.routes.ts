@@ -10,7 +10,7 @@ import { RevokedComponent } from './pages/admin/revoked/revoked.component';
 import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
 import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
 import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
-import { BpaRegistrationComponent } from './pages/shared/bpa-registration/bpa-registration.component';
+import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
 
 export const routes: Routes = [
   // Standalone route without DefaultLayout
@@ -24,10 +24,10 @@ export const routes: Routes = [
   },
   {
     path: 'bpa',
-    component: BpaRegistrationComponent,
+    component: BpaRegisterComponent,
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
-      { path: 'register', component: BpaRegistrationComponent },
+      { path: 'register', component: BpaRegisterComponent },
     ],
   },
 

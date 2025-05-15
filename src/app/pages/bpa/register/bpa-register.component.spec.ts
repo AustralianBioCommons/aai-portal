@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BpaRegistrationComponent } from './bpa-registration.component';
+import { BpaRegisterComponent } from './bpa-register.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 
-describe('BpaRegistrationComponent', () => {
-  let component: BpaRegistrationComponent;
-  let fixture: ComponentFixture<BpaRegistrationComponent>;
+describe('BpaRegisterComponent', () => {
+  let component: BpaRegisterComponent;
+  let fixture: ComponentFixture<BpaRegisterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BpaRegistrationComponent, ReactiveFormsModule],
+      imports: [BpaRegisterComponent, ReactiveFormsModule],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BpaRegistrationComponent);
+    fixture = TestBed.createComponent(BpaRegisterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
