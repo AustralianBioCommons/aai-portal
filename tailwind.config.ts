@@ -7,6 +7,9 @@ module.exports = {
           primary: '#041e48',
           secondary: '#171717',
         },
+        galaxy: {
+          primary: '#243e8f',
+        },
       },
     },
   },
