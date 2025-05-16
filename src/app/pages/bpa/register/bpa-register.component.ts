@@ -40,9 +40,7 @@ export class BpaRegisterComponent {
 
   private passwordValidator = Validators.compose([
     Validators.required,
-    Validators.pattern(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-    ),
+    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
   ]);
 
   private confirmPasswordValidator = (): ValidationErrors | null => {
@@ -51,16 +49,6 @@ export class BpaRegisterComponent {
     return password === confirm ? null : { passwordMismatch: true };
   };
 
-  private atLeastOneCheckboxValidator(): ValidationErrors | null {
-    const organizations = this.registrationForm?.get('organizations');
-    if (!organizations) return null;
-
-    const hasChecked = (organizations.value as boolean[]).some(
-      (value) => value === true,
-    );
-    return hasChecked ? null : { requireCheckbox: true };
-  }
-
   registrationForm = this.formBuilder.group({
     username: ['', [Validators.required]],
     fullname: ['', [Validators.required]],
@@ -68,10 +56,7 @@ export class BpaRegisterComponent {
     reason: ['', [Validators.required]],
     password: ['', this.passwordValidator],
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
-    organizations: this.formBuilder.array(
-      this.checkboxes.map(() => false),
-      [this.atLeastOneCheckboxValidator.bind(this)],
-    ),
+    organizations: this.formBuilder.array(this.checkboxes.map(() => false)),
   });
 
   onSubmit(): void {
@@ -102,13 +87,6 @@ export class BpaRegisterComponent {
     return !!(field?.invalid && (field?.dirty || field?.touched));
   }
 
-  isOrganizationsInvalid(): boolean {
-    const organizations = this.registrationForm.get('organizations');
-    return !!(
-      organizations?.errors?.['requireCheckbox'] && organizations.touched
-    );
-  }
-
   getErrorMessage(fieldName: string): string {
     const control = this.registrationForm.get(fieldName);
 
@@ -123,10 +101,7 @@ export class BpaRegisterComponent {
         return 'Passwords do not match';
       }
       if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters and contain at least one uppercase letter, one lowercase letter, one number and one special character';
-      }
-      if (control.errors['requireCheckbox']) {
-        return 'Please select at least one organization';
+        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, and a number';
       }
     }
     return '';

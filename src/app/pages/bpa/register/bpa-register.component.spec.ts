@@ -35,7 +35,6 @@ describe('BpaRegisterComponent', () => {
 
   it('should validate required fields', () => {
     const form = component.registrationForm;
-
     expect(form.valid).toBeFalsy();
 
     const requiredControls = [
@@ -87,35 +86,6 @@ describe('BpaRegisterComponent', () => {
     expect(emailControl?.errors).toBeNull();
   });
 
-  it('should validate organization selection', () => {
-    const organizationsControl =
-      component.registrationForm.get('organizations');
-
-    expect(organizationsControl?.errors?.['requireCheckbox']).toBeTruthy();
-
-    const formArray = component.registrationForm.get('organizations');
-    formArray?.setValue(new Array(component.checkboxes.length).fill(false));
-    formArray?.setValue([
-      true,
-      ...new Array(component.checkboxes.length - 1).fill(false),
-    ]);
-
-    expect(organizationsControl?.errors).toBeNull();
-  });
-
-  it('should show error messages when form is submitted with invalid data', () => {
-    const submitButton = fixture.debugElement.query(
-      By.css('button[type="submit"]'),
-    );
-    submitButton.nativeElement.click();
-    fixture.detectChanges();
-
-    const errorMessages = fixture.debugElement.queryAll(
-      By.css('.text-red-500'),
-    );
-    expect(errorMessages.length).toBeGreaterThan(0);
-  });
-
   it('should have valid form when all required fields are filled correctly', () => {
     const form = component.registrationForm;
 
@@ -124,14 +94,10 @@ describe('BpaRegisterComponent', () => {
       fullname: 'Test User',
       email: 'test@example.com',
       reason: 'Testing purpose with valid reason',
-      password: 'StrongPass123!',
-      confirmPassword: 'StrongPass123!',
+      password: 'StrongPass123',
+      confirmPassword: 'StrongPass123',
+      organizations: new Array(component.checkboxes.length).fill(false),
     });
-
-    const organizationsArray = form.get('organizations');
-    const newValue = new Array(component.checkboxes.length).fill(false);
-    newValue[0] = true;
-    organizationsArray?.setValue(newValue);
 
     expect(form.valid).toBeTruthy();
   });
@@ -145,17 +111,12 @@ describe('BpaRegisterComponent', () => {
       fullname: 'Test User',
       email: 'test@example.com',
       reason: 'Testing purpose with valid reason',
-      password: 'StrongPass123!',
-      confirmPassword: 'StrongPass123!',
+      password: 'StrongPass123',
+      confirmPassword: 'StrongPass123',
+      organizations: new Array(component.checkboxes.length).fill(false),
     });
 
-    const organizationsArray = form.get('organizations');
-    const newValue = new Array(component.checkboxes.length).fill(false);
-    newValue[0] = true;
-    organizationsArray?.setValue(newValue);
-
     component.onSubmit();
-
     expect(console.log).toHaveBeenCalledWith(form.value);
   });
 });

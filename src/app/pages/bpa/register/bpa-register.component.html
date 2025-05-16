@@ -139,10 +139,9 @@
           }
         </div>
 
-        <div class="relative my-6 flex flex-col gap-6">
+        <div class="my-6 flex flex-col gap-6">
           <div class="text-base font-normal">
             Select organizations that you wish to request membership of:
-            <span class="text-red-500">*</span>
           </div>
           <div class="flex flex-col gap-4" formArrayName="organizations">
             @for (checkbox of checkboxes; track checkbox; let i = $index) {
@@ -162,11 +161,6 @@
               </div>
             }
           </div>
-          @if (isOrganizationsInvalid()) {
-            <div class="absolute -bottom-6 text-xs text-red-500">
-              {{ getErrorMessage("organizations") }}
-            </div>
-          }
         </div>
 
         <div>Please provide a password for your account:</div>
