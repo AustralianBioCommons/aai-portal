@@ -90,6 +90,8 @@ export class BpaRegisterComponent {
 
   private passwordValidator = Validators.compose([
     Validators.required,
+
+    // Regex pattern to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
     Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
   ]);
 
