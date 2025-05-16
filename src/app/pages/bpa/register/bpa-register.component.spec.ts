@@ -22,15 +22,18 @@ describe('BpaRegisterComponent', () => {
   });
 
   it('should initialize with an empty form', () => {
+    const organizationsGroup = component.registrationForm.get('organizations');
+
     expect(component.registrationForm.get('username')?.value).toBe('');
     expect(component.registrationForm.get('fullname')?.value).toBe('');
     expect(component.registrationForm.get('email')?.value).toBe('');
     expect(component.registrationForm.get('reason')?.value).toBe('');
     expect(component.registrationForm.get('password')?.value).toBe('');
     expect(component.registrationForm.get('confirmPassword')?.value).toBe('');
-    expect(component.registrationForm.get('organizations')?.value).toEqual(
-      new Array(component.checkboxes.length).fill(false),
-    );
+
+    component.organizations.forEach((org) => {
+      expect(organizationsGroup?.get(org.id)?.value).toBeFalse();
+    });
   });
 
   it('should validate required fields', () => {
@@ -58,21 +61,20 @@ describe('BpaRegisterComponent', () => {
     passwordControl?.setValue('weak');
     expect(passwordControl?.errors?.['pattern']).toBeTruthy();
 
-    passwordControl?.setValue('StrongPass123!');
+    passwordControl?.setValue('StrongPass123');
     expect(passwordControl?.errors).toBeNull();
   });
 
   it('should validate password confirmation', () => {
     const form = component.registrationForm;
-
-    form.get('password')?.setValue('StrongPass123!');
-    form.get('confirmPassword')?.setValue('DifferentPass123!');
+    form.get('password')?.setValue('StrongPass123');
+    form.get('confirmPassword')?.setValue('DifferentPass123');
 
     expect(
       form.get('confirmPassword')?.errors?.['passwordMismatch'],
     ).toBeTruthy();
 
-    form.get('confirmPassword')?.setValue('StrongPass123!');
+    form.get('confirmPassword')?.setValue('StrongPass123');
     expect(form.get('confirmPassword')?.errors).toBeNull();
   });
 
@@ -88,35 +90,73 @@ describe('BpaRegisterComponent', () => {
 
   it('should have valid form when all required fields are filled correctly', () => {
     const form = component.registrationForm;
+    const organizations = component.organizations.reduce(
+      (acc, org) => ({
+        ...acc,
+        [org.id]: false,
+      }),
+      {},
+    );
 
     form.patchValue({
       username: 'testuser',
       fullname: 'Test User',
       email: 'test@example.com',
-      reason: 'Testing purpose with valid reason',
+      reason: 'Testing purpose',
       password: 'StrongPass123',
       confirmPassword: 'StrongPass123',
-      organizations: new Array(component.checkboxes.length).fill(false),
+      organizations,
     });
 
     expect(form.valid).toBeTruthy();
   });
 
+  it('should display error messages when fields are invalid', () => {
+    const usernameControl = component.registrationForm.get('username');
+    usernameControl?.markAsTouched();
+    fixture.detectChanges();
+
+    expect(component.getErrorMessage('username')).toBe(
+      'This field is required',
+    );
+  });
+
   it('should console.log form value when submitted with valid data', () => {
     spyOn(console, 'log');
     const form = component.registrationForm;
+    const organizations = component.organizations.reduce(
+      (acc, org) => ({
+        ...acc,
+        [org.id]: false,
+      }),
+      {},
+    );
 
     form.patchValue({
       username: 'testuser',
       fullname: 'Test User',
       email: 'test@example.com',
-      reason: 'Testing purpose with valid reason',
+      reason: 'Testing purpose',
       password: 'StrongPass123',
       confirmPassword: 'StrongPass123',
-      organizations: new Array(component.checkboxes.length).fill(false),
+      organizations,
     });
 
     component.onSubmit();
     expect(console.log).toHaveBeenCalledWith(form.value);
+  });
+
+  it('should scroll to first invalid field on invalid submit', () => {
+    const mockElement = document.createElement('div');
+    spyOn(mockElement, 'scrollIntoView');
+    spyOn(document, 'getElementById').and.returnValue(mockElement);
+
+    component.onSubmit();
+
+    expect(document.getElementById).toHaveBeenCalled();
+    expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
+      behavior: 'smooth',
+      block: 'center',
+    });
   });
 });

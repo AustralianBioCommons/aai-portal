@@ -143,21 +143,21 @@
           <div class="text-base font-normal">
             Select organizations that you wish to request membership of:
           </div>
-          <div class="flex flex-col gap-4" formArrayName="organizations">
-            @for (checkbox of checkboxes; track checkbox; let i = $index) {
-              <div class="flex items-center gap-2">
-                <input
-                  [id]="'checkbox-' + i"
-                  type="checkbox"
-                  [formControlName]="i"
-                  class="h-4 w-4 rounded-md border-gray-300 bg-gray-100 text-bpa-primary"
-                />
-                <label
-                  [for]="'checkbox-' + i"
-                  class="text-sm font-medium text-gray-900"
-                >
-                  {{ checkbox }}
-                </label>
+          <div class="flex flex-col gap-4" formGroupName="organizations">
+            @for (org of organizations; track org.id) {
+              <div class="form-group">
+                <div class="controls">
+                  <label class="checkbox" [for]="org.id">
+                    <input
+                      [id]="org.id"
+                      type="checkbox"
+                      [formControlName]="org.id"
+                      [name]="'org-' + org.id"
+                      class="h-4 w-4 rounded-md border-gray-300 bg-gray-100 text-bpa-primary"
+                    />
+                    {{ org.name }}
+                  </label>
+                </div>
               </div>
             }
           </div>

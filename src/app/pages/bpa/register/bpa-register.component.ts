@@ -7,6 +7,12 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+interface Organization {
+  id: string;
+  name: string;
+  selected: boolean;
+}
+
 @Component({
   selector: 'app-bpa-register',
   imports: [ReactiveFormsModule, CommonModule],
@@ -17,25 +23,69 @@ import { CommonModule } from '@angular/common';
 export class BpaRegisterComponent {
   private formBuilder = inject(FormBuilder);
 
-  checkboxes: string[] = [
-    '2024 Fungi Bioinformatics Workshop',
-    'ARC for Innovations in Peptide and Protein Science (CIPPS)',
-    'Australian Amphibian and Reptile Genomics',
-    'Australian Avian Genomics',
-    'Australian Fish Genomics',
-    'Australian Grasslands Initiative',
-    "Fungi Functional 'Omics",
-    'Genomics for Forest Resilience',
-    'Great Barrier Reef',
-    "Integrated Pest Management 'Omics",
-    'Oz Mammals Genomics Initiative',
-    "Plant Pathogen 'Omics",
-    'Plant Protein Atlas',
-    'The Australian Microbiome Initiative',
-    'Threatened Species Initiative',
-    'Wheat Cultivars',
-    'Wheat Pathogens Genomes',
-    'Wheat Pathogens Transcript',
+  organizations: Organization[] = [
+    {
+      id: 'bpa-bioinformatics-workshop',
+      name: '2024 Fungi Bioinformatics Workshop',
+      selected: false,
+    },
+    {
+      id: 'cipps',
+      name: 'ARC for Innovations in Peptide and Protein Science (CIPPS)',
+      selected: false,
+    },
+    {
+      id: 'ausarg',
+      name: 'Australian Amphibian and Reptile Genomics',
+      selected: false,
+    },
+    { id: 'aus-avian', name: 'Australian Avian Genomics', selected: false },
+    { id: 'aus-fish', name: 'Australian Fish Genomics', selected: false },
+    {
+      id: 'grasslands',
+      name: 'Australian Grasslands Initiative',
+      selected: false,
+    },
+    { id: 'fungi', name: "Fungi Functional 'Omics", selected: false },
+    {
+      id: 'forest-resilience',
+      name: 'Genomics for Forest Resilience',
+      selected: false,
+    },
+    {
+      id: 'bpa-great-barrier-reef',
+      name: 'Great Barrier Reef',
+      selected: false,
+    },
+    {
+      id: 'bpa-ipm',
+      name: "Integrated Pest Management 'Omics",
+      selected: false,
+    },
+    { id: 'bpa-omg', name: 'Oz Mammals Genomics Initiative', selected: false },
+    { id: 'plant-pathogen', name: "Plant Pathogen 'Omics", selected: false },
+    { id: 'ppa', name: 'Plant Protein Atlas', selected: false },
+    {
+      id: 'australian-microbiome',
+      name: 'The Australian Microbiome Initiative',
+      selected: false,
+    },
+    {
+      id: 'threatened-species',
+      name: 'Threatened Species Initiative',
+      selected: false,
+    },
+    { id: 'bpa-wheat-cultivars', name: 'Wheat Cultivars', selected: false },
+    {
+      id: 'bpa-wheat-pathogens-genomes',
+      name: 'Wheat Pathogens Genomes',
+      selected: false,
+    },
+    {
+      id: 'bpa-wheat-pathogens-transcript',
+      name: 'Wheat Pathogens Transcript',
+      selected: false,
+    },
   ];
 
   private passwordValidator = Validators.compose([
@@ -56,7 +106,15 @@ export class BpaRegisterComponent {
     reason: ['', [Validators.required]],
     password: ['', this.passwordValidator],
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
-    organizations: this.formBuilder.array(this.checkboxes.map(() => false)),
+    organizations: this.formBuilder.group(
+      this.organizations.reduce(
+        (acc, org) => ({
+          ...acc,
+          [org.id]: [false],
+        }),
+        {},
+      ),
+    ),
   });
 
   onSubmit(): void {
