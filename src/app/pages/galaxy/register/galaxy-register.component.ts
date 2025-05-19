@@ -74,6 +74,7 @@ export class GalaxyRegisterComponent {
         console.error('Registration failed:', error);
         this.errorMessage = error?.message || 'Registration failed';
         this.registerSuccess = false;
+        document.getElementById("register_error_message")?.scrollIntoView();
         return of(null); // return observable to allow subscription to complete
       })
     ).subscribe(result => {
