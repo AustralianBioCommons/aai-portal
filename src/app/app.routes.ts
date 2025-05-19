@@ -11,6 +11,7 @@ import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register
 import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
 import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
 import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
+import { RegistrationCompleteComponent } from './pages/bpa/registration-complete/registration-complete.component';
 
 export const routes: Routes = [
   // Standalone route without DefaultLayout
@@ -24,10 +25,13 @@ export const routes: Routes = [
   },
   {
     path: 'bpa',
-    component: BpaRegisterComponent,
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
       { path: 'register', component: BpaRegisterComponent },
+      {
+        path: 'registration-complete',
+        component: RegistrationCompleteComponent,
+      },
     ],
   },
 

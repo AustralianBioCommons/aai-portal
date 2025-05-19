@@ -1,6 +1,14 @@
 <div class="flex min-h-full flex-col items-center justify-center bg-gray-50">
+  @if (errorNotification()) {
+    <div
+      class="fixed right-12 top-12 z-50 rounded-sm bg-red-600 p-6 text-white shadow-lg"
+    >
+      {{ errorNotification() }}
+    </div>
+  }
+
   <div class="flex w-full items-center justify-center bg-bpa-primary p-12">
-    <a href="https://data.bioplatforms.com/">
+    <a href="https://aaidemo.bioplatforms.com/">
       <img
         src="https://data.bioplatforms.com/BIO-RGB_Full-NEG_Portal_TRANS2_small.webp"
         class="h-20 w-auto"
@@ -146,15 +154,15 @@
           <div class="flex flex-col gap-4" formGroupName="organizations">
             @for (org of organizations; track org.id) {
               <div class="form-group">
-                <div class="controls">
-                  <label class="checkbox" [for]="org.id">
-                    <input
-                      [id]="org.id"
-                      type="checkbox"
-                      [formControlName]="org.id"
-                      [name]="'org-' + org.id"
-                      class="h-4 w-4 rounded-md border-gray-300 bg-gray-100 text-bpa-primary"
-                    />
+                <div class="controls flex items-center gap-2">
+                  <input
+                    [id]="org.id"
+                    type="checkbox"
+                    [formControlName]="org.id"
+                    [name]="'org-' + org.id"
+                    class="h-4 w-4 rounded-md border-gray-300 bg-gray-100 text-bpa-primary"
+                  />
+                  <label class="text-sm font-medium" [for]="org.id">
                     {{ org.name }}
                   </label>
                 </div>
@@ -226,11 +234,11 @@
       </form>
     </div>
   </div>
-  <div class="sticky bottom-0 w-full">
+  <div class="pointer-events-none sticky bottom-0 z-10 w-full">
     <div class="flex w-full justify-end pb-12 pr-12">
       <button
         (click)="scrollToTop()"
-        class="flex h-12 w-12 items-center justify-center rounded-full border border-bpa-primary bg-white text-bpa-primary hover:bg-gray-50"
+        class="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-bpa-primary bg-white text-bpa-primary hover:bg-gray-50"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

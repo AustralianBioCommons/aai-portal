@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -6,11 +7,21 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 interface Organization {
   id: string;
   name: string;
   selected: boolean;
+}
+
+interface RegistrationRequest {
+  username: string;
+  fullname: string;
+  email: string;
+  reason: string;
+  password: string;
+  organizations: { [key: string]: boolean };
 }
 
 @Component({
@@ -21,7 +32,17 @@ interface Organization {
   styleUrl: './bpa-register.component.css',
 })
 export class BpaRegisterComponent {
+  private readonly backendURL =
+    'https://aaibackend.test.biocommons.org.au/bpa/register';
+  // 'http://localhost:8000/bpa/register';
+
+  private readonly errorNotificationTimeout = 5000;
+
   private formBuilder = inject(FormBuilder);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+
+  errorNotification = signal<string | null>(null);
 
   organizations: Organization[] = [
     {
@@ -88,10 +109,9 @@ export class BpaRegisterComponent {
     },
   ];
 
+  // Validator to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
   private passwordValidator = Validators.compose([
     Validators.required,
-
-    // Regex pattern to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
     Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
   ]);
 
@@ -121,7 +141,26 @@ export class BpaRegisterComponent {
 
   onSubmit(): void {
     if (this.registrationForm.valid) {
-      console.log(this.registrationForm.value);
+      const formValue = this.registrationForm.value;
+      const requestBody: RegistrationRequest = {
+        username: formValue.username || '',
+        fullname: formValue.fullname || '',
+        email: formValue.email || '',
+        reason: formValue.reason || '',
+        password: formValue.password || '',
+        organizations: formValue.organizations || {},
+      };
+
+      this.http.post(this.backendURL, requestBody).subscribe({
+        next: () => {
+          this.router.navigate(['/bpa/registration-complete']);
+        },
+        error: (error) => {
+          this.showErrorNotification(
+            `Registration failed: ${error?.error?.detail}`,
+          );
+        },
+      });
     } else {
       this.registrationForm.markAllAsTouched();
 
@@ -138,6 +177,34 @@ export class BpaRegisterComponent {
     }
   }
 
+  resetForm(): void {
+    this.registrationForm.reset({
+      username: '',
+      fullname: '',
+      email: '',
+      reason: '',
+      password: '',
+      confirmPassword: '',
+      organizations: this.organizations.reduce(
+        (acc, org) => ({
+          ...acc,
+          [org.id]: false,
+        }),
+        {},
+      ),
+    });
+    this.registrationForm.markAsPristine();
+    this.registrationForm.markAsUntouched();
+  }
+
+  showErrorNotification(message: string): void {
+    this.errorNotification.set(message);
+    setTimeout(
+      () => this.errorNotification.set(null),
+      this.errorNotificationTimeout,
+    );
+  }
+
   scrollToTop(): void {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -149,17 +216,10 @@ export class BpaRegisterComponent {
 
   getErrorMessage(fieldName: string): string {
     const control = this.registrationForm.get(fieldName);
-
     if (control?.errors) {
-      if (control.errors['required']) {
-        return 'This field is required';
-      }
-      if (control.errors['email']) {
-        return 'Please enter a valid email address';
-      }
-      if (control.errors['passwordMismatch']) {
-        return 'Passwords do not match';
-      }
+      if (control.errors['required']) return 'This field is required';
+      if (control.errors['email']) return 'Please enter a valid email address';
+      if (control.errors['passwordMismatch']) return 'Passwords do not match';
       if (fieldName === 'password' && control.errors['pattern']) {
         return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, and a number';
       }
