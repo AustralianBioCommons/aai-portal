@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GalaxyRegisterComponent } from './galaxy-register.component';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('GalaxyRegisterComponent', () => {
   let component: GalaxyRegisterComponent;
@@ -8,7 +9,8 @@ describe('GalaxyRegisterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ReactiveFormsModule, GalaxyRegisterComponent]
+      imports: [ReactiveFormsModule, GalaxyRegisterComponent],
+      providers: [provideHttpClient()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalaxyRegisterComponent);
