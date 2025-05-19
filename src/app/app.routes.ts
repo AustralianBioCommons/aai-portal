@@ -10,14 +10,26 @@ import { RevokedComponent } from './pages/admin/revoked/revoked.component';
 import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
 import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
 import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
+import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
 
 export const routes: Routes = [
   // Standalone route without DefaultLayout
-  { path: 'galaxy', component: GalaxyLayoutComponent,
+  {
+    path: 'galaxy',
+    component: GalaxyLayoutComponent,
     children: [
-      {path: '', redirectTo: 'register', pathMatch: 'full' },
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
       { path: 'register', component: GalaxyRegisterComponent },
-    ]},
+    ],
+  },
+  {
+    path: 'bpa',
+    component: BpaRegisterComponent,
+    children: [
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
+      { path: 'register', component: BpaRegisterComponent },
+    ],
+  },
 
   // All other routes use DefaultLayoutComponent
   {

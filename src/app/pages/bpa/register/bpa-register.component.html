@@ -1,0 +1,272 @@
+<div class="flex min-h-full flex-col items-center justify-center bg-gray-50">
+  <div class="flex w-full items-center justify-center bg-bpa-primary p-12">
+    <a href="https://data.bioplatforms.com/">
+      <img
+        src="https://data.bioplatforms.com/BIO-RGB_Full-NEG_Portal_TRANS2_small.webp"
+        class="h-20 w-auto"
+        alt="Bioplatforms Australia Data Portal Logo"
+      />
+    </a>
+  </div>
+  <div
+    class="m-12 mb-0 flex max-w-6xl rounded-md bg-white p-12 shadow-xl md:m-24 md:mb-12"
+  >
+    <div class="w-2/5 border-r pr-12 text-gray-500">
+      Please register for the Bioplatforms Australia Data Portal by completing
+      the form to the right.<br /><br />
+
+      Please provide your name, email, a username to use, a password, and the
+      reason for your request.<br /><br />
+
+      All metadata describing the sequence data is available once you are
+      registered, as are non-embargoed sequence files.<br /><br />
+
+      Once registered, you will have access to the publicly available portion of
+      the datasets for the initiative you selected.<br /><br />
+
+      You can request membership of projects of interest to obtain access to
+      restricted sequence files (projects currently under embargo).<br /><br />
+
+      Please contact
+      <span class="text-blue-700 hover:text-blue-800">
+        <a href="mailto:help@bioplatforms.com"> help&#64;bioplatforms.com </a>
+      </span>
+      with details of your username, the embargo section you would like access
+      to and confirmation of eligibility (reason for access and link to the lead
+      project team).<br /><br />
+
+      If the project you are interested in does not appear on this page, visit
+      the Memberships page once logged in to request access.<br /><br />
+    </div>
+    <div class="flex w-3/5 flex-col gap-6 pl-12">
+      <div class="mb-6 text-3xl font-semibold">Register for an Account</div>
+      <form
+        [formGroup]="registrationForm"
+        (ngSubmit)="onSubmit()"
+        class="flex flex-col gap-6"
+      >
+        <div class="w-full">
+          <label for="username" class="block text-sm font-medium">
+            Username
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            placeholder="username"
+            [class]="
+              'relative mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 ' +
+              (isFieldInvalid('username')
+                ? 'border-red-500 outline-red-500 focus:outline-red-500'
+                : 'outline-gray-300 focus:outline-bpa-primary')
+            "
+          />
+          @if (isFieldInvalid("username")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("username") }}
+            </div>
+          }
+        </div>
+        <div class="w-full">
+          <label for="fullname" class="block text-sm font-medium">
+            Full Name
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="fullname"
+            formControlName="fullname"
+            placeholder="Joe Bloggs"
+            [class]="
+              'relative mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 ' +
+              (isFieldInvalid('fullname')
+                ? 'border-red-500 outline-red-500 focus:outline-red-500'
+                : 'outline-gray-300 focus:outline-bpa-primary')
+            "
+          />
+          @if (isFieldInvalid("fullname")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("fullname") }}
+            </div>
+          }
+        </div>
+
+        <div class="w-full">
+          <label for="email" class="block text-sm font-medium">
+            Email
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="joe@example.com"
+            [class]="
+              'relative mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 ' +
+              (isFieldInvalid('email')
+                ? 'border-red-500 outline-red-500 focus:outline-red-500'
+                : 'outline-gray-300 focus:outline-bpa-primary')
+            "
+          />
+          @if (isFieldInvalid("email")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("email") }}
+            </div>
+          }
+        </div>
+        <div class="w-full">
+          <label for="reason" class="block text-sm font-medium">
+            Reason for Request
+            <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="reason"
+            formControlName="reason"
+            rows="4"
+            placeholder="Please provide a brief outline of your interest in the project data"
+            [class]="
+              'relative mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 ' +
+              (isFieldInvalid('reason')
+                ? 'border-red-500 outline-red-500 focus:outline-red-500'
+                : 'outline-gray-300 focus:outline-bpa-primary')
+            "
+          ></textarea>
+          @if (isFieldInvalid("reason")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("reason") }}
+            </div>
+          }
+        </div>
+
+        <div class="my-6 flex flex-col gap-6">
+          <div class="text-base font-normal">
+            Select organizations that you wish to request membership of:
+          </div>
+          <div class="flex flex-col gap-4" formGroupName="organizations">
+            @for (org of organizations; track org.id) {
+              <div class="form-group">
+                <div class="controls">
+                  <label class="checkbox" [for]="org.id">
+                    <input
+                      [id]="org.id"
+                      type="checkbox"
+                      [formControlName]="org.id"
+                      [name]="'org-' + org.id"
+                      class="h-4 w-4 rounded-md border-gray-300 bg-gray-100 text-bpa-primary"
+                    />
+                    {{ org.name }}
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div>Please provide a password for your account:</div>
+        <div class="w-full">
+          <label for="password" class="block text-sm font-medium">
+            Password
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="Password"
+            [class]="
+              'mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 ' +
+              (isFieldInvalid('password')
+                ? 'border-red-500 outline-red-500 focus:outline-red-500'
+                : 'outline-gray-300 focus:outline-bpa-primary')
+            "
+          />
+          @if (isFieldInvalid("password")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("password") }}
+            </div>
+          }
+        </div>
+
+        <div class="w-full">
+          <label for="confirm-password" class="block text-sm font-medium">
+            Confirm Password
+            <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="confirm-password"
+            formControlName="confirmPassword"
+            placeholder="Password"
+            [class]="
+              'relative mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 ' +
+              (isFieldInvalid('confirmPassword')
+                ? 'border-red-500 outline-red-500 focus:outline-red-500'
+                : 'outline-gray-300 focus:outline-bpa-primary')
+            "
+          />
+          @if (isFieldInvalid("confirmPassword")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("confirmPassword") }}
+            </div>
+          }
+        </div>
+        <div class="mt-6 flex w-full items-center justify-between">
+          <div>
+            <span class="text-red-500">*</span>
+            Required fields
+          </div>
+          <button
+            type="submit"
+            class="rounded-md bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-950"
+          >
+            Create Account
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="sticky bottom-0 w-full">
+    <div class="flex w-full justify-end pb-12 pr-12">
+      <button
+        (click)="scrollToTop()"
+        class="flex h-12 w-12 items-center justify-center rounded-full border border-bpa-primary bg-white text-bpa-primary hover:bg-gray-50"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-8"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m4.5 15.75 7.5-7.5 7.5 7.5"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div
+    class="flex w-full items-center justify-center gap-12 bg-bpa-secondary p-12"
+  >
+    <a href="https://www.bioplatforms.com/">
+      <img
+        src="https://data.bioplatforms.com/BIO-RGB_Large-NEGTRANS_small.webp"
+        alt="Bioplatforms Australia Logo"
+        class="h-20 w-auto"
+      />
+    </a>
+    <a
+      href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"
+    >
+      <img
+        src="https://data.bioplatforms.com/ncris-footer.webp"
+        alt="NCRIS Logo"
+        class="h-20 w-auto"
+      />
+    </a>
+  </div>
+</div>
