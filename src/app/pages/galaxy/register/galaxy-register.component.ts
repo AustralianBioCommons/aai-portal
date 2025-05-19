@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -8,6 +8,10 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, of, switchMap } from 'rxjs';
+
+const backendUrl = "https://aaibackend.test.biocommons.org.au";
 
 
 interface GalaxyRegistrationForm {
@@ -17,6 +21,10 @@ interface GalaxyRegistrationForm {
   public_name: FormControl<string>;
 }
 
+interface GalaxyRegistrationToken {
+  token: string;
+}
+
 @Component({
   selector: 'app-register',
   imports: [ReactiveFormsModule],
@@ -24,7 +32,11 @@ interface GalaxyRegistrationForm {
   styleUrl: './galaxy-register.component.css'
 })
 export class GalaxyRegisterComponent {
+  http = inject(HttpClient);
   registerForm: FormGroup<GalaxyRegistrationForm>;
+
+  registerSuccess = false;
+  errorMessage: string | null = null;
 
   passwordMatchValidator(group: AbstractControl<GalaxyRegistrationForm>): ValidationErrors | null {
     const password = group.get('password')?.value;
@@ -41,12 +53,36 @@ export class GalaxyRegisterComponent {
     }, {validators: [this.passwordMatchValidator]})
   }
 
-  onSubmit(): void {
-    if (this.registerForm.valid) {
-      console.log('Form Submitted', this.registerForm.value);
-      // You could call a service here to submit the registration data
-    } else {
+
+  onSubmit() {
+    if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      return;
     }
+
+    const formData = this.registerForm.value;
+
+    this.http.get<GalaxyRegistrationToken>(`${backendUrl}/galaxy/get-registration-token`).pipe(
+      switchMap(response => {
+        const token = response.token;
+        if (!token) throw new Error('No token received');
+
+        const headers = new HttpHeaders().set('registration-token', token);
+        return this.http.post(`${backendUrl}/galaxy/register`, formData, { headers });
+      }),
+      catchError((error) => {
+        console.error('Registration failed:', error);
+        this.errorMessage = error?.message || 'Registration failed';
+        this.registerSuccess = false;
+        return of(null); // return observable to allow subscription to complete
+      })
+    ).subscribe(result => {
+      if (result) {
+        this.registerSuccess = true;
+        this.errorMessage = null;
+        this.registerForm.reset();
+        document.getElementById("register_success_message")?.scrollIntoView();
+      }
+    });
   }
 }
