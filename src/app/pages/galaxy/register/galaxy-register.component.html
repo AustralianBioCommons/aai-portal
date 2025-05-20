@@ -1,11 +1,5 @@
 <div class="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md my-4 gap-2">
   <h1 class="font-semibold">Create a Galaxy account</h1>
-  @if (registerSuccess) {
-    <div id="register_success_message" class="m-2 mb-4 p-2 bg-green-100 border border-green-800 rounded text-black text-sm">
-      Registration successful! Please <strong>check your email</strong> and confirm your email
-      address before <a class="font-semibold underline" href="https://galaxy.test.biocommons.org.au">signing in to Galaxy</a>
-    </div>
-  }
   @if (errorMessage !== null) {
     <div id="register_error_message" class="m-2 mb-4 p-2 bg-red-100 border border-red-800 rounded text-black text-sm">
       Registration failed: {{ errorMessage }}
