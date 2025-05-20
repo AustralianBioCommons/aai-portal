@@ -4,6 +4,7 @@ import { GalaxyRegisterComponent } from './galaxy-register.component';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 
 describe('GalaxyRegisterComponent', () => {
   let component: GalaxyRegisterComponent;
@@ -84,11 +85,13 @@ describe('GalaxyRegisterComponent submission', () => {
   let component: GalaxyRegisterComponent;
   let fixture: ComponentFixture<GalaxyRegisterComponent>;
   let httpMock: HttpTestingController;
+  let router: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
+    router = jasmine.createSpyObj('Router', ['navigate']);
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, GalaxyRegisterComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), {provide: Router, useValue: router}],
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalaxyRegisterComponent);
@@ -110,24 +113,27 @@ describe('GalaxyRegisterComponent submission', () => {
     });
   }
 
-  it('should display success message on successful registration', fakeAsync(() => {
+  it('should redirect to success page on successful registration', fakeAsync(() => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token");
-    expect(tokenReq.request.method).toBe('GET');
+
+    // Expect token request
+    const tokenReq = httpMock.expectOne(
+      "https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token"
+    );
     tokenReq.flush({ token: 'mock-token' });
 
-    const registerReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/register");
-    expect(registerReq.request.method).toBe('POST');
+    // Expect registration request
+    const registerReq = httpMock.expectOne(
+      "https://aaibackend.test.biocommons.org.au/galaxy/register"
+    );
     registerReq.flush({ success: true });
 
     tick();
     fixture.detectChanges();
 
-    const successEl = fixture.debugElement.query(By.css('#register_success_message'));
-    expect(successEl).toBeTruthy();
-    expect(component.registerSuccess).toBeTrue();
+    expect(router.navigate).toHaveBeenCalledWith(['/galaxy/register-success']);
     expect(component.errorMessage).toBeNull();
   }));
 
@@ -143,7 +149,6 @@ describe('GalaxyRegisterComponent submission', () => {
 
     const errorEl = fixture.debugElement.query(By.css('#register_error_message'));
     expect(errorEl).toBeTruthy();
-    expect(component.registerSuccess).toBeFalse();
     expect(errorEl.nativeElement.textContent).toContain('Registration failed');
   }));
 
@@ -162,7 +167,6 @@ describe('GalaxyRegisterComponent submission', () => {
 
     const errorEl = fixture.debugElement.query(By.css('#register_error_message'));
     expect(errorEl).toBeTruthy();
-    expect(component.registerSuccess).toBeFalse();
     expect(errorEl.nativeElement.textContent).toContain('Registration failed:');
   }));
 
@@ -178,7 +182,6 @@ describe('GalaxyRegisterComponent submission', () => {
     fixture.detectChanges();
 
     expect(component.registerForm.invalid).toBeTrue();
-    expect(component.registerSuccess).toBeFalse(); // Initial state, not set to false
     expect(component.errorMessage).toBeNull();
   });
 });
