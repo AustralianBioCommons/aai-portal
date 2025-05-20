@@ -52,7 +52,11 @@
           <span class="absolute -inset-1.5"></span>
           <span class="sr-only">Open user menu</span>
           @if (user?.picture) {
-            <img class="h-10 w-10 rounded-full" [src]="user.picture" alt="" />
+            <img
+              class="h-10 w-10 rounded-full"
+              [src]="user.picture"
+              alt="User"
+            />
           }
         </button>
         @if (userMenuOpen) {
