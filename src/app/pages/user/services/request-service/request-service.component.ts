@@ -7,7 +7,10 @@ import {
   FormBuilder,
 } from '@angular/forms';
 import { systemsList } from '../../../../core/constants/constants';
-import {AuthService, UserWithMetadata} from '../../../../core/services/auth.service';
+import {
+  AuthService,
+  UserWithMetadata,
+} from '../../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
@@ -20,7 +23,7 @@ import { LoadingSpinnerComponent } from '../../../../shared/components/loading-s
 export class RequestServiceComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthService);
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
 
   step = 0;
   remainingSystems: any[] = [];
@@ -29,9 +32,9 @@ export class RequestServiceComponent implements OnInit {
   loading = true;
   submitted = false;
 
-  requestForm = this.fb.group({
-    systems: this.fb.group({}),
-    selectedSystems: this.fb.group({}),
+  requestForm = this.formBuilder.group({
+    systems: this.formBuilder.group({}),
+    selectedSystems: this.formBuilder.group({}),
   });
 
   ngOnInit(): void {
@@ -128,7 +131,7 @@ export class RequestServiceComponent implements OnInit {
 
     const updatePayload = {
       systems: {
-        ...this.user?.user_metadata?.systems || {},
+        ...(this.user?.user_metadata?.systems || {}),
         requested: [
           ...(this.user?.user_metadata?.systems?.requested || []),
           ...selectedSystemIDs,

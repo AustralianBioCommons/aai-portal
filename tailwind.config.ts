@@ -1,13 +1,17 @@
 module.exports = {
-  content: [
-    "./src/**/*.{html,ts}",
-  ],
+  content: ['./src/**/*.{html,ts}'],
   theme: {
     extend: {
       colors: {
-        galaxy: {primary: "#243e8f"}
-      }
+        bpa: {
+          primary: '#041e48',
+          secondary: '#171717',
+        },
+        galaxy: {
+          primary: '#243e8f',
+        },
+      },
     },
   },
   plugins: [],
-}
+};
