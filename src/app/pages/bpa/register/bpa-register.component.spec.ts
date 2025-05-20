@@ -1,162 +1,203 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { BpaRegisterComponent } from './bpa-register.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { By } from '@angular/platform-browser';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { Router } from '@angular/router';
 
 describe('BpaRegisterComponent', () => {
   let component: BpaRegisterComponent;
   let fixture: ComponentFixture<BpaRegisterComponent>;
+  let httpTestingController: HttpTestingController;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BpaRegisterComponent, ReactiveFormsModule],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: Router,
+          useValue: { navigate: jasmine.createSpy('navigate') },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BpaRegisterComponent);
     component = fixture.componentInstance;
+    httpTestingController = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    httpTestingController.verify();
   });
 
-  it('should initialize with an empty form', () => {
-    const organizationsGroup = component.registrationForm.get('organizations');
+  describe('Form Initialization', () => {
+    it('should create component', () => {
+      expect(component).toBeTruthy();
+    });
 
-    expect(component.registrationForm.get('username')?.value).toBe('');
-    expect(component.registrationForm.get('fullname')?.value).toBe('');
-    expect(component.registrationForm.get('email')?.value).toBe('');
-    expect(component.registrationForm.get('reason')?.value).toBe('');
-    expect(component.registrationForm.get('password')?.value).toBe('');
-    expect(component.registrationForm.get('confirmPassword')?.value).toBe('');
+    it('should initialize with empty form fields', () => {
+      const organizationsGroup =
+        component.registrationForm.get('organizations');
+      expect(component.registrationForm.get('username')?.value).toBe('');
+      expect(component.registrationForm.get('fullname')?.value).toBe('');
+      expect(component.registrationForm.get('email')?.value).toBe('');
+      expect(component.registrationForm.get('reason')?.value).toBe('');
+      expect(component.registrationForm.get('password')?.value).toBe('');
+      expect(component.registrationForm.get('confirmPassword')?.value).toBe('');
 
-    component.organizations.forEach((org) => {
-      expect(organizationsGroup?.get(org.id)?.value).toBeFalse();
+      component.organizations.forEach((org) => {
+        expect(organizationsGroup?.get(org.id)?.value).toBeFalse();
+      });
     });
   });
 
-  it('should validate required fields', () => {
-    const form = component.registrationForm;
-    expect(form.valid).toBeFalsy();
+  describe('Form Validation', () => {
+    it('should validate required fields', () => {
+      const requiredControls = [
+        'username',
+        'fullname',
+        'email',
+        'reason',
+        'password',
+        'confirmPassword',
+      ];
 
-    const requiredControls = [
-      'username',
-      'fullname',
-      'email',
-      'reason',
-      'password',
-      'confirmPassword',
-    ];
+      requiredControls.forEach((controlName) => {
+        const control = component.registrationForm.get(controlName);
+        control?.markAsTouched();
+        expect(control?.errors?.['required']).toBeTruthy();
+        expect(component.getErrorMessage(controlName)).toBe(
+          'This field is required',
+        );
+      });
+    });
 
-    requiredControls.forEach((controlName) => {
-      const control = form.get(controlName);
-      expect(control?.errors?.['required']).toBeTruthy();
+    it('should validate password format', () => {
+      const passwordControl = component.registrationForm.get('password');
+
+      const invalidPasswords = ['weak', 'onlylower', 'ONLYUPPER', '12345678'];
+      invalidPasswords.forEach((password) => {
+        passwordControl?.setValue(password);
+        expect(passwordControl?.errors?.['pattern']).toBeTruthy();
+      });
+
+      passwordControl?.setValue('StrongPass123');
+      expect(passwordControl?.errors).toBeNull();
+    });
+
+    it('should validate password confirmation match', () => {
+      const form = component.registrationForm;
+      form.patchValue({
+        password: 'StrongPass123',
+        confirmPassword: 'DifferentPass123',
+      });
+
+      expect(
+        form.get('confirmPassword')?.errors?.['passwordMismatch'],
+      ).toBeTruthy();
+      expect(component.getErrorMessage('confirmPassword')).toBe(
+        'Passwords do not match',
+      );
+
+      form.patchValue({ confirmPassword: 'StrongPass123' });
+      expect(form.get('confirmPassword')?.errors).toBeNull();
+    });
+
+    it('should validate email format', () => {
+      const emailControl = component.registrationForm.get('email');
+      emailControl?.setValue('invalid-email');
+      expect(emailControl?.errors?.['email']).toBeTruthy();
+      expect(component.getErrorMessage('email')).toBe(
+        'Please enter a valid email address',
+      );
+
+      emailControl?.setValue('valid@email.com');
+      expect(emailControl?.errors).toBeNull();
     });
   });
 
-  it('should validate password requirements', () => {
-    const passwordControl = component.registrationForm.get('password');
-
-    passwordControl?.setValue('weak');
-    expect(passwordControl?.errors?.['pattern']).toBeTruthy();
-
-    passwordControl?.setValue('StrongPass123');
-    expect(passwordControl?.errors).toBeNull();
-  });
-
-  it('should validate password confirmation', () => {
-    const form = component.registrationForm;
-    form.get('password')?.setValue('StrongPass123');
-    form.get('confirmPassword')?.setValue('DifferentPass123');
-
-    expect(
-      form.get('confirmPassword')?.errors?.['passwordMismatch'],
-    ).toBeTruthy();
-
-    form.get('confirmPassword')?.setValue('StrongPass123');
-    expect(form.get('confirmPassword')?.errors).toBeNull();
-  });
-
-  it('should validate email format', () => {
-    const emailControl = component.registrationForm.get('email');
-
-    emailControl?.setValue('invalid-email');
-    expect(emailControl?.errors?.['email']).toBeTruthy();
-
-    emailControl?.setValue('valid@email.com');
-    expect(emailControl?.errors).toBeNull();
-  });
-
-  it('should have valid form when all required fields are filled correctly', () => {
-    const form = component.registrationForm;
-    const organizations = component.organizations.reduce(
-      (acc, org) => ({
-        ...acc,
-        [org.id]: false,
-      }),
-      {},
-    );
-
-    form.patchValue({
-      username: 'testuser',
-      fullname: 'Test User',
-      email: 'test@example.com',
-      reason: 'Testing purpose',
-      password: 'StrongPass123',
-      confirmPassword: 'StrongPass123',
-      organizations,
+  describe('Form Submission', () => {
+    beforeEach(() => {
+      component.registrationForm.patchValue({
+        username: 'testuser',
+        fullname: 'Test User',
+        email: 'test@example.com',
+        reason: 'Testing purpose',
+        password: 'StrongPass123',
+        confirmPassword: 'StrongPass123',
+        organizations: component.organizations.reduce(
+          (acc, org) => ({ ...acc, [org.id]: false }),
+          {},
+        ),
+      });
     });
 
-    expect(form.valid).toBeTruthy();
-  });
+    it('should submit form successfully', fakeAsync(() => {
+      component.onSubmit();
 
-  it('should display error messages when fields are invalid', () => {
-    const usernameControl = component.registrationForm.get('username');
-    usernameControl?.markAsTouched();
-    fixture.detectChanges();
+      const req = httpTestingController.expectOne(
+        'https://aaibackend.test.biocommons.org.au/bpa/register',
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush({});
 
-    expect(component.getErrorMessage('username')).toBe(
-      'This field is required',
-    );
-  });
+      tick();
+      expect(router.navigate).toHaveBeenCalledWith([
+        '/bpa/registration-complete',
+      ]);
+    }));
 
-  it('should console.log form value when submitted with valid data', () => {
-    spyOn(console, 'log');
-    const form = component.registrationForm;
-    const organizations = component.organizations.reduce(
-      (acc, org) => ({
-        ...acc,
-        [org.id]: false,
-      }),
-      {},
-    );
+    it('should scroll to first invalid field on invalid submit', () => {
+      component.registrationForm.reset(); // Make form invalid
+      const mockElement = document.createElement('div');
+      spyOn(mockElement, 'scrollIntoView');
+      spyOn(document, 'getElementById').and.returnValue(mockElement);
 
-    form.patchValue({
-      username: 'testuser',
-      fullname: 'Test User',
-      email: 'test@example.com',
-      reason: 'Testing purpose',
-      password: 'StrongPass123',
-      confirmPassword: 'StrongPass123',
-      organizations,
+      component.onSubmit();
+
+      expect(document.getElementById).toHaveBeenCalled();
+      expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
+        behavior: 'smooth',
+        block: 'center',
+      });
     });
-
-    component.onSubmit();
-    expect(console.log).toHaveBeenCalledWith(form.value);
   });
 
-  it('should scroll to first invalid field on invalid submit', () => {
-    const mockElement = document.createElement('div');
-    spyOn(mockElement, 'scrollIntoView');
-    spyOn(document, 'getElementById').and.returnValue(mockElement);
+  describe('UI Interactions', () => {
+    it('should show and hide error notification', fakeAsync(() => {
+      const errorMessage = 'Test error';
+      component.showErrorNotification(errorMessage);
+      expect(component.errorNotification()).toBe(errorMessage);
 
-    component.onSubmit();
+      tick(5000);
+      expect(component.errorNotification()).toBeNull();
+    }));
 
-    expect(document.getElementById).toHaveBeenCalled();
-    expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
-      behavior: 'smooth',
-      block: 'center',
+    it('should reset form', () => {
+      component.registrationForm.patchValue({
+        username: 'testuser',
+        email: 'test@example.com',
+      });
+
+      component.resetForm();
+
+      expect(component.registrationForm.pristine).toBeTrue();
+      expect(component.registrationForm.untouched).toBeTrue();
+      expect(component.registrationForm.get('username')?.value).toBe('');
+      expect(component.registrationForm.get('email')?.value).toBe('');
     });
   });
 });
