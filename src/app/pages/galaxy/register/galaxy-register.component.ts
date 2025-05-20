@@ -9,7 +9,9 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 const backendUrl = 'https://aaibackend.test.biocommons.org.au';
 
@@ -34,7 +36,6 @@ export class GalaxyRegisterComponent {
   http = inject(HttpClient);
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
-  registerSuccess = false;
   errorMessage: string | null = null;
 
   passwordMatchValidator(
@@ -45,8 +46,9 @@ export class GalaxyRegisterComponent {
     return password === confirm ? null : { passwordMismatch: true };
   }
 
-  constructor(private formBuilder: FormBuilder) {
-    this.registerForm = formBuilder.group(
+  constructor(private formBuilder: FormBuilder, private router: Router, private titleService: Title) {
+    this.titleService.setTitle('Galaxy Australia - Register');
+    this.registerForm = this.formBuilder.group(
       {
         email: new FormControl('', {
           nonNullable: true,
@@ -98,17 +100,15 @@ export class GalaxyRegisterComponent {
         catchError((error) => {
           console.error('Registration failed:', error);
           this.errorMessage = error?.message || 'Registration failed';
-          this.registerSuccess = false;
           document.getElementById('register_error_message')?.scrollIntoView();
           return of(null); // return observable to allow subscription to complete
         }),
       )
       .subscribe((result) => {
         if (result) {
-          this.registerSuccess = true;
           this.errorMessage = null;
           this.registerForm.reset();
-          document.getElementById('register_success_message')?.scrollIntoView();
+          this.router.navigate(["/galaxy/register-success"]);
         }
       });
   }
