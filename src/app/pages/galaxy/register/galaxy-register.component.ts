@@ -34,6 +34,9 @@ interface GalaxyRegistrationToken {
 })
 export class GalaxyRegisterComponent {
   http = inject(HttpClient);
+  formBuilder = inject(FormBuilder);
+  router = inject(Router);
+  titleService = inject(Title);
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   errorMessage: string | null = null;
@@ -46,7 +49,7 @@ export class GalaxyRegisterComponent {
     return password === confirm ? null : { passwordMismatch: true };
   }
 
-  constructor(private formBuilder: FormBuilder, private router: Router, private titleService: Title) {
+  constructor() {
     this.titleService.setTitle('Galaxy Australia - Register');
     this.registerForm = this.formBuilder.group(
       {
