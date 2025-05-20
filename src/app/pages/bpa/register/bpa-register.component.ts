@@ -27,8 +27,8 @@ interface RegistrationRequest {
 
 @Component({
   selector: 'app-bpa-register',
-  imports: [ReactiveFormsModule, CommonModule],
   standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
@@ -43,12 +43,7 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private titleService = inject(Title);
 
-  private defaultFavicon: string | null = null;
   errorNotification = signal<string | null>(null);
-
-  constructor() {
-    this.titleService.setTitle('Register | BPA Data Portal');
-  }
 
   organizations: Organization[] = [
     {
@@ -115,6 +110,8 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
     },
   ];
 
+  private defaultFavicon: string | null = null;
+
   // Validator to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
   private passwordValidator = Validators.compose([
     Validators.required,
@@ -136,14 +133,15 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
     organizations: this.formBuilder.group(
       this.organizations.reduce(
-        (acc, org) => ({
-          ...acc,
-          [org.id]: [false],
-        }),
+        (acc, org) => ({ ...acc, [org.id]: [false] }),
         {},
       ),
     ),
   });
+
+  constructor() {
+    this.titleService.setTitle('Register | BPA Data Portal');
+  }
 
   ngOnInit(): void {
     this.defaultFavicon =
@@ -156,11 +154,6 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
     if (this.defaultFavicon) {
       this.setFavicon(this.defaultFavicon);
     }
-  }
-
-  private setFavicon(href: string): void {
-    const links = this.document.querySelectorAll("link[rel*='icon']");
-    links.forEach((link) => link.setAttribute('href', href));
   }
 
   onSubmit(): void {
@@ -176,22 +169,17 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
       };
 
       this.http.post(this.backendURL, requestBody).subscribe({
-        next: () => {
-          this.router.navigate(['/bpa/registration-success']);
-        },
-        error: (error) => {
+        next: () => this.router.navigate(['/bpa/registration-success']),
+        error: (error) =>
           this.showErrorNotification(
             `Registration failed: ${error?.error?.detail}`,
-          );
-        },
+          ),
       });
     } else {
       this.registrationForm.markAllAsTouched();
-
       const firstInvalidField = Object.keys(
         this.registrationForm.controls,
       ).find((key) => this.registrationForm.get(key)?.invalid);
-
       if (firstInvalidField) {
         const element = document.getElementById(firstInvalidField);
         if (element) {
@@ -210,10 +198,7 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
       password: '',
       confirmPassword: '',
       organizations: this.organizations.reduce(
-        (acc, org) => ({
-          ...acc,
-          [org.id]: false,
-        }),
+        (acc, org) => ({ ...acc, [org.id]: false }),
         {},
       ),
     });
@@ -249,5 +234,10 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
       }
     }
     return '';
+  }
+
+  private setFavicon(href: string): void {
+    const links = this.document.querySelectorAll("link[rel*='icon']");
+    links.forEach((link) => link.setAttribute('href', href));
   }
 }
