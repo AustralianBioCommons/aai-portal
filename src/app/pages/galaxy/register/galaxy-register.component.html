@@ -1,6 +1,6 @@
 <div class="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md my-4 gap-2">
   <h1 class="font-semibold">Create a Galaxy account</h1>
-  @if (errorMessage !== null) {
+  @if (errorMessage) {
     <div id="register_error_message" class="m-2 mb-4 p-2 bg-red-100 border border-red-800 rounded text-black text-sm">
       Registration failed: {{ errorMessage }}
     </div>
