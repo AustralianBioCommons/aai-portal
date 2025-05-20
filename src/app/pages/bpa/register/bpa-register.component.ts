@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -6,8 +6,9 @@ import {
   Validators,
   ValidationErrors,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 
 interface Organization {
   id: string;
@@ -21,7 +22,7 @@ interface RegistrationRequest {
   email: string;
   reason: string;
   password: string;
-  organizations: { [key: string]: boolean };
+  organizations: Record<string, boolean>;
 }
 
 @Component({
@@ -31,18 +32,23 @@ interface RegistrationRequest {
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
-export class BpaRegisterComponent {
+export class BpaRegisterComponent implements OnInit, OnDestroy {
+  private readonly errorNotificationTimeout = 5000;
   private readonly backendURL =
     'https://aaibackend.test.biocommons.org.au/bpa/register';
-  // 'http://localhost:8000/bpa/register';
-
-  private readonly errorNotificationTimeout = 5000;
 
   private formBuilder = inject(FormBuilder);
+  private document = inject(DOCUMENT);
   private http = inject(HttpClient);
   private router = inject(Router);
+  private titleService = inject(Title);
 
+  private defaultFavicon: string | null = null;
   errorNotification = signal<string | null>(null);
+
+  constructor() {
+    this.titleService.setTitle('Register | BPA Data Portal');
+  }
 
   organizations: Organization[] = [
     {
@@ -139,6 +145,24 @@ export class BpaRegisterComponent {
     ),
   });
 
+  ngOnInit(): void {
+    this.defaultFavicon =
+      this.document.querySelector("link[rel*='icon']")?.getAttribute('href') ||
+      null;
+    this.setFavicon('/assets/bpa-favicon.ico');
+  }
+
+  ngOnDestroy(): void {
+    if (this.defaultFavicon) {
+      this.setFavicon(this.defaultFavicon);
+    }
+  }
+
+  private setFavicon(href: string): void {
+    const links = this.document.querySelectorAll("link[rel*='icon']");
+    links.forEach((link) => link.setAttribute('href', href));
+  }
+
   onSubmit(): void {
     if (this.registrationForm.valid) {
       const formValue = this.registrationForm.value;
@@ -153,7 +177,7 @@ export class BpaRegisterComponent {
 
       this.http.post(this.backendURL, requestBody).subscribe({
         next: () => {
-          this.router.navigate(['/bpa/registration-complete']);
+          this.router.navigate(['/bpa/registration-success']);
         },
         error: (error) => {
           this.showErrorNotification(

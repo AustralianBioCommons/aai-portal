@@ -156,7 +156,7 @@ describe('BpaRegisterComponent', () => {
 
       tick();
       expect(router.navigate).toHaveBeenCalledWith([
-        '/bpa/registration-complete',
+        '/bpa/registration-success',
       ]);
     }));
 

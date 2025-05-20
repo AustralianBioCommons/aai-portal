@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { systemsList } from '../../../core/constants/constants';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -9,7 +9,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   templateUrl: './pending.component.html',
   styleUrl: './pending.component.css',
 })
-export class PendingComponent {
+export class PendingComponent implements OnInit {
   systemsList = systemsList;
   user: any = {};
   pendingSystems: string[] = [];
