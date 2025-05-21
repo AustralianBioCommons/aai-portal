@@ -6,6 +6,7 @@
       <img
         src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
         class="auto h-16"
+        alt="Australian Biocommons Logo"
       />
       <h1
         class="mt-12 text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl"
@@ -51,7 +52,11 @@
           <span class="absolute -inset-1.5"></span>
           <span class="sr-only">Open user menu</span>
           @if (user?.picture) {
-            <img class="h-10 w-10 rounded-full" [src]="user.picture" />
+            <img
+              class="h-10 w-10 rounded-full"
+              [src]="user.picture"
+              alt="User"
+            />
           }
         </button>
         @if (userMenuOpen) {

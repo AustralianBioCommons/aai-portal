@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -6,8 +6,9 @@ import {
   Validators,
   ValidationErrors,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 
 interface Organization {
   id: string;
@@ -21,26 +22,26 @@ interface RegistrationRequest {
   email: string;
   reason: string;
   password: string;
-  organizations: { [key: string]: boolean };
+  organizations: Record<string, boolean>;
 }
 
 @Component({
   selector: 'app-bpa-register',
-  imports: [ReactiveFormsModule, CommonModule],
   standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
-export class BpaRegisterComponent {
+export class BpaRegisterComponent implements OnInit, OnDestroy {
+  private readonly errorNotificationTimeout = 5000;
   private readonly backendURL =
     'https://aaibackend.test.biocommons.org.au/bpa/register';
-  // 'http://localhost:8000/bpa/register';
-
-  private readonly errorNotificationTimeout = 5000;
 
   private formBuilder = inject(FormBuilder);
+  private document = inject(DOCUMENT);
   private http = inject(HttpClient);
   private router = inject(Router);
+  private titleService = inject(Title);
 
   errorNotification = signal<string | null>(null);
 
@@ -109,6 +110,8 @@ export class BpaRegisterComponent {
     },
   ];
 
+  private defaultFavicon: string | null = null;
+
   // Validator to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
   private passwordValidator = Validators.compose([
     Validators.required,
@@ -130,14 +133,28 @@ export class BpaRegisterComponent {
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
     organizations: this.formBuilder.group(
       this.organizations.reduce(
-        (acc, org) => ({
-          ...acc,
-          [org.id]: [false],
-        }),
+        (acc, org) => ({ ...acc, [org.id]: [false] }),
         {},
       ),
     ),
   });
+
+  constructor() {
+    this.titleService.setTitle('Register | BPA Data Portal');
+  }
+
+  ngOnInit(): void {
+    this.defaultFavicon =
+      this.document.querySelector("link[rel*='icon']")?.getAttribute('href') ||
+      null;
+    this.setFavicon('/assets/bpa-favicon.ico');
+  }
+
+  ngOnDestroy(): void {
+    if (this.defaultFavicon) {
+      this.setFavicon(this.defaultFavicon);
+    }
+  }
 
   onSubmit(): void {
     if (this.registrationForm.valid) {
@@ -152,22 +169,17 @@ export class BpaRegisterComponent {
       };
 
       this.http.post(this.backendURL, requestBody).subscribe({
-        next: () => {
-          this.router.navigate(['/bpa/registration-complete']);
-        },
-        error: (error) => {
+        next: () => this.router.navigate(['/bpa/registration-success']),
+        error: (error) =>
           this.showErrorNotification(
             `Registration failed: ${error?.error?.detail}`,
-          );
-        },
+          ),
       });
     } else {
       this.registrationForm.markAllAsTouched();
-
       const firstInvalidField = Object.keys(
         this.registrationForm.controls,
       ).find((key) => this.registrationForm.get(key)?.invalid);
-
       if (firstInvalidField) {
         const element = document.getElementById(firstInvalidField);
         if (element) {
@@ -186,10 +198,7 @@ export class BpaRegisterComponent {
       password: '',
       confirmPassword: '',
       organizations: this.organizations.reduce(
-        (acc, org) => ({
-          ...acc,
-          [org.id]: false,
-        }),
+        (acc, org) => ({ ...acc, [org.id]: false }),
         {},
       ),
     });
@@ -225,5 +234,10 @@ export class BpaRegisterComponent {
       }
     }
     return '';
+  }
+
+  private setFavicon(href: string): void {
+    const links = this.document.querySelectorAll("link[rel*='icon']");
+    links.forEach((link) => link.setAttribute('href', href));
   }
 }
