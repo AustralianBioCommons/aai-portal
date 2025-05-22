@@ -12,7 +12,9 @@ export class BpaRegistrationSuccessComponent implements OnInit, OnDestroy {
   private defaultFavicon: string | null = null;
 
   constructor() {
-    this.titleService.setTitle('Registration Successful | BPA Data Portal');
+    this.titleService.setTitle(
+      'Registration Successful | Bioplatforms Australia Data Portal',
+    );
   }
 
   ngOnInit(): void {
