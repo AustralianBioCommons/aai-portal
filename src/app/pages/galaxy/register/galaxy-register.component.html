@@ -164,10 +164,10 @@
     </span>
   </div>
 
-  <div class="relative min-h-96 w-full flex-1 pb-10 pt-6 lg:w-1/2">
+  <div class="relative min-h-96 w-full flex-1 lg:w-1/2">
     @if (isFrameLoading) {
       <div class="absolute inset-0 z-10 flex flex-col justify-between">
-        <div class="mt-36 flex-1 pt-2 text-2xl font-medium text-gray-800">
+        <div class="mt-36 pt-2 text-2xl font-medium text-gray-800">
           Terms of service
         </div>
         <div class="flex flex-grow items-center justify-center">
@@ -176,7 +176,7 @@
       </div>
     }
     <iframe
-      class="h-full min-h-96 w-full"
+      class="absolute inset-0 z-20 h-full min-h-96 w-full pt-6"
       title="terms-of-use"
       src="https://site.usegalaxy.org.au/about#terms-of-service"
       (load)="onFrameLoad()"
