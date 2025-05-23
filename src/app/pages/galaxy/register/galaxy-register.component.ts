@@ -12,6 +12,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { Title } from '@angular/platform-browser';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 const backendUrl = 'https://aaibackend.test.biocommons.org.au';
 
@@ -28,7 +29,7 @@ interface GalaxyRegistrationToken {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, LoadingSpinnerComponent],
   templateUrl: './galaxy-register.component.html',
   styleUrl: './galaxy-register.component.css',
 })
@@ -40,6 +41,11 @@ export class GalaxyRegisterComponent {
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   errorMessage: string | null = null;
+  isFrameLoading = true;
+
+  onFrameLoad(): void {
+    this.isFrameLoading = false;
+  }
 
   passwordMatchValidator(
     group: AbstractControl<GalaxyRegistrationForm>,
@@ -111,7 +117,7 @@ export class GalaxyRegisterComponent {
         if (result) {
           this.errorMessage = null;
           this.registerForm.reset();
-          this.router.navigate(["/galaxy/register-success"]);
+          this.router.navigate(['/galaxy/register-success']);
         }
       });
   }

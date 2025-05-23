@@ -2,7 +2,7 @@
   class="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10 lg:flex-row lg:p-6"
 >
   <div
-    class="flex w-full flex-col gap-6 rounded-md bg-white p-10 shadow-2xl lg:w-1/2"
+    class="flex w-full flex-1 flex-col gap-6 rounded-md bg-white p-10 shadow-2xl lg:w-1/2"
   >
     <div class="rounded-md bg-sky-100 p-4 text-sm text-sky-900">
       Please register only one account to ensure fair sharing of computational
@@ -164,11 +164,17 @@
     </span>
   </div>
 
-  <div class="w-full flex-1 pt-6 lg:w-1/2">
+  <div class="relative min-h-96 w-full flex-1 pb-10 pt-6 lg:w-1/2">
+    @if (isFrameLoading) {
+      <div class="absolute inset-0 z-10 flex items-center justify-center">
+        <app-loading-spinner />
+      </div>
+    }
     <iframe
-      class="h-full min-h-96 w-full border-0"
+      class="h-full min-h-96 w-full"
       title="terms-of-use"
       src="https://site.usegalaxy.org.au/about#terms-of-service"
+      (load)="onFrameLoad()"
     ></iframe>
   </div>
 </div>
