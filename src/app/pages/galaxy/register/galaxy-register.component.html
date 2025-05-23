@@ -166,8 +166,12 @@
 
   <div class="relative min-h-96 w-full flex-1 pb-10 pt-6 lg:w-1/2">
     @if (isFrameLoading) {
-      <div class="absolute inset-0 z-10 flex items-center justify-center">
-        <app-loading-spinner />
+      <div class="absolute inset-0 z-10 flex flex-col justify-between">
+        <div class="mt-36 flex-1 pt-2 text-2xl font-medium text-gray-800">
+          Terms of service
+        </div>
+        <div class="flex flex-1 justify-center"><app-loading-spinner /></div>
+        <div class="flex-1"></div>
       </div>
     }
     <iframe
