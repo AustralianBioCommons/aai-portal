@@ -4,7 +4,7 @@
   <div
     class="flex min-h-96 min-w-96 max-w-lg flex-col items-center justify-center gap-10 rounded-md bg-white px-16 py-24 text-center shadow-lg"
   >
-    @if (!emailVerified) {
+    @if (emailVerified()) {
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -27,10 +27,10 @@
       <div
         class="flex flex-1 flex-col gap-6 *:rounded-md *:bg-blue-800 *:px-6 *:py-3 *:text-white"
       >
-        <a class="hover:bg-blue-900" href="{{ app_urls.galaxy }}">
+        <a class="hover:bg-blue-900" [href]="appUrls.galaxy">
           Go to Galaxy Australia
         </a>
-        <a class="hover:bg-blue-900" href="{{ app_urls.bpa }}">
+        <a class="hover:bg-blue-900" [href]="appUrls.bpa">
           Go to Bioplatforms Australia Data Portal
         </a>
       </div>
@@ -55,8 +55,8 @@
       <div class="text-gray-500">
         Your email could not be verified.<br />
         Please try again.<br /><br />
-        @if (errorMessage) {
-          <span class="text-red-600">Error details: {{ errorMessage }}</span>
+        @if (errorMessage()) {
+          <span class="text-red-600">Error details: {{ errorMessage() }}</span>
         }
       </div>
     }
