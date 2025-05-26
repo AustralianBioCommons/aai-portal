@@ -28,17 +28,13 @@ describe('EmailVerifiedComponent', () => {
   };
 
   // 🔍 Successful verification test
-  it('should display success message for verified email with known app', () => {
+  it('should set emailVerified when success=true', () => {
     createComponentWithParams({
       success: 'true',
       application_name: 'Galaxy Test Portal'
     });
 
     expect(component.emailVerified).toBeTrue();
-    expect(component.applicationName).toBe('Galaxy Test Portal');
-    expect(component.appId).toBe('galaxy');
-    expect(component.appUrl).toBe('https://galaxy.test.biocommons.org.au');
-    expect(component.message).toContain('Your email has been successfully verified for Galaxy Test Portal');
     expect(component.errorMessage).toBe('');
   });
 
@@ -51,9 +47,6 @@ describe('EmailVerifiedComponent', () => {
     });
 
     expect(component.emailVerified).toBeFalse();
-    expect(component.appId).toBe('bpa');
-    expect(component.appUrl).toBe('https://aaidemo.bioplatforms.com');
-    expect(component.message).toBe('');
     expect(component.errorMessage).toBe('Invalid verification token');
   });
 
@@ -64,42 +57,26 @@ describe('EmailVerifiedComponent', () => {
     });
 
     expect(component.emailVerified).toBeTrue();
-    expect(component.applicationName).toBeNull();
-    expect(component.appId).toBeNull();
-    expect(component.appUrl).toBeNull();
-    expect(component.message).toBe('Your email has been successfully verified. You can now log in.');
   });
 
-  // ❓ Edge case: unknown application name
-  it('should not match unknown application name to an appId', () => {
-    createComponentWithParams({
-      success: 'true',
-      application_name: 'UnknownApp'
-    });
-
-    expect(component.appId).toBeNull();
-    expect(component.appUrl).toBeNull();
-    expect(component.message).toContain('Your email has been successfully verified for UnknownApp');
-  });
-
-  // ✅ DOM: Successful verification test
-  it('should render success message and app link for known app', () => {
-    createComponentWithParams({
-      success: 'true',
-      application_name: 'Galaxy'
-    });
+  it('should display success message and links on email verification success', () => {
+    createComponentWithParams({ success: 'true' });
 
     const compiled = fixture.nativeElement as HTMLElement;
 
-    const heading = compiled.querySelector('h1');
-    const paragraph = compiled.querySelector('p');
-    const link = compiled.querySelector('a');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Email Verified');
+    expect(compiled.querySelector('p')?.textContent).toContain('Your email has been successfully verified');
 
-    expect(heading?.textContent).toContain('Email Verified');
-    expect(paragraph?.textContent).toContain('Your email has been successfully verified for Galaxy');
-    expect(link?.textContent).toContain('Go to Galaxy');
-    expect(link?.getAttribute('href')).toBe('https://galaxy.test.biocommons.org.au');
+    const links = compiled.querySelectorAll('a');
+    expect(links.length).toBe(2);
+
+    const galaxyLink = Array.from(links).find(link => link.href.includes('galaxy.test.biocommons.org.au'));
+    const bpaLink = Array.from(links).find(link => link.href.includes('aaidemo.bioplatforms.com'));
+
+    expect(galaxyLink?.textContent).toContain('Go to Galaxy Australia');
+    expect(bpaLink?.textContent).toContain('Go to BioPlatforms Australia Data Portal');
   });
+
 
   // ❌ DOM: Unsuccessful verification
   it('should render error message and error detail if verification failed', () => {
@@ -117,19 +94,5 @@ describe('EmailVerifiedComponent', () => {
     expect(heading?.textContent).toContain('Email verification error');
     expect(paragraph?.textContent).toContain('Your email could not be verified');
     expect(paragraph?.textContent).toContain('Verification token expired');
-  });
-
-  // ❓ DOM: Unknown application name should not render app link
-  it('should show message but not link for unknown app', () => {
-    createComponentWithParams({
-      success: 'true',
-      application_name: 'RandomApp'
-    });
-
-    const compiled = fixture.nativeElement as HTMLElement;
-    const link = compiled.querySelector('a');
-
-    expect(compiled.querySelector('p')?.textContent).toContain('RandomApp');
-    expect(link).toBeNull();
   });
 });
