@@ -7,7 +7,9 @@ describe('EmailVerifiedComponent', () => {
   let component: EmailVerifiedComponent;
   let fixture: ComponentFixture<EmailVerifiedComponent>;
 
-  const createComponentWithParams = (queryParams: Record<string, string | null>) => {
+  const createComponentWithParams = (
+    queryParams: Record<string, string | null>,
+  ) => {
     TestBed.configureTestingModule({
       imports: [EmailVerifiedComponent],
       providers: [
@@ -15,11 +17,11 @@ describe('EmailVerifiedComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             queryParamMap: of({
-              get: (key: string) => queryParams[key] ?? null
-            })
-          }
-        }
-      ]
+              get: (key: string) => queryParams[key] ?? null,
+            }),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EmailVerifiedComponent);
@@ -27,36 +29,33 @@ describe('EmailVerifiedComponent', () => {
     fixture.detectChanges();
   };
 
-  // 🔍 Successful verification test
   it('should set emailVerified when success=true', () => {
     createComponentWithParams({
       success: 'true',
-      application_name: 'Galaxy Test Portal'
+      application_name: 'Galaxy Test Portal',
     });
 
-    expect(component.emailVerified).toBeTrue();
-    expect(component.errorMessage).toBe('');
+    expect(component.emailVerified()).toBeTrue();
+    expect(component.errorMessage()).toBe('');
   });
 
-  // ❌ Unsuccessful verification test
   it('should handle verification failure and show error message', () => {
     createComponentWithParams({
       success: 'false',
       application_name: 'BPA Demo',
-      message: 'Invalid verification token'
+      message: 'Invalid verification token',
     });
 
-    expect(component.emailVerified).toBeFalse();
-    expect(component.errorMessage).toBe('Invalid verification token');
+    expect(component.emailVerified()).toBeFalse();
+    expect(component.errorMessage()).toBe('Invalid verification token');
   });
 
-  // 🧪 Fallback behavior when no application_name is provided
   it('should handle verified email with no application name', () => {
     createComponentWithParams({
-      success: 'true'
+      success: 'true',
     });
 
-    expect(component.emailVerified).toBeTrue();
+    expect(component.emailVerified()).toBeTrue();
   });
 
   it('should display success message and links on email verification success', () => {
@@ -64,35 +63,43 @@ describe('EmailVerifiedComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h1')?.textContent).toContain('Email Verified');
-    expect(compiled.querySelector('p')?.textContent).toContain('Your email has been successfully verified');
+    expect(compiled.querySelector('h1')?.textContent).toContain(
+      'Email Verified',
+    );
+    expect(compiled.querySelector('p')?.textContent).toContain(
+      'Your email has been successfully verified',
+    );
 
     const links = compiled.querySelectorAll('a');
     expect(links.length).toBe(2);
 
-    const galaxyLink = Array.from(links).find(link => link.href.includes('galaxy.test.biocommons.org.au'));
-    const bpaLink = Array.from(links).find(link => link.href.includes('aaidemo.bioplatforms.com'));
+    const galaxyLink = Array.from(links).find((link) =>
+      link.href.includes('galaxy.test.biocommons.org.au'),
+    );
+    const bpaLink = Array.from(links).find((link) =>
+      link.href.includes('aaidemo.bioplatforms.com'),
+    );
 
     expect(galaxyLink?.textContent).toContain('Go to Galaxy Australia');
-    expect(bpaLink?.textContent).toContain('Go to BioPlatforms Australia Data Portal');
+    expect(bpaLink?.textContent).toContain(
+      'Go to Bioplatforms Australia Data Portal',
+    );
   });
 
-
-  // ❌ DOM: Unsuccessful verification
   it('should render error message and error detail if verification failed', () => {
     createComponentWithParams({
       success: 'false',
       application_name: 'bpa',
-      message: 'Verification token expired'
+      message: 'Verification token expired',
     });
 
     const compiled = fixture.nativeElement as HTMLElement;
 
     const heading = compiled.querySelector('h1');
-    const paragraph = compiled.querySelector('p');
+    const errorDiv = compiled.querySelector('.text-gray-500');
 
     expect(heading?.textContent).toContain('Email verification error');
-    expect(paragraph?.textContent).toContain('Your email could not be verified');
-    expect(paragraph?.textContent).toContain('Verification token expired');
+    expect(errorDiv?.textContent).toContain('Your email could not be verified');
+    expect(errorDiv?.textContent).toContain('Verification token expired');
   });
 });
