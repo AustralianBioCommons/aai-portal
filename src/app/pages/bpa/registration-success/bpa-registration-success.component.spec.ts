@@ -44,17 +44,19 @@ describe('BpaRegistrationSuccessComponent', () => {
     );
   });
 
-  it('should have a return link to the BPA Data Portal', () => {
+  it('should have a return link to the Bioplatforms Australia Data Portal', () => {
     const links = fixture.debugElement.queryAll(
       By.css('a[href="https://aaidemo.bioplatforms.com/"]'),
     );
     const returnLink = links.find((el) =>
-      el.nativeElement.textContent.includes('Return to BPA Data Portal'),
+      el.nativeElement.textContent.includes(
+        'Return to Bioplatforms Australia Data Portal',
+      ),
     );
 
     expect(returnLink).toBeTruthy();
     expect(returnLink!.nativeElement.textContent.trim()).toContain(
-      'Return to BPA Data Portal',
+      'Return to Bioplatforms Australia Data Portal',
     );
   });
 

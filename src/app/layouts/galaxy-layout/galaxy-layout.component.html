@@ -1,17 +1,20 @@
 <div class="flex h-full min-h-screen flex-col">
-  <nav class="bg-galaxy-primary flex justify-center p-8 items-center">
-    <a href="https://galaxy.test.biocommons.org.au">
+  <nav class="text-center items-center bg-galaxy-primary p-6">
+    <a
+      href="https://galaxy.test.biocommons.org.au"
+      class="flex items-center justify-center gap-2"
+    >
       <img
-        class="h-12"
+        class="h-10"
         src="https://usegalaxy.org.au/static/favicon.svg"
         width="auto"
         alt="Galaxy logo"
         loading="lazy"
-      >
+      />
+      <span class="mb-1 text-2xl font-bold text-white">Australia</span>
     </a>
-  <span class="text-white text-xl font-semibold">Australia</span>
-</nav>
+  </nav>
   <div class="h-full">
-    <router-outlet/>
+    <router-outlet />
   </div>
 </div>

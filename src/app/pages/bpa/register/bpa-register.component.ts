@@ -140,7 +140,7 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
-    this.titleService.setTitle('Register | BPA Data Portal');
+    this.titleService.setTitle('Register | Bioplatforms Australia Data Portal');
   }
 
   ngOnInit(): void {
@@ -170,10 +170,7 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
 
       this.http.post(this.backendURL, requestBody).subscribe({
         next: () => this.router.navigate(['/bpa/registration-success']),
-        error: (error) =>
-          this.showErrorNotification(
-            `Registration failed: ${error?.error?.detail}`,
-          ),
+        error: (error) => this.showErrorNotification(error?.error?.detail),
       });
     } else {
       this.registrationForm.markAllAsTouched();
