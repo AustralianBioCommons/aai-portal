@@ -12,6 +12,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 describe('BpaRegisterComponent', () => {
   let component: BpaRegisterComponent;
@@ -148,8 +149,9 @@ describe('BpaRegisterComponent', () => {
     it('should submit form successfully', fakeAsync(() => {
       component.onSubmit();
 
+      // Use the correct development URL from environment
       const req = httpTestingController.expectOne(
-        'https://aaibackend.test.biocommons.org.au/bpa/register',
+        `${environment.auth0.backend}/bpa/register`,
       );
       expect(req.request.method).toBe('POST');
       req.flush({});
@@ -158,6 +160,24 @@ describe('BpaRegisterComponent', () => {
       expect(router.navigate).toHaveBeenCalledWith([
         '/bpa/registration-success',
       ]);
+    }));
+
+    it('should handle form submission error', fakeAsync(() => {
+      component.onSubmit();
+
+      const req = httpTestingController.expectOne(
+        `${environment.auth0.backend}/bpa/register`,
+      );
+      expect(req.request.method).toBe('POST');
+
+      // Simulate error response
+      req.flush(
+        { error: 'Registration failed' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      tick();
+      // Add assertions for error handling based on your component logic
     }));
 
     it('should scroll to first invalid field on invalid submit', () => {

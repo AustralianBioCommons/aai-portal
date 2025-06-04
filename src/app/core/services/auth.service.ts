@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
 import { HttpClient } from '@angular/common/http';
-import { concatMap, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -12,7 +12,7 @@ export interface BiocommonsUserMetadata {
   systems?: {
     approved?: string[];
     requested?: string[];
-  }
+  };
 }
 
 /** Define the extra fields we expect on top of the Auth0 User type */
@@ -40,16 +40,9 @@ export class AuthService {
     });
 
     // Fetch user data when authenticated
-    this.auth0.user$
-      .pipe(
-        concatMap((user) =>
-          this.http.get(
-            encodeURI(`${environment.auth0.audience}users/${user?.sub}`),
-          ),
-        ),
-        tap((user) => this.user.set(user)),
-      )
-      .subscribe();
+    this.auth0.user$.subscribe((user) => {
+      this.user.set(user as UserWithMetadata);
+    });
   }
 
   login(): void {
@@ -64,7 +57,7 @@ export class AuthService {
     });
   }
 
-  getUser(){
+  getUser() {
     return this.user$;
   }
 
