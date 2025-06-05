@@ -102,20 +102,33 @@ describe('PendingComponent', () => {
   });
 
   it('should not load data when user is not authenticated', () => {
-    const authSignal = signal(false);
     const authSpy = jasmine.createSpyObj('AuthService', [], {
-      isAuthenticated: authSignal,
+      isAuthenticated: signal(false),
+    });
+    const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [PendingComponent],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: AuthService, useValue: authSpy },
+        provideMockAuth0Service({ isAuthenticated: false }),
+        provideHttpClient(),
+        provideRouter([]),
+      ],
     });
 
-    TestBed.overrideProvider(AuthService, { useValue: authSpy });
-    fixture = TestBed.createComponent(PendingComponent);
-    component = fixture.componentInstance;
-    mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    const testFixture = TestBed.createComponent(PendingComponent);
+    const testComponent = testFixture.componentInstance;
+    const testApiService = TestBed.inject(
+      ApiService,
+    ) as jasmine.SpyObj<ApiService>;
 
-    fixture.detectChanges();
+    testFixture.detectChanges();
 
-    expect(mockApiService.getAllPending).not.toHaveBeenCalled();
-    expect(component.loading()).toBe(true);
+    expect(testApiService.getAllPending).not.toHaveBeenCalled();
+    expect(testComponent.loading()).toBe(true);
   });
 
   it('should display no pending requests message when empty', () => {
