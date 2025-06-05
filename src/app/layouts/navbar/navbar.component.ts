@@ -88,10 +88,14 @@ export class NavbarComponent implements OnDestroy {
       )
       .subscribe({
         next: (pendingData) => {
-          const totalPending =
-            (pendingData.pending_services?.length || 0) +
-            (pendingData.pending_resources?.length || 0);
-          this.pendingCount.set(totalPending);
+          if (pendingData) {
+            const totalPending =
+              (pendingData.pending_services?.length || 0) +
+              (pendingData.pending_resources?.length || 0);
+            this.pendingCount.set(totalPending);
+          } else {
+            this.pendingCount.set(0);
+          }
         },
         error: (error) => {
           console.error('Failed to fetch pending count:', error);
