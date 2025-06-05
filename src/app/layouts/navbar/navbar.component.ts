@@ -102,7 +102,6 @@ export class NavbarComponent implements OnDestroy {
     effect(() => {
       this.isAuthenticated.set(this.auth.isAuthenticated());
       this.user.set(this.auth.user());
-      console.log(this.user);
     });
 
     this.renderer.listen('window', 'click', (e: Event) => {

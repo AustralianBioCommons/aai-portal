@@ -13,7 +13,7 @@ import { filter, switchMap } from 'rxjs/operators';
   styleUrl: './pending.component.css',
 })
 export class PendingComponent {
-  pendingItems!: Pending;
+  pendingItems: Pending = { pending_services: [], pending_resources: [] };
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -29,7 +29,10 @@ export class PendingComponent {
       )
       .subscribe({
         next: (res) => {
-          this.pendingItems = res;
+          this.pendingItems = res || {
+            pending_services: [],
+            pending_resources: [],
+          };
           this.error.set(null);
           this.loading.set(false);
         },
@@ -37,11 +40,15 @@ export class PendingComponent {
           console.error('Failed to retrieve pending requests', error);
           this.error.set('Failed to load pending requests');
           this.loading.set(false);
+          this.pendingItems = { pending_services: [], pending_resources: [] };
         },
       });
   }
 
   get pendingItemsArray() {
+    if (!this.pendingItems) {
+      return [];
+    }
     return [
       ...(this.pendingItems.pending_services || []),
       ...(this.pendingItems.pending_resources || []),
