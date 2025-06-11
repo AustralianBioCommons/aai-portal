@@ -54,7 +54,7 @@ describe('EmailVerifiedComponent', () => {
     await createComponent({ success: 'true', email: 'galaxy@example.com', message: '' });
 
     expect(httpClientSpy.get).toHaveBeenCalledWith(
-      `${environment.auth0.backend}/registration_info?user_email=galaxy%40example.com`
+      `${environment.auth0.backend}/utils/registration_info?user_email=galaxy%40example.com`
     );
     expect(component.appId()).toBe('galaxy');
     expect(component.appUrl()).toContain('galaxy.test.biocommons.org.au');

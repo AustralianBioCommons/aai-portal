@@ -55,7 +55,7 @@ export class EmailVerifiedComponent {
   }
 
   getAppInfo(email: string): void {
-    this.http.get<UserInfoResponse>(`${environment.auth0.backend}/registration_info?user_email=${encodeURIComponent(email)}`)
+    this.http.get<UserInfoResponse>(`${environment.auth0.backend}/utils/registration_info?user_email=${encodeURIComponent(email)}`)
       .subscribe({
         next: (data) => {
           this.appId.set(data.app);
