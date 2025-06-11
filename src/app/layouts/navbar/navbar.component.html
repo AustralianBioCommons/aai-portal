@@ -1,4 +1,4 @@
-@if (!isAuthenticated) {
+@if (!isAuthenticated()) {
   <div
     class="absolute left-0 top-0 z-50 flex h-full w-full flex-col items-center justify-center bg-white"
   >
@@ -42,7 +42,7 @@
       <div class="relative">
         <button
           type="button"
-          class="focus:outline-hidden relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm hover:cursor-pointer focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+          class="focus:outline-hidden relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm hover:cursor-pointer focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-200"
           id="user-menu-button"
           aria-expanded="false"
           aria-haspopup="true"
@@ -51,10 +51,10 @@
         >
           <span class="absolute -inset-1.5"></span>
           <span class="sr-only">Open user menu</span>
-          @if (user?.picture) {
+          @if (user()?.picture) {
             <img
               class="h-10 w-10 rounded-full"
-              [src]="user.picture"
+              [src]="user().picture"
               alt="User"
             />
           }
@@ -73,8 +73,9 @@
               role="menuitem"
               tabindex="-1"
               id="user-menu-item-2"
+              (click)="logoutButton.logout()"
             >
-              <app-logout-button />
+              <app-logout-button #logoutButton />
             </div>
           </div>
         }
@@ -94,15 +95,17 @@
           }"
         >
           @if (
-            (userType === "user" && page.label === "Pending") ||
+            (userType === "user" &&
+              page.label === "Pending" &&
+              pendingCount() > 0) ||
             (userType === "admin" &&
               page.label === "Requests" &&
-              user?.user_metadata?.systems?.requested?.length > 0)
+              pendingCount() > 0)
           ) {
             <span
               class="absolute -right-2 -top-2 min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs text-white"
             >
-              {{ user?.user_metadata?.systems?.requested?.length }}
+              {{ pendingCount() }}
             </span>
           }
           {{ page.label }}

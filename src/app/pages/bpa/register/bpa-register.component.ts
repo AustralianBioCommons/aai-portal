@@ -9,6 +9,7 @@ import {
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
+import { environment } from '../../../../environments/environment';
 
 interface Organization {
   id: string;
@@ -34,8 +35,7 @@ interface RegistrationRequest {
 })
 export class BpaRegisterComponent implements OnInit, OnDestroy {
   private readonly errorNotificationTimeout = 5000;
-  private readonly backendURL =
-    'https://aaibackend.test.biocommons.org.au/bpa/register';
+  private readonly backendURL = `${environment.auth0.backend}/bpa/register`;
 
   private formBuilder = inject(FormBuilder);
   private document = inject(DOCUMENT);

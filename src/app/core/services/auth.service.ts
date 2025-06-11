@@ -2,23 +2,71 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
 import { HttpClient } from '@angular/common/http';
-import { concatMap, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-export interface BiocommonsUserMetadata {
-  first_name?: string;
-  last_name?: string;
-  systems?: {
-    approved?: string[];
-    requested?: string[];
-  }
+export type Status = 'approved' | 'revoked' | 'pending';
+
+export interface Resource {
+  name: string;
+  status: Status;
+  id: string;
 }
 
-/** Define the extra fields we expect on top of the Auth0 User type */
-export interface UserWithMetadata extends User {
+export interface Service {
+  name: string;
+  id: string;
+  status: Status;
+  last_updated: string;
+  updated_by: string;
+  resources: Resource[];
+}
+
+export interface Group {
+  name: string;
+  id: string;
+}
+
+export interface Identity {
+  connection: string;
+  provider: string;
+  user_id: string;
+  isSocial: boolean;
+}
+
+export interface BPAMetadata {
+  registration_reason: string;
+  username: string;
+}
+
+export interface BiocommonsUserMetadata {
+  bpa?: BPAMetadata;
+  galaxy_username?: string;
+}
+
+export interface BiocommonsAppMetadata {
+  groups: Group[];
+  services: Service[];
+  registration_from?: 'biocommons' | 'galaxy' | 'bpa';
+}
+
+export interface BiocommonsAuth0User {
+  created_at: string;
+  email: string;
+  email_verified: boolean;
+  identities: Identity[];
+  name: string;
+  nickname: string;
+  picture: string;
+  updated_at: string;
+  user_id: string;
   user_metadata?: BiocommonsUserMetadata;
-  user_id?: string;
+  app_metadata?: BiocommonsAppMetadata;
+  last_ip?: string;
+  last_login?: string;
+  logins_count?: number;
 }
 
 @Injectable({
@@ -30,7 +78,7 @@ export class AuthService {
   private http = inject(HttpClient);
 
   isAuthenticated = signal<boolean>(false);
-  user = signal<UserWithMetadata | null>(null);
+  user = signal<BiocommonsAuth0User | null>(null);
   user$ = toObservable(this.user);
 
   constructor() {
@@ -40,16 +88,9 @@ export class AuthService {
     });
 
     // Fetch user data when authenticated
-    this.auth0.user$
-      .pipe(
-        concatMap((user) =>
-          this.http.get(
-            encodeURI(`${environment.auth0.audience}users/${user?.sub}`),
-          ),
-        ),
-        tap((user) => this.user.set(user)),
-      )
-      .subscribe();
+    this.auth0.user$.subscribe((user) => {
+      this.user.set(user as BiocommonsAuth0User);
+    });
   }
 
   login(): void {
@@ -64,21 +105,7 @@ export class AuthService {
     });
   }
 
-  getUser(){
+  getUser(): Observable<BiocommonsAuth0User | null> {
     return this.user$;
-  }
-
-  updateUserMetadata(userId: string, metadata: any) {
-    return this.http
-      .patch(
-        `${environment.auth0.audience}users/${userId}`,
-        { user_metadata: metadata },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-      .pipe(tap((updatedUser: UserWithMetadata) => this.user.set(updatedUser)));
   }
 }

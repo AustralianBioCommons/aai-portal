@@ -1,4 +1,4 @@
-export const systemsList = [
+export const servicesList = [
   {
     id: 'TSI_SH',
     name: 'Threatened Species Initiative Service Hub',
