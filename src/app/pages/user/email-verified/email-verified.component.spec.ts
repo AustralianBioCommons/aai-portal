@@ -1,97 +1,111 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EmailVerifiedComponent } from './email-verified.component';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
+import { of, throwError } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 describe('EmailVerifiedComponent', () => {
-  let component: EmailVerifiedComponent;
   let fixture: ComponentFixture<EmailVerifiedComponent>;
+  let component: EmailVerifiedComponent;
+  let httpClientSpy: jasmine.SpyObj<HttpClient>;
 
-  const createComponentWithParams = (
-    queryParams: Record<string, string | null>,
-  ) => {
-    TestBed.configureTestingModule({
+  beforeEach(() => {
+    httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
+  });
+
+  const createComponent = async (queryParams: Record<string, string | null>, detectChanges = true) => {
+    const activatedRouteStub = {
+      queryParamMap: of({
+        get: (key: string) => queryParams[key] ?? null
+      })
+    };
+
+    await TestBed.configureTestingModule({
       imports: [EmailVerifiedComponent],
       providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            queryParamMap: of({
-              get: (key: string) => queryParams[key] ?? null,
-            }),
-          },
-        },
-      ],
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
+        { provide: HttpClient, useValue: httpClientSpy },
+        Title
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(EmailVerifiedComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    if (detectChanges) {
+      fixture.detectChanges();
+    }
   };
 
-  it('should set emailVerified when success=true', () => {
-    createComponentWithParams({
-      success: 'true',
-      application_name: 'Galaxy Test Portal',
-    });
-
-    expect(component.emailVerified()).toBeTrue();
-    expect(component.errorMessage()).toBe('');
+  afterEach(() => {
+    httpClientSpy.get.calls.reset();
   });
 
-  it('should handle verification failure and show error message', () => {
-    createComponentWithParams({
-      success: 'false',
-      application_name: 'BPA Demo',
-      message: 'Invalid verification token',
-    });
+  it('should mark email as verified if success=true', async () => {
+    httpClientSpy.get.and.returnValue(of({ app: 'galaxy' }));
+    await createComponent({ success: 'true', email: 'test@example.com', message: '' });
 
+    expect(component.emailVerified()).toBeTrue();
+  });
+
+  it('should use galaxy URL if app response is galaxy', async () => {
+    httpClientSpy.get.and.returnValue(of({ app: 'galaxy' }));
+    await createComponent({ success: 'true', email: 'galaxy@example.com', message: '' });
+
+    expect(httpClientSpy.get).toHaveBeenCalledWith(
+      `${environment.auth0.backend}/registration_info?user_email=galaxy%40example.com`
+    );
+    expect(component.appId()).toBe('galaxy');
+    expect(component.appUrl()).toContain('galaxy.test.biocommons.org.au');
+  });
+
+  it('should use bpa URL if app response is bpa', async () => {
+    httpClientSpy.get.and.returnValue(of({ app: 'bpa' }));
+    await createComponent({ success: 'true', email: 'bpa@example.com', message: '' });
+
+    expect(component.appId()).toBe('bpa');
+    expect(component.appUrl()).toContain('aaidemo.bioplatforms.com');
+  });
+
+  it('should use biocommons URL if app response is biocommons', async () => {
+    httpClientSpy.get.and.returnValue(of({ app: 'biocommons' }));
+    await createComponent({ success: 'true', email: 'bio@example.com', message: '' });
+
+    expect(component.appId()).toBe('biocommons');
+    expect(component.appUrl()).toContain('login.test.biocommons.org.au');
+  });
+
+  it('should not fail if app lookup throws', async () => {
+    httpClientSpy.get.and.returnValue(throwError(() => new Error('API down')));
+    await createComponent({ success: 'true', email: 'fail@example.com', message: '' });
+
+    expect(httpClientSpy.get).toHaveBeenCalled();
+    expect(component.appId()).toBe('biocommons'); // fallback
+  });
+
+  it('should set error message if present in query params', async () => {
+    httpClientSpy.get.and.returnValue(of({ app: 'biocommons' }));
+    await createComponent({ success: 'false', email: 'test@example.com', message: 'Verification failed' });
+
+    expect(component.errorMessage()).toBe('Verification failed');
     expect(component.emailVerified()).toBeFalse();
-    expect(component.errorMessage()).toBe('Invalid verification token');
   });
 
-  it('should handle verified email with no application name', () => {
-    createComponentWithParams({
-      success: 'true',
-    });
-
-    expect(component.emailVerified()).toBeTrue();
-  });
-
-  it('should display success message and links on email verification success', () => {
-    createComponentWithParams({ success: 'true' });
+  it('should display success message and link on email verification success', async () => {
+    await createComponent({ success: 'true', email: null, message: null });
 
     const compiled = fixture.nativeElement as HTMLElement;
 
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Email Verified',
-    );
-    expect(compiled.querySelector('p')?.textContent).toContain(
-      'Your email has been successfully verified',
-    );
+    expect(compiled.querySelector('h1')?.textContent).toContain('Email Verified');
+    expect(compiled.querySelector('p')?.textContent).toContain('Your email has been successfully verified');
 
-    const links = compiled.querySelectorAll('a');
-    expect(links.length).toBe(2);
-
-    const galaxyLink = Array.from(links).find((link) =>
-      link.href.includes('galaxy.test.biocommons.org.au'),
-    );
-    const bpaLink = Array.from(links).find((link) =>
-      link.href.includes('aaidemo.bioplatforms.com'),
-    );
-
-    expect(galaxyLink?.textContent).toContain('Go to Galaxy Australia');
-    expect(bpaLink?.textContent).toContain(
-      'Go to Bioplatforms Australia Data Portal',
-    );
+    const link = compiled.querySelector('a');
+    expect(link?.textContent).toContain('Continue');
   });
 
-  it('should render error message and error detail if verification failed', () => {
-    createComponentWithParams({
-      success: 'false',
-      application_name: 'bpa',
-      message: 'Verification token expired',
-    });
+  it('should render error message and error detail if verification failed', async () => {
+    await createComponent({ success: 'false', email: null, message: 'Verification token expired' });
 
     const compiled = fixture.nativeElement as HTMLElement;
 
@@ -102,4 +116,16 @@ describe('EmailVerifiedComponent', () => {
     expect(errorDiv?.textContent).toContain('Your email could not be verified');
     expect(errorDiv?.textContent).toContain('Verification token expired');
   });
+
+  it('should not call getAppInfo if email is missing in query params', async () => {
+    httpClientSpy.get.and.returnValue(of({ app: 'galaxy' }));
+    await createComponent({ success: 'true', email: null, message: '' }, false);
+
+    const spy = spyOn(component, 'getAppInfo');
+    fixture.detectChanges();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(httpClientSpy.get).not.toHaveBeenCalled();
+  });
 });
+
