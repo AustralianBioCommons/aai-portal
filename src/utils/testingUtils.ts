@@ -1,7 +1,7 @@
-import {of} from 'rxjs';
-import {AuthService as Auth0Service} from '@auth0/auth0-angular';
-import { UserWithMetadata } from '../app/core/services/auth.service';
-import {AuthService} from '../app/core/services/auth.service';
+import { of } from 'rxjs';
+import { AuthService as Auth0Service } from '@auth0/auth0-angular';
+import { BiocommonsAuth0User } from '../app/core/services/auth.service';
+import { AuthService } from '../app/core/services/auth.service';
 import { signal } from '@angular/core';
 
 /**
@@ -9,15 +9,19 @@ import { signal } from '@angular/core';
  * when components depend on this service. Can be passed to the providers
  * field when configuring TestBed
  */
-export function provideMockAuth0Service(options: {isAuthenticated: boolean,  user?: UserWithMetadata} = {isAuthenticated: true}) {
-  const user = options.user || { name: 'TestUser'};
+export function provideMockAuth0Service(
+  options: { isAuthenticated: boolean; user?: BiocommonsAuth0User } = {
+    isAuthenticated: true,
+  },
+) {
+  const user = options.user || { name: 'TestUser' };
   const mockAuth0Service = {
     isAuthenticated$: of(options.isAuthenticated),
     user$: of(user),
     loginWithRedirect: jasmine.createSpy('loginWithRedirect'),
     logout: jasmine.createSpy('logout'),
   };
-  return {provide: Auth0Service, useValue: mockAuth0Service};
+  return { provide: Auth0Service, useValue: mockAuth0Service };
 }
 
 /**
@@ -30,9 +34,20 @@ export function provideMockAuth0Service(options: {isAuthenticated: boolean,  use
  * and user data
  *
  */
-export function provideMockAuthService(options: {isAuthenticated: boolean,  user?: UserWithMetadata}) {
-  const user = options.user || { name: 'TestUser'};
+export function provideMockAuthService(options: {
+  isAuthenticated: boolean;
+  user?: BiocommonsAuth0User;
+}) {
+  const user = options.user || { name: 'TestUser' };
   const userSignal = signal(user);
-  const mockAuthService = jasmine.createSpyObj('AuthService', {getUser: of(user)}, {isAuthenticated: signal(options.isAuthenticated), user: userSignal, user$: of(userSignal)});
-  return {provide: AuthService, useValue: mockAuthService};
+  const mockAuthService = jasmine.createSpyObj(
+    'AuthService',
+    { getUser: of(user) },
+    {
+      isAuthenticated: signal(options.isAuthenticated),
+      user: userSignal,
+      user$: of(userSignal),
+    },
+  );
+  return { provide: AuthService, useValue: mockAuthService };
 }

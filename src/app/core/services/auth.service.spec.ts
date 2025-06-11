@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from './auth.service';
+import { AuthService, BiocommonsAuth0User } from './auth.service';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { provideMockAuth0Service } from '../../../utils/testingUtils';
 import { provideHttpClient } from '@angular/common/http';
@@ -11,13 +11,25 @@ describe('AuthService', () => {
   let mockAuth0Service: jasmine.SpyObj<Auth0Service>;
   let mockDocument: jasmine.SpyObj<Document>;
 
+  const mockUser: BiocommonsAuth0User = {
+    created_at: '2023-01-01T00:00:00Z',
+    email: 'test@example.com',
+    email_verified: true,
+    identities: [],
+    name: 'Test User',
+    nickname: 'testuser',
+    picture: 'https://example.com/avatar.jpg',
+    updated_at: '2023-01-01T00:00:00Z',
+    user_id: 'auth0|123'
+  };
+
   beforeEach(() => {
     const auth0Spy = jasmine.createSpyObj('Auth0Service', [
       'loginWithRedirect',
       'logout'
     ], {
       isAuthenticated$: of(true),
-      user$: of({ sub: 'auth0|123', name: 'Test User' })
+      user$: of(mockUser)
     });
 
     const docSpy = jasmine.createSpyObj('Document', [], {
@@ -66,7 +78,7 @@ describe('AuthService', () => {
     expect(userObservable).toBeDefined();
     
     userObservable.subscribe(user => {
-      expect(user).toEqual({ sub: 'auth0|123', name: 'Test User' });
+      expect(user).toEqual(mockUser);
     });
   });
 });
