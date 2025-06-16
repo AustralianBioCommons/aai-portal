@@ -12,10 +12,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth0 = inject(Auth0Service);
 
   const isBackendRequest = req.url.includes(environment.auth0.backend);
-  const isPublicEndpoint = req.url.includes('/register');
+  const isRegistrationEndpoint = req.url.includes('/register');
 
   // For requests to the AAI backend that's not a registration endpoint
-  if (isBackendRequest && !isPublicEndpoint) {
+  if (isBackendRequest && !isRegistrationEndpoint) {
     return auth0.getAccessTokenSilently().pipe(
       switchMap((token) => {
         // Add Bearer token to request headers
