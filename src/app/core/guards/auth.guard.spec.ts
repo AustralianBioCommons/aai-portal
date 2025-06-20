@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { authGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
 import { signal } from '@angular/core';
@@ -28,7 +28,9 @@ describe('authGuard', () => {
   it('should return true when user is authenticated', () => {
     mockAuthService.isAuthenticated.set(true);
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    const result = TestBed.runInInjectionContext(() => 
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
 
     expect(result).toBe(true);
     expect(mockRouter.navigate).not.toHaveBeenCalled();
@@ -37,7 +39,9 @@ describe('authGuard', () => {
   it('should return false and navigate to root when user is not authenticated', () => {
     mockAuthService.isAuthenticated.set(false);
 
-    const result = TestBed.runInInjectionContext(() => authGuard({} as any, {} as any));
+    const result = TestBed.runInInjectionContext(() => 
+      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
+    );
 
     expect(result).toBe(false);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['']);
