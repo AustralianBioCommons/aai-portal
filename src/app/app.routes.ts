@@ -14,6 +14,7 @@ import { GalaxyRegisterSuccessComponent } from './pages/galaxy/register-success/
 import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
 import { BpaRegistrationSuccessComponent } from './pages/bpa/registration-success/bpa-registration-success.component';
 import { EmailVerifiedComponent } from './pages/user/email-verified/email-verified.component';
+import { RegisterSelectionComponent } from './pages/bpa/register-selection/register-selection.component';
 
 export const routes: Routes = [
   // Standalone route without DefaultLayout
@@ -30,7 +31,8 @@ export const routes: Routes = [
     path: 'bpa',
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
-      { path: 'register', component: BpaRegisterComponent },
+      { path: 'register', component: RegisterSelectionComponent },
+      { path: 'register/standard-account', component: BpaRegisterComponent },
       {
         path: 'registration-success',
         component: BpaRegistrationSuccessComponent,
