@@ -14,7 +14,8 @@ import { GalaxyRegisterSuccessComponent } from './pages/galaxy/register-success/
 import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
 import { BpaRegistrationSuccessComponent } from './pages/bpa/registration-success/bpa-registration-success.component';
 import { EmailVerifiedComponent } from './pages/user/email-verified/email-verified.component';
-import { RegisterSelectionComponent } from './pages/bpa/register-selection/register-selection.component';
+import { BpaRegisterSelectionComponent } from './pages/bpa/register-selection/bpa-register-selection.component';
+import { GalaxyRegisterSelectionComponent } from './pages/galaxy/register-selection/galaxy-register-selection.component';
 
 export const routes: Routes = [
   // Standalone route without DefaultLayout
@@ -23,7 +24,8 @@ export const routes: Routes = [
     component: GalaxyLayoutComponent,
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
-      { path: 'register', component: GalaxyRegisterComponent },
+      { path: 'register', component: GalaxyRegisterSelectionComponent },
+      { path: 'register/standard-account', component: GalaxyRegisterComponent },
       { path: 'register-success', component: GalaxyRegisterSuccessComponent },
     ],
   },
@@ -31,7 +33,7 @@ export const routes: Routes = [
     path: 'bpa',
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
-      { path: 'register', component: RegisterSelectionComponent },
+      { path: 'register', component: BpaRegisterSelectionComponent },
       { path: 'register/standard-account', component: BpaRegisterComponent },
       {
         path: 'registration-success',
@@ -40,9 +42,8 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'user', children: [
-      {path: 'email-verified', component: EmailVerifiedComponent}
-    ]
+    path: 'user',
+    children: [{ path: 'email-verified', component: EmailVerifiedComponent }],
   },
 
   // All other routes use DefaultLayoutComponent
