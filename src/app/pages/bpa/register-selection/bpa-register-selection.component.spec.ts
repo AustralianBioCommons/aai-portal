@@ -18,8 +18,8 @@ describe('BpaRegisterSelectionComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: { params: {}, queryParams: {} },
-            params: { subscribe: () => {} },
-            queryParams: { subscribe: () => {} }
+            params: { subscribe: () => ({}) },
+            queryParams: { subscribe: () => ({}) }
           }
         }
       ],

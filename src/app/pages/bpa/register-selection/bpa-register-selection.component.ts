@@ -8,7 +8,7 @@ import { DOCUMENT } from '@angular/common';
   templateUrl: './bpa-register-selection.component.html',
   styleUrls: ['./bpa-register-selection.component.css'],
 })
-export class BpaRegisterSelectionComponent {
+export class BpaRegisterSelectionComponent implements OnInit, OnDestroy {
   private document = inject(DOCUMENT);
   private defaultFavicon: string | null = null;
 
