@@ -1,10 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
-import { AuthService as Auth0Service, User } from '@auth0/auth0-angular';
+import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 export type Status = 'approved' | 'revoked' | 'pending';

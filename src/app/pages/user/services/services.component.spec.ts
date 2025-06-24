@@ -12,7 +12,6 @@ describe('ServicesComponent', () => {
   let component: ServicesComponent;
   let fixture: ComponentFixture<ServicesComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', ['getApprovedServices']);
@@ -34,7 +33,6 @@ describe('ServicesComponent', () => {
     fixture = TestBed.createComponent(ServicesComponent);
     component = fixture.componentInstance;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
-    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
   });
 
   it('should create', () => {

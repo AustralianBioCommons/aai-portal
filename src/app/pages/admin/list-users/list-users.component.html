@@ -5,8 +5,11 @@
       class="flex flex-col gap-6 p-6 font-light *:bg-white *:hover:cursor-pointer *:hover:bg-gray-50 lg:px-48"
     >
       <div
+        role="button"
+        tabindex="0"
         class="flex items-center justify-between rounded-md p-4"
         (click)="selectGroup('Australian universities')"
+        (keyup.enter)="selectGroup('Australian universities')"
       >
         <div class="text-sky-900">Australian universities</div>
         <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
@@ -14,8 +17,11 @@
         </div>
       </div>
       <div
+        role="button"
+        tabindex="0"
         class="flex items-center justify-between rounded-md p-4"
         (click)="selectGroup('International')"
+        (keyup.enter)="selectGroup('International')"
       >
         <div class="text-sky-900">International</div>
         <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
@@ -23,8 +29,11 @@
         </div>
       </div>
       <div
+        role="button"
+        tabindex="0"
         class="flex items-center justify-between rounded-md p-4"
         (click)="selectGroup('GPGPU')"
+        (keyup.enter)="selectGroup('GPGPU')"
       >
         <div class="text-sky-900">GPGPU</div>
         <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
@@ -35,11 +44,11 @@
   </div>
 } @else {
   <div
-    class="absolute top-0 left-0 flex min-h-screen w-screen flex-1 flex-col justify-between overflow-x-hidden bg-gray-100 p-6"
+    class="absolute left-0 top-0 flex min-h-screen w-screen flex-1 flex-col justify-between overflow-x-hidden bg-gray-100 p-6"
   >
     <div class="flex justify-end">
       <button
-        class="top-6 right-6 text-sky-900 hover:cursor-pointer"
+        class="right-6 top-6 text-sky-900 hover:cursor-pointer"
         (click)="groupSelected = false"
       >
         <svg

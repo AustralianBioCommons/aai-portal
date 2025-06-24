@@ -8,7 +8,7 @@ import {
   OnDestroy,
   signal,
 } from '@angular/core';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService, BiocommonsAuth0User } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { LoginButtonComponent } from '../../shared/components/buttons/login-button/login-button.component';
 import { LogoutButtonComponent } from '../../shared/components/buttons/logout-button/logout-button.component';
@@ -42,7 +42,7 @@ export class NavbarComponent implements OnDestroy {
   userMenuButton!: ElementRef;
 
   isAuthenticated = signal(false);
-  user = signal<any>(null);
+  user = signal<BiocommonsAuth0User | null>(null);
   pendingCount = signal(0);
   userType = 'user';
   userMenuOpen = false;
