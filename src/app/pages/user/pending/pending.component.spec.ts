@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PendingComponent } from './pending.component';
-import { ApiService } from '../../../core/services/api.service';
+import { ApiService, Pending } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { provideMockAuth0Service } from '../../../../utils/testingUtils';
 import { provideHttpClient } from '@angular/common/http';
@@ -12,7 +12,6 @@ describe('PendingComponent', () => {
   let component: PendingComponent;
   let fixture: ComponentFixture<PendingComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
@@ -34,9 +33,6 @@ describe('PendingComponent', () => {
     fixture = TestBed.createComponent(PendingComponent);
     component = fixture.componentInstance;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
-    mockAuthService = TestBed.inject(
-      AuthService,
-    ) as jasmine.SpyObj<AuthService>;
   });
 
   it('should create', () => {
@@ -194,14 +190,12 @@ describe('PendingComponent', () => {
   });
 
   it('should return empty array from pendingItemsArray when pendingItems is null', () => {
-    component.pendingItems = null as any;
-
+    component.pendingItems = null as unknown as Pending;
     expect(component.pendingItemsArray).toEqual([]);
   });
 
   it('should handle missing arrays in pendingItems', () => {
-    component.pendingItems = {} as any;
-
+    component.pendingItems = {} as Pending;
     expect(component.pendingItemsArray).toEqual([]);
   });
 
@@ -217,7 +211,7 @@ describe('PendingComponent', () => {
           resources: [],
         },
       ],
-      pending_resources: undefined as any,
+      pending_resources: undefined as unknown as never[],
     };
 
     expect(component.pendingItemsArray.length).toBe(1);

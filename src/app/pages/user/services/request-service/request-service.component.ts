@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   FormControl,
@@ -6,9 +6,17 @@ import {
   ReactiveFormsModule,
   FormBuilder,
 } from '@angular/forms';
-import { servicesList } from '../../../../core/constants/constants';
-import { AuthService } from '../../../../core/services/auth.service';
+import {
+  AuthService,
+  BiocommonsAuth0User,
+} from '../../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+
+interface ServiceOption {
+  id: string;
+  name: string;
+  url: string;
+}
 
 @Component({
   selector: 'app-request-service',
@@ -17,15 +25,15 @@ import { LoadingSpinnerComponent } from '../../../../shared/components/loading-s
   templateUrl: './request-service.component.html',
   styleUrls: ['./request-service.component.css'],
 })
-export class RequestServiceComponent implements OnInit {
+export class RequestServiceComponent {
   private router = inject(Router);
   private auth = inject(AuthService);
   private formBuilder = inject(FormBuilder);
 
   step = 0;
-  remainingServices: any[] = [];
-  selectedServices: any[] = [];
-  user: any | null = {};
+  remainingServices: ServiceOption[] = [];
+  selectedServices: ServiceOption[] = [];
+  user: BiocommonsAuth0User | null = null;
   loading = true;
   submitted = false;
 
@@ -33,36 +41,6 @@ export class RequestServiceComponent implements OnInit {
     services: this.formBuilder.group({}),
     selectedServices: this.formBuilder.group({}),
   });
-
-  ngOnInit(): void {
-    // this.auth.getUser().subscribe((user) => {
-    //   this.user = user;
-    //   if (user?.user_metadata?.services) {
-    //     const approvedServiceIDs = user.user_metadata.services.approved || [];
-    //     const requestedServiceIDs = user.user_metadata.services.requested || [];
-    //     const excludedServiceIDs = [
-    //       ...approvedServiceIDs,
-    //       ...requestedServiceIDs,
-    //     ];
-    //     this.remainingServices = servicesList.filter(
-    //       (service) => !excludedServiceIDs.includes(service.id),
-    //     );
-    //     // Dynamically add form controls for each remaining service
-    //     const servicesGroup = this.requestForm.get('services') as FormGroup;
-    //     this.remainingServices.forEach((service) => {
-    //       servicesGroup.addControl(service.id, new FormControl(false));
-    //     });
-    //   } else {
-    //     this.remainingServices = servicesList;
-    //     // Dynamically add form controls for each remaining service
-    //     const servicesGroup = this.requestForm.get('services') as FormGroup;
-    //     this.remainingServices.forEach((service) => {
-    //       servicesGroup.addControl(service.id, new FormControl(false));
-    //     });
-    //   }
-    //   this.loading = false;
-    // });
-  }
 
   nextStep() {
     if (this.step === 0) {
@@ -123,28 +101,6 @@ export class RequestServiceComponent implements OnInit {
   }
 
   submitForm() {
-    // const userId = this.user!.user_id!;
-    // const selectedServiceIDs = this.selectedServices.map(
-    //   (service) => service.id,
-    // );
-
-    // const updatePayload = {
-    //   services: {
-    //     ...(this.user?.user_metadata?.services || {}),
-    //     requested: [
-    //       ...(this.user?.user_metadata?.services?.requested || []),
-    //       ...selectedServiceIDs,
-    //     ],
-    //   },
-    // };
-
-    // this.auth.updateUserMetadata(userId, updatePayload).subscribe({
-    //   next: () => {},
-    //   error: (error: any) => {
-    //     console.error('Error updating user metadata', error);
-    //   },
-    // });
-
     this.submitted = true;
   }
 }
