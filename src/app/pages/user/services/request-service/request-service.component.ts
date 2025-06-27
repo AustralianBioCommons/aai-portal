@@ -6,10 +6,7 @@ import {
   ReactiveFormsModule,
   FormBuilder,
 } from '@angular/forms';
-import {
-  AuthService,
-  BiocommonsAuth0User,
-} from '../../../../core/services/auth.service';
+import { BiocommonsAuth0User } from '../../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 
 interface ServiceOption {
@@ -27,7 +24,6 @@ interface ServiceOption {
 })
 export class RequestServiceComponent {
   private router = inject(Router);
-  private auth = inject(AuthService);
   private formBuilder = inject(FormBuilder);
 
   step = 0;

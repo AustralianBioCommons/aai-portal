@@ -9,9 +9,9 @@ import { AuthService } from '../../../../core/services/auth.service';
   styleUrl: './login-button.component.css',
 })
 export class LoginButtonComponent {
-  private auth = inject(AuthService);
+  private authService = inject(AuthService);
 
   login() {
-    this.auth.login();
+    this.authService.login();
   }
 }
