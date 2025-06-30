@@ -6,22 +6,17 @@ import {
   ElementRef,
   signal,
 } from '@angular/core';
-import { AuthService, BiocommonsAuth0User } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { LogoutButtonComponent } from '../../shared/components/buttons/logout-button/logout-button.component';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, shareReplay, switchMap } from 'rxjs/operators';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { filter, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
-  imports: [
-    RouterLink,
-    LogoutButtonComponent,
-    CommonModule,
-  ],
+  imports: [RouterLink, LogoutButtonComponent, CommonModule],
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
@@ -33,70 +28,31 @@ export class NavbarComponent {
   private router = inject(Router);
 
   @ViewChild('menu', { read: ElementRef }) menu!: ElementRef;
-  @ViewChild('userMenuButton', { read: ElementRef })
-  userMenuButton!: ElementRef;
+  @ViewChild('userMenuButton', { read: ElementRef }) userMenuButton!: ElementRef;
 
-  isAuthenticated = signal(false);
-  user = signal<BiocommonsAuth0User | null>(null);
-  isAdmin = signal<boolean>(false);
+  isAuthenticated = this.authService.isAuthenticated;
+  user = this.authService.user;
+  isAdmin = this.authService.isAdmin;
+  
   pendingCount = signal(0);
   userMenuOpen = signal(false);
 
   userPages = [
-    {
-      label: 'Services',
-      route: '/services',
-    },
-    {
-      label: 'Access',
-      route: '/access',
-    },
-    {
-      label: 'Pending',
-      route: '/pending',
-    },
+    { label: 'Services', route: '/services' },
+    { label: 'Access', route: '/access' },
+    { label: 'Pending', route: '/pending' },
   ];
 
   adminPages = [
-    {
-      label: 'All users',
-      route: '/all-users',
-    },
-    {
-      label: 'Revoked',
-      route: '/revoked',
-    },
-    {
-      label: 'Requests',
-      route: '/requests',
-    },
+    { label: 'All users', route: '/all-users' },
+    { label: 'Revoked', route: '/revoked' },
+    { label: 'Requests', route: '/requests' },
   ];
 
   constructor() {
-    const isAuthenticated$ = toObservable(this.authService.isAuthenticated).pipe(
-      takeUntilDestroyed(),
-      shareReplay(1)
-    );
-
-    // Set isAuthenticated
-    isAuthenticated$.subscribe(isAuthenticated => this.isAuthenticated.set(isAuthenticated));
-
-    // Set user
-    toObservable(this.authService.user)
-      .pipe(takeUntilDestroyed())
-      .subscribe(user => this.user.set(user));
-
-    // Set isAdmin if authenticated
-    isAuthenticated$
+    toObservable(this.isAuthenticated)
       .pipe(
-        filter(Boolean),
-        switchMap(() => this.authService.isAdmin())
-      )
-      .subscribe(isAdmin => this.isAdmin.set(isAdmin));
-
-    // Set pending count if authenticated
-    isAuthenticated$
-      .pipe(
+        takeUntilDestroyed(),
         filter(Boolean),
         switchMap(() => this.api.getAllPending())
       )
@@ -123,7 +79,6 @@ export class NavbarComponent {
       }
     });
   }
-
 
   getUserType() {
     return this.isAdmin() ? this.adminPages : this.userPages;

@@ -74,7 +74,9 @@ export class AuthService {
   private document = inject(DOCUMENT);
 
   isAuthenticated = toSignal(this.auth0Service.isAuthenticated$, { initialValue: false });
+  isLoading = toSignal(this.auth0Service.isLoading$, { initialValue: true });
   user = toSignal(this.auth0Service.user$ as Observable<BiocommonsAuth0User | null>, { initialValue: null });
+  isAdmin = toSignal(this.isAdmin$(), { initialValue: false });
 
   login(): void {
     this.auth0Service.loginWithRedirect();
@@ -88,7 +90,7 @@ export class AuthService {
     });
   }
 
-  private decodeToken(token: string): any {
+  private decodeToken(token: string) {
     try {
       if (!token || token.split('.').length !== 3) {
         throw new Error('Invalid JWT token format');
@@ -105,7 +107,7 @@ export class AuthService {
     }
   }
 
-  isAdmin(): Observable<boolean> {
+  private isAdmin$(): Observable<boolean> {
     return this.auth0Service.isAuthenticated$.pipe(
       switchMap((isAuth) => {
         if (!isAuth) {

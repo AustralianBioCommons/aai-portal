@@ -1,10 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FooterComponent } from "../footer/footer.component";
 import { NavbarComponent } from "../navbar/navbar.component";
 import { Router, RouterOutlet } from "@angular/router";
 import { AuthService } from '../../core/services/auth.service';
-import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { filter, switchMap, take } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-default-layout',
@@ -12,28 +12,25 @@ import { filter, switchMap, take } from 'rxjs/operators';
   templateUrl: './default-layout.component.html',
   styleUrl: './default-layout.component.css',
 })
-export class DefaultLayoutComponent implements OnInit {
+export class DefaultLayoutComponent {
   private authService = inject(AuthService);
-  private auth0Service = inject(Auth0Service);
   private router = inject(Router);
 
-  ngOnInit() {
+  constructor() {
     if (this.router.url === '/') {
-      this.auth0Service.isLoading$.pipe(
+      toObservable(this.authService.isLoading).pipe(
         filter(isLoading => !isLoading),
-        switchMap(() => this.auth0Service.isAuthenticated$),
-        take(1),
-        switchMap(isAuthenticated => {
-          if (isAuthenticated) {
-            return this.authService.isAdmin();
+        take(1)
+      ).subscribe(() => {
+        const isAuthenticated = this.authService.isAuthenticated();
+        const isAdmin = this.authService.isAdmin();
+
+        if (isAuthenticated) {
+          if (isAdmin) {
+            this.router.navigate(['/all-users']);
+          } else {
+            this.router.navigate(['/services']);
           }
-          return [false];
-        })
-      ).subscribe(isAdmin => {
-        if (isAdmin) {
-          this.router.navigate(['/all-users']);
-        } else {
-          this.router.navigate(['/services']);
         }
       });
     }
