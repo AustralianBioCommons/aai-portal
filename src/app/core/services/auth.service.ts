@@ -1,7 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { Observable, map, catchError, of } from 'rxjs';
+import { Observable, map, catchError, of, switchMap } from 'rxjs';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
@@ -72,20 +73,8 @@ export class AuthService {
   private auth0Service = inject(Auth0Service);
   private document = inject(DOCUMENT);
 
-  isAuthenticated = signal<boolean>(false);
-  user = signal<BiocommonsAuth0User | null>(null);
-
-  constructor() {
-    // Subscribe to Auth0 authentication state
-    this.auth0Service.isAuthenticated$.subscribe((isAuthenticated) => {
-      this.isAuthenticated.set(isAuthenticated);
-    });
-
-    // Fetch user data when authenticated
-    this.auth0Service.user$.subscribe((user) => {
-      this.user.set(user as BiocommonsAuth0User);
-    });
-  }
+  isAuthenticated = toSignal(this.auth0Service.isAuthenticated$, { initialValue: false });
+  user = toSignal(this.auth0Service.user$ as Observable<BiocommonsAuth0User | null>, { initialValue: null });
 
   login(): void {
     this.auth0Service.loginWithRedirect();
@@ -99,10 +88,10 @@ export class AuthService {
     });
   }
 
-  private decodeToken(token: string) {
+  private decodeToken(token: string): any {
     try {
-      if (!token || token.split('.').length < 2) {
-        throw new Error('Invalid token format');
+      if (!token || token.split('.').length !== 3) {
+        throw new Error('Invalid JWT token format');
       }
 
       const base64Url = token.split('.')[1];
@@ -117,23 +106,23 @@ export class AuthService {
   }
 
   isAdmin(): Observable<boolean> {
-    if (!this.isAuthenticated()) {
-      return of(false);
-    }
-
-    return this.auth0Service.getAccessTokenSilently().pipe(
-      map((token) => {
-        const decodedToken = this.decodeToken(token);
-        if (!decodedToken) {
-          return false;
+    return this.auth0Service.isAuthenticated$.pipe(
+      switchMap((isAuth) => {
+        if (!isAuth) {
+          return of(false);
         }
         
-        const roles = decodedToken['https://biocommons.org.au/roles'] || [];
-        return roles.some((role: string) => role.toLowerCase().includes('admin'));
-      }),
-      catchError((error) => {
-        console.error('Failed to get access token for admin check:', error);
-        return of(false);
+        return this.auth0Service.getAccessTokenSilently().pipe(
+          map((token) => {
+            const decodedToken = this.decodeToken(token);
+            const roles = decodedToken?.['https://biocommons.org.au/roles'] || [];
+            return roles.some((role: string) => role.toLowerCase().includes('admin'));
+          }),
+          catchError((error) => {
+            console.error('Failed to get access token for admin check:', error);
+            return of(false);
+          })
+        );
       })
     );
   }
