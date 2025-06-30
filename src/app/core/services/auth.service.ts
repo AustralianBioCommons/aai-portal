@@ -1,9 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Observable, map, catchError, of } from 'rxjs';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
@@ -71,39 +69,72 @@ export interface BiocommonsAuth0User {
   providedIn: 'root',
 })
 export class AuthService {
-  private auth0 = inject(Auth0Service);
+  private auth0Service = inject(Auth0Service);
   private document = inject(DOCUMENT);
-  private http = inject(HttpClient);
 
   isAuthenticated = signal<boolean>(false);
   user = signal<BiocommonsAuth0User | null>(null);
-  user$ = toObservable(this.user);
 
   constructor() {
     // Subscribe to Auth0 authentication state
-    this.auth0.isAuthenticated$.subscribe((isAuthenticated) => {
+    this.auth0Service.isAuthenticated$.subscribe((isAuthenticated) => {
       this.isAuthenticated.set(isAuthenticated);
     });
 
     // Fetch user data when authenticated
-    this.auth0.user$.subscribe((user) => {
+    this.auth0Service.user$.subscribe((user) => {
       this.user.set(user as BiocommonsAuth0User);
     });
   }
 
   login(): void {
-    this.auth0.loginWithRedirect();
+    this.auth0Service.loginWithRedirect();
   }
 
   logout(): void {
-    this.auth0.logout({
+    this.auth0Service.logout({
       logoutParams: {
         returnTo: this.document.location.origin,
       },
     });
   }
 
-  getUser(): Observable<BiocommonsAuth0User | null> {
-    return this.user$;
+  private decodeToken(token: string) {
+    try {
+      if (!token || token.split('.').length < 2) {
+        throw new Error('Invalid token format');
+      }
+
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = atob(base64);
+
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  }
+
+  isAdmin(): Observable<boolean> {
+    if (!this.isAuthenticated()) {
+      return of(false);
+    }
+
+    return this.auth0Service.getAccessTokenSilently().pipe(
+      map((token) => {
+        const decodedToken = this.decodeToken(token);
+        if (!decodedToken) {
+          return false;
+        }
+        
+        const roles = decodedToken['https://biocommons.org.au/roles'] || [];
+        return roles.some((role: string) => role.toLowerCase().includes('admin'));
+      }),
+      catchError((error) => {
+        console.error('Failed to get access token for admin check:', error);
+        return of(false);
+      })
+    );
   }
 }

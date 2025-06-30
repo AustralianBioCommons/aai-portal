@@ -16,8 +16,19 @@ import { BpaRegistrationSuccessComponent } from './pages/bpa/registration-succes
 import { EmailVerifiedComponent } from './pages/user/email-verified/email-verified.component';
 import { BpaRegisterSelectionComponent } from './pages/bpa/register-selection/bpa-register-selection.component';
 import { GalaxyRegisterSelectionComponent } from './pages/galaxy/register-selection/galaxy-register-selection.component';
+import { LoginComponent } from './pages/login/login.component';
+import { loginGuard } from './core/guards/login.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
+import { userGuard } from './core/guards/user.guard';
 
 export const routes: Routes = [
+  // Login route - only accessible when not logged in
+  {
+    path: 'login',
+    component: LoginComponent,
+    canActivate: [loginGuard],
+  },
   // Standalone route without DefaultLayout
   {
     path: 'galaxy',
@@ -50,11 +61,12 @@ export const routes: Routes = [
   {
     path: '',
     component: DefaultLayoutComponent,
+    canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'services', pathMatch: 'full' },
       {
         path: 'services',
         component: ServicesComponent,
+        canActivate: [userGuard],
         children: [
           {
             path: 'request',
@@ -62,11 +74,11 @@ export const routes: Routes = [
           },
         ],
       },
-      { path: 'access', component: AccessComponent },
-      { path: 'pending', component: PendingComponent },
-      { path: 'all-users', component: ListUsersComponent },
-      { path: 'revoked', component: RevokedComponent },
-      { path: 'requests', component: RequestsComponent },
+      { path: 'access', component: AccessComponent, canActivate: [userGuard] },
+      { path: 'pending', component: PendingComponent, canActivate: [userGuard] },
+      { path: 'all-users', component: ListUsersComponent, canActivate: [adminGuard] },
+      { path: 'revoked', component: RevokedComponent, canActivate: [adminGuard] },
+      { path: 'requests', component: RequestsComponent, canActivate: [adminGuard] },
     ],
   },
   { path: '**', component: NotFoundComponent },

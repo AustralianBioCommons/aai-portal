@@ -29,7 +29,6 @@ describe('AuthService', () => {
       'logout'
     ], {
       isAuthenticated$: of(true),
-      user$: of(mockUser)
     });
 
     const docSpy = jasmine.createSpyObj('Document', [], {
@@ -71,14 +70,5 @@ describe('AuthService', () => {
 
   it('should update authentication state', () => {
     expect(service.isAuthenticated()).toBe(true);
-  });
-
-  it('should return user observable', () => {
-    const userObservable = service.getUser();
-    expect(userObservable).toBeDefined();
-    
-    userObservable.subscribe(user => {
-      expect(user).toEqual(mockUser);
-    });
   });
 });

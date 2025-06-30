@@ -1,29 +1,24 @@
 import {
   Component,
   inject,
-  effect,
   Renderer2,
   ViewChild,
   ElementRef,
-  OnDestroy,
   signal,
 } from '@angular/core';
 import { AuthService, BiocommonsAuth0User } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
-import { LoginButtonComponent } from '../../shared/components/buttons/login-button/login-button.component';
 import { LogoutButtonComponent } from '../../shared/components/buttons/logout-button/logout-button.component';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, shareReplay, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
   imports: [
     RouterLink,
-    LoginButtonComponent,
     LogoutButtonComponent,
     CommonModule,
   ],
@@ -31,8 +26,8 @@ import { filter, switchMap } from 'rxjs/operators';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
-export class NavbarComponent implements OnDestroy {
-  private auth = inject(AuthService);
+export class NavbarComponent {
+  private authService = inject(AuthService);
   private api = inject(ApiService);
   private renderer = inject(Renderer2);
   private router = inject(Router);
@@ -43,9 +38,9 @@ export class NavbarComponent implements OnDestroy {
 
   isAuthenticated = signal(false);
   user = signal<BiocommonsAuth0User | null>(null);
+  isAdmin = signal<boolean>(false);
   pendingCount = signal(0);
-  userType = 'user';
-  userMenuOpen = false;
+  userMenuOpen = signal(false);
 
   userPages = [
     {
@@ -77,25 +72,40 @@ export class NavbarComponent implements OnDestroy {
     },
   ];
 
-  private userSubscription!: Subscription;
-
   constructor() {
-    toObservable(this.auth.isAuthenticated)
+    const isAuthenticated$ = toObservable(this.authService.isAuthenticated).pipe(
+      takeUntilDestroyed(),
+      shareReplay(1)
+    );
+
+    // Set isAuthenticated
+    isAuthenticated$.subscribe(isAuthenticated => this.isAuthenticated.set(isAuthenticated));
+
+    // Set user
+    toObservable(this.authService.user)
+      .pipe(takeUntilDestroyed())
+      .subscribe(user => this.user.set(user));
+
+    // Set isAdmin if authenticated
+    isAuthenticated$
       .pipe(
-        takeUntilDestroyed(),
-        filter((isAuth) => isAuth),
-        switchMap(() => this.api.getAllPending()),
+        filter(Boolean),
+        switchMap(() => this.authService.isAdmin())
+      )
+      .subscribe(isAdmin => this.isAdmin.set(isAdmin));
+
+    // Set pending count if authenticated
+    isAuthenticated$
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.api.getAllPending())
       )
       .subscribe({
         next: (pendingData) => {
-          if (pendingData) {
-            const totalPending =
-              (pendingData.pending_services?.length || 0) +
-              (pendingData.pending_resources?.length || 0);
-            this.pendingCount.set(totalPending);
-          } else {
-            this.pendingCount.set(0);
-          }
+          const totalPending =
+            (pendingData?.pending_services?.length || 0) +
+            (pendingData?.pending_resources?.length || 0);
+          this.pendingCount.set(totalPending);
         },
         error: (error) => {
           console.error('Failed to fetch pending count:', error);
@@ -103,36 +113,27 @@ export class NavbarComponent implements OnDestroy {
         },
       });
 
-    effect(() => {
-      this.isAuthenticated.set(this.auth.isAuthenticated());
-      this.user.set(this.auth.user());
-    });
-
+    // Close menu on outside click
     this.renderer.listen('window', 'click', (e: Event) => {
       if (
         !this.userMenuButton?.nativeElement.contains(e.target) &&
         !this.menu?.nativeElement.contains(e.target)
       ) {
-        this.userMenuOpen = false;
+        this.userMenuOpen.set(false);
       }
     });
   }
 
+
   getUserType() {
-    return this.userType === 'admin' ? this.adminPages : this.userPages;
+    return this.isAdmin() ? this.adminPages : this.userPages;
   }
 
   toggleUserMenu() {
-    this.userMenuOpen = !this.userMenuOpen;
+    this.userMenuOpen.set(!this.userMenuOpen());
   }
 
   isActive(url: string): boolean {
     return this.router.url === url;
-  }
-
-  ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
   }
 }
