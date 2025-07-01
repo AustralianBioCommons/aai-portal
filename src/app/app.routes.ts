@@ -20,7 +20,6 @@ import { LoginComponent } from './pages/login/login.component';
 import { loginGuard } from './core/guards/login.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
-import { userGuard } from './core/guards/user.guard';
 
 export const routes: Routes = [
   // Login route - only accessible when not logged in
@@ -66,7 +65,6 @@ export const routes: Routes = [
       {
         path: 'services',
         component: ServicesComponent,
-        canActivate: [userGuard],
         children: [
           {
             path: 'request',
@@ -74,11 +72,23 @@ export const routes: Routes = [
           },
         ],
       },
-      { path: 'access', component: AccessComponent, canActivate: [userGuard] },
-      { path: 'pending', component: PendingComponent, canActivate: [userGuard] },
-      { path: 'all-users', component: ListUsersComponent, canActivate: [adminGuard] },
-      { path: 'revoked', component: RevokedComponent, canActivate: [adminGuard] },
-      { path: 'requests', component: RequestsComponent, canActivate: [adminGuard] },
+      { path: 'access', component: AccessComponent },
+      { path: 'pending', component: PendingComponent },
+      {
+        path: 'all-users',
+        component: ListUsersComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'revoked',
+        component: RevokedComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'requests',
+        component: RequestsComponent,
+        canActivate: [adminGuard],
+      },
     ],
   },
   { path: '**', component: NotFoundComponent },
