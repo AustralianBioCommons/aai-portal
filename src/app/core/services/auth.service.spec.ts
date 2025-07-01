@@ -1,15 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService, BiocommonsAuth0User } from './auth.service';
-import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { provideMockAuth0Service } from '../../../utils/testingUtils';
-import { provideHttpClient } from '@angular/common/http';
 import { DOCUMENT } from '@angular/common';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { AuthService as Auth0Service } from '@auth0/auth0-angular';
+import { AuthService, BiocommonsAuth0User } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
   let mockAuth0Service: jasmine.SpyObj<Auth0Service>;
-  let mockDocument: jasmine.SpyObj<Document>;
+  let mockDocument: { location: { origin: string } };
 
   const mockUser: BiocommonsAuth0User = {
     created_at: '2023-01-01T00:00:00Z',
@@ -20,34 +18,36 @@ describe('AuthService', () => {
     nickname: 'testuser',
     picture: 'https://example.com/avatar.jpg',
     updated_at: '2023-01-01T00:00:00Z',
-    user_id: 'auth0|123'
+    user_id: 'auth0|123',
   };
 
   beforeEach(() => {
-    const auth0Spy = jasmine.createSpyObj('Auth0Service', [
-      'loginWithRedirect',
-      'logout'
-    ], {
-      isAuthenticated$: of(true),
-    });
+    const auth0Spy = jasmine.createSpyObj(
+      'Auth0Service',
+      ['loginWithRedirect', 'logout', 'getAccessTokenSilently'],
+      {
+        isAuthenticated$: of(true),
+        isLoading$: of(false),
+        user$: of(mockUser),
+      },
+    );
 
-    const docSpy = jasmine.createSpyObj('Document', [], {
-      location: { origin: 'http://localhost:4200' }
-    });
+    mockDocument = {
+      location: { origin: 'http://localhost:4200' },
+    };
 
     TestBed.configureTestingModule({
       providers: [
         AuthService,
         { provide: Auth0Service, useValue: auth0Spy },
-        { provide: DOCUMENT, useValue: docSpy },
-        provideMockAuth0Service({ isAuthenticated: true }),
-        provideHttpClient()
-      ]
+        { provide: DOCUMENT, useValue: mockDocument },
+      ],
     });
 
     service = TestBed.inject(AuthService);
-    mockAuth0Service = TestBed.inject(Auth0Service) as jasmine.SpyObj<Auth0Service>;
-    mockDocument = TestBed.inject(DOCUMENT) as jasmine.SpyObj<Document>;
+    mockAuth0Service = TestBed.inject(
+      Auth0Service,
+    ) as jasmine.SpyObj<Auth0Service>;
   });
 
   it('should be created', () => {
@@ -63,12 +63,86 @@ describe('AuthService', () => {
     service.logout();
     expect(mockAuth0Service.logout).toHaveBeenCalledWith({
       logoutParams: {
-        returnTo: mockDocument.location.origin,
+        returnTo: 'http://localhost:4200',
       },
     });
   });
 
-  it('should update authentication state', () => {
+  it('should return authentication state', () => {
     expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('should return user data', () => {
+    expect(service.user()).toEqual(mockUser);
+  });
+
+  it('should detect admin role correctly', (done) => {
+    const adminToken = btoa(
+      JSON.stringify({
+        'https://biocommons.org.au/roles': ['user', 'admin'],
+      }),
+    );
+    const mockJWT = `header.${adminToken}.signature`;
+
+    mockAuth0Service.getAccessTokenSilently.and.returnValue(of(mockJWT));
+
+    (service as any).isAdmin$().subscribe((isAdmin: boolean) => {
+      expect(isAdmin).toBe(true);
+      done();
+    });
+  });
+
+  it('should detect non-admin user correctly', (done) => {
+    const userToken = btoa(
+      JSON.stringify({
+        'https://biocommons.org.au/roles': ['user'],
+      }),
+    );
+    const mockJWT = `header.${userToken}.signature`;
+
+    mockAuth0Service.getAccessTokenSilently.and.returnValue(of(mockJWT));
+
+    (service as any).isAdmin$().subscribe((isAdmin: boolean) => {
+      expect(isAdmin).toBe(false);
+      done();
+    });
+  });
+
+  it('should handle token error gracefully', (done) => {
+    mockAuth0Service.getAccessTokenSilently.and.returnValue(
+      throwError(() => new Error('Token error')),
+    );
+
+    (service as any).isAdmin$().subscribe((isAdmin: boolean) => {
+      expect(isAdmin).toBe(false);
+      done();
+    });
+  });
+
+  it('should return false for admin when not authenticated', (done) => {
+    const unauthenticatedAuth0Spy = jasmine.createSpyObj(
+      'Auth0Service',
+      ['loginWithRedirect', 'logout', 'getAccessTokenSilently'],
+      {
+        isAuthenticated$: of(false),
+        isLoading$: of(false),
+        user$: of(null),
+      },
+    );
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: Auth0Service, useValue: unauthenticatedAuth0Spy },
+        { provide: DOCUMENT, useValue: mockDocument },
+      ],
+    });
+
+    const unauthenticatedService = TestBed.inject(AuthService);
+    (unauthenticatedService as any).isAdmin$().subscribe((isAdmin: boolean) => {
+      expect(isAdmin).toBe(false);
+      done();
+    });
   });
 });
