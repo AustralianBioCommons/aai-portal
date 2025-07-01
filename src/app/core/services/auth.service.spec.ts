@@ -86,10 +86,10 @@ describe('AuthService', () => {
 
     mockAuth0Service.getAccessTokenSilently.and.returnValue(of(mockJWT));
 
-    (service as any).isAdmin$().subscribe((isAdmin: boolean) => {
-      expect(isAdmin).toBe(true);
+    setTimeout(() => {
+      expect(service.isAdmin()).toBe(true);
       done();
-    });
+    }, 0);
   });
 
   it('should detect non-admin user correctly', (done) => {
@@ -102,10 +102,10 @@ describe('AuthService', () => {
 
     mockAuth0Service.getAccessTokenSilently.and.returnValue(of(mockJWT));
 
-    (service as any).isAdmin$().subscribe((isAdmin: boolean) => {
-      expect(isAdmin).toBe(false);
+    setTimeout(() => {
+      expect(service.isAdmin()).toBe(false);
       done();
-    });
+    }, 0);
   });
 
   it('should handle token error gracefully', (done) => {
@@ -113,10 +113,10 @@ describe('AuthService', () => {
       throwError(() => new Error('Token error')),
     );
 
-    (service as any).isAdmin$().subscribe((isAdmin: boolean) => {
-      expect(isAdmin).toBe(false);
+    setTimeout(() => {
+      expect(service.isAdmin()).toBe(false);
       done();
-    });
+    }, 0);
   });
 
   it('should return false for admin when not authenticated', (done) => {
@@ -140,9 +140,10 @@ describe('AuthService', () => {
     });
 
     const unauthenticatedService = TestBed.inject(AuthService);
-    (unauthenticatedService as any).isAdmin$().subscribe((isAdmin: boolean) => {
-      expect(isAdmin).toBe(false);
+
+    setTimeout(() => {
+      expect(unauthenticatedService.isAdmin()).toBe(false);
       done();
-    });
+    }, 0);
   });
 });
