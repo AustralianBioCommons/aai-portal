@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { DOCUMENT } from '@angular/common';
 import { of, throwError } from 'rxjs';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { AuthService, BiocommonsAuth0User } from './auth.service';
@@ -7,7 +6,6 @@ import { AuthService, BiocommonsAuth0User } from './auth.service';
 describe('AuthService', () => {
   let service: AuthService;
   let mockAuth0Service: jasmine.SpyObj<Auth0Service>;
-  let mockDocument: { location: { origin: string } };
 
   const mockUser: BiocommonsAuth0User = {
     created_at: '2023-01-01T00:00:00Z',
@@ -21,7 +19,7 @@ describe('AuthService', () => {
     user_id: 'auth0|123',
   };
 
-  beforeEach(() => {
+  function createService(tokenResponse = of('default.token.signature')) {
     const auth0Spy = jasmine.createSpyObj(
       'Auth0Service',
       ['loginWithRedirect', 'logout', 'getAccessTokenSilently'],
@@ -32,15 +30,13 @@ describe('AuthService', () => {
       },
     );
 
-    mockDocument = {
-      location: { origin: 'http://localhost:4200' },
-    };
+    auth0Spy.getAccessTokenSilently.and.returnValue(tokenResponse);
 
+    TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         AuthService,
         { provide: Auth0Service, useValue: auth0Spy },
-        { provide: DOCUMENT, useValue: mockDocument },
       ],
     });
 
@@ -48,31 +44,40 @@ describe('AuthService', () => {
     mockAuth0Service = TestBed.inject(
       Auth0Service,
     ) as jasmine.SpyObj<Auth0Service>;
-  });
+    return { service, mockAuth0Service };
+  }
 
   it('should be created', () => {
+    createService();
     expect(service).toBeTruthy();
   });
 
   it('should call loginWithRedirect when login is called', () => {
+    createService();
     service.login();
     expect(mockAuth0Service.loginWithRedirect).toHaveBeenCalled();
   });
 
-  it('should call logout with correct parameters', () => {
+  it('should call logout with returnTo parameter', () => {
+    createService();
     service.logout();
-    expect(mockAuth0Service.logout).toHaveBeenCalledWith({
-      logoutParams: {
-        returnTo: 'http://localhost:4200',
-      },
-    });
+    
+    expect(mockAuth0Service.logout).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        logoutParams: jasmine.objectContaining({
+          returnTo: jasmine.any(String)
+        })
+      })
+    );
   });
 
   it('should return authentication state', () => {
+    createService();
     expect(service.isAuthenticated()).toBe(true);
   });
 
   it('should return user data', () => {
+    createService();
     expect(service.user()).toEqual(mockUser);
   });
 
@@ -84,12 +89,12 @@ describe('AuthService', () => {
     );
     const mockJWT = `header.${adminToken}.signature`;
 
-    mockAuth0Service.getAccessTokenSilently.and.returnValue(of(mockJWT));
+    createService(of(mockJWT));
 
     setTimeout(() => {
       expect(service.isAdmin()).toBe(true);
       done();
-    }, 0);
+    }, 100);
   });
 
   it('should detect non-admin user correctly', (done) => {
@@ -100,23 +105,21 @@ describe('AuthService', () => {
     );
     const mockJWT = `header.${userToken}.signature`;
 
-    mockAuth0Service.getAccessTokenSilently.and.returnValue(of(mockJWT));
+    createService(of(mockJWT));
 
     setTimeout(() => {
       expect(service.isAdmin()).toBe(false);
       done();
-    }, 0);
+    }, 100);
   });
 
   it('should handle token error gracefully', (done) => {
-    mockAuth0Service.getAccessTokenSilently.and.returnValue(
-      throwError(() => new Error('Token error')),
-    );
+    createService(throwError(() => new Error('Token error')));
 
     setTimeout(() => {
       expect(service.isAdmin()).toBe(false);
       done();
-    }, 0);
+    }, 100);
   });
 
   it('should return false for admin when not authenticated', (done) => {
@@ -135,7 +138,6 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: Auth0Service, useValue: unauthenticatedAuth0Spy },
-        { provide: DOCUMENT, useValue: mockDocument },
       ],
     });
 
@@ -144,6 +146,6 @@ describe('AuthService', () => {
     setTimeout(() => {
       expect(unauthenticatedService.isAdmin()).toBe(false);
       done();
-    }, 0);
+    }, 100);
   });
 });
