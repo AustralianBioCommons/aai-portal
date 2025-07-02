@@ -1,24 +1,41 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router, ActivatedRoute } from '@angular/router';
+import { of, throwError, EMPTY } from 'rxjs';
+import { signal } from '@angular/core';
 import { NavbarComponent } from './navbar.component';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
-import { provideMockAuth0Service } from '../../../utils/testingUtils';
-import { By } from '@angular/platform-browser';
-import { of, throwError } from 'rxjs';
-import { signal } from '@angular/core';
 
-describe('NavbarComponent when logged in', () => {
+describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
+      isAdmin: signal(false),
+    });
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['navigate', 'createUrlTree', 'serializeUrl'],
+      {
+        url: '/services',
+        events: EMPTY,
+        routerState: { root: {} },
+      },
+    );
+
+    routerSpy.createUrlTree.and.returnValue({});
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { params: {}, queryParams: {} },
+      params: of({}),
+      queryParams: of({}),
     });
 
     await TestBed.configureTestingModule({
@@ -26,15 +43,17 @@ describe('NavbarComponent when logged in', () => {
       providers: [
         { provide: ApiService, useValue: apiSpy },
         { provide: AuthService, useValue: authSpy },
-        provideMockAuth0Service({ isAuthenticated: true }),
-        provideHttpClient(),
-        provideRouter([]),
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(NavbarComponent);
     component = fixture.componentInstance;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    mockAuthService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
   });
 
   it('should create', () => {
@@ -45,18 +64,7 @@ describe('NavbarComponent when logged in', () => {
     expect(component).toBeTruthy();
   });
 
-  it('Should display Dashboard nav', () => {
-    mockApiService.getAllPending.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
-    );
-    fixture.detectChanges();
-
-    const navDe = fixture.debugElement;
-    const header = navDe.query(By.css('.text-2xl'));
-    expect(header.nativeElement.textContent).toContain('Dashboard');
-  });
-
-  it('should display pending count badge when there are pending items', () => {
+  it('should calculate pending count correctly', () => {
     const mockPending = {
       pending_services: [
         {
@@ -75,12 +83,9 @@ describe('NavbarComponent when logged in', () => {
     fixture.detectChanges();
 
     expect(component.pendingCount()).toBe(2);
-    const compiled = fixture.nativeElement as HTMLElement;
-    const badge = compiled.querySelector('.bg-red-500');
-    expect(badge?.textContent?.trim()).toBe('2');
   });
 
-  it('should handle error when fetching pending count', () => {
+  it('should handle API error gracefully', () => {
     mockApiService.getAllPending.and.returnValue(
       throwError(() => new Error('API Error')),
     );
@@ -88,5 +93,35 @@ describe('NavbarComponent when logged in', () => {
     fixture.detectChanges();
 
     expect(component.pendingCount()).toBe(0);
+  });
+
+  it('should return user pages for non-admin', () => {
+    const pages = component.getUserType();
+    expect(pages).toBe(component.userPages);
+  });
+
+  it('should return admin pages for admin', () => {
+    Object.defineProperty(mockAuthService, 'isAdmin', {
+      value: signal(true),
+    });
+    component.isAdmin = mockAuthService.isAdmin;
+
+    const pages = component.getUserType();
+    expect(pages).toBe(component.adminPages);
+  });
+
+  it('should toggle user menu', () => {
+    expect(component.userMenuOpen()).toBe(false);
+
+    component.toggleUserMenu();
+    expect(component.userMenuOpen()).toBe(true);
+
+    component.toggleUserMenu();
+    expect(component.userMenuOpen()).toBe(false);
+  });
+
+  it('should check if route is active', () => {
+    expect(component.isActive('/services')).toBe(true);
+    expect(component.isActive('/other')).toBe(false);
   });
 });

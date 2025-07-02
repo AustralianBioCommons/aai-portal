@@ -9,9 +9,9 @@ import { AuthService } from '../../../../core/services/auth.service';
   styleUrl: './logout-button.component.css',
 })
 export class LogoutButtonComponent {
-  private auth = inject(AuthService);
+  private authService = inject(AuthService);
 
   logout() {
-    this.auth.logout();
+    this.authService.logout();
   }
 }

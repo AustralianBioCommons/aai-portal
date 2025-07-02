@@ -4,17 +4,17 @@ import {
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
 } from '@angular/router';
-import { authGuard } from './auth.guard';
+import { adminGuard } from './admin.guard';
 import { AuthService } from '../services/auth.service';
 import { signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
-describe('authGuard', () => {
+describe('adminGuard', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated'], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'isAdmin'], {
       isLoading: signal(false),
     });
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
@@ -26,22 +26,21 @@ describe('authGuard', () => {
       ],
     });
 
-    mockAuthService = TestBed.inject(
-      AuthService,
-    ) as jasmine.SpyObj<AuthService>;
+    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
   it('should be created', () => {
-    const executeGuard = TestBed.runInInjectionContext(() => authGuard);
+    const executeGuard = TestBed.runInInjectionContext(() => adminGuard);
     expect(executeGuard).toBeTruthy();
   });
 
-  it('should return true when user is authenticated', (done) => {
+  it('should return true when user is authenticated and is admin', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(true);
+    mockAuthService.isAdmin.and.returnValue(true);
 
     const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
+      adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
 
     (result as Observable<boolean>).subscribe((value) => {
@@ -51,16 +50,32 @@ describe('authGuard', () => {
     });
   });
 
-  it('should return false and navigate to login when user is not authenticated', (done) => {
-    mockAuthService.isAuthenticated.and.returnValue(false);
+  it('should return false and navigate to home when user is not admin', (done) => {
+    mockAuthService.isAuthenticated.and.returnValue(true);
+    mockAuthService.isAdmin.and.returnValue(false);
 
     const result = TestBed.runInInjectionContext(() =>
-      authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
+      adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
 
     (result as Observable<boolean>).subscribe((value) => {
       expect(value).toBe(false);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+      done();
+    });
+  });
+
+  it('should return false and navigate to home when user is not authenticated', (done) => {
+    mockAuthService.isAuthenticated.and.returnValue(false);
+    mockAuthService.isAdmin.and.returnValue(false);
+
+    const result = TestBed.runInInjectionContext(() =>
+      adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
+    );
+
+    (result as Observable<boolean>).subscribe((value) => {
+      expect(value).toBe(false);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
       done();
     });
   });

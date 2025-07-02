@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, map, take } from 'rxjs/operators';
 
-export const authGuard: CanActivateFn = () => {
+export const adminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -12,10 +12,13 @@ export const authGuard: CanActivateFn = () => {
     filter(isLoading => !isLoading),
     take(1),
     map(() => {
-      if (authService.isAuthenticated()) {
+      const isAuthenticated = authService.isAuthenticated();
+      const isAdmin = authService.isAdmin();
+      
+      if (isAuthenticated && isAdmin) {
         return true;
       } else {
-        router.navigate(['/login']);
+        router.navigate(['/']);
         return false;
       }
     })

@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, map, take } from 'rxjs/operators';
 
-export const authGuard: CanActivateFn = () => {
+export const loginGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -12,11 +12,13 @@ export const authGuard: CanActivateFn = () => {
     filter(isLoading => !isLoading),
     take(1),
     map(() => {
-      if (authService.isAuthenticated()) {
-        return true;
-      } else {
-        router.navigate(['/login']);
+      const isAuthenticated = authService.isAuthenticated();
+      
+      if (isAuthenticated) {
+        router.navigate(['/']);
         return false;
+      } else {
+        return true;
       }
     })
   );

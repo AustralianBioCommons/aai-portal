@@ -9,14 +9,14 @@ import { environment } from '../../../environments/environment';
  * HTTP interceptor that adds the Auth0 access token to requests sent to the AAI backend API
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth0 = inject(Auth0Service);
+  const auth0Service = inject(Auth0Service);
 
   const isBackendRequest = req.url.includes(environment.auth0.backend);
   const isRegistrationEndpoint = req.url.includes('/register');
 
   // For requests to the AAI backend that's not a registration endpoint
   if (isBackendRequest && !isRegistrationEndpoint) {
-    return auth0.getAccessTokenSilently().pipe(
+    return auth0Service.getAccessTokenSilently().pipe(
       switchMap((token) => {
         // Add Bearer token to request headers
         const authReq = req.clone({
