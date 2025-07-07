@@ -2,12 +2,12 @@
   <div class="relative flex h-full flex-1 grow flex-col">
     <div class="bg-white p-6 text-2xl font-bold lg:px-48">Revoked</div>
     <div
-      class="flex flex-col gap-6 p-6 font-light *:bg-white *:hover:cursor-pointer *:hover:bg-gray-50 lg:px-48"
+      class="flex flex-col gap-6 p-6 font-light *:bg-white *:hover:cursor-pointer lg:px-48"
     >
       <div
         role="button"
         tabindex="0"
-        class="flex items-center justify-between rounded-md p-4"
+        class="flex items-center justify-between rounded-md p-4 hover:bg-gray-50"
         (click)="selectRevokedUser('Australian universities')"
         (keyup.enter)="selectRevokedUser('Australian universities')"
       >
@@ -19,7 +19,7 @@
       <div
         role="button"
         tabindex="0"
-        class="flex items-center justify-between rounded-md p-4"
+        class="flex items-center justify-between rounded-md p-4 hover:bg-gray-50"
         (click)="selectRevokedUser('International')"
         (keyup.enter)="selectRevokedUser('International')"
       >
@@ -31,7 +31,7 @@
       <div
         role="button"
         tabindex="0"
-        class="flex items-center justify-between rounded-md p-4"
+        class="flex items-center justify-between rounded-md p-4 hover:bg-gray-50"
         (click)="selectRevokedUser('GPGPU')"
         (keyup.enter)="selectRevokedUser('GPGPU')"
       >
@@ -43,7 +43,7 @@
       <div
         role="button"
         tabindex="0"
-        class="flex items-center justify-between rounded-md p-4"
+        class="flex items-center justify-between rounded-md p-4 hover:bg-gray-50"
         (click)="selectRevokedUser('High mem node users')"
         (keyup.enter)="selectRevokedUser('High mem node users')"
       >
