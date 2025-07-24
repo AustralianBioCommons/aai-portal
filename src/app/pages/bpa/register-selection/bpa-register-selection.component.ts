@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-register-selection',
@@ -11,6 +12,11 @@ import { DOCUMENT } from '@angular/common';
 export class BpaRegisterSelectionComponent implements OnInit, OnDestroy {
   private document = inject(DOCUMENT);
   private defaultFavicon: string | null = null;
+  private titleService = inject(Title);
+
+  constructor() {
+    this.titleService.setTitle('Register | Bioplatforms Australia Data Portal');
+  }
 
   ngOnInit(): void {
     this.defaultFavicon =

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -7,4 +8,10 @@ import { RouterLink } from '@angular/router';
   templateUrl: './galaxy-register-selection.component.html',
   styleUrl: './galaxy-register-selection.component.css',
 })
-export class GalaxyRegisterSelectionComponent {}
+export class GalaxyRegisterSelectionComponent {
+  private titleService = inject(Title);
+
+  constructor() {
+    this.titleService.setTitle('Galaxy Australia - Register');
+  }
+}

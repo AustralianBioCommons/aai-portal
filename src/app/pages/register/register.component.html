@@ -1,0 +1,518 @@
+<div class="flex h-full w-full flex-col">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-12 py-6">
+    <a href="https://www.biocommons.org.au/">
+      <img
+        src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
+        class="auto h-16"
+        alt="Australian Biocommons Logo"
+      />
+    </a>
+    <div class="flex justify-between gap-12 font-light *:text-sky-900">
+      <a class="hover:text-sky-950" href="https://www.biocommons.org.au/about">
+        About
+      </a>
+      <a class="hover:text-sky-950" href="https://www.biocommons.org.au/">
+        FAQ
+      </a>
+      <a
+        class="hover:text-sky-950"
+        href="https://www.biocommons.org.au/contact-form"
+      >
+        Contact us
+      </a>
+    </div>
+  </div>
+
+  @if (currentStep === 1) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="bundleForm"
+        class="flex w-full max-w-4xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-4xl font-semibold text-gray-900">Access bundles</h1>
+        <p class="font-light text-gray-500">
+          Request access to a bundle you need for your research.
+        </p>
+
+        @if (
+          bundleForm.get("selectedBundle")?.invalid &&
+          bundleForm.get("selectedBundle")?.touched
+        ) {
+          <div class="text-sm text-red-500">
+            Please select a bundle to continue
+          </div>
+        }
+
+        <!-- Bundle selection cards -->
+        <div
+          class="flex w-full cursor-pointer rounded-md bg-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          [ngClass]="{
+            'ring-1 ring-red-500':
+              bundleForm.get('selectedBundle')?.invalid &&
+              bundleForm.get('selectedBundle')?.touched &&
+              !bundleForm.get('selectedBundle')?.value,
+            'ring-1 ring-sky-500':
+              bundleForm.get('selectedBundle')?.value === 'data-portal-galaxy',
+          }"
+          (click)="selectBundle('data-portal-galaxy')"
+        >
+          <!-- Data Portal and Galaxy bundle content -->
+          <div class="flex w-5/6 items-center justify-start border-r p-12">
+            <div class="w-1/6">
+              <img
+                src="/assets/bpa-logo.png"
+                alt="bpa-logo"
+                class="h-16 w-auto"
+              />
+              <img
+                src="/assets/galaxy-logo.png"
+                alt="galaxy-logo"
+                class="h-16 w-auto"
+              />
+            </div>
+            <div class="flex w-4/6 flex-col gap-6">
+              <div class="text-2xl font-semibold">Data Portal and Galaxy</div>
+              <div>
+                <div class="mb-2 font-medium">Bundle includes:</div>
+                <ul class="list-disc pl-6 font-light text-gray-500">
+                  <li>
+                    The <span class="font-medium">Data Portal</span> public data
+                    access
+                  </li>
+                  <li>
+                    The <span class="font-medium">Galaxy Australia</span> data
+                    access
+                  </li>
+                  <li>Easily import data into Galaxy from the Data Portal</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="flex w-1/6 items-center justify-center p-6">
+            <input
+              type="radio"
+              formControlName="selectedBundle"
+              value="data-portal-galaxy"
+              class="pointer-events-none h-4 w-4 text-sky-900"
+            />
+          </div>
+        </div>
+
+        <!-- TSI bundle card -->
+        <div
+          class="flex w-full cursor-pointer rounded-md bg-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+          [ngClass]="{
+            'ring-1 ring-red-500':
+              bundleForm.get('selectedBundle')?.invalid &&
+              bundleForm.get('selectedBundle')?.touched &&
+              !bundleForm.get('selectedBundle')?.value,
+            'ring-1 ring-sky-500':
+              bundleForm.get('selectedBundle')?.value === 'tsi',
+          }"
+          (click)="selectBundle('tsi')"
+        >
+          <!-- TSI bundle content -->
+          <div class="flex w-5/6 items-center justify-start border-r p-12">
+            <div class="w-1/6">
+              <img
+                src="/assets/tsi-logo.jpg"
+                alt="tsi-logo"
+                class="h-16 w-auto"
+              />
+            </div>
+            <div class="flex w-4/6 flex-col gap-6">
+              <div class="text-2xl font-semibold">
+                Threatened Species Initiative
+              </div>
+              <div>
+                <div class="mb-2 font-medium">Bundle includes:</div>
+                <ul class="list-disc pl-6 font-light text-gray-500">
+                  <li>
+                    The <span class="font-medium">Data Portal</span> and
+                    <span class="font-medium">Galaxy Australia</span> data
+                    access
+                  </li>
+                  <li>TSI public and restricted datasets in the Data Portal</li>
+                  <li>
+                    Galaxy Australia 2TB storage space, high memory nodes,
+                    workflows and tools
+                  </li>
+                  <li>Easily import data into Galaxy from the Data Portal</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="flex w-1/6 items-center justify-center p-6">
+            <input
+              type="radio"
+              formControlName="selectedBundle"
+              value="tsi"
+              class="pointer-events-none h-4 w-4 text-sky-900"
+            />
+          </div>
+        </div>
+
+        <!-- Fungi bundle card (disabled) -->
+        <div
+          class="flex w-full cursor-not-allowed rounded-md bg-white opacity-50 shadow-md"
+        >
+          <div class="flex w-5/6 items-center justify-start border-r p-12">
+            <div class="w-1/6">
+              <img
+                src="/assets/aff-logo.png"
+                alt="ffa-logo"
+                class="-ml-4 h-20 w-auto"
+              />
+            </div>
+            <div class="flex w-4/6 flex-col gap-6">
+              <div class="text-2xl font-semibold">Fungi Functional 'Omics</div>
+            </div>
+          </div>
+          <div class="flex w-1/6 items-center justify-center p-6">
+            <input
+              type="radio"
+              formControlName="selectedBundle"
+              value="fungi"
+              class="h-4 w-4 text-sky-900"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  } @else if (currentStep === 2) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="registrationForm"
+        class="flex w-full max-w-4xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-4xl font-semibold text-gray-900">Your details</h1>
+        <p class="font-light text-gray-500">
+          Please provide your details to create an account for the selected
+          bundle.
+        </p>
+        <p class="font-light text-gray-500">
+          Australian BioCommons access enables a streamlined approach to
+          accessing the Bioplatforms Australia Data Portal and Galaxy Australia
+          research infrastructure bundles.
+        </p>
+
+        <!-- Registration form fields -->
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div class="relative">
+            <label
+              for="firstName"
+              class="block text-sm font-medium text-gray-700"
+            >
+              First Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              formControlName="firstName"
+              placeholder="John"
+              class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              [class.border-red-500]="isFieldInvalid('firstName')"
+              [class.border-gray-300]="!isFieldInvalid('firstName')"
+            />
+            @if (isFieldInvalid("firstName")) {
+              <div class="absolute mt-0.5 text-xs text-red-500">
+                {{ getErrorMessage("firstName") }}
+              </div>
+            }
+          </div>
+
+          <div class="relative">
+            <label
+              for="lastName"
+              class="block text-sm font-medium text-gray-700"
+            >
+              Last Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName"
+              placeholder="Doe"
+              class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              [class.border-red-500]="isFieldInvalid('lastName')"
+              [class.border-gray-300]="!isFieldInvalid('lastName')"
+            />
+            @if (isFieldInvalid("lastName")) {
+              <div class="absolute mt-0.5 text-xs text-red-500">
+                {{ getErrorMessage("lastName") }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="relative">
+          <label for="email" class="block text-sm font-medium text-gray-700">
+            Email Address <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="john.doe@example.com"
+            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('email')"
+            [class.border-gray-300]="!isFieldInvalid('email')"
+          />
+          @if (isFieldInvalid("email")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("email") }}
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label for="username" class="block text-sm font-medium text-gray-700">
+            Username <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            placeholder="johndoe"
+            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('username')"
+            [class.border-gray-300]="!isFieldInvalid('username')"
+          />
+          @if (isFieldInvalid("username")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("username") }}
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label for="password" class="block text-sm font-medium text-gray-700">
+            Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('password')"
+            [class.border-gray-300]="!isFieldInvalid('password')"
+          />
+          @if (isFieldInvalid("password")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("password") }}
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label
+            for="confirmPassword"
+            class="block text-sm font-medium text-gray-700"
+          >
+            Confirm Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            placeholder="••••••••"
+            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('confirmPassword')"
+            [class.border-gray-300]="!isFieldInvalid('confirmPassword')"
+          />
+          @if (isFieldInvalid("confirmPassword")) {
+            <div class="absolute mt-0.5 text-xs text-red-500">
+              {{ getErrorMessage("confirmPassword") }}
+            </div>
+          }
+        </div>
+      </form>
+    </div>
+  } @else if (currentStep === 3) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="termsForm"
+        class="flex w-full max-w-4xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-4xl font-semibold text-gray-900">
+          Accept terms and conditions
+        </h1>
+        <p class="font-light text-gray-500">
+          Please review and accept the terms and conditions for each service in
+          your selected bundle.
+        </p>
+
+        @if (getSelectedBundle()) {
+          <div class="flex w-full flex-col gap-6">
+            <div class="text-xl font-medium text-gray-800">
+              {{ getSelectedBundle()?.name }} Bundle Terms and Conditions
+            </div>
+
+            @if (termsForm.invalid && termsForm.touched) {
+              <div class="text-sm text-red-500">
+                Please accept all terms and conditions to continue
+              </div>
+            }
+
+            @for (
+              service of getSelectedBundle()?.services || [];
+              track service.id
+            ) {
+              <div
+                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                [ngClass]="{
+                  'ring-1 ring-red-500':
+                    termsForm.get(service.id)?.invalid &&
+                    termsForm.get(service.id)?.touched &&
+                    !termsForm.get(service.id)?.value,
+                  'ring-1 ring-sky-500':
+                    termsForm.get(service.id)?.value === true,
+                }"
+                (click)="toggleTermsAcceptance(service.id)"
+              >
+                <a
+                  [href]="service.termsUrl"
+                  target="_blank"
+                  class="flex items-center gap-2 font-medium text-sky-600 hover:text-sky-700 hover:underline"
+                  (click)="$event.stopPropagation()"
+                >
+                  {{ service.name }}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-4"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                    />
+                  </svg>
+                </a>
+                <input
+                  type="checkbox"
+                  [formControlName]="service.id"
+                  class="pointer-events-none h-4 w-4 text-sky-900"
+                />
+              </div>
+            }
+          </div>
+        }
+      </form>
+    </div>
+  } @else if (currentStep === 4) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <div class="flex w-full max-w-4xl flex-1 flex-col gap-12">
+        <div class="flex flex-col gap-6">
+          <h1 class="text-4xl font-semibold text-gray-900">
+            Details confirmation
+          </h1>
+          <div class="font-light text-gray-500">
+            Please review your information and registration details below.
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-6 text-xl font-medium text-gray-800">
+            Your information
+          </div>
+          <div class="flex flex-col gap-6 font-light text-gray-500">
+            <div>
+              <div class="mb-2 text-sm font-medium">First Name</div>
+              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
+                {{ registrationForm.get("firstName")?.value }}
+              </div>
+            </div>
+            <div>
+              <div class="mb-2 text-sm font-medium">Last Name</div>
+              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
+                {{ registrationForm.get("lastName")?.value }}
+              </div>
+            </div>
+            <div>
+              <div class="mb-2 text-sm font-medium">Email Address</div>
+              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
+                {{ registrationForm.get("email")?.value }}
+              </div>
+            </div>
+            <div>
+              <div class="mb-2 text-sm font-medium">Username</div>
+              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
+                {{ registrationForm.get("username")?.value }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-6 text-xl font-medium text-gray-800">
+            Access bundle requested
+          </div>
+          <div>
+            <div class="mt-1 rounded-md bg-white p-3 text-sm shadow-md">
+              {{ getSelectedBundle()?.name }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div
+      class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
+    >
+      <div class="text-4xl font-semibold sm:text-5xl lg:text-6xl">
+        Thank you
+      </div>
+      <div class="font-light text-gray-500">
+        You will receive an email notification once your access request has been
+        approved.
+      </div>
+      <div class="text-center">
+        <button
+          type="button"
+          class="shadow-xs rounded-md bg-sky-500 px-8 py-3 text-sm font-light text-white hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+          [routerLink]="['/login']"
+        >
+          Login
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Shared navigation buttons -->
+  @if (currentStep < totalSteps) {
+    <div class="flex w-full items-center justify-center bg-gray-50 p-12">
+      <div
+        class="flex w-full max-w-4xl justify-between font-light *:px-12 *:py-3 *:hover:cursor-pointer"
+      >
+        <button
+          type="button"
+          class="rounded-md border border-gray-300 bg-white text-sky-500 hover:bg-gray-100"
+          (click)="prevStep()"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          class="rounded-md bg-sky-500 text-white hover:bg-sky-600"
+          (click)="nextStep()"
+        >
+          {{ currentStep === 4 ? "Submit" : "Next" }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

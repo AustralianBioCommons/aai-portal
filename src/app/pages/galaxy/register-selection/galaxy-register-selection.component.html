@@ -2,39 +2,44 @@
   class="flex min-h-full flex-col items-center justify-center bg-white md:bg-gray-50"
 >
   <div
-    class="flex max-w-6xl flex-col rounded-md bg-white p-12 md:m-12 md:mb-12 md:shadow-xl lg:m-24"
+    class="flex max-w-5xl flex-col rounded-md bg-white p-12 md:m-12 md:mb-12 md:shadow-xl lg:m-24"
   >
     <div class="mb-12 text-center text-3xl font-medium text-gray-800">
       Register
     </div>
     <div class="flex flex-col md:flex-row">
       <div
-        class="flex w-full flex-col gap-6 border-b pb-12 md:w-1/2 md:border-b-0 md:border-r md:pb-0 md:pr-12"
+        class="flex w-full flex-col justify-between gap-6 border-b pb-12 md:w-1/2 md:border-b-0 md:border-r md:pb-0 md:pr-12"
       >
-        <div class="mb-6 text-2xl font-medium text-gray-800">
-          Galaxy Australia Account
+        <div class="text-2xl font-medium text-gray-800">
+          Galaxy Australia Access
+        </div>
+        <div class="mb-6 font-light text-gray-500">
+          Get free access to many free web-based bioinformatics tools and
+          workflows.
         </div>
         <button
-          [routerLink]="['standard-account']"
+          [routerLink]="['standard-access']"
           type="button"
-          class="w-fit rounded-md border border-galaxy-primary bg-transparent px-4 py-2 text-sm font-medium text-galaxy-primary hover:cursor-pointer hover:border-blue-900 hover:bg-gray-50"
+          class="w-fit rounded-md border border-blue-900 bg-transparent px-4 py-2 text-sm font-medium text-blue-900 hover:cursor-pointer hover:border-blue-950 hover:bg-gray-50"
         >
           Continue
         </button>
       </div>
-      <div class="flex w-full flex-col gap-6 pt-12 md:w-1/2 md:pl-12 md:pt-0">
-        <div class="text-2xl font-medium text-gray-800">BioCommons Account</div>
-        <ul class="ml-6 list-disc text-gray-500">
-          <li>
-            Enable a single sign on (SSO) access to Galaxy and BioCommons
-            digital infrastructure
-          </li>
-          <li>Seamless data repository integration experience</li>
-          <li>A self-service dashboard application</li>
-        </ul>
+      <div
+        class="flex w-full flex-col justify-between gap-6 pt-12 md:w-1/2 md:pl-12 md:pt-0"
+      >
+        <div class="text-2xl font-medium text-gray-800">
+          Data Portal Access + Bundles
+        </div>
+        <div class="mb-6 font-light text-gray-500">
+          Get free access to many free web-based bioinformatics tools and
+          workflows, along with Australian BioCommons service bundles.
+        </div>
         <button
+          [routerLink]="['bundle-access']"
           type="button"
-          class="w-fit rounded-md bg-galaxy-primary px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-900"
+          class="w-fit rounded-md bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-950"
         >
           Continue
         </button>

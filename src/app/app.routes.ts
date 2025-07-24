@@ -20,6 +20,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { loginGuard } from './core/guards/login.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { RegisterComponent } from './pages/register/register.component';
 
 export const routes: Routes = [
   // Login route - only accessible when not logged in
@@ -35,8 +36,16 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
       { path: 'register', component: GalaxyRegisterSelectionComponent },
-      { path: 'register/standard-account', component: GalaxyRegisterComponent },
-      { path: 'register-success', component: GalaxyRegisterSuccessComponent },
+      { path: 'register/standard-access', component: GalaxyRegisterComponent },
+      {
+        path: 'register/standard-access/success',
+        component: GalaxyRegisterSuccessComponent,
+      },
+      {
+        path: 'register/bundle-access',
+        component: RegisterComponent,
+        canActivate: [loginGuard],
+      },
     ],
   },
   {
@@ -44,10 +53,15 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
       { path: 'register', component: BpaRegisterSelectionComponent },
-      { path: 'register/standard-account', component: BpaRegisterComponent },
+      { path: 'register/standard-access', component: BpaRegisterComponent },
       {
-        path: 'registration-success',
+        path: 'register/standard-access/success',
         component: BpaRegistrationSuccessComponent,
+      },
+      {
+        path: 'register/bundle-access',
+        component: RegisterComponent,
+        canActivate: [loginGuard],
       },
     ],
   },
