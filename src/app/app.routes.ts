@@ -30,6 +30,12 @@ export const routes: Routes = [
     canActivate: [loginGuard],
     data: { title: 'Login | AAI Portal' },
   },
+  {
+    path: 'register',
+    component: RegisterComponent,
+    canActivate: [loginGuard],
+    data: { title: 'Register | AAI Portal' },
+  },
   // Standalone route without DefaultLayout
   {
     path: 'galaxy',
