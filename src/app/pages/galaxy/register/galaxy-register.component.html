@@ -29,20 +29,13 @@
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
           [class]="{
             'border-red-500':
-              registerForm.get('email')?.touched &&
-              registerForm.get('email')?.invalid,
+              isFieldInvalid('email'),
           }"
         />
-        @if (
-          registerForm.get("email")?.touched &&
-          registerForm.get("email")?.invalid
-        ) {
+        @if (isFieldInvalid('email')) {
           <div class="absolute right-0 text-sm text-red-500">
-            @if (registerForm.get("email")?.errors?.["required"]) {
-              <small>Email is required</small>
-            }
-            @if (registerForm.get("email")?.errors?.["email"]) {
-              <small>Invalid email</small>
+            @for (error of getErrorMessages("email"); track error) {
+              <small>{{ error }}</small><br/>
             }
           </div>
         }
@@ -57,19 +50,13 @@
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
           [class]="{
             'border-red-500':
-              registerForm.get('password')?.touched &&
-              registerForm.get('password')?.invalid,
+              isFieldInvalid('password'),
           }"
         />
-        @if (
-          registerForm.get("password")?.touched &&
-          registerForm.get("password")?.invalid
-        ) {
+        @if ( isFieldInvalid("password")) {
           <div class="mt-0.5 text-sm text-red-500">
-            @if (isFieldInvalid("password")) {
-              @for (error of getErrorMessages("password"); track error) {
-                <small>{{ error }}</small><br/>
-              }
+            @for (error of getErrorMessages("password"); track error) {
+              <small>{{ error }}</small><br/>
             }
           </div>
         }
@@ -111,14 +98,10 @@
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
           [class]="{
             'border-red-500':
-              registerForm.get('public_name')?.touched &&
-              registerForm.get('public_name')?.invalid,
+             isFieldInvalid('public_name'),
           }"
         />
-        @if (
-          registerForm.get("public_name")?.touched &&
-          registerForm.get("public_name")?.invalid
-        ) {
+        @if ( isFieldInvalid('public_name')) {
           <div class="absolute right-0 text-sm text-red-500">
             @if (registerForm.get("public_name")?.errors?.["required"]) {
               <small>
