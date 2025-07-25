@@ -13,6 +13,7 @@ import {
   Validators,
   ReactiveFormsModule,
   ValidationErrors,
+  FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -28,11 +29,26 @@ interface Bundle {
   services: BundleService[];
 }
 
+interface BundleFormData {
+  selectedBundle: string;
+}
+
+interface RegistrationFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+  confirmPassword: string;
+}
+
+type TermsFormData = Record<string, boolean>;
+
 interface RegistrationState {
   currentStep: number;
-  bundleFormData: any;
-  registrationFormData: any;
-  termsFormData: any;
+  bundleFormData: BundleFormData | null;
+  registrationFormData: RegistrationFormData | null;
+  termsFormData: TermsFormData | null;
 }
 
 @Component({
@@ -50,7 +66,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private readonly STORAGE_KEY = 'bundle-registration-state';
 
   currentStep = 1;
-  totalSteps = 5; // Updated from 4 to 5
+  totalSteps = 5;
 
   bundles: Bundle[] = [
     {
@@ -180,9 +196,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private saveCurrentState() {
     const state: RegistrationState = {
       currentStep: this.currentStep,
-      bundleFormData: this.bundleForm.value,
-      registrationFormData: this.registrationForm.value,
-      termsFormData: this.termsForm.value,
+      bundleFormData: this.bundleForm.value as BundleFormData,
+      registrationFormData: this.registrationForm.value as RegistrationFormData,
+      termsFormData: this.termsForm.value as TermsFormData,
     };
 
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
@@ -218,10 +234,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
   initializeTermsForm() {
     const selectedBundle = this.getSelectedBundle();
     if (selectedBundle) {
-      const termsControls: { [key: string]: any } = {};
+      const termsControls: Record<string, FormControl<boolean>> = {};
 
       selectedBundle.services.forEach((service) => {
-        termsControls[service.id] = [false, Validators.requiredTrue];
+        termsControls[service.id] = this.formBuilder.control(false, {
+          validators: Validators.requiredTrue,
+          nonNullable: true,
+        });
       });
 
       this.termsForm = this.formBuilder.group(termsControls);

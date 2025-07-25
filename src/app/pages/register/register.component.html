@@ -1,14 +1,14 @@
 <div class="flex h-full w-full flex-col">
   <!-- Header -->
-  <div class="flex items-center justify-between px-12 py-6">
+  <div class="flex items-center justify-between px-6 py-6 sm:px-12">
     <a href="https://www.biocommons.org.au/">
       <img
         src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
-        class="auto h-16"
+        class="auto h-16 min-w-44"
         alt="Australian Biocommons Logo"
       />
     </a>
-    <div class="flex justify-between gap-12 font-light *:text-sky-900">
+    <div class="flex justify-between gap-6 font-light *:text-sky-900 sm:gap-12">
       <a class="hover:text-sky-950" href="https://www.biocommons.org.au/about">
         About
       </a>
@@ -48,6 +48,7 @@
 
         <!-- Bundle selection cards -->
         <div
+          tabindex="0"
           class="flex w-full cursor-pointer rounded-md bg-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
           [ngClass]="{
             'ring-1 ring-red-500':
@@ -58,6 +59,7 @@
               bundleForm.get('selectedBundle')?.value === 'data-portal-galaxy',
           }"
           (click)="selectBundle('data-portal-galaxy')"
+          (keyup.enter)="selectBundle('data-portal-galaxy')"
         >
           <!-- Data Portal and Galaxy bundle content -->
           <div class="flex w-5/6 items-center justify-start border-r p-12">
@@ -103,6 +105,7 @@
 
         <!-- TSI bundle card -->
         <div
+          tabindex="0"
           class="flex w-full cursor-pointer rounded-md bg-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
           [ngClass]="{
             'ring-1 ring-red-500':
@@ -113,6 +116,7 @@
               bundleForm.get('selectedBundle')?.value === 'tsi',
           }"
           (click)="selectBundle('tsi')"
+          (keyup.enter)="selectBundle('tsi')"
         >
           <!-- TSI bundle content -->
           <div class="flex w-5/6 items-center justify-start border-r p-12">
@@ -192,10 +196,6 @@
       >
         <h1 class="text-4xl font-semibold text-gray-900">Your details</h1>
         <p class="font-light text-gray-500">
-          Please provide your details to create an account for the selected
-          bundle.
-        </p>
-        <p class="font-light text-gray-500">
           Australian BioCommons access enables a streamlined approach to
           accessing the Bioplatforms Australia Data Portal and Galaxy Australia
           research infrastructure bundles.
@@ -206,7 +206,7 @@
           <div class="relative">
             <label
               for="firstName"
-              class="block text-sm font-medium text-gray-700"
+              class="block text-sm font-medium text-gray-900"
             >
               First Name <span class="text-red-500">*</span>
             </label>
@@ -215,7 +215,7 @@
               id="firstName"
               formControlName="firstName"
               placeholder="John"
-              class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
               [class.border-red-500]="isFieldInvalid('firstName')"
               [class.border-gray-300]="!isFieldInvalid('firstName')"
             />
@@ -229,7 +229,7 @@
           <div class="relative">
             <label
               for="lastName"
-              class="block text-sm font-medium text-gray-700"
+              class="block text-sm font-medium text-gray-900"
             >
               Last Name <span class="text-red-500">*</span>
             </label>
@@ -238,7 +238,7 @@
               id="lastName"
               formControlName="lastName"
               placeholder="Doe"
-              class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
               [class.border-red-500]="isFieldInvalid('lastName')"
               [class.border-gray-300]="!isFieldInvalid('lastName')"
             />
@@ -251,7 +251,7 @@
         </div>
 
         <div class="relative">
-          <label for="email" class="block text-sm font-medium text-gray-700">
+          <label for="email" class="block text-sm font-medium text-gray-900">
             Email Address <span class="text-red-500">*</span>
           </label>
           <input
@@ -259,7 +259,7 @@
             id="email"
             formControlName="email"
             placeholder="john.doe@example.com"
-            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('email')"
             [class.border-gray-300]="!isFieldInvalid('email')"
           />
@@ -271,7 +271,7 @@
         </div>
 
         <div class="relative">
-          <label for="username" class="block text-sm font-medium text-gray-700">
+          <label for="username" class="block text-sm font-medium text-gray-900">
             Username <span class="text-red-500">*</span>
           </label>
           <input
@@ -279,7 +279,7 @@
             id="username"
             formControlName="username"
             placeholder="johndoe"
-            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('username')"
             [class.border-gray-300]="!isFieldInvalid('username')"
           />
@@ -291,7 +291,7 @@
         </div>
 
         <div class="relative">
-          <label for="password" class="block text-sm font-medium text-gray-700">
+          <label for="password" class="block text-sm font-medium text-gray-900">
             Password <span class="text-red-500">*</span>
           </label>
           <input
@@ -299,7 +299,7 @@
             id="password"
             formControlName="password"
             placeholder="••••••••"
-            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('password')"
             [class.border-gray-300]="!isFieldInvalid('password')"
           />
@@ -313,7 +313,7 @@
         <div class="relative">
           <label
             for="confirmPassword"
-            class="block text-sm font-medium text-gray-700"
+            class="block text-sm font-medium text-gray-900"
           >
             Confirm Password <span class="text-red-500">*</span>
           </label>
@@ -322,7 +322,7 @@
             id="confirmPassword"
             formControlName="confirmPassword"
             placeholder="••••••••"
-            class="mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('confirmPassword')"
             [class.border-gray-300]="!isFieldInvalid('confirmPassword')"
           />
@@ -352,21 +352,16 @@
 
         @if (getSelectedBundle()) {
           <div class="flex w-full flex-col gap-6">
-            <div class="text-xl font-medium text-gray-800">
-              {{ getSelectedBundle()?.name }} Bundle Terms and Conditions
+            <div class="text-xl font-medium text-gray-900">
+              {{ getSelectedBundle()?.name }} Bundle
             </div>
-
-            @if (termsForm.invalid && termsForm.touched) {
-              <div class="text-sm text-red-500">
-                Please accept all terms and conditions to continue
-              </div>
-            }
 
             @for (
               service of getSelectedBundle()?.services || [];
               track service.id
             ) {
               <div
+                tabindex="0"
                 class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                 [ngClass]="{
                   'ring-1 ring-red-500':
@@ -377,6 +372,7 @@
                     termsForm.get(service.id)?.value === true,
                 }"
                 (click)="toggleTermsAcceptance(service.id)"
+                (keyup.enter)="toggleTermsAcceptance(service.id)"
               >
                 <a
                   [href]="service.termsUrl"
@@ -391,7 +387,7 @@
                     viewBox="0 0 24 24"
                     stroke-width="1.5"
                     stroke="currentColor"
-                    class="size-4"
+                    class="size-4 min-h-4 min-w-4"
                   >
                     <path
                       stroke-linecap="round"
@@ -405,6 +401,12 @@
                   [formControlName]="service.id"
                   class="pointer-events-none h-4 w-4 text-sky-900"
                 />
+              </div>
+            }
+
+            @if (termsForm.invalid && termsForm.touched) {
+              <div class="text-sm text-red-500">
+                Please accept all terms and conditions to continue
               </div>
             }
           </div>
@@ -426,31 +428,33 @@
         </div>
 
         <div>
-          <div class="mb-6 text-xl font-medium text-gray-800">
+          <div class="mb-6 text-xl font-medium text-gray-900">
             Your information
           </div>
-          <div class="flex flex-col gap-6 font-light text-gray-500">
-            <div>
-              <div class="mb-2 text-sm font-medium">First Name</div>
-              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
-                {{ registrationForm.get("firstName")?.value }}
+          <div class="flex flex-col gap-6 font-light text-gray-900">
+            <div class="flex justify-between gap-6">
+              <div class="w-full">
+                <div class="mb-2 text-sm font-medium">First Name</div>
+                <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                  {{ registrationForm.get("firstName")?.value }}
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="mb-2 text-sm font-medium">Last Name</div>
-              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
-                {{ registrationForm.get("lastName")?.value }}
+              <div class="w-full">
+                <div class="mb-2 text-sm font-medium">Last Name</div>
+                <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                  {{ registrationForm.get("lastName")?.value }}
+                </div>
               </div>
             </div>
             <div>
               <div class="mb-2 text-sm font-medium">Email Address</div>
-              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
+              <div class="rounded-md bg-white p-3 text-gray-900 shadow">
                 {{ registrationForm.get("email")?.value }}
               </div>
             </div>
             <div>
               <div class="mb-2 text-sm font-medium">Username</div>
-              <div class="rounded-md bg-white p-4 text-lg text-gray-900">
+              <div class="rounded-md bg-white p-3 text-gray-900 shadow">
                 {{ registrationForm.get("username")?.value }}
               </div>
             </div>
@@ -458,13 +462,11 @@
         </div>
 
         <div>
-          <div class="mb-6 text-xl font-medium text-gray-800">
+          <div class="mb-6 text-xl font-medium text-gray-900">
             Access bundle requested
           </div>
-          <div>
-            <div class="mt-1 rounded-md bg-white p-3 text-sm shadow-md">
-              {{ getSelectedBundle()?.name }}
-            </div>
+          <div class="rounded-md bg-white p-3 font-light text-gray-900 shadow">
+            {{ getSelectedBundle()?.name }}
           </div>
         </div>
       </div>
@@ -494,13 +496,13 @@
 
   <!-- Shared navigation buttons -->
   @if (currentStep < totalSteps) {
-    <div class="flex w-full items-center justify-center bg-gray-50 p-12">
+    <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
       <div
         class="flex w-full max-w-4xl justify-between font-light *:px-12 *:py-3 *:hover:cursor-pointer"
       >
         <button
           type="button"
-          class="rounded-md border border-gray-300 bg-white text-sky-500 hover:bg-gray-100"
+          class="rounded-md border bg-white text-sky-500 hover:bg-gray-100"
           (click)="prevStep()"
         >
           Back
