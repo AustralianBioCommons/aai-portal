@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   FormBuilder,
@@ -8,7 +8,8 @@ import {
   ValidationErrors,
   FormControl,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 
 interface BundleService {
   id: string;
@@ -28,10 +29,14 @@ interface Bundle {
   imports: [RouterLink, ReactiveFormsModule, CommonModule],
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
+  private titleService = inject(Title);
+  private document = inject(DOCUMENT);
+
+  private defaultFavicon: string | null = null;
 
   currentStep = 1;
   totalSteps = 5;
@@ -102,6 +107,37 @@ export class RegisterComponent {
   });
 
   termsForm: FormGroup = this.formBuilder.group({});
+
+  constructor() {
+    if (this.router.url.includes('/bpa/')) {
+      this.titleService.setTitle(
+        'Register | Bioplatforms Australia Data Portal',
+      );
+    } else if (this.router.url.includes('/galaxy/')) {
+      this.titleService.setTitle('Galaxy Australia - Register');
+    }
+  }
+
+  ngOnInit(): void {
+    if (this.router.url.includes('/bpa/')) {
+      this.defaultFavicon =
+        this.document
+          .querySelector("link[rel*='icon']")
+          ?.getAttribute('href') || null;
+      this.setFavicon('/assets/bpa-favicon.ico');
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.router.url.includes('/bpa/') && this.defaultFavicon) {
+      this.setFavicon(this.defaultFavicon);
+    }
+  }
+
+  private setFavicon(href: string): void {
+    const links = this.document.querySelectorAll("link[rel*='icon']");
+    links.forEach((link) => link.setAttribute('href', href));
+  }
 
   selectBundle(value: string) {
     this.bundleForm.patchValue({ selectedBundle: value });
