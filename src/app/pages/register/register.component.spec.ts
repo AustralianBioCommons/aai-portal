@@ -21,8 +21,6 @@ describe('RegisterComponent', () => {
   let fixture: ComponentFixture<RegisterComponent>;
 
   beforeEach(async () => {
-    localStorage.clear();
-
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
       providers: [
@@ -36,10 +34,6 @@ describe('RegisterComponent', () => {
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    localStorage.clear();
   });
 
   it('should create', () => {
@@ -60,12 +54,10 @@ describe('RegisterComponent', () => {
     });
 
     it('should initialize registration form with empty values', () => {
-      component.registrationForm.reset();
-
-      expect(component.registrationForm.get('firstName')?.value).toBe(null);
-      expect(component.registrationForm.get('lastName')?.value).toBe(null);
-      expect(component.registrationForm.get('email')?.value).toBe(null);
-      expect(component.registrationForm.get('username')?.value).toBe(null);
+      expect(component.registrationForm.get('firstName')?.value).toBe('');
+      expect(component.registrationForm.get('lastName')?.value).toBe('');
+      expect(component.registrationForm.get('email')?.value).toBe('');
+      expect(component.registrationForm.get('username')?.value).toBe('');
     });
   });
 
@@ -151,6 +143,43 @@ describe('RegisterComponent', () => {
       component.prevStep();
       expect(component.currentStep).toBe(1);
     });
+
+    it('should not proceed from step 3 with invalid terms form', () => {
+      component.currentStep = 3;
+      component.selectBundle('data-portal-galaxy');
+      component['initializeTermsForm']();
+
+      component.nextStep();
+      expect(component.currentStep).toBe(3);
+      expect(component.termsForm.get('bpa')?.touched).toBe(true);
+    });
+
+    it('should proceed from step 3 with accepted terms', () => {
+      component.currentStep = 3;
+      component.selectBundle('data-portal-galaxy');
+      component['initializeTermsForm']();
+
+      component.termsForm.patchValue({
+        bpa: true,
+        galaxy: true,
+      });
+
+      component.nextStep();
+      expect(component.currentStep).toBe(4);
+    });
+
+    it('should complete registration and advance to final step', () => {
+      spyOn(console, 'log');
+
+      component.currentStep = 4;
+      component.nextStep();
+
+      expect(console.log).toHaveBeenCalledWith(
+        'Submitting registration...',
+        jasmine.any(Object),
+      );
+      expect(component.currentStep).toBe(5);
+    });
   });
 
   describe('Form Validation', () => {
@@ -199,12 +228,18 @@ describe('RegisterComponent', () => {
         'Passwords do not match',
       );
     });
+
+    it('should return empty string for fields without errors', () => {
+      const firstName = component.registrationForm.get('firstName');
+      firstName?.setValue('John');
+      expect(component.getErrorMessage('firstName')).toBe('');
+    });
   });
 
   describe('Terms Form', () => {
     beforeEach(() => {
       component.selectBundle('data-portal-galaxy');
-      component.initializeTermsForm();
+      component['initializeTermsForm']();
     });
 
     it('should initialize terms form based on selected bundle', () => {
@@ -217,65 +252,20 @@ describe('RegisterComponent', () => {
       component.toggleTermsAcceptance('bpa');
       expect(component.termsForm.get('bpa')?.value).toBe(true);
     });
-  });
 
-  describe('State Persistence', () => {
-    beforeEach(() => {
-      localStorage.clear();
-      component.currentStep = 1;
-      component.bundleForm.reset();
-      component.registrationForm.reset();
+    it('should toggle terms acceptance back to false', () => {
+      component.termsForm.get('bpa')?.setValue(true);
+      component.toggleTermsAcceptance('bpa');
+      expect(component.termsForm.get('bpa')?.value).toBe(false);
     });
 
-    it('should save state to localStorage', () => {
-      component.selectBundle('data-portal-galaxy');
-      component.registrationForm.patchValue({
-        firstName: 'John',
-        lastName: 'Doe',
-      });
+    it('should initialize TSI terms form correctly', () => {
+      component.selectBundle('tsi');
+      component['initializeTermsForm']();
 
-      component['saveCurrentState']();
-
-      const savedState = localStorage.getItem('bundle-registration-state');
-      expect(savedState).toBeTruthy();
-
-      const state = JSON.parse(savedState!);
-      expect(state.currentStep).toBe(1);
-      expect(state.bundleFormData.selectedBundle).toBe('data-portal-galaxy');
-      expect(state.registrationFormData.firstName).toBe('John');
-    });
-
-    it('should load state from localStorage', () => {
-      const mockState = {
-        currentStep: 2,
-        bundleFormData: { selectedBundle: 'tsi' },
-        registrationFormData: {
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane@example.com',
-          username: 'janesmith',
-          password: '',
-          confirmPassword: '',
-        },
-        termsFormData: null,
-      };
-
-      localStorage.setItem(
-        'bundle-registration-state',
-        JSON.stringify(mockState),
-      );
-
-      component['loadSavedState']();
-
-      expect(component.currentStep).toBe(2);
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe('tsi');
-      expect(component.registrationForm.get('firstName')?.value).toBe('Jane');
-    });
-
-    it('should clear state from localStorage', () => {
-      localStorage.setItem('bundle-registration-state', 'test-data');
-      component['clearSavedState']();
-      expect(localStorage.getItem('bundle-registration-state')).toBeNull();
+      expect(component.termsForm.get('tsi')).toBeTruthy();
+      expect(component.termsForm.get('bpa')).toBeTruthy();
+      expect(component.termsForm.get('galaxy')).toBeTruthy();
     });
   });
 
@@ -298,6 +288,26 @@ describe('RegisterComponent', () => {
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
       ).toBe('Your details');
+    });
+
+    it('should display step 3 terms acceptance when on step 3', () => {
+      component.currentStep = 3;
+      fixture.detectChanges();
+      expect(
+        fixture.debugElement
+          .query(By.css('h1'))
+          .nativeElement.textContent.trim(),
+      ).toBe('Accept terms and conditions');
+    });
+
+    it('should display step 4 confirmation when on step 4', () => {
+      component.currentStep = 4;
+      fixture.detectChanges();
+      expect(
+        fixture.debugElement
+          .query(By.css('h1'))
+          .nativeElement.textContent.trim(),
+      ).toBe('Details confirmation');
     });
 
     it('should display navigation buttons', () => {
@@ -323,33 +333,68 @@ describe('RegisterComponent', () => {
           .nativeElement.textContent.trim(),
       ).toBe('Thank you');
     });
+
+    it('should not display navigation buttons on final step', () => {
+      component.currentStep = 5;
+      fixture.detectChanges();
+      const buttons = fixture.debugElement.queryAll(By.css('button'));
+      expect(buttons.length).toBe(1);
+      expect(buttons[0].nativeElement.textContent.trim()).toBe('Login');
+    });
   });
 
   describe('Complete Registration', () => {
-    beforeEach(() => {
-      localStorage.clear();
-    });
+    it('should log registration data when completing registration', () => {
+      spyOn(console, 'log');
 
-    it('should call completeRegistration and advance to final step', () => {
-      spyOn(component, 'completeRegistration').and.callThrough();
-      spyOn(localStorage, 'removeItem');
+      component.selectBundle('data-portal-galaxy');
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        username: 'johndoe',
+      });
 
       component.currentStep = 4;
       component.nextStep();
 
-      expect(component.completeRegistration).toHaveBeenCalled();
-      expect(localStorage.removeItem).toHaveBeenCalledWith(
-        'bundle-registration-state',
+      expect(console.log).toHaveBeenCalledWith(
+        'Submitting registration...',
+        jasmine.objectContaining({
+          bundle: jasmine.any(Object),
+          registration: jasmine.any(Object),
+          terms: jasmine.any(Object),
+        }),
       );
       expect(component.currentStep).toBe(5);
     });
 
-    it('should clear localStorage when registration is completed', () => {
-      localStorage.setItem('bundle-registration-state', 'test-data');
+    it('should advance to final step when registration is completed', () => {
+      component.currentStep = 4;
+      const initialStep = component.currentStep;
 
-      component.completeRegistration();
+      component.nextStep();
 
-      expect(localStorage.getItem('bundle-registration-state')).toBeNull();
+      expect(component.currentStep).toBe(initialStep + 1);
+      expect(component.currentStep).toBe(5);
+    });
+  });
+
+  describe('Bundle Data', () => {
+    it('should have correct bundle data structure', () => {
+      expect(component.bundles.length).toBe(2);
+      expect(component.bundles[0].id).toBe('data-portal-galaxy');
+      expect(component.bundles[1].id).toBe('tsi');
+    });
+
+    it('should have services for each bundle', () => {
+      const dataPortalBundle = component.bundles.find(
+        (b) => b.id === 'data-portal-galaxy',
+      );
+      const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
+
+      expect(dataPortalBundle?.services.length).toBe(2);
+      expect(tsiBundle?.services.length).toBe(3);
     });
   });
 });

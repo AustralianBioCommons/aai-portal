@@ -1,12 +1,5 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import {
-  Router,
-  ActivatedRoute,
-  RouterLink,
-  NavigationEnd,
-} from '@angular/router';
-import { filter, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Component, inject } from '@angular/core';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -29,41 +22,16 @@ interface Bundle {
   services: BundleService[];
 }
 
-interface BundleFormData {
-  selectedBundle: string;
-}
-
-interface RegistrationFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-}
-
-type TermsFormData = Record<string, boolean>;
-
-interface RegistrationState {
-  currentStep: number;
-  bundleFormData: BundleFormData | null;
-  registrationFormData: RegistrationFormData | null;
-  termsFormData: TermsFormData | null;
-}
-
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   imports: [RouterLink, ReactiveFormsModule, CommonModule],
   styleUrl: './register.component.css',
 })
-export class RegisterComponent implements OnInit, OnDestroy {
+export class RegisterComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
-  private destroy$ = new Subject<void>();
-
-  private readonly STORAGE_KEY = 'bundle-registration-state';
 
   currentStep = 1;
   totalSteps = 5;
@@ -135,85 +103,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   termsForm: FormGroup = this.formBuilder.group({});
 
-  ngOnInit() {
-    this.loadSavedState();
-    this.setupFormSubscriptions();
-    this.setupRouteListener();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private setupRouteListener() {
-    this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd,
-        ),
-        takeUntil(this.destroy$),
-      )
-      .subscribe((event: NavigationEnd) => {
-        // Clear state if navigating away from registration routes
-        if (!event.url.includes('/register/bundle-access')) {
-          this.clearSavedState();
-        }
-      });
-  }
-
-  private loadSavedState() {
-    const savedState = localStorage.getItem(this.STORAGE_KEY);
-    if (!savedState) return;
-
-    try {
-      const state: RegistrationState = JSON.parse(savedState);
-      this.currentStep = state.currentStep;
-      if (state.bundleFormData) {
-        this.bundleForm.patchValue(state.bundleFormData);
-      }
-      if (state.registrationFormData) {
-        this.registrationForm.patchValue(state.registrationFormData);
-      }
-      if (state.termsFormData && this.currentStep >= 3) {
-        this.initializeTermsForm();
-        this.termsForm.patchValue(state.termsFormData);
-      }
-    } catch (error) {
-      console.error('Error loading saved registration state:', error);
-      this.clearSavedState();
-    }
-  }
-
-  private saveCurrentState() {
-    const state: RegistrationState = {
-      currentStep: this.currentStep,
-      bundleFormData: this.bundleForm.value as BundleFormData,
-      registrationFormData: this.registrationForm.value as RegistrationFormData,
-      termsFormData: this.termsForm.value as TermsFormData,
-    };
-
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
-  }
-
-  private clearSavedState() {
-    localStorage.removeItem(this.STORAGE_KEY);
-  }
-
-  private setupFormSubscriptions() {
-    this.bundleForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.saveCurrentState();
-      });
-
-    this.registrationForm.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.saveCurrentState();
-      });
-  }
-
   selectBundle(value: string) {
     this.bundleForm.patchValue({ selectedBundle: value });
   }
@@ -223,7 +112,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
-  initializeTermsForm() {
+  private initializeTermsForm() {
     const selectedBundle = this.getSelectedBundle();
     if (selectedBundle) {
       const termsControls: Record<string, FormControl<boolean>> = {};
@@ -236,12 +125,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
       });
 
       this.termsForm = this.formBuilder.group(termsControls);
-
-      this.termsForm.valueChanges
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => {
-          this.saveCurrentState();
-        });
     }
   }
 
@@ -265,7 +148,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
       default:
         if (this.currentStep < this.totalSteps) {
           this.currentStep++;
-          this.saveCurrentState();
         }
         break;
     }
@@ -277,7 +159,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
         onSuccess();
       }
       this.currentStep++;
-      this.saveCurrentState();
     } else {
       form.markAllAsTouched();
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -286,11 +167,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   prevStep() {
     if (this.currentStep === 1) {
-      this.clearSavedState(); // Clear saved state when leaving registration
       this.router.navigate(['../'], { relativeTo: this.route });
     } else if (this.currentStep > 1) {
       this.currentStep--;
-      this.saveCurrentState();
     }
   }
 
@@ -317,12 +196,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  completeRegistration() {
+  private completeRegistration() {
     console.log('Submitting registration...', {
       bundle: this.bundleForm.value,
       registration: this.registrationForm.value,
       terms: this.termsForm.value,
     });
-    this.clearSavedState();
   }
 }
