@@ -24,6 +24,7 @@
     </div>
   </div>
 
+  <!-- Select bundle step -->
   @if (currentStep === 1) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
@@ -186,7 +187,10 @@
         </div>
       </form>
     </div>
-  } @else if (currentStep === 2) {
+  }
+
+  <!-- Registration form step -->
+  @else if (currentStep === 2) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
@@ -334,7 +338,10 @@
         </div>
       </form>
     </div>
-  } @else if (currentStep === 3) {
+  }
+
+  <!-- Accept terms & conditions step -->
+  @else if (currentStep === 3) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
@@ -413,7 +420,10 @@
         }
       </form>
     </div>
-  } @else if (currentStep === 4) {
+  }
+
+  <!-- Review details step -->
+  @else if (currentStep === 4) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
@@ -471,7 +481,10 @@
         </div>
       </div>
     </div>
-  } @else {
+  }
+
+  <!-- Final step -->
+  @else {
     <div
       class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
     >
@@ -482,15 +495,13 @@
         You will receive an email notification once your access request has been
         approved.
       </div>
-      <div class="text-center">
-        <button
-          type="button"
-          class="shadow-xs rounded-md bg-sky-500 px-8 py-3 text-sm font-light text-white hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
-          [routerLink]="['/login']"
-        >
-          Login
-        </button>
-      </div>
+      <button
+        type="button"
+        class="rounded-md bg-sky-500 px-8 py-3 text-sm font-light text-white shadow-sm hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+        [routerLink]="['/login']"
+      >
+        Login
+      </button>
     </div>
   }
 
@@ -498,18 +509,18 @@
   @if (currentStep < totalSteps) {
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
       <div
-        class="flex w-full max-w-4xl justify-between font-light *:px-12 *:py-3 *:hover:cursor-pointer"
+        class="flex w-full max-w-4xl justify-between font-light *:rounded-md *:px-12 *:py-3 *:shadow-sm *:hover:cursor-pointer"
       >
         <button
           type="button"
-          class="rounded-md border bg-white text-sky-500 hover:bg-gray-100"
+          class="border bg-white text-sky-500 hover:bg-gray-100"
           (click)="prevStep()"
         >
           Back
         </button>
         <button
           type="button"
-          class="rounded-md bg-sky-500 text-white hover:bg-sky-600"
+          class="bg-sky-500 text-white hover:bg-sky-600"
           (click)="nextStep()"
         >
           {{ currentStep === 4 ? "Submit" : "Next" }}

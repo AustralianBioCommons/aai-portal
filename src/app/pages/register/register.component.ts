@@ -164,32 +164,24 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   private loadSavedState() {
     const savedState = localStorage.getItem(this.STORAGE_KEY);
-    if (savedState) {
-      try {
-        const state: RegistrationState = JSON.parse(savedState);
+    if (!savedState) return;
 
-        // Restore step
-        this.currentStep = state.currentStep;
-
-        // Restore bundle form
-        if (state.bundleFormData) {
-          this.bundleForm.patchValue(state.bundleFormData);
-        }
-
-        // Restore registration form
-        if (state.registrationFormData) {
-          this.registrationForm.patchValue(state.registrationFormData);
-        }
-
-        // Restore terms form if we're on step 3+
-        if (state.termsFormData && this.currentStep >= 3) {
-          this.initializeTermsForm();
-          this.termsForm.patchValue(state.termsFormData);
-        }
-      } catch (error) {
-        console.error('Error loading saved registration state:', error);
-        this.clearSavedState();
+    try {
+      const state: RegistrationState = JSON.parse(savedState);
+      this.currentStep = state.currentStep;
+      if (state.bundleFormData) {
+        this.bundleForm.patchValue(state.bundleFormData);
       }
+      if (state.registrationFormData) {
+        this.registrationForm.patchValue(state.registrationFormData);
+      }
+      if (state.termsFormData && this.currentStep >= 3) {
+        this.initializeTermsForm();
+        this.termsForm.patchValue(state.termsFormData);
+      }
+    } catch (error) {
+      console.error('Error loading saved registration state:', error);
+      this.clearSavedState();
     }
   }
 
