@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -8,7 +8,6 @@ import {
 } from '@angular/forms';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Title } from '@angular/platform-browser';
 import { environment } from '../../../../environments/environment';
 
 interface Organization {
@@ -33,7 +32,7 @@ interface RegistrationRequest {
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
-export class BpaRegisterComponent implements OnInit, OnDestroy {
+export class BpaRegisterComponent {
   private readonly errorNotificationTimeout = 5000;
   private readonly backendURL = `${environment.auth0.backend}/bpa/register`;
 
@@ -41,7 +40,6 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
   private document = inject(DOCUMENT);
   private http = inject(HttpClient);
   private router = inject(Router);
-  private titleService = inject(Title);
 
   errorNotification = signal<string | null>(null);
 
@@ -110,8 +108,6 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
     },
   ];
 
-  private defaultFavicon: string | null = null;
-
   // Validator to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
   private passwordValidator = Validators.compose([
     Validators.required,
@@ -138,23 +134,6 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
       ),
     ),
   });
-
-  constructor() {
-    this.titleService.setTitle('Register | Bioplatforms Australia Data Portal');
-  }
-
-  ngOnInit(): void {
-    this.defaultFavicon =
-      this.document.querySelector("link[rel*='icon']")?.getAttribute('href') ||
-      null;
-    this.setFavicon('/assets/bpa-favicon.ico');
-  }
-
-  ngOnDestroy(): void {
-    if (this.defaultFavicon) {
-      this.setFavicon(this.defaultFavicon);
-    }
-  }
 
   onSubmit(): void {
     if (this.registrationForm.valid) {
@@ -231,10 +210,5 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
       }
     }
     return '';
-  }
-
-  private setFavicon(href: string): void {
-    const links = this.document.querySelectorAll("link[rel*='icon']");
-    links.forEach((link) => link.setAttribute('href', href));
   }
 }

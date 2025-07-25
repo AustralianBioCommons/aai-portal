@@ -28,48 +28,78 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
     canActivate: [loginGuard],
+    data: { title: 'Login | AAI Portal' },
   },
   // Standalone route without DefaultLayout
   {
     path: 'galaxy',
     component: GalaxyLayoutComponent,
+    data: { favicon: '/assets/galaxy-favicon.ico' },
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
-      { path: 'register', component: GalaxyRegisterSelectionComponent },
-      { path: 'register/standard-access', component: GalaxyRegisterComponent },
+      {
+        path: 'register',
+        component: GalaxyRegisterSelectionComponent,
+        data: { title: 'Galaxy Australia - Register' },
+      },
+      {
+        path: 'register/standard-access',
+        component: GalaxyRegisterComponent,
+        data: { title: 'Galaxy Australia - Register' },
+      },
       {
         path: 'register/standard-access/success',
         component: GalaxyRegisterSuccessComponent,
+        data: { title: 'Galaxy Australia - Registration successful' },
       },
       {
         path: 'register/bundle-access',
         component: RegisterComponent,
         canActivate: [loginGuard],
+        data: { title: 'Galaxy Australia - Register' },
       },
     ],
   },
   {
     path: 'bpa',
+    data: { favicon: '/assets/bpa-favicon.ico' },
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
-      { path: 'register', component: BpaRegisterSelectionComponent },
-      { path: 'register/standard-access', component: BpaRegisterComponent },
+      {
+        path: 'register',
+        component: BpaRegisterSelectionComponent,
+        data: { title: 'Register | Bioplatforms Australia Data Portal' },
+      },
+      {
+        path: 'register/standard-access',
+        component: BpaRegisterComponent,
+        data: { title: 'Register | Bioplatforms Australia Data Portal' },
+      },
       {
         path: 'register/standard-access/success',
         component: BpaRegistrationSuccessComponent,
+        data: {
+          title: 'Registration Successful | Bioplatforms Australia Data Portal',
+        },
       },
       {
         path: 'register/bundle-access',
         component: RegisterComponent,
         canActivate: [loginGuard],
+        data: { title: 'Register | Bioplatforms Australia Data Portal' },
       },
     ],
   },
   {
     path: 'user',
-    children: [{ path: 'email-verified', component: EmailVerifiedComponent }],
+    children: [
+      {
+        path: 'email-verified',
+        component: EmailVerifiedComponent,
+        data: { title: 'Email Verification' },
+      },
+    ],
   },
-
   // All other routes use DefaultLayoutComponent
   {
     path: '',

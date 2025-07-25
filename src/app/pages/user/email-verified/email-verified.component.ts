@@ -1,9 +1,9 @@
-import { Component, computed, signal, inject } from '@angular/core';
+import { Component, computed, signal, inject, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Title } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { BrandingService } from '../../../core/services/branding.service';
 
 type AppId = 'bpa' | 'galaxy' | 'biocommons';
 
@@ -20,8 +20,8 @@ interface UserInfoResponse {
 })
 export class EmailVerifiedComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly titleService = inject(Title);
   private readonly http = inject(HttpClient);
+  private readonly brandingService = inject(BrandingService);
 
   readonly appUrls: Record<AppId, string> = {
     bpa: 'https://aaidemo.bioplatforms.com',
@@ -41,12 +41,14 @@ export class EmailVerifiedComponent {
   });
 
   constructor() {
-    this.titleService.setTitle('Email Verification');
+    effect(() => {
+      this.brandingService.setTitle(this.title());
+    });
+
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       this.emailVerified.set(params.get('success') === 'true');
       this.errorMessage.set(params.get('message') || '');
       this.userEmail.set(params.get('email') || '');
-      this.titleService.setTitle(this.title());
 
       if (this.userEmail()) {
         this.getAppInfo(this.userEmail());
@@ -55,15 +57,18 @@ export class EmailVerifiedComponent {
   }
 
   getAppInfo(email: string): void {
-    this.http.get<UserInfoResponse>(`${environment.auth0.backend}/utils/registration_info?user_email=${encodeURIComponent(email)}`)
+    this.http
+      .get<UserInfoResponse>(
+        `${environment.auth0.backend}/utils/registration_info?user_email=${encodeURIComponent(email)}`,
+      )
       .subscribe({
         next: (data) => {
           this.appId.set(data.app);
-          this.appUrl.set(this.appUrls[this.appId()])
+          this.appUrl.set(this.appUrls[this.appId()]);
         },
         error: (err) => {
           console.error(`Failed to fetch app info: ${err}`);
-        }
+        },
       });
   }
 }
