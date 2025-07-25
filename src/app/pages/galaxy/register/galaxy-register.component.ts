@@ -87,7 +87,8 @@ export class GalaxyRegisterComponent {
           ],
         }),
       },
-      { validators: [this.passwordMatchValidator] },
+      { validators: [this.passwordMatchValidator],
+        updateOn: 'blur'},
     );
   }
 
@@ -130,8 +131,8 @@ export class GalaxyRegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.registerForm.get(fieldName);
-    return !!(field?.invalid && (field?.dirty || field?.touched));
+    const field = this.registerForm.get(fieldName)!;
+    return field.invalid && (field.dirty || field.touched);
   }
 
   getErrorMessages(fieldName: string): string[] {
