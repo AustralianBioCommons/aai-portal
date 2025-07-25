@@ -65,12 +65,11 @@
           registerForm.get("password")?.touched &&
           registerForm.get("password")?.invalid
         ) {
-          <div class="absolute right-0 text-sm text-red-500">
-            @if (registerForm.get("password")?.errors?.["required"]) {
-              <small>Password is required</small>
-            }
-            @if (registerForm.get("password")?.errors?.["minlength"]) {
-              <small>Minimum 6 characters</small>
+          <div class="mt-0.5 text-sm text-red-500">
+            @if (isFieldInvalid("password")) {
+              @for (error of getErrorMessages("password"); track error) {
+                <small>{{ error }}</small><br/>
+              }
             }
           </div>
         }

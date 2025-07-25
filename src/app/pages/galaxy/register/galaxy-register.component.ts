@@ -13,6 +13,13 @@ import { Router } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import {
+  ALLOWED_SPECIAL_CHARACTERS,
+  digitRequired,
+  lowercaseRequired,
+  specialCharacterRequired,
+  uppercaseRequired
+} from '../../../../utils/passwords';
 
 const backendUrl = 'https://aaibackend.test.biocommons.org.au';
 
@@ -65,11 +72,11 @@ export class GalaxyRegisterComponent {
         }),
         password: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, Validators.minLength(6)],
+          validators: [Validators.required, Validators.minLength(8), lowercaseRequired, uppercaseRequired, digitRequired, specialCharacterRequired],
         }),
         password_confirmation: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, Validators.minLength(6)],
+          validators: [Validators.required, Validators.minLength(8)],
         }),
         public_name: new FormControl('', {
           nonNullable: true,
@@ -120,5 +127,31 @@ export class GalaxyRegisterComponent {
           this.router.navigate(['/galaxy/register-success']);
         }
       });
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return !!(field?.invalid && (field?.dirty || field?.touched));
+  }
+
+  getErrorMessages(fieldName: string): string[] {
+    const control = this.registerForm.get(fieldName);
+    if (!control?.errors) return [];
+
+    const errorMessages: Record<string, string> = {
+      'required': 'This field is required',
+      'email': 'Please enter a valid email address',
+      'passwordMismatch': 'Passwords do not match',
+      'minlength': 'Password must be at least 8 characters',
+      'lowercaseRequired': 'Password must contain at least one lowercase letter',
+      'uppercaseRequired': 'Password must contain at least one uppercase letter',
+      'digitRequired': 'Password must contain at least one digit',
+      'specialCharacterRequired': `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`
+    };
+
+    // Return all error messages that apply to this control
+    return Object.keys(control.errors)
+      .filter(key => errorMessages[key])
+      .map(key => errorMessages[key]);
   }
 }
