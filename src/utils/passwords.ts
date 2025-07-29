@@ -23,3 +23,9 @@ export function specialCharacterRequired(control: AbstractControl): ValidationEr
   return ok ? null : {specialCharacterRequired: true};
 }
 
+export function passwordRequirements(control: AbstractControl): ValidationErrors | null {
+  return {...lowercaseRequired(control),
+          ...uppercaseRequired(control),
+          ...digitRequired(control),
+         ...specialCharacterRequired(control)}
+}
