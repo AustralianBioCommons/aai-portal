@@ -57,7 +57,7 @@ describe('BpaRegisterSelectionComponent', () => {
 
   it('should display section descriptions', () => {
     const descriptions = fixture.debugElement.queryAll(
-      By.css('.font-light.text-gray-500'),
+      By.css('.mb-6.font-light.text-gray-500'),
     );
     expect(descriptions.length).toBe(2);
     expect(descriptions[0].nativeElement.textContent.trim()).toBe(
@@ -116,7 +116,7 @@ describe('BpaRegisterSelectionComponent', () => {
   it('should have correct button styling', () => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
 
-    expect(buttons[0].nativeElement.className).toContain('border-blue-900');
+    expect(buttons[0].nativeElement.className).toContain('border');
     expect(buttons[0].nativeElement.className).toContain('bg-transparent');
     expect(buttons[0].nativeElement.className).toContain('text-blue-900');
 

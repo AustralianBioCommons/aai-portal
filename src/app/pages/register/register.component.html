@@ -29,15 +29,17 @@
       class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
     >
       <div class="text-3xl font-semibold">Register</div>
-      <div class="flex items-center justify-center gap-2">
-        <div class="font-light text-gray-500">Already have an account?</div>
-        <button
-          class="font-medium text-sky-600 hover:text-sky-700"
-          (click)="login()"
-        >
-          Log in
-        </button>
-      </div>
+      @if (router.url === "/register") {
+        <div class="flex items-center justify-center gap-2">
+          <div class="font-light text-gray-500">Already have an account?</div>
+          <button
+            class="font-medium text-sky-600 hover:text-sky-700"
+            (click)="login()"
+          >
+            Log in
+          </button>
+        </div>
+      }
     </div>
   }
 
@@ -76,7 +78,8 @@
               'ring-1 ring-red-500':
                 bundleForm.get('selectedBundle')?.invalid &&
                 bundleForm.get('selectedBundle')?.touched &&
-                !bundleForm.get('selectedBundle')?.value,
+                !bundleForm.get('selectedBundle')?.value &&
+                !bundle.disabled,
               'ring-1 ring-sky-500':
                 bundleForm.get('selectedBundle')?.value === bundle.id,
             }"

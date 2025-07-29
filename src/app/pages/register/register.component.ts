@@ -34,7 +34,7 @@ interface Bundle {
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
-  private router = inject(Router);
+  public router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
