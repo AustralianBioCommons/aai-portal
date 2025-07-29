@@ -106,21 +106,10 @@
              isFieldInvalid('public_name'),
           }"
         />
-        @if ( isFieldInvalid('public_name')) {
-          <div class="absolute right-0 text-sm text-red-500">
-            @if (registerForm.get("public_name")?.errors?.["required"]) {
-              <small>
-                Please enter a public name that will be used to identify you
-              </small>
-            }
-            @if (registerForm.get("public_name")?.errors?.["minlength"]) {
-              <small>Your public name needs at least 3 characters</small>
-            }
-            @if (registerForm.get("public_name")?.errors?.["pattern"]) {
-              <small>
-                Your public name should contain only lower-case letters,
-                numbers, dots, underscores and dashes
-              </small>
+        @if ( isFieldInvalid("public_name")) {
+          <div class="mt-0.5 text-sm text-red-500">
+            @for (error of getErrorMessages("public_name"); track error) {
+              <small>{{ error }}</small><br/>
             }
           </div>
         }
