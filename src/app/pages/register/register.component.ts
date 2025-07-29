@@ -27,6 +27,15 @@ interface Bundle {
   services: BundleService[];
 }
 
+interface RegistrationForm {
+  firstName: FormControl<string>;
+  lastName: FormControl<string>;
+  email: FormControl<string>;
+  username: FormControl<string>;
+  password: FormControl<string>;
+  confirmPassword: FormControl<string>;
+}
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -117,22 +126,34 @@ export class RegisterComponent {
     return password === confirm ? null : { passwordMismatch: true };
   };
 
-  registrationForm: FormGroup = this.formBuilder.group({
-    firstName: ['', [Validators.required]],
-    lastName: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    username: ['', [Validators.required]],
-    password: ['', this.passwordValidator],
-    confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
-  });
+  registrationForm: FormGroup<RegistrationForm> =
+    this.formBuilder.nonNullable.group({
+      firstName: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+      ]),
+      lastName: this.formBuilder.nonNullable.control('', [Validators.required]),
+      email: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+        Validators.email,
+      ]),
+      username: this.formBuilder.nonNullable.control('', [Validators.required]),
+      password: this.formBuilder.nonNullable.control(
+        '',
+        this.passwordValidator,
+      ),
+      confirmPassword: this.formBuilder.nonNullable.control('', [
+        Validators.required,
+        this.confirmPasswordValidator,
+      ]),
+    });
+
+  termsForm: FormGroup = this.formBuilder.group({});
 
   constructor() {
     this.registrationForm.get('password')?.valueChanges.subscribe(() => {
       this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
     });
   }
-
-  termsForm: FormGroup = this.formBuilder.group({});
 
   selectBundle(value: string) {
     this.bundleForm.patchValue({ selectedBundle: value });
