@@ -24,8 +24,9 @@ export function specialCharacterRequired(control: AbstractControl): ValidationEr
 }
 
 export function passwordRequirements(control: AbstractControl): ValidationErrors | null {
-  return {...lowercaseRequired(control),
+  const errors =  {...lowercaseRequired(control),
           ...uppercaseRequired(control),
           ...digitRequired(control),
-         ...specialCharacterRequired(control)}
+         ...specialCharacterRequired(control)};
+  return Object.keys(errors).length ? errors : null;
 }
