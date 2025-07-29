@@ -24,20 +24,22 @@
     </div>
   </div>
 
-  <div
-    class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
-  >
-    <div class="text-3xl font-semibold">Register</div>
-    <div class="flex items-center justify-center gap-2">
-      <div class="font-light text-gray-500">Already have an account?</div>
-      <button
-        class="font-medium text-sky-600 hover:text-sky-700"
-        (click)="login()"
-      >
-        Log in
-      </button>
+  @if (currentStep < totalSteps) {
+    <div
+      class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
+    >
+      <div class="text-3xl font-semibold">Register</div>
+      <div class="flex items-center justify-center gap-2">
+        <div class="font-light text-gray-500">Already have an account?</div>
+        <button
+          class="font-medium text-sky-600 hover:text-sky-700"
+          (click)="login()"
+        >
+          Log in
+        </button>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Select bundle step -->
   @if (currentStep === 1) {
