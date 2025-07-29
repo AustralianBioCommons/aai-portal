@@ -53,6 +53,11 @@
               isFieldInvalid('password'),
           }"
         />
+        <div class="mb-2 mt-1 text-xs text-gray-500">
+          Passwords must be at least 8 characters in length and contain at
+          least one uppercase letter, one lowercase letter, one number, and one
+          special character.
+        </div>
         @if ( isFieldInvalid("password")) {
           <div class="mt-0.5 text-sm text-red-500">
             @for (error of getErrorMessages("password"); track error) {
