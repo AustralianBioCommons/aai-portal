@@ -1,7 +1,7 @@
 <div class="flex h-full w-full flex-col">
   <!-- Header -->
   <div class="flex items-center justify-between px-6 py-6 sm:px-12">
-    <a href="https://www.biocommons.org.au/">
+    <a href="https://aaiportal.test.biocommons.org.au/">
       <img
         src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
         class="auto h-16 min-w-44"
@@ -21,6 +21,21 @@
       >
         Contact us
       </a>
+    </div>
+  </div>
+
+  <div
+    class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
+  >
+    <div class="text-3xl font-semibold">Register</div>
+    <div class="flex items-center justify-center gap-2">
+      <div class="font-light text-gray-500">Already have an account?</div>
+      <button
+        class="font-medium text-sky-600 hover:text-sky-700"
+        (click)="login()"
+      >
+        Log in
+      </button>
     </div>
   </div>
 
@@ -48,143 +63,64 @@
         }
 
         <!-- Bundle selection cards -->
-        <div
-          tabindex="0"
-          class="flex w-full cursor-pointer rounded-md bg-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-          [ngClass]="{
-            'ring-1 ring-red-500':
-              bundleForm.get('selectedBundle')?.invalid &&
-              bundleForm.get('selectedBundle')?.touched &&
-              !bundleForm.get('selectedBundle')?.value,
-            'ring-1 ring-sky-500':
-              bundleForm.get('selectedBundle')?.value === 'data-portal-galaxy',
-          }"
-          (click)="selectBundle('data-portal-galaxy')"
-          (keyup.enter)="selectBundle('data-portal-galaxy')"
-        >
-          <!-- Data Portal and Galaxy bundle content -->
-          <div class="flex w-5/6 items-center justify-start border-r p-12">
-            <div class="w-1/6">
-              <img
-                src="/assets/bpa-logo.png"
-                alt="bpa-logo"
-                class="h-16 w-auto"
-              />
-              <img
-                src="/assets/galaxy-logo.png"
-                alt="galaxy-logo"
-                class="h-16 w-auto"
-              />
-            </div>
-            <div class="flex w-4/6 flex-col gap-6">
-              <div class="text-2xl font-semibold">Data Portal and Galaxy</div>
-              <div>
-                <div class="mb-2 font-medium">Bundle includes:</div>
-                <ul class="list-disc pl-6 font-light text-gray-500">
-                  <li>
-                    The <span class="font-medium">Data Portal</span> public data
-                    access
-                  </li>
-                  <li>
-                    The <span class="font-medium">Galaxy Australia</span> data
-                    access
-                  </li>
-                  <li>Easily import data into Galaxy from the Data Portal</li>
-                </ul>
+        @for (bundle of bundles; track bundle.id) {
+          <div
+            tabindex="0"
+            class="flex w-full rounded-md bg-white shadow-md transition-all duration-200"
+            [ngClass]="{
+              'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
+                !bundle.disabled,
+              'cursor-not-allowed opacity-50': bundle.disabled,
+              'ring-1 ring-red-500':
+                bundleForm.get('selectedBundle')?.invalid &&
+                bundleForm.get('selectedBundle')?.touched &&
+                !bundleForm.get('selectedBundle')?.value,
+              'ring-1 ring-sky-500':
+                bundleForm.get('selectedBundle')?.value === bundle.id,
+            }"
+            (click)="!bundle.disabled && selectBundle(bundle.id)"
+            (keyup.enter)="!bundle.disabled && selectBundle(bundle.id)"
+          >
+            <!-- Bundle content -->
+            <div class="flex w-5/6 items-center justify-start border-r p-12">
+              <div class="w-1/6">
+                @for (logo of bundle.logoUrls; track logo) {
+                  <img
+                    [src]="logo"
+                    [alt]="bundle.name + ' logo'"
+                    class="h-16 w-auto"
+                    [class.-ml-4]="bundle.id === 'fungi'"
+                    [class.h-20]="bundle.id === 'fungi'"
+                  />
+                }
+              </div>
+              <div class="flex w-4/6 flex-col gap-6">
+                <div class="text-2xl font-semibold">{{ bundle.name }}</div>
+                @if (bundle.description.length) {
+                  <div>
+                    <div class="mb-2 font-medium">{{ bundle.description }}</div>
+                    @if (bundle.listItems.length > 0) {
+                      <ul class="list-disc pl-6 font-light text-gray-500">
+                        @for (item of bundle.listItems; track item) {
+                          <li [innerHTML]="item"></li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                }
               </div>
             </div>
-          </div>
-          <div class="flex w-1/6 items-center justify-center p-6">
-            <input
-              type="radio"
-              formControlName="selectedBundle"
-              value="data-portal-galaxy"
-              class="pointer-events-none h-4 w-4 text-sky-900"
-            />
-          </div>
-        </div>
-
-        <!-- TSI bundle card -->
-        <div
-          tabindex="0"
-          class="flex w-full cursor-pointer rounded-md bg-white shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-          [ngClass]="{
-            'ring-1 ring-red-500':
-              bundleForm.get('selectedBundle')?.invalid &&
-              bundleForm.get('selectedBundle')?.touched &&
-              !bundleForm.get('selectedBundle')?.value,
-            'ring-1 ring-sky-500':
-              bundleForm.get('selectedBundle')?.value === 'tsi',
-          }"
-          (click)="selectBundle('tsi')"
-          (keyup.enter)="selectBundle('tsi')"
-        >
-          <!-- TSI bundle content -->
-          <div class="flex w-5/6 items-center justify-start border-r p-12">
-            <div class="w-1/6">
-              <img
-                src="/assets/tsi-logo.jpg"
-                alt="tsi-logo"
-                class="h-16 w-auto"
+            <div class="flex w-1/6 items-center justify-center p-6">
+              <input
+                type="radio"
+                formControlName="selectedBundle"
+                [value]="bundle.id"
+                [disabled]="bundle.disabled ?? false"
+                class="pointer-events-none h-4 w-4 text-sky-900"
               />
             </div>
-            <div class="flex w-4/6 flex-col gap-6">
-              <div class="text-2xl font-semibold">
-                Threatened Species Initiative
-              </div>
-              <div>
-                <div class="mb-2 font-medium">Bundle includes:</div>
-                <ul class="list-disc pl-6 font-light text-gray-500">
-                  <li>
-                    The <span class="font-medium">Data Portal</span> and
-                    <span class="font-medium">Galaxy Australia</span> data
-                    access
-                  </li>
-                  <li>TSI public and restricted datasets in the Data Portal</li>
-                  <li>
-                    Galaxy Australia 2TB storage space, high memory nodes,
-                    workflows and tools
-                  </li>
-                  <li>Easily import data into Galaxy from the Data Portal</li>
-                </ul>
-              </div>
-            </div>
           </div>
-          <div class="flex w-1/6 items-center justify-center p-6">
-            <input
-              type="radio"
-              formControlName="selectedBundle"
-              value="tsi"
-              class="pointer-events-none h-4 w-4 text-sky-900"
-            />
-          </div>
-        </div>
-
-        <!-- Fungi bundle card (disabled) -->
-        <div
-          class="flex w-full cursor-not-allowed rounded-md bg-white opacity-50 shadow-md"
-        >
-          <div class="flex w-5/6 items-center justify-start border-r p-12">
-            <div class="w-1/6">
-              <img
-                src="/assets/aff-logo.png"
-                alt="ffa-logo"
-                class="-ml-4 h-20 w-auto"
-              />
-            </div>
-            <div class="flex w-4/6 flex-col gap-6">
-              <div class="text-2xl font-semibold">Fungi Functional 'Omics</div>
-            </div>
-          </div>
-          <div class="flex w-1/6 items-center justify-center p-6">
-            <input
-              type="radio"
-              formControlName="selectedBundle"
-              value="fungi"
-              class="h-4 w-4 text-sky-900"
-            />
-          </div>
-        </div>
+        }
       </form>
     </div>
   }

@@ -27,11 +27,10 @@
           type="email"
           formControlName="email"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.get('email')?.touched &&
-              registerForm.get('email')?.invalid,
-          }"
+          [class.border-red-500]="
+            registerForm.get('email')?.touched &&
+            registerForm.get('email')?.invalid
+          "
         />
         @if (
           registerForm.get("email")?.touched &&
@@ -55,11 +54,10 @@
           type="password"
           formControlName="password"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.get('password')?.touched &&
-              registerForm.get('password')?.invalid,
-          }"
+          [class.border-red-500]="
+            registerForm.get('password')?.touched &&
+            registerForm.get('password')?.invalid
+          "
         />
         @if (
           registerForm.get("password")?.touched &&
@@ -85,11 +83,10 @@
           type="password"
           formControlName="password_confirmation"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.hasError('passwordMismatch') &&
-              registerForm.get('password_confirmation')?.touched,
-          }"
+          [class.border-red-500]="
+            registerForm.get('password_confirmation')?.touched &&
+            registerForm.get('password_confirmation')?.invalid
+          "
         />
         @if (
           registerForm.hasError("passwordMismatch") &&
@@ -110,11 +107,10 @@
           type="text"
           formControlName="public_name"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.get('public_name')?.touched &&
-              registerForm.get('public_name')?.invalid,
-          }"
+          [class.border-red-500]="
+            registerForm.get('public_name')?.touched &&
+            registerForm.get('public_name')?.invalid
+          "
         />
         @if (
           registerForm.get("public_name")?.touched &&

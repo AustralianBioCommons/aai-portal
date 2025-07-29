@@ -9,6 +9,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/services/auth.service';
 
 interface BundleService {
   id: string;
@@ -19,6 +20,10 @@ interface BundleService {
 interface Bundle {
   id: string;
   name: string;
+  description: string;
+  logoUrls: string[];
+  listItems: string[];
+  disabled?: boolean;
   services: BundleService[];
 }
 
@@ -32,47 +37,67 @@ export class RegisterComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
+  private authService = inject(AuthService);
 
   currentStep = 1;
   totalSteps = 5;
+
+  private readonly bpaBundleService: BundleService = {
+    id: 'bpa',
+    name: 'Bioplatforms Australia Data Portal Terms and Conditions',
+    termsUrl: 'https://data.bioplatforms.com/',
+  };
+
+  private readonly galaxyBundleService: BundleService = {
+    id: 'galaxy',
+    name: 'Galaxy Australia Terms of Service',
+    termsUrl: 'https://site.usegalaxy.org.au/about#terms-of-service',
+  };
+
+  private readonly tsiBundleService: BundleService = {
+    id: 'tsi',
+    name: 'TSI Terms and Conditions',
+    termsUrl: 'https://threatenedspeciesinitiative.com/',
+  };
 
   bundles: Bundle[] = [
     {
       id: 'data-portal-galaxy',
       name: 'Data Portal and Galaxy',
-      services: [
-        {
-          id: 'bpa',
-          name: 'Bioplatforms Australia Data Portal Terms and Conditions',
-          termsUrl: 'https://data.bioplatforms.com/',
-        },
-        {
-          id: 'galaxy',
-          name: 'Galaxy Australia Terms of Service',
-          termsUrl: 'https://site.usegalaxy.org.au/about#terms-of-service',
-        },
+      description: 'Bundle includes:',
+      logoUrls: ['/assets/bpa-logo.png', '/assets/galaxy-logo.png'],
+      listItems: [
+        'The <span class="font-medium">Data Portal</span> public data access',
+        'The <span class="font-medium">Galaxy Australia</span> data access',
+        'Easily import data into Galaxy from the Data Portal',
       ],
+      services: [this.bpaBundleService, this.galaxyBundleService],
     },
     {
       id: 'tsi',
       name: 'Threatened Species Initiative',
-      services: [
-        {
-          id: 'tsi',
-          name: 'TSI Terms and Conditions',
-          termsUrl: 'https://threatenedspeciesinitiative.com/',
-        },
-        {
-          id: 'bpa',
-          name: 'Bioplatforms Australia Data Portal Terms and Conditions',
-          termsUrl: 'https://data.bioplatforms.com/',
-        },
-        {
-          id: 'galaxy',
-          name: 'Galaxy Australia Terms of Service',
-          termsUrl: 'https://site.usegalaxy.org.au/about#terms-of-service',
-        },
+      description: 'Bundle includes:',
+      logoUrls: ['/assets/tsi-logo.jpg'],
+      listItems: [
+        'The <span class="font-medium">Data Portal</span> and <span class="font-medium">Galaxy Australia</span> data access',
+        'TSI public and restricted datasets in the Data Portal',
+        'Galaxy Australia 2TB storage space, high memory nodes, workflows and tools',
+        'Easily import data into Galaxy from the Data Portal',
       ],
+      services: [
+        this.tsiBundleService,
+        this.bpaBundleService,
+        this.galaxyBundleService,
+      ],
+    },
+    {
+      id: 'fungi',
+      name: "Fungi Functional 'Omics",
+      description: '',
+      logoUrls: ['/assets/aff-logo.png'],
+      listItems: [],
+      disabled: true,
+      services: [],
     },
   ];
 
@@ -80,10 +105,10 @@ export class RegisterComponent {
     selectedBundle: ['', Validators.required],
   });
 
-  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, and a number
+  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character
   private passwordValidator = Validators.compose([
     Validators.required,
-    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
+    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/),
   ]);
 
   private confirmPasswordValidator = (): ValidationErrors | null => {
@@ -105,6 +130,10 @@ export class RegisterComponent {
 
   selectBundle(value: string) {
     this.bundleForm.patchValue({ selectedBundle: value });
+  }
+
+  login() {
+    this.authService.login();
   }
 
   getSelectedBundle(): Bundle | undefined {
@@ -190,7 +219,7 @@ export class RegisterComponent {
       if (control.errors['email']) return 'Please enter a valid email address';
       if (control.errors['passwordMismatch']) return 'Passwords do not match';
       if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, and a number';
+        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character';
       }
     }
     return '';

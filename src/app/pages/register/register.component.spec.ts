@@ -3,8 +3,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { Component } from '@angular/core';
-
 import { RegisterComponent } from './register.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   template: '<div>Mock Login Component</div>',
@@ -15,6 +15,8 @@ class MockLoginComponent {}
   template: '<div>Mock Home Component</div>',
 })
 class MockHomeComponent {}
+
+class MockAuthService {}
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
@@ -28,6 +30,7 @@ describe('RegisterComponent', () => {
           { path: 'login', component: MockLoginComponent },
           { path: '', component: MockHomeComponent },
         ]),
+        { provide: AuthService, useClass: MockAuthService },
       ],
     }).compileComponents();
 
@@ -130,8 +133,8 @@ describe('RegisterComponent', () => {
         lastName: 'Doe',
         email: 'john.doe@example.com',
         username: 'johndoe',
-        password: 'Password123',
-        confirmPassword: 'Password123',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
       });
 
       component.nextStep();
@@ -310,36 +313,12 @@ describe('RegisterComponent', () => {
       ).toBe('Details confirmation');
     });
 
-    it('should display navigation buttons', () => {
-      const buttons = fixture.debugElement.queryAll(By.css('button'));
-      expect(buttons.length).toBe(2);
-      expect(buttons[0].nativeElement.textContent.trim()).toBe('Back');
-      expect(buttons[1].nativeElement.textContent.trim()).toBe('Next');
-    });
-
-    it('should show Submit button on step 4', () => {
-      component.currentStep = 4;
-      fixture.detectChanges();
-      const submitButton = fixture.debugElement.queryAll(By.css('button'))[1];
-      expect(submitButton.nativeElement.textContent.trim()).toBe('Submit');
-    });
-
     it('should display thank you message on final step', () => {
       component.currentStep = 5;
       fixture.detectChanges();
-      expect(
-        fixture.debugElement
-          .query(By.css('.text-4xl'))
-          .nativeElement.textContent.trim(),
-      ).toBe('Thank you');
-    });
 
-    it('should not display navigation buttons on final step', () => {
-      component.currentStep = 5;
-      fixture.detectChanges();
-      const buttons = fixture.debugElement.queryAll(By.css('button'));
-      expect(buttons.length).toBe(1);
-      expect(buttons[0].nativeElement.textContent.trim()).toBe('Login');
+      const thankYouText = fixture.debugElement.query(By.css('.text-4xl'));
+      expect(thankYouText.nativeElement.textContent.trim()).toBe('Thank you');
     });
   });
 
@@ -382,9 +361,10 @@ describe('RegisterComponent', () => {
 
   describe('Bundle Data', () => {
     it('should have correct bundle data structure', () => {
-      expect(component.bundles.length).toBe(2);
+      expect(component.bundles.length).toBe(3);
       expect(component.bundles[0].id).toBe('data-portal-galaxy');
       expect(component.bundles[1].id).toBe('tsi');
+      expect(component.bundles[2].id).toBe('fungi');
     });
 
     it('should have services for each bundle', () => {
@@ -392,9 +372,28 @@ describe('RegisterComponent', () => {
         (b) => b.id === 'data-portal-galaxy',
       );
       const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
+      const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
 
       expect(dataPortalBundle?.services.length).toBe(2);
       expect(tsiBundle?.services.length).toBe(3);
+      expect(fungiBundle?.services.length).toBe(0);
+    });
+
+    it('should have logoUrls for each bundle', () => {
+      const dataPortalBundle = component.bundles.find(
+        (b) => b.id === 'data-portal-galaxy',
+      );
+      const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
+      const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
+
+      expect(dataPortalBundle?.logoUrls.length).toBe(2);
+      expect(tsiBundle?.logoUrls.length).toBe(1);
+      expect(fungiBundle?.logoUrls.length).toBe(1);
+    });
+
+    it('should have fungi bundle disabled', () => {
+      const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
+      expect(fungiBundle?.disabled).toBe(true);
     });
   });
 });

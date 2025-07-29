@@ -95,7 +95,7 @@ describe('BpaRegisterComponent', () => {
         expect(passwordControl?.errors?.['pattern']).toBeTruthy();
       });
 
-      passwordControl?.setValue('StrongPass123');
+      passwordControl?.setValue('StrongPass123!');
       expect(passwordControl?.errors).toBeNull();
     });
 
@@ -137,19 +137,20 @@ describe('BpaRegisterComponent', () => {
         fullname: 'Test User',
         email: 'test@example.com',
         reason: 'Testing purpose',
-        password: 'StrongPass123',
-        confirmPassword: 'StrongPass123',
-        organizations: component.organizations.reduce(
-          (acc, org) => ({ ...acc, [org.id]: false }),
-          {},
-        ),
+        password: 'StrongPass123!',
+        confirmPassword: 'StrongPass123!',
+      });
+
+      const organizationsGroup =
+        component.registrationForm.get('organizations');
+      component.organizations.forEach((org) => {
+        organizationsGroup?.get(org.id)?.setValue(false);
       });
     });
 
     it('should submit form successfully', fakeAsync(() => {
       component.onSubmit();
 
-      // Use the correct development URL from environment
       const req = httpTestingController.expectOne(
         `${environment.auth0.backend}/bpa/register`,
       );
@@ -170,18 +171,17 @@ describe('BpaRegisterComponent', () => {
       );
       expect(req.request.method).toBe('POST');
 
-      // Simulate error response
       req.flush(
-        { error: 'Registration failed' },
+        { detail: 'Registration failed' },
         { status: 400, statusText: 'Bad Request' },
       );
 
       tick();
-      // Add assertions for error handling based on your component logic
+      expect(component.errorNotification()).toBe('Registration failed');
     }));
 
     it('should scroll to first invalid field on invalid submit', () => {
-      component.registrationForm.reset(); // Make form invalid
+      component.registrationForm.reset();
       const mockElement = document.createElement('div');
       spyOn(mockElement, 'scrollIntoView');
       spyOn(document, 'getElementById').and.returnValue(mockElement);

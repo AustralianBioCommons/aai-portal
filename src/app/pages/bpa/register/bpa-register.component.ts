@@ -108,10 +108,10 @@ export class BpaRegisterComponent {
     },
   ];
 
-  // Validator to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
+  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character
   private passwordValidator = Validators.compose([
     Validators.required,
-    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
+    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/),
   ]);
 
   private confirmPasswordValidator = (): ValidationErrors | null => {
@@ -206,7 +206,7 @@ export class BpaRegisterComponent {
       if (control.errors['email']) return 'Please enter a valid email address';
       if (control.errors['passwordMismatch']) return 'Passwords do not match';
       if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, and a number';
+        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character';
       }
     }
     return '';
