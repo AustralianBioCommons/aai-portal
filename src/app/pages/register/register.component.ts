@@ -126,6 +126,12 @@ export class RegisterComponent {
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
   });
 
+  constructor() {
+    this.registrationForm.get('password')?.valueChanges.subscribe(() => {
+      this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
+    });
+  }
+
   termsForm: FormGroup = this.formBuilder.group({});
 
   selectBundle(value: string) {

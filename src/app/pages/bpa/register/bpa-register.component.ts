@@ -6,7 +6,7 @@ import {
   Validators,
   ValidationErrors,
 } from '@angular/forms';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -37,7 +37,6 @@ export class BpaRegisterComponent {
   private readonly backendURL = `${environment.auth0.backend}/bpa/register`;
 
   private formBuilder = inject(FormBuilder);
-  private document = inject(DOCUMENT);
   private http = inject(HttpClient);
   private router = inject(Router);
 
@@ -134,6 +133,12 @@ export class BpaRegisterComponent {
       ),
     ),
   });
+
+  constructor() {
+    this.registrationForm.get('password')?.valueChanges.subscribe(() => {
+      this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
+    });
+  }
 
   onSubmit(): void {
     if (this.registrationForm.valid) {

@@ -237,6 +237,25 @@ describe('RegisterComponent', () => {
       firstName?.setValue('John');
       expect(component.getErrorMessage('firstName')).toBe('');
     });
+
+    it('should revalidate confirmPassword when password changes', () => {
+      component.registrationForm.patchValue({
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component.registrationForm.get('confirmPassword')?.markAsTouched();
+
+      expect(component.isFieldInvalid('confirmPassword')).toBe(false);
+
+      component.registrationForm
+        .get('password')
+        ?.setValue('DifferentPassword123!');
+
+      expect(component.isFieldInvalid('confirmPassword')).toBe(true);
+      expect(component.getErrorMessage('confirmPassword')).toBe(
+        'Passwords do not match',
+      );
+    });
   });
 
   describe('Terms Form', () => {

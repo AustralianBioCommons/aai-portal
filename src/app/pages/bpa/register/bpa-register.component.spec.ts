@@ -220,4 +220,21 @@ describe('BpaRegisterComponent', () => {
       expect(component.registrationForm.get('email')?.value).toBe('');
     });
   });
+
+  it('should revalidate confirmPassword when password changes', () => {
+    component.registrationForm.patchValue({
+      password: 'StrongPass123!',
+      confirmPassword: 'StrongPass123!',
+    });
+    component.registrationForm.get('confirmPassword')?.markAsTouched();
+
+    expect(component.isFieldInvalid('confirmPassword')).toBe(false);
+
+    component.registrationForm.get('password')?.setValue('DifferentPass123!');
+
+    expect(component.isFieldInvalid('confirmPassword')).toBe(true);
+    expect(component.getErrorMessage('confirmPassword')).toBe(
+      'Passwords do not match',
+    );
+  });
 });
