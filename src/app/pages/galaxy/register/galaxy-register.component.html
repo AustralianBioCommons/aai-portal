@@ -84,8 +84,8 @@
           formControlName="password_confirmation"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
           [class.border-red-500]="
-            registerForm.get('password_confirmation')?.touched &&
-            registerForm.get('password_confirmation')?.invalid
+            registerForm.hasError('passwordMismatch') &&
+            registerForm.get('password_confirmation')?.touched
           "
         />
         @if (
