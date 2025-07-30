@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
   FormGroup,
@@ -39,7 +39,7 @@ interface RegistrationForm {
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  imports: [RouterLink, ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule],
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
@@ -258,5 +258,28 @@ export class RegisterComponent {
       registration: this.registrationForm.value,
       terms: this.termsForm.value,
     });
+  }
+
+  getFinalPageButton(): { text: string; action: () => void } {
+    const currentUrl = this.router.url;
+
+    if (currentUrl.includes('/bpa/register')) {
+      return {
+        text: 'Return to Bioplatforms Australia Data Portal',
+        action: () =>
+          (window.location.href = 'https://aaidemo.bioplatforms.com/'),
+      };
+    } else if (currentUrl.includes('/galaxy/register')) {
+      return {
+        text: 'Return to Galaxy Australia',
+        action: () =>
+          (window.location.href = 'https://galaxy.test.biocommons.org.au/'),
+      };
+    } else {
+      return {
+        text: 'Login',
+        action: () => this.router.navigate(['/login']),
+      };
+    }
   }
 }
