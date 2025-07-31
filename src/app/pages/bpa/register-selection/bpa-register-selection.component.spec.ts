@@ -19,9 +19,9 @@ describe('BpaRegisterSelectionComponent', () => {
           useValue: {
             snapshot: { params: {}, queryParams: {} },
             params: { subscribe: () => ({}) },
-            queryParams: { subscribe: () => ({}) }
-          }
-        }
+            queryParams: { subscribe: () => ({}) },
+          },
+        },
       ],
     }).compileComponents();
 
@@ -39,41 +39,88 @@ describe('BpaRegisterSelectionComponent', () => {
     expect(title.nativeElement.textContent.trim()).toBe('Register');
   });
 
-  it('should display Bioplatforms Australia Account section', () => {
-    const sectionTitle = fixture.debugElement.query(By.css('.text-2xl'));
-    expect(sectionTitle.nativeElement.textContent.trim()).toBe('Bioplatforms Australia Account');
+  it('should display Data Portal Access section', () => {
+    const sectionTitles = fixture.debugElement.queryAll(By.css('.text-2xl'));
+    expect(sectionTitles.length).toBe(2);
+    expect(sectionTitles[0].nativeElement.textContent.trim()).toBe(
+      'Data Portal Access',
+    );
   });
 
-  it('should display BioCommons Account section with benefits list', () => {
-    const listItems = fixture.debugElement.queryAll(By.css('li'));
-    expect(listItems.length).toBe(3);
-    expect(listItems[0].nativeElement.textContent).toContain('Enable a single sign on (SSO) access');
-    expect(listItems[1].nativeElement.textContent).toContain('Seamless data repository integration');
-    expect(listItems[2].nativeElement.textContent).toContain('A self-service dashboard application');
+  it('should display Data Portal Access + Bundles section', () => {
+    const sectionTitles = fixture.debugElement.queryAll(By.css('.text-2xl'));
+    expect(sectionTitles.length).toBe(2);
+    expect(sectionTitles[1].nativeElement.textContent.trim()).toBe(
+      'Data Portal Access + Bundles',
+    );
   });
 
-  it('should have two continue buttons', () => {
+  it('should display section descriptions', () => {
+    const descriptions = fixture.debugElement.queryAll(
+      By.css('.mb-6.font-light.text-gray-500'),
+    );
+    expect(descriptions.length).toBe(2);
+    expect(descriptions[0].nativeElement.textContent.trim()).toBe(
+      "Access the Data Portal's public and restricted data.",
+    );
+    expect(descriptions[1].nativeElement.textContent.trim()).toBe(
+      "Access the Data Portal's public and restricted data, plus the Australian BioCommons service bundles.",
+    );
+  });
+
+  it('should have two continue buttons with correct routing', () => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
     expect(buttons.length).toBe(2);
-    buttons.forEach(button => {
+
+    buttons.forEach((button) => {
       expect(button.nativeElement.textContent.trim()).toBe('Continue');
     });
+
+    expect(buttons[0].attributes['ng-reflect-router-link']).toBe(
+      'standard-access',
+    );
+    expect(buttons[1].attributes['ng-reflect-router-link']).toBe(
+      'bundle-access',
+    );
   });
 
   it('should display header logo with correct attributes', () => {
-    const headerLogo = fixture.debugElement.query(By.css('.bg-bpa-primary img'));
-    expect(headerLogo.nativeElement.src).toContain('BIO-RGB_Full-NEG_Portal_TRANS2_small.webp');
-    expect(headerLogo.nativeElement.alt).toBe('Bioplatforms Australia Data Portal Logo');
+    const headerLogo = fixture.debugElement.query(
+      By.css('.bg-bpa-primary img'),
+    );
+    expect(headerLogo.nativeElement.src).toContain(
+      'BIO-RGB_Full-NEG_Portal_TRANS2_small.webp',
+    );
+    expect(headerLogo.nativeElement.alt).toBe(
+      'Bioplatforms Australia Data Portal Logo',
+    );
   });
 
   it('should display footer logos with correct attributes', () => {
-    const footerLogos = fixture.debugElement.queryAll(By.css('.bg-bpa-secondary img'));
+    const footerLogos = fixture.debugElement.queryAll(
+      By.css('.bg-bpa-secondary img'),
+    );
     expect(footerLogos.length).toBe(2);
-    
-    expect(footerLogos[0].nativeElement.src).toContain('BIO-RGB_Large-NEGTRANS_small.webp');
-    expect(footerLogos[0].nativeElement.alt).toBe('Bioplatforms Australia Logo');
-    
+
+    expect(footerLogos[0].nativeElement.src).toContain(
+      'BIO-RGB_Large-NEGTRANS_small.webp',
+    );
+    expect(footerLogos[0].nativeElement.alt).toBe(
+      'Bioplatforms Australia Logo',
+    );
+
     expect(footerLogos[1].nativeElement.src).toContain('ncris-footer.webp');
     expect(footerLogos[1].nativeElement.alt).toBe('NCRIS Logo');
+  });
+
+  it('should have correct button styling', () => {
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+
+    expect(buttons[0].nativeElement.className).toContain('border');
+    expect(buttons[0].nativeElement.className).toContain('bg-transparent');
+    expect(buttons[0].nativeElement.className).toContain('text-blue-900');
+
+    expect(buttons[1].nativeElement.className).toContain('bg-blue-900');
+    expect(buttons[1].nativeElement.className).toContain('text-white');
   });
 });

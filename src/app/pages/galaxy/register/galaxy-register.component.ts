@@ -11,7 +11,6 @@ import {
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
-import { Title } from '@angular/platform-browser';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import {
   ALLOWED_SPECIAL_CHARACTERS,
@@ -41,7 +40,6 @@ export class GalaxyRegisterComponent {
   http = inject(HttpClient);
   formBuilder = inject(FormBuilder);
   router = inject(Router);
-  titleService = inject(Title);
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   errorMessage: string | null = null;
@@ -60,7 +58,6 @@ export class GalaxyRegisterComponent {
   }
 
   constructor() {
-    this.titleService.setTitle('Galaxy Australia - Register');
     this.registerForm = this.formBuilder.group(
       {
         email: new FormControl('', {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -6,9 +6,8 @@ import {
   Validators,
   ValidationErrors,
 } from '@angular/forms';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Title } from '@angular/platform-browser';
 import { environment } from '../../../../environments/environment';
 
 interface Organization {
@@ -33,15 +32,13 @@ interface RegistrationRequest {
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
-export class BpaRegisterComponent implements OnInit, OnDestroy {
+export class BpaRegisterComponent {
   private readonly errorNotificationTimeout = 5000;
   private readonly backendURL = `${environment.auth0.backend}/bpa/register`;
 
   private formBuilder = inject(FormBuilder);
-  private document = inject(DOCUMENT);
   private http = inject(HttpClient);
   private router = inject(Router);
-  private titleService = inject(Title);
 
   errorNotification = signal<string | null>(null);
 
@@ -110,12 +107,10 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
     },
   ];
 
-  private defaultFavicon: string | null = null;
-
-  // Validator to require a password with at least 8 characters including a lower-case letter, an upper-case letter, and a number
+  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character
   private passwordValidator = Validators.compose([
     Validators.required,
-    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/),
+    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/),
   ]);
 
   private confirmPasswordValidator = (): ValidationErrors | null => {
@@ -140,20 +135,9 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
   });
 
   constructor() {
-    this.titleService.setTitle('Register | Bioplatforms Australia Data Portal');
-  }
-
-  ngOnInit(): void {
-    this.defaultFavicon =
-      this.document.querySelector("link[rel*='icon']")?.getAttribute('href') ||
-      null;
-    this.setFavicon('/assets/bpa-favicon.ico');
-  }
-
-  ngOnDestroy(): void {
-    if (this.defaultFavicon) {
-      this.setFavicon(this.defaultFavicon);
-    }
+    this.registrationForm.get('password')?.valueChanges.subscribe(() => {
+      this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
+    });
   }
 
   onSubmit(): void {
@@ -227,14 +211,9 @@ export class BpaRegisterComponent implements OnInit, OnDestroy {
       if (control.errors['email']) return 'Please enter a valid email address';
       if (control.errors['passwordMismatch']) return 'Passwords do not match';
       if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, and a number';
+        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character';
       }
     }
     return '';
-  }
-
-  private setFavicon(href: string): void {
-    const links = this.document.querySelectorAll("link[rel*='icon']");
-    links.forEach((link) => link.setAttribute('href', href));
   }
 }

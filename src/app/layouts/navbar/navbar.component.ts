@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
-import { LogoutButtonComponent } from '../../shared/components/buttons/logout-button/logout-button.component';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
@@ -16,7 +15,7 @@ import { filter, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, LogoutButtonComponent, CommonModule],
+  imports: [RouterLink, CommonModule],
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
@@ -28,12 +27,13 @@ export class NavbarComponent {
   private router = inject(Router);
 
   @ViewChild('menu', { read: ElementRef }) menu!: ElementRef;
-  @ViewChild('userMenuButton', { read: ElementRef }) userMenuButton!: ElementRef;
+  @ViewChild('userMenuButton', { read: ElementRef })
+  userMenuButton!: ElementRef;
 
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
   isAdmin = this.authService.isAdmin;
-  
+
   pendingCount = signal(0);
   userMenuOpen = signal(false);
 
@@ -54,7 +54,7 @@ export class NavbarComponent {
       .pipe(
         takeUntilDestroyed(),
         filter(Boolean),
-        switchMap(() => this.api.getAllPending())
+        switchMap(() => this.api.getAllPending()),
       )
       .subscribe({
         next: (pendingData) => {
@@ -90,5 +90,9 @@ export class NavbarComponent {
 
   isActive(url: string): boolean {
     return this.router.url === url;
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

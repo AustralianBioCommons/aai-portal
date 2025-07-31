@@ -1,12 +1,17 @@
-import { Component } from '@angular/core';
-import { LoginButtonComponent } from '../../shared/components/buttons/login-button/login-button.component';
+import { Component, inject } from '@angular/core';
+import { AuthService } from '../../core/services/auth.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [LoginButtonComponent],
+  imports: [RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
+  private authService = inject(AuthService);
 
+  login() {
+    this.authService.login();
+  }
 }
