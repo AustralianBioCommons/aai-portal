@@ -70,7 +70,7 @@
             formControlName="username"
             placeholder="username"
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-            [class]="{ 'border-red-500': isFieldInvalid('username') }"
+            [class.border-red-500]="isFieldInvalid('username')"
           />
           @if (isFieldInvalid("username")) {
             <div class="absolute mt-0.5 text-xs text-red-500">
@@ -89,7 +89,7 @@
             formControlName="fullname"
             placeholder="Joe Bloggs"
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-            [class]="{ 'border-red-500': isFieldInvalid('fullname') }"
+            [class.border-red-500]="isFieldInvalid('fullname')"
           />
           @if (isFieldInvalid("fullname")) {
             <div class="absolute mt-0.5 text-xs text-red-500">
@@ -109,7 +109,7 @@
             formControlName="email"
             placeholder="joe@example.com"
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-            [class]="{ 'border-red-500': isFieldInvalid('email') }"
+            [class.border-red-500]="isFieldInvalid('email')"
           />
           @if (isFieldInvalid("email")) {
             <div class="absolute mt-0.5 text-xs text-red-500">
@@ -128,7 +128,7 @@
             rows="4"
             placeholder="Please provide a brief outline of your interest in the project data"
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-            [class]="{ 'border-red-500': isFieldInvalid('reason') }"
+            [class.border-red-500]="isFieldInvalid('reason')"
           ></textarea>
           @if (isFieldInvalid("reason")) {
             <div class="absolute mt-0.5 text-xs text-red-500">
@@ -173,7 +173,7 @@
             formControlName="password"
             placeholder="Password"
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-            [class]="{ 'border-red-500': isFieldInvalid('password') }"
+            [class.border-red-500]="isFieldInvalid('password')"
           />
           @if (isFieldInvalid("password")) {
             <div class="mt-0.5 text-xs text-red-500">
@@ -193,7 +193,7 @@
             formControlName="confirmPassword"
             placeholder="Password"
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-            [class]="{ 'border-red-500': isFieldInvalid('confirmPassword') }"
+            [class.border-red-500]="isFieldInvalid('confirmPassword')"
           />
           @if (isFieldInvalid("confirmPassword")) {
             <div class="absolute mt-0.5 text-xs text-red-500">
@@ -210,7 +210,7 @@
           </div>
           <button
             type="submit"
-            class="rounded-md bg-blue-900 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-950"
+            class="rounded-md bg-blue-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-950"
           >
             Create Account
           </button>

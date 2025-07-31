@@ -1,18 +1,30 @@
-<div class="flex h-full w-full flex-col items-center justify-center bg-white">
-  <div class="flex flex-col items-center justify-center">
-    <img
-      src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
-      class="auto h-16"
-      alt="Australian Biocommons Logo"
-    />
-    <h1
-      class="mt-12 text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl"
+<div
+  class="flex h-full w-full flex-col items-center justify-center gap-6 bg-white"
+>
+  <img
+    src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
+    class="auto h-16"
+    alt="Australian Biocommons Logo"
+  />
+  <h1 class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
+    AAI User Portal
+  </h1>
+  <p class="font-light text-gray-400">Please log in to continue</p>
+  <div class="flex items-center justify-center">
+    <button
+      (click)="login()"
+      class="rounded-md bg-sky-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-sky-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
     >
-      AAI User Portal
-    </h1>
-    <p class="my-8 font-light text-gray-400">Please log in to continue</p>
-    <div class="flex items-center justify-center gap-x-6">
-      <app-login-button />
-    </div>
+      Log in
+    </button>
+  </div>
+  <div class="mt-6 flex items-center justify-center gap-2">
+    <div class="font-light text-gray-400">Don't have an account?</div>
+    <button
+      class="text-sky-500 hover:text-sky-600"
+      [routerLink]="['/register']"
+    >
+      Register
+    </button>
   </div>
 </div>

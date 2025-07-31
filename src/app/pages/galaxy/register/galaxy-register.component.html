@@ -27,11 +27,10 @@
           type="email"
           formControlName="email"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.get('email')?.touched &&
-              registerForm.get('email')?.invalid,
-          }"
+          [class.border-red-500]="
+            registerForm.get('email')?.touched &&
+            registerForm.get('email')?.invalid
+          "
         />
         @if (
           registerForm.get("email")?.touched &&
@@ -55,11 +54,10 @@
           type="password"
           formControlName="password"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.get('password')?.touched &&
-              registerForm.get('password')?.invalid,
-          }"
+          [class.border-red-500]="
+            registerForm.get('password')?.touched &&
+            registerForm.get('password')?.invalid
+          "
         />
         @if (
           registerForm.get("password")?.touched &&
@@ -85,11 +83,10 @@
           type="password"
           formControlName="password_confirmation"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.hasError('passwordMismatch') &&
-              registerForm.get('password_confirmation')?.touched,
-          }"
+          [class.border-red-500]="
+            registerForm.hasError('passwordMismatch') &&
+            registerForm.get('password_confirmation')?.touched
+          "
         />
         @if (
           registerForm.hasError("passwordMismatch") &&
@@ -110,11 +107,10 @@
           type="text"
           formControlName="public_name"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              registerForm.get('public_name')?.touched &&
-              registerForm.get('public_name')?.invalid,
-          }"
+          [class.border-red-500]="
+            registerForm.get('public_name')?.touched &&
+            registerForm.get('public_name')?.invalid
+          "
         />
         @if (
           registerForm.get("public_name")?.touched &&
@@ -147,20 +143,20 @@
 
       <button
         type="submit"
-        class="hover:cursor w-full rounded-md bg-galaxy-primary px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-900"
+        class="hover:cursor w-full rounded-md bg-galaxy-primary px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-950"
       >
         Register
       </button>
     </form>
-    <span class="text-sm text-gray-800"
-      >Already have an account?
+    <span class="text-sm text-gray-800">
+      Already have an account?
       <a
-        class="text-blue-500 hover:text-blue-600"
+        class="font-medium text-blue-500 hover:text-blue-600"
         href="https://galaxy.test.biocommons.org.au/"
       >
         Return to Galaxy
       </a>
-      and log in.
+      and log in
     </span>
   </div>
 

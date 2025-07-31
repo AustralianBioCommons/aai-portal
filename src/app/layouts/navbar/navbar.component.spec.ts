@@ -124,4 +124,20 @@ describe('NavbarComponent', () => {
     expect(component.isActive('/services')).toBe(true);
     expect(component.isActive('/other')).toBe(false);
   });
+
+  it('should call authService.logout when logout is clicked', () => {
+    const logoutSpy = jasmine.createSpy('logout');
+    Object.defineProperty(mockAuthService, 'logout', {
+      value: logoutSpy,
+    });
+
+    mockApiService.getAllPending.and.returnValue(
+      of({ pending_services: [], pending_resources: [] }),
+    );
+    fixture.detectChanges();
+
+    component.logout();
+
+    expect(logoutSpy).toHaveBeenCalled();
+  });
 });
