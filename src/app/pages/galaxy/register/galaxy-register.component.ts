@@ -71,7 +71,7 @@ export class GalaxyRegisterComponent {
         }),
         password: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, passwordRequirements],
+          validators: [passwordRequirements],
         }),
         password_confirmation: new FormControl('', {
           nonNullable: true,
@@ -80,7 +80,6 @@ export class GalaxyRegisterComponent {
         username: new FormControl('', {
           nonNullable: true,
           validators: [
-            Validators.required,
             usernameRequirements
           ],
         }),
