@@ -15,7 +15,8 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import {
   ALLOWED_SPECIAL_CHARACTERS,
   passwordRequirements,
-} from '../../../../utils/passwords';
+} from '../../../../utils/validation/passwords';
+import { usernameRequirements } from '../../../../utils/validation/usernames';
 
 const backendUrl = 'https://aaibackend.test.biocommons.org.au';
 
@@ -49,6 +50,10 @@ export class GalaxyRegisterComponent {
     this.isFrameLoading = false;
   }
 
+  /**
+   * Checks that the password and password_confirmation
+   * fields have the same value
+   */
   passwordMatchValidator(
     group: AbstractControl<GalaxyRegistrationForm>,
   ): ValidationErrors | null {
@@ -66,18 +71,17 @@ export class GalaxyRegisterComponent {
         }),
         password: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, Validators.minLength(8), passwordRequirements],
+          validators: [Validators.required, passwordRequirements],
         }),
         password_confirmation: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, Validators.minLength(8)],
+          validators: [Validators.required],
         }),
-        public_name: new FormControl('', {
+        username: new FormControl('', {
           nonNullable: true,
           validators: [
             Validators.required,
-            Validators.minLength(3),
-            Validators.pattern(/^[a-z0-9._-]+$/),
+            usernameRequirements
           ],
         }),
       },
@@ -141,14 +145,16 @@ export class GalaxyRegisterComponent {
       'password': {
         'passwordMismatch': 'Passwords do not match',
         'minlength': 'Password must be at least 8 characters',
+        'maxlength': 'Password cannot be longer than 128 characters',
         'lowercaseRequired': 'Password must contain at least one lowercase letter',
         'uppercaseRequired': 'Password must contain at least one uppercase letter',
         'digitRequired': 'Password must contain at least one digit',
         'specialCharacterRequired': `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`
       },
-      'public_name': {
+      'username': {
         'required': 'Please enter a public name that will be used to identify you',
         'minlength': 'Your public name needs at least 3 characters',
+        'maxlength': 'Your public name cannot be longer than 100 characters',
         'pattern': 'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
       }
     };
