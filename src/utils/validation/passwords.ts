@@ -1,6 +1,16 @@
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ValidationErrors, Validators } from '@angular/forms';
 
 export const ALLOWED_SPECIAL_CHARACTERS = '!@#$%^&*';
+
+
+interface PasswordErrors {
+  minLength?: boolean;
+  maxLength?: boolean;
+  lowercaseRequired?: boolean;
+  uppercaseRequired?: boolean;
+  digitRequired?: boolean;
+  specialCharacterRequired?: boolean;
+}
 
 export function lowercaseRequired(control: AbstractControl): ValidationErrors | null {
   const ok = /[a-z]/.test(control.value);
@@ -23,10 +33,15 @@ export function specialCharacterRequired(control: AbstractControl): ValidationEr
   return ok ? null : {specialCharacterRequired: true};
 }
 
-export function passwordRequirements(control: AbstractControl): ValidationErrors | null {
-  const errors =  {...lowercaseRequired(control),
-          ...uppercaseRequired(control),
-          ...digitRequired(control),
-         ...specialCharacterRequired(control)};
+export function passwordRequirements(control: AbstractControl): PasswordErrors | null {
+  const minLengthValidator = Validators.minLength(8);
+  const maxLengthValidator = Validators.maxLength(128);
+  const errors =  {
+    ...minLengthValidator(control),
+    ...maxLengthValidator(control),
+    ...lowercaseRequired(control),
+    ...uppercaseRequired(control),
+    ...digitRequired(control),
+    ...specialCharacterRequired(control)};
   return Object.keys(errors).length ? errors : null;
 }
