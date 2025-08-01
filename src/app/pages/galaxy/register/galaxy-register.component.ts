@@ -108,7 +108,7 @@ export class GalaxyRegisterComponent {
 
     this.http
       .get<GalaxyRegistrationToken>(
-        `${environment.auth0.backend}/galaxy/get-registration-token`,
+        `${environment.auth0.backend}/galaxy/register/get-registration-token`,
       )
       .pipe(
         switchMap((response) => {
