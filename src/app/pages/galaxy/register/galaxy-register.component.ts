@@ -17,8 +17,8 @@ import {
   passwordRequirements,
 } from '../../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../../utils/validation/usernames';
+import { environment } from '../../../../environments/environment';
 
-const backendUrl = 'https://aaibackend.test.biocommons.org.au';
 
 interface GalaxyRegistrationForm {
   email: FormControl<string>;
@@ -99,7 +99,7 @@ export class GalaxyRegisterComponent {
 
     this.http
       .get<GalaxyRegistrationToken>(
-        `${backendUrl}/galaxy/get-registration-token`,
+        `${environment.auth0.backend}/galaxy/get-registration-token`,
       )
       .pipe(
         switchMap((response) => {
@@ -107,7 +107,7 @@ export class GalaxyRegisterComponent {
           if (!token) throw new Error('No token received');
 
           const headers = new HttpHeaders().set('registration-token', token);
-          return this.http.post(`${backendUrl}/galaxy/register`, formData, {
+          return this.http.post(`${environment.auth0.backend}/galaxy/register`, formData, {
             headers,
           });
         }),

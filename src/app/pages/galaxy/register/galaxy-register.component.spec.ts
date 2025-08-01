@@ -5,6 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 describe('GalaxyRegisterComponent', () => {
   let component: GalaxyRegisterComponent;
@@ -37,7 +38,7 @@ describe('GalaxyRegisterComponent', () => {
   });
 
   it('should detect mismatching passwords', () => {
-    component.registerForm.controls['password'].setValue('password123');
+    component.registerForm.controls['password'].setValue('Password123!');
     component.registerForm.controls['password_confirmation'].setValue('notmatching');
     component.registerForm.updateValueAndValidity();
 
@@ -45,8 +46,8 @@ describe('GalaxyRegisterComponent', () => {
   });
 
   it('should not show mismatch error when passwords match', () => {
-    component.registerForm.controls['password'].setValue('password123');
-    component.registerForm.controls['password_confirmation'].setValue('password123');
+    component.registerForm.controls['password'].setValue('Password123!');
+    component.registerForm.controls['password_confirmation'].setValue('Password123!');
     component.registerForm.updateValueAndValidity();
 
     expect(component.registerForm.hasError('passwordMismatch')).toBeFalse();
@@ -107,8 +108,8 @@ describe('GalaxyRegisterComponent submission', () => {
   function fillFormWithValidData() {
     component.registerForm.setValue({
       email: 'test@example.com',
-      password: 'password123',
-      password_confirmation: 'password123',
+      password: 'Password123!',
+      password_confirmation: 'Password123!',
       username: 'testuser'
     });
   }
@@ -120,13 +121,13 @@ describe('GalaxyRegisterComponent submission', () => {
 
     // Expect token request
     const tokenReq = httpMock.expectOne(
-      "https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token"
+      `${environment.auth0.backend}/galaxy/get-registration-token`
     );
     tokenReq.flush({ token: 'mock-token' });
 
     // Expect registration request
     const registerReq = httpMock.expectOne(
-      "https://aaibackend.test.biocommons.org.au/galaxy/register"
+      `${environment.auth0.backend}/galaxy/register`
     );
     registerReq.flush({ success: true });
 
@@ -141,7 +142,7 @@ describe('GalaxyRegisterComponent submission', () => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token");
+    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/get-registration-token`);
     tokenReq.flush("", {status: 500, statusText: "Token request failed"});
 
     tick();
@@ -156,10 +157,10 @@ describe('GalaxyRegisterComponent submission', () => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token");
+    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/get-registration-token`);
     tokenReq.flush({ token: 'mock-token' });
 
-    const registerReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/register");
+    const registerReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/register`);
     registerReq.flush("", { status: 500, statusText: "Server error" });
 
     tick();
