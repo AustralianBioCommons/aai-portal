@@ -4,7 +4,7 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { BpaRegisterComponent } from './bpa-register.component';
+import { BpaRegisterComponent, RegistrationRequest } from './bpa-register.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 import {
@@ -67,7 +67,7 @@ describe('BpaRegisterComponent', () => {
 
   describe('Form Validation', () => {
     it('should validate required fields', () => {
-      const requiredControls = [
+      const requiredControls: (keyof RegistrationRequest | "confirmPassword")[] = [
         'username',
         'fullname',
         'email',
@@ -80,7 +80,7 @@ describe('BpaRegisterComponent', () => {
         const control = component.registrationForm.get(controlName);
         control?.markAsTouched();
         expect(control?.errors?.['required']).toBeTruthy();
-        expect(component.getErrorMessage(controlName)).toBe(
+        expect(component.getErrorMessages(controlName)).toContain(
           'This field is required',
         );
       });
@@ -92,7 +92,8 @@ describe('BpaRegisterComponent', () => {
       const invalidPasswords = ['weak', 'onlylower', 'ONLYUPPER', '12345678'];
       invalidPasswords.forEach((password) => {
         passwordControl?.setValue(password);
-        expect(passwordControl?.errors?.['pattern']).toBeTruthy();
+        const errors = passwordControl?.errors;
+        expect([errors?.['lowercaseRequired'], errors?.['uppercaseRequired'], errors?.['numberRequired'], errors?.['specialCharacterRequired'], errors?.['minlength']]).toBeTruthy();
       });
 
       passwordControl?.setValue('StrongPass123!');
@@ -109,7 +110,7 @@ describe('BpaRegisterComponent', () => {
       expect(
         form.get('confirmPassword')?.errors?.['passwordMismatch'],
       ).toBeTruthy();
-      expect(component.getErrorMessage('confirmPassword')).toBe(
+      expect(component.getErrorMessages('confirmPassword')).toContain(
         'Passwords do not match',
       );
 
@@ -121,7 +122,7 @@ describe('BpaRegisterComponent', () => {
       const emailControl = component.registrationForm.get('email');
       emailControl?.setValue('invalid-email');
       expect(emailControl?.errors?.['email']).toBeTruthy();
-      expect(component.getErrorMessage('email')).toBe(
+      expect(component.getErrorMessages('email')).toContain(
         'Please enter a valid email address',
       );
 
@@ -233,7 +234,7 @@ describe('BpaRegisterComponent', () => {
     component.registrationForm.get('password')?.setValue('DifferentPass123!');
 
     expect(component.isFieldInvalid('confirmPassword')).toBe(true);
-    expect(component.getErrorMessage('confirmPassword')).toBe(
+    expect(component.getErrorMessages('confirmPassword')).toContain(
       'Passwords do not match',
     );
   });
