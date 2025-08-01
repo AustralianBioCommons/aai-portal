@@ -12,14 +12,19 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import {
+  passwordRequirements,
+} from '../../../../utils/validation/passwords';
+import { usernameRequirements } from '../../../../utils/validation/usernames';
+import { environment } from '../../../../environments/environment';
+import { ValidationService } from '../../../core/services/validation.service';
 
-const backendUrl = 'https://aaibackend.test.biocommons.org.au';
 
 interface GalaxyRegistrationForm {
   email: FormControl<string>;
   password: FormControl<string>;
   password_confirmation: FormControl<string>;
-  public_name: FormControl<string>;
+  username: FormControl<string>;
 }
 
 interface GalaxyRegistrationToken {
@@ -33,9 +38,10 @@ interface GalaxyRegistrationToken {
   styleUrl: './galaxy-register.component.css',
 })
 export class GalaxyRegisterComponent {
-  http = inject(HttpClient);
-  formBuilder = inject(FormBuilder);
-  router = inject(Router);
+  private http = inject(HttpClient);
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
+  private validationService = inject(ValidationService);
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   errorMessage: string | null = null;
@@ -45,6 +51,10 @@ export class GalaxyRegisterComponent {
     this.isFrameLoading = false;
   }
 
+  /**
+   * Checks that the password and password_confirmation
+   * fields have the same value
+   */
   passwordMatchValidator(
     group: AbstractControl<GalaxyRegistrationForm>,
   ): ValidationErrors | null {
@@ -54,6 +64,14 @@ export class GalaxyRegisterComponent {
   }
 
   constructor() {
+    this.validationService.addFieldErrorMessages("username",
+      {
+        'required': 'Please enter a public name that will be used to identify you',
+        'minlength': 'Your public name needs at least 3 characters',
+        'maxlength': 'Your public name cannot be longer than 100 characters',
+        'pattern': 'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
+      }
+    )
     this.registerForm = this.formBuilder.group(
       {
         email: new FormControl('', {
@@ -62,22 +80,21 @@ export class GalaxyRegisterComponent {
         }),
         password: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, Validators.minLength(6)],
+          validators: [passwordRequirements],
         }),
         password_confirmation: new FormControl('', {
           nonNullable: true,
-          validators: [Validators.required, Validators.minLength(6)],
+          validators: [Validators.required],
         }),
-        public_name: new FormControl('', {
+        username: new FormControl('', {
           nonNullable: true,
           validators: [
-            Validators.required,
-            Validators.minLength(3),
-            Validators.pattern(/^[a-z0-9._-]+$/),
+            usernameRequirements
           ],
         }),
       },
-      { validators: [this.passwordMatchValidator] },
+      { validators: [this.passwordMatchValidator],
+        updateOn: 'blur'},
     );
   }
 
@@ -91,7 +108,7 @@ export class GalaxyRegisterComponent {
 
     this.http
       .get<GalaxyRegistrationToken>(
-        `${backendUrl}/galaxy/get-registration-token`,
+        `${environment.auth0.backend}/galaxy/get-registration-token`,
       )
       .pipe(
         switchMap((response) => {
@@ -99,7 +116,7 @@ export class GalaxyRegisterComponent {
           if (!token) throw new Error('No token received');
 
           const headers = new HttpHeaders().set('registration-token', token);
-          return this.http.post(`${backendUrl}/galaxy/register`, formData, {
+          return this.http.post(`${environment.auth0.backend}/galaxy/register`, formData, {
             headers,
           });
         }),
@@ -117,5 +134,13 @@ export class GalaxyRegisterComponent {
           this.router.navigate(['/galaxy/register-success']);
         }
       });
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    return this.validationService.isFieldInvalid(this.registerForm, fieldName);
+  }
+
+  getErrorMessages(fieldName: keyof GalaxyRegistrationForm): string[] {
+    return this.validationService.getErrorMessages(this.registerForm, fieldName);
   }
 }

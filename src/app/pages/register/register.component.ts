@@ -11,6 +11,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { BUNDLES, Bundle } from '../../core/constants/constants';
+import { passwordRequirements } from '../../../utils/validation/passwords';
+import { usernameRequirements } from '../../../utils/validation/usernames';
+import { ValidationService } from '../../core/services/validation.service';
 
 interface RegistrationForm {
   firstName: FormControl<string>;
@@ -32,6 +35,7 @@ export class RegisterComponent {
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
+  private validationService = inject(ValidationService);
 
   currentStep = 1;
   totalSteps = 5;
@@ -41,12 +45,6 @@ export class RegisterComponent {
   bundleForm: FormGroup = this.formBuilder.group({
     selectedBundle: ['', Validators.required],
   });
-
-  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character
-  private passwordValidator = Validators.compose([
-    Validators.required,
-    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/),
-  ]);
 
   private confirmPasswordValidator = (): ValidationErrors | null => {
     const password = this.registrationForm?.get('password')?.value;
@@ -64,10 +62,10 @@ export class RegisterComponent {
         Validators.required,
         Validators.email,
       ]),
-      username: this.formBuilder.nonNullable.control('', [Validators.required]),
+      username: this.formBuilder.nonNullable.control('', usernameRequirements),
       password: this.formBuilder.nonNullable.control(
         '',
-        this.passwordValidator,
+        passwordRequirements,
       ),
       confirmPassword: this.formBuilder.nonNullable.control('', [
         Validators.required,
@@ -163,21 +161,11 @@ export class RegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.registrationForm.get(fieldName);
-    return !!(field?.invalid && (field?.dirty || field?.touched));
+    return this.validationService.isFieldInvalid(this.registrationForm, fieldName);
   }
 
-  getErrorMessage(fieldName: string): string {
-    const control = this.registrationForm.get(fieldName);
-    if (control?.errors) {
-      if (control.errors['required']) return 'This field is required';
-      if (control.errors['email']) return 'Please enter a valid email address';
-      if (control.errors['passwordMismatch']) return 'Passwords do not match';
-      if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character';
-      }
-    }
-    return '';
+  getErrorMessages(fieldName: keyof RegistrationForm): string[] {
+    return this.validationService.getErrorMessages(this.registrationForm, fieldName);
   }
 
   private completeRegistration() {

@@ -5,6 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 describe('GalaxyRegisterComponent', () => {
   let component: GalaxyRegisterComponent;
@@ -33,11 +34,11 @@ describe('GalaxyRegisterComponent', () => {
     expect(component.registerForm.get('email')?.value).toBe('');
     expect(component.registerForm.get('password')?.value).toBe('');
     expect(component.registerForm.get('password_confirmation')?.value).toBe('');
-    expect(component.registerForm.get('public_name')?.value).toBe('');
+    expect(component.registerForm.get('username')?.value).toBe('');
   });
 
   it('should detect mismatching passwords', () => {
-    component.registerForm.controls['password'].setValue('password123');
+    component.registerForm.controls['password'].setValue('Password123!');
     component.registerForm.controls['password_confirmation'].setValue('notmatching');
     component.registerForm.updateValueAndValidity();
 
@@ -45,32 +46,32 @@ describe('GalaxyRegisterComponent', () => {
   });
 
   it('should not show mismatch error when passwords match', () => {
-    component.registerForm.controls['password'].setValue('password123');
-    component.registerForm.controls['password_confirmation'].setValue('password123');
+    component.registerForm.controls['password'].setValue('Password123!');
+    component.registerForm.controls['password_confirmation'].setValue('Password123!');
     component.registerForm.updateValueAndValidity();
 
     expect(component.registerForm.hasError('passwordMismatch')).toBeFalse();
   });
 
-  it('should invalidate public_name with uppercase letters', () => {
-    component.registerForm.controls['public_name'].setValue('InvalidName');
-    expect(component.registerForm.controls['public_name'].valid).toBeFalse();
-    expect(component.registerForm.controls['public_name'].errors?.['pattern']).toBeTruthy();
+  it('should invalidate username with uppercase letters', () => {
+    component.registerForm.controls['username'].setValue('InvalidName');
+    expect(component.registerForm.controls['username'].valid).toBeFalse();
+    expect(component.registerForm.controls['username'].errors?.['pattern']).toBeTruthy();
   });
 
-  it('should invalidate public_name with special characters', () => {
-    component.registerForm.controls['public_name'].setValue('bad$name!');
-    expect(component.registerForm.controls['public_name'].valid).toBeFalse();
-    expect(component.registerForm.controls['public_name'].errors?.['pattern']).toBeTruthy();
+  it('should invalidate username with special characters', () => {
+    component.registerForm.controls['username'].setValue('bad$name!');
+    expect(component.registerForm.controls['username'].valid).toBeFalse();
+    expect(component.registerForm.controls['username'].errors?.['pattern']).toBeTruthy();
   });
 
-  it('should accept a valid public_name', () => {
-    component.registerForm.controls['public_name'].setValue('valid_name-123');
-    expect(component.registerForm.controls['public_name'].valid).toBeTrue();
+  it('should accept a valid username', () => {
+    component.registerForm.controls['username'].setValue('valid_name-123');
+    expect(component.registerForm.controls['username'].valid).toBeTrue();
   });
 
-  it('should show "Your public name should contain only..." when public_name is invalid', () => {
-    component.registerForm.controls['public_name'].setValue('Invalid@Name');
+  it('should show "Your public name should contain only..." when username is invalid', () => {
+    component.registerForm.controls['username'].setValue('Invalid@Name');
     markAllAsTouched();
 
     const errorElements: NodeListOf<HTMLElement> = fixture.debugElement.nativeElement.querySelectorAll('small');
@@ -107,9 +108,9 @@ describe('GalaxyRegisterComponent submission', () => {
   function fillFormWithValidData() {
     component.registerForm.setValue({
       email: 'test@example.com',
-      password: 'password123',
-      password_confirmation: 'password123',
-      public_name: 'testuser'
+      password: 'Password123!',
+      password_confirmation: 'Password123!',
+      username: 'testuser'
     });
   }
 
@@ -120,13 +121,13 @@ describe('GalaxyRegisterComponent submission', () => {
 
     // Expect token request
     const tokenReq = httpMock.expectOne(
-      "https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token"
+      `${environment.auth0.backend}/galaxy/get-registration-token`
     );
     tokenReq.flush({ token: 'mock-token' });
 
     // Expect registration request
     const registerReq = httpMock.expectOne(
-      "https://aaibackend.test.biocommons.org.au/galaxy/register"
+      `${environment.auth0.backend}/galaxy/register`
     );
     registerReq.flush({ success: true });
 
@@ -141,7 +142,7 @@ describe('GalaxyRegisterComponent submission', () => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token");
+    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/get-registration-token`);
     tokenReq.flush("", {status: 500, statusText: "Token request failed"});
 
     tick();
@@ -156,10 +157,10 @@ describe('GalaxyRegisterComponent submission', () => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/get-registration-token");
+    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/get-registration-token`);
     tokenReq.flush({ token: 'mock-token' });
 
-    const registerReq = httpMock.expectOne("https://aaibackend.test.biocommons.org.au/galaxy/register");
+    const registerReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/register`);
     registerReq.flush("", { status: 500, statusText: "Server error" });
 
     tick();
@@ -175,7 +176,7 @@ describe('GalaxyRegisterComponent submission', () => {
       email: '',
       password: '',
       password_confirmation: '',
-      public_name: ''
+      username: ''
     });
 
     component.onSubmit();

@@ -9,6 +9,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { usernameRequirements } from '../../../../utils/validation/usernames';
+import { passwordRequirements } from '../../../../utils/validation/passwords';
+import { ValidationService } from '../../../core/services/validation.service';
 
 interface Organization {
   id: string;
@@ -16,7 +19,7 @@ interface Organization {
   selected: boolean;
 }
 
-interface RegistrationRequest {
+export interface RegistrationRequest {
   username: string;
   fullname: string;
   email: string;
@@ -39,6 +42,7 @@ export class BpaRegisterComponent {
   private formBuilder = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
+  private validationService = inject(ValidationService);
 
   errorNotification = signal<string | null>(null);
 
@@ -107,12 +111,6 @@ export class BpaRegisterComponent {
     },
   ];
 
-  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character
-  private passwordValidator = Validators.compose([
-    Validators.required,
-    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/),
-  ]);
-
   private confirmPasswordValidator = (): ValidationErrors | null => {
     const password = this.registrationForm?.get('password')?.value;
     const confirm = this.registrationForm?.get('confirmPassword')?.value;
@@ -120,11 +118,11 @@ export class BpaRegisterComponent {
   };
 
   registrationForm = this.formBuilder.group({
-    username: ['', [Validators.required]],
+    username: ['', [usernameRequirements]],
     fullname: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     reason: ['', [Validators.required]],
-    password: ['', this.passwordValidator],
+    password: ['', passwordRequirements],
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
     organizations: this.formBuilder.group(
       this.organizations.reduce(
@@ -200,20 +198,10 @@ export class BpaRegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.registrationForm.get(fieldName);
-    return !!(field?.invalid && (field?.dirty || field?.touched));
+    return this.validationService.isFieldInvalid(this.registrationForm, fieldName);
   }
 
-  getErrorMessage(fieldName: string): string {
-    const control = this.registrationForm.get(fieldName);
-    if (control?.errors) {
-      if (control.errors['required']) return 'This field is required';
-      if (control.errors['email']) return 'Please enter a valid email address';
-      if (control.errors['passwordMismatch']) return 'Passwords do not match';
-      if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character';
-      }
-    }
-    return '';
+  getErrorMessages(fieldName: keyof RegistrationRequest | "confirmPassword"): string[] {
+    return this.validationService.getErrorMessages(this.registrationForm, fieldName);
   }
 }
