@@ -9,6 +9,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { usernameRequirements } from '../../../../utils/validation/usernames';
+import { ALLOWED_SPECIAL_CHARACTERS, passwordRequirements } from '../../../../utils/validation/passwords';
 
 interface Organization {
   id: string;
@@ -16,7 +18,7 @@ interface Organization {
   selected: boolean;
 }
 
-interface RegistrationRequest {
+export interface RegistrationRequest {
   username: string;
   fullname: string;
   email: string;
@@ -107,12 +109,6 @@ export class BpaRegisterComponent {
     },
   ];
 
-  // Password validator to require at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character
-  private passwordValidator = Validators.compose([
-    Validators.required,
-    Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/),
-  ]);
-
   private confirmPasswordValidator = (): ValidationErrors | null => {
     const password = this.registrationForm?.get('password')?.value;
     const confirm = this.registrationForm?.get('confirmPassword')?.value;
@@ -120,11 +116,11 @@ export class BpaRegisterComponent {
   };
 
   registrationForm = this.formBuilder.group({
-    username: ['', [Validators.required]],
+    username: ['', [usernameRequirements]],
     fullname: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     reason: ['', [Validators.required]],
-    password: ['', this.passwordValidator],
+    password: ['', passwordRequirements],
     confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
     organizations: this.formBuilder.group(
       this.organizations.reduce(
@@ -204,16 +200,40 @@ export class BpaRegisterComponent {
     return !!(field?.invalid && (field?.dirty || field?.touched));
   }
 
-  getErrorMessage(fieldName: string): string {
+  getErrorMessages(fieldName: keyof RegistrationRequest | "confirmPassword"): string[] {
     const control = this.registrationForm.get(fieldName);
-    if (control?.errors) {
-      if (control.errors['required']) return 'This field is required';
-      if (control.errors['email']) return 'Please enter a valid email address';
-      if (control.errors['passwordMismatch']) return 'Passwords do not match';
-      if (fieldName === 'password' && control.errors['pattern']) {
-        return 'Password must be at least 8 characters including a lower-case letter, an upper-case letter, a number, and a special character';
+    if (!control?.errors) return [];
+
+    const errorMessages: Partial<Record<keyof RegistrationRequest | "confirmPassword" | "default", Record<string, string>>> = {
+      'default': {
+        'required': 'This field is required',
+        'email': 'Please enter a valid email address',
+        'passwordMismatch': 'Passwords do not match',
+      },
+      'password': {
+        'passwordMismatch': 'Passwords do not match',
+        'minlength': 'Password must be at least 8 characters',
+        'maxlength': 'Password cannot be longer than 128 characters',
+        'lowercaseRequired': 'Password must contain at least one lowercase letter',
+        'uppercaseRequired': 'Password must contain at least one uppercase letter',
+        'digitRequired': 'Password must contain at least one digit',
+        'specialCharacterRequired': `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`
+      },
+      'username': {
+        'minlength': 'Your username needs at least 3 characters',
+        'maxlength': 'Your username cannot be longer than 100 characters',
+        'pattern': 'Your username should contain only lower-case letters, numbers, dots, underscores and dashes',
       }
-    }
-    return '';
+    };
+
+    // Return all error messages that apply to this control
+    return Object.keys(control.errors)
+      .filter(key =>
+        errorMessages[fieldName]?.[key] || errorMessages['default']?.[key]
+      )
+      .map(key =>
+        errorMessages[fieldName]?.[key] || errorMessages['default']?.[key] || `Error: ${key}`
+      );
+
   }
 }
