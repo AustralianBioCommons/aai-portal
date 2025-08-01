@@ -11,8 +11,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { BUNDLES, Bundle } from '../../core/constants/constants';
-import { ALLOWED_SPECIAL_CHARACTERS, passwordRequirements } from '../../../utils/validation/passwords';
+import { passwordRequirements } from '../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../utils/validation/usernames';
+import { ValidationService } from '../../core/services/validation.service';
 
 interface RegistrationForm {
   firstName: FormControl<string>;
@@ -34,6 +35,7 @@ export class RegisterComponent {
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
+  private validationService = inject(ValidationService);
 
   currentStep = 1;
   totalSteps = 5;
@@ -159,45 +161,11 @@ export class RegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.registrationForm.get(fieldName);
-    return !!(field?.invalid && (field?.dirty || field?.touched));
+    return this.validationService.isFieldInvalid(this.registrationForm, fieldName);
   }
 
   getErrorMessages(fieldName: keyof RegistrationForm): string[] {
-    const control = this.registrationForm.get(fieldName);
-    if (!control?.errors) return [];
-
-    const errorMessages: Partial<Record<keyof RegistrationForm | "default", Record<string, string>>> = {
-      'default': {
-        'required': 'This field is required',
-        'email': 'Please enter a valid email address',
-        'passwordMismatch': 'Passwords do not match',
-      },
-      'password': {
-        'passwordMismatch': 'Passwords do not match',
-        'minlength': 'Password must be at least 8 characters',
-        'maxlength': 'Password cannot be longer than 128 characters',
-        'lowercaseRequired': 'Password must contain at least one lowercase letter',
-        'uppercaseRequired': 'Password must contain at least one uppercase letter',
-        'digitRequired': 'Password must contain at least one digit',
-        'specialCharacterRequired': `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`
-      },
-      'username': {
-        'minlength': 'Your username needs at least 3 characters',
-        'maxlength': 'Your username cannot be longer than 100 characters',
-        'pattern': 'Your username should contain only lower-case letters, numbers, dots, underscores and dashes',
-      }
-    };
-
-    // Return all error messages that apply to this control
-    return Object.keys(control.errors)
-      .filter(key =>
-        errorMessages[fieldName]?.[key] || errorMessages['default']?.[key]
-      )
-      .map(key =>
-        errorMessages[fieldName]?.[key] || errorMessages['default']?.[key] || `Error: ${key}`
-      );
-
+    return this.validationService.getErrorMessages(this.registrationForm, fieldName);
   }
 
   private completeRegistration() {

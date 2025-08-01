@@ -13,11 +13,11 @@ import { Router } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import {
-  ALLOWED_SPECIAL_CHARACTERS,
   passwordRequirements,
 } from '../../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { environment } from '../../../../environments/environment';
+import { ValidationService } from '../../../core/services/validation.service';
 
 
 interface GalaxyRegistrationForm {
@@ -38,9 +38,10 @@ interface GalaxyRegistrationToken {
   styleUrl: './galaxy-register.component.css',
 })
 export class GalaxyRegisterComponent {
-  http = inject(HttpClient);
-  formBuilder = inject(FormBuilder);
-  router = inject(Router);
+  private http = inject(HttpClient);
+  private formBuilder = inject(FormBuilder);
+  private router = inject(Router);
+  private validationService = inject(ValidationService);
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   errorMessage: string | null = null;
@@ -63,6 +64,14 @@ export class GalaxyRegisterComponent {
   }
 
   constructor() {
+    this.validationService.addFieldErrorMessages("username",
+      {
+        'required': 'Please enter a public name that will be used to identify you',
+        'minlength': 'Your public name needs at least 3 characters',
+        'maxlength': 'Your public name cannot be longer than 100 characters',
+        'pattern': 'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
+      }
+    )
     this.registerForm = this.formBuilder.group(
       {
         email: new FormControl('', {
@@ -128,44 +137,10 @@ export class GalaxyRegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    const field = this.registerForm.get(fieldName)!;
-    return field.invalid && (field.dirty || field.touched);
+    return this.validationService.isFieldInvalid(this.registerForm, fieldName);
   }
 
   getErrorMessages(fieldName: keyof GalaxyRegistrationForm): string[] {
-    const control = this.registerForm.get(fieldName);
-    if (!control?.errors) return [];
-
-    const errorMessages: Partial<Record<keyof GalaxyRegistrationForm | "default", Record<string, string>>> = {
-      'default': {
-        'required': 'This field is required',
-        'email': 'Please enter a valid email address',
-      },
-      'password': {
-        'passwordMismatch': 'Passwords do not match',
-        'minlength': 'Password must be at least 8 characters',
-        'maxlength': 'Password cannot be longer than 128 characters',
-        'lowercaseRequired': 'Password must contain at least one lowercase letter',
-        'uppercaseRequired': 'Password must contain at least one uppercase letter',
-        'digitRequired': 'Password must contain at least one digit',
-        'specialCharacterRequired': `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`
-      },
-      'username': {
-        'required': 'Please enter a public name that will be used to identify you',
-        'minlength': 'Your public name needs at least 3 characters',
-        'maxlength': 'Your public name cannot be longer than 100 characters',
-        'pattern': 'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
-      }
-    };
-
-    // Return all error messages that apply to this control
-    return Object.keys(control.errors)
-      .filter(key =>
-        errorMessages[fieldName]?.[key] || errorMessages['default']?.[key]
-      )
-      .map(key =>
-        errorMessages[fieldName]?.[key] || errorMessages['default']?.[key] || `Error: ${key}`
-      );
-
+    return this.validationService.getErrorMessages(this.registerForm, fieldName);
   }
 }
