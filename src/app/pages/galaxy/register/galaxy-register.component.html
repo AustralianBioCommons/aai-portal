@@ -92,22 +92,22 @@
       </div>
 
       <div class="relative">
-        <label for="public_name" class="text-xs text-gray-600">
-          Public Name
+        <label for="username" class="text-xs text-gray-600">
+          Public Name (username)
         </label>
         <input
-          id="public_name"
+          id="username"
           type="text"
-          formControlName="public_name"
+          formControlName="username"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
           [class]="{
             'border-red-500':
-             isFieldInvalid('public_name'),
+             isFieldInvalid('username'),
           }"
         />
-        @if ( isFieldInvalid("public_name")) {
+        @if ( isFieldInvalid("username")) {
           <div class="mt-0.5 text-sm text-red-500">
-            @for (error of getErrorMessages("public_name"); track error) {
+            @for (error of getErrorMessages("username"); track error) {
               <small>{{ error }}</small><br/>
             }
           </div>

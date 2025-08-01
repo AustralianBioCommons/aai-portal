@@ -23,7 +23,7 @@ interface GalaxyRegistrationForm {
   email: FormControl<string>;
   password: FormControl<string>;
   password_confirmation: FormControl<string>;
-  public_name: FormControl<string>;
+  username: FormControl<string>;
 }
 
 interface GalaxyRegistrationToken {
