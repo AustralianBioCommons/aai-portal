@@ -27,10 +27,7 @@
           type="email"
           formControlName="email"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              isFieldInvalid('email'),
-          }"
+          [class.border-red-500]="isFieldInvalid('email')"]
         />
         @if (isFieldInvalid('email')) {
           <div class="absolute right-0 text-sm text-red-500">
@@ -48,10 +45,7 @@
           type="password"
           formControlName="password"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-              isFieldInvalid('password'),
-          }"
+          [class.border-red-500]="isFieldInvalid('password')"
         />
         <div class="mb-2 mt-1 text-xs text-gray-500">
           Passwords must be at least 8 characters in length and contain at
@@ -100,10 +94,7 @@
           type="text"
           formControlName="username"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class]="{
-            'border-red-500':
-             isFieldInvalid('username'),
-          }"
+          [class.border-red-500]="isFieldInvalid('username')"
         />
         @if ( isFieldInvalid("username")) {
           <div class="mt-0.5 text-sm text-red-500">
