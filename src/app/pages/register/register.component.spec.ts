@@ -194,7 +194,7 @@ describe('RegisterComponent', () => {
       const firstName = component.registrationForm.get('firstName');
       firstName?.markAsTouched();
       expect(component.isFieldInvalid('firstName')).toBe(true);
-      expect(component.getErrorMessage('firstName')).toBe(
+      expect(component.getErrorMessages('firstName')).toContain(
         'This field is required',
       );
     });
@@ -204,7 +204,7 @@ describe('RegisterComponent', () => {
       email?.setValue('invalid-email');
       email?.markAsTouched();
       expect(component.isFieldInvalid('email')).toBe(true);
-      expect(component.getErrorMessage('email')).toBe(
+      expect(component.getErrorMessages('email')).toContain(
         'Please enter a valid email address',
       );
     });
@@ -214,7 +214,7 @@ describe('RegisterComponent', () => {
       password?.setValue('weak');
       password?.markAsTouched();
       expect(component.isFieldInvalid('password')).toBe(true);
-      expect(component.getErrorMessage('password')).toContain(
+      expect(component.getErrorMessages('password')).toContain(
         'Password must be at least 8 characters',
       );
     });
@@ -227,15 +227,15 @@ describe('RegisterComponent', () => {
       const confirmPassword = component.registrationForm.get('confirmPassword');
       confirmPassword?.markAsTouched();
       expect(component.isFieldInvalid('confirmPassword')).toBe(true);
-      expect(component.getErrorMessage('confirmPassword')).toBe(
+      expect(component.getErrorMessages('confirmPassword')).toContain(
         'Passwords do not match',
       );
     });
 
-    it('should return empty string for fields without errors', () => {
+    it('should return empty array for fields without errors', () => {
       const firstName = component.registrationForm.get('firstName');
       firstName?.setValue('John');
-      expect(component.getErrorMessage('firstName')).toBe('');
+      expect(component.getErrorMessages('firstName')).toEqual([]);
     });
 
     it('should revalidate confirmPassword when password changes', () => {
@@ -252,7 +252,7 @@ describe('RegisterComponent', () => {
         ?.setValue('DifferentPassword123!');
 
       expect(component.isFieldInvalid('confirmPassword')).toBe(true);
-      expect(component.getErrorMessage('confirmPassword')).toBe(
+      expect(component.getErrorMessages('confirmPassword')).toContain(
         'Passwords do not match',
       );
     });
