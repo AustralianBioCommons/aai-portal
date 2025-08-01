@@ -129,10 +129,11 @@ describe('Password Validators', () => {
       expect(result).toBeNull();
     });
 
-    it('should return all errors when password fails all requirements', () => {
+    it('should return multiple errors when password fails multiple requirements', () => {
       const control = new FormControl('');
       const result = passwordRequirements(control);
       expect(result).toEqual({
+        required: true,
         lowercaseRequired: true,
         uppercaseRequired: true,
         digitRequired: true,
@@ -144,6 +145,7 @@ describe('Password Validators', () => {
       const control = new FormControl('test');
       const result = passwordRequirements(control);
       expect(result).toEqual({
+        minlength: {requiredLength: 8, actualLength: 4},
         uppercaseRequired: true,
         digitRequired: true,
         specialCharacterRequired: true
@@ -152,6 +154,7 @@ describe('Password Validators', () => {
       const control2 = new FormControl('TEST123');
       const result2 = passwordRequirements(control2);
       expect(result2).toEqual({
+        minlength: {requiredLength: 8, actualLength: 7},
         lowercaseRequired: true,
         specialCharacterRequired: true
       });
