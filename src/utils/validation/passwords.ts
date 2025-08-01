@@ -4,8 +4,9 @@ export const ALLOWED_SPECIAL_CHARACTERS = '!@#$%^&*';
 
 
 interface PasswordErrors {
-  minLength?: boolean;
-  maxLength?: boolean;
+  required?: boolean;
+  minlength?: {requiredLength: number, actualLength: number};
+  maxlength?: {requiredLength: number, actualLength: number};
   lowercaseRequired?: boolean;
   uppercaseRequired?: boolean;
   digitRequired?: boolean;
@@ -34,9 +35,11 @@ export function specialCharacterRequired(control: AbstractControl): ValidationEr
 }
 
 export function passwordRequirements(control: AbstractControl): PasswordErrors | null {
+  const requiredValidator = Validators.required;
   const minLengthValidator = Validators.minLength(8);
   const maxLengthValidator = Validators.maxLength(128);
   const errors =  {
+    ...requiredValidator(control),
     ...minLengthValidator(control),
     ...maxLengthValidator(control),
     ...lowercaseRequired(control),
