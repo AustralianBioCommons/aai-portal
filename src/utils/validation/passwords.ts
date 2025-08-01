@@ -35,16 +35,14 @@ export function specialCharacterRequired(control: AbstractControl): ValidationEr
 }
 
 export function passwordRequirements(control: AbstractControl): PasswordErrors | null {
-  const requiredValidator = Validators.required;
-  const minLengthValidator = Validators.minLength(8);
-  const maxLengthValidator = Validators.maxLength(128);
-  const errors =  {
-    ...requiredValidator(control),
-    ...minLengthValidator(control),
-    ...maxLengthValidator(control),
-    ...lowercaseRequired(control),
-    ...uppercaseRequired(control),
-    ...digitRequired(control),
-    ...specialCharacterRequired(control)};
-  return Object.keys(errors).length ? errors : null;
+  const combined_validator =  Validators.compose([
+    Validators.required,
+    Validators.minLength(8),
+    Validators.maxLength(128),
+    lowercaseRequired,
+    uppercaseRequired,
+    digitRequired,
+    specialCharacterRequired
+  ]);
+  return combined_validator!(control);
 }
