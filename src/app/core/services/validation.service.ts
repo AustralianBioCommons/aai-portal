@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import { FormGroup} from '@angular/forms';
 import {ALLOWED_SPECIAL_CHARACTERS} from '../../../utils/validation/passwords';
 
+/**
+ * Form validation service to reuse across our registration forms.
+ * Has common definitions of when a field is invalid, along with some
+ * common error messages for our fields (these can be overridden for
+ * specific forms)
+ */
 @Injectable({
   providedIn: 'root'
 })
