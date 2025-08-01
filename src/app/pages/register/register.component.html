@@ -164,9 +164,11 @@
               [class.border-red-500]="isFieldInvalid('firstName')"
               [class.border-gray-300]="!isFieldInvalid('firstName')"
             />
-            @if (isFieldInvalid("firstName")) {
-              <div class="absolute mt-0.5 text-xs text-red-500">
-                {{ getErrorMessage("firstName") }}
+            @if ( isFieldInvalid("firstName")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (error of getErrorMessages("firstName"); track error) {
+                  <small>{{ error }}</small><br/>
+                }
               </div>
             }
           </div>
@@ -187,9 +189,11 @@
               [class.border-red-500]="isFieldInvalid('lastName')"
               [class.border-gray-300]="!isFieldInvalid('lastName')"
             />
-            @if (isFieldInvalid("lastName")) {
-              <div class="absolute mt-0.5 text-xs text-red-500">
-                {{ getErrorMessage("lastName") }}
+            @if ( isFieldInvalid("lastName")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (error of getErrorMessages("lastName"); track error) {
+                  <small>{{ error }}</small><br/>
+                }
               </div>
             }
           </div>
@@ -208,9 +212,11 @@
             [class.border-red-500]="isFieldInvalid('email')"
             [class.border-gray-300]="!isFieldInvalid('email')"
           />
-          @if (isFieldInvalid("email")) {
-            <div class="absolute mt-0.5 text-xs text-red-500">
-              {{ getErrorMessage("email") }}
+          @if ( isFieldInvalid("email")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("email"); track error) {
+                <small>{{ error }}</small><br/>
+              }
             </div>
           }
         </div>
@@ -228,9 +234,11 @@
             [class.border-red-500]="isFieldInvalid('username')"
             [class.border-gray-300]="!isFieldInvalid('username')"
           />
-          @if (isFieldInvalid("username")) {
-            <div class="absolute mt-0.5 text-xs text-red-500">
-              {{ getErrorMessage("username") }}
+          @if ( isFieldInvalid("username")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("username"); track error) {
+                <small>{{ error }}</small><br/>
+              }
             </div>
           }
         </div>
@@ -248,9 +256,11 @@
             [class.border-red-500]="isFieldInvalid('password')"
             [class.border-gray-300]="!isFieldInvalid('password')"
           />
-          @if (isFieldInvalid("password")) {
-            <div class="absolute mt-0.5 text-xs text-red-500">
-              {{ getErrorMessage("password") }}
+          @if ( isFieldInvalid("password")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("password"); track error) {
+                <small>{{ error }}</small><br/>
+              }
             </div>
           }
         </div>
@@ -271,9 +281,11 @@
             [class.border-red-500]="isFieldInvalid('confirmPassword')"
             [class.border-gray-300]="!isFieldInvalid('confirmPassword')"
           />
-          @if (isFieldInvalid("confirmPassword")) {
-            <div class="absolute mt-0.5 text-xs text-red-500">
-              {{ getErrorMessage("confirmPassword") }}
+          @if ( isFieldInvalid("confirmPassword")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("confirmPassword"); track error) {
+                <small>{{ error }}</small><br/>
+              }
             </div>
           }
         </div>
