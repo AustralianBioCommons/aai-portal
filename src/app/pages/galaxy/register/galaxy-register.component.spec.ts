@@ -121,7 +121,7 @@ describe('GalaxyRegisterComponent submission', () => {
 
     // Expect token request
     const tokenReq = httpMock.expectOne(
-      `${environment.auth0.backend}/galaxy/get-registration-token`
+      `${environment.auth0.backend}/galaxy/register/get-registration-token`
     );
     tokenReq.flush({ token: 'mock-token' });
 
@@ -142,7 +142,7 @@ describe('GalaxyRegisterComponent submission', () => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/get-registration-token`);
+    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/register/get-registration-token`);
     tokenReq.flush("", {status: 500, statusText: "Token request failed"});
 
     tick();
@@ -157,7 +157,7 @@ describe('GalaxyRegisterComponent submission', () => {
     fillFormWithValidData();
 
     component.onSubmit();
-    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/get-registration-token`);
+    const tokenReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/register/get-registration-token`);
     tokenReq.flush({ token: 'mock-token' });
 
     const registerReq = httpMock.expectOne(`${environment.auth0.backend}/galaxy/register`);
