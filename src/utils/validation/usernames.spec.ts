@@ -36,7 +36,7 @@ describe('usernameRequirements', () => {
 
   it('should validate maximum length', () => {
     // Arrange
-    const tooLongUsername = 'a'.repeat(101); // 101 characters
+    const tooLongUsername = 'a'.repeat(129);
     const control = new FormControl(tooLongUsername);
 
     // Act
