@@ -8,4 +8,7 @@ export const environment = {
     scope: 'read:current_user update:current_user_metadata',
     backend: 'https://aaibackend.test.biocommons.org.au',
   },
+  recaptcha: {
+    siteKeyV2: '6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG',
+  },
 };

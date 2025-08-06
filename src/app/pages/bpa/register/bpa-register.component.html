@@ -72,10 +72,10 @@
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('username')"
           />
-          @if ( isFieldInvalid("username")) {
+          @if (isFieldInvalid("username")) {
             <div class="mt-0.5 text-xs text-red-500">
               @for (error of getErrorMessages("username"); track error) {
-                <small>{{ error }}</small><br/>
+                {{ error }}<br />
               }
             </div>
           }
@@ -93,10 +93,10 @@
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('fullname')"
           />
-          @if ( isFieldInvalid("fullname")) {
+          @if (isFieldInvalid("fullname")) {
             <div class="mt-0.5 text-xs text-red-500">
               @for (error of getErrorMessages("fullname"); track error) {
-                <small>{{ error }}</small><br/>
+                {{ error }}<br />
               }
             </div>
           }
@@ -115,10 +115,10 @@
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('email')"
           />
-          @if ( isFieldInvalid("email")) {
+          @if (isFieldInvalid("email")) {
             <div class="mt-0.5 text-xs text-red-500">
               @for (error of getErrorMessages("email"); track error) {
-                <small>{{ error }}</small><br/>
+                {{ error }}<br />
               }
             </div>
           }
@@ -136,10 +136,10 @@
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('reason')"
           ></textarea>
-          @if ( isFieldInvalid("reason")) {
+          @if (isFieldInvalid("reason")) {
             <div class="mt-0.5 text-xs text-red-500">
               @for (error of getErrorMessages("reason"); track error) {
-                <small>{{ error }}</small><br/>
+                {{ error }}<br />
               }
             </div>
           }
@@ -185,13 +185,13 @@
           />
           <div class="mb-2 mt-1 text-xs text-gray-500">
             Passwords must be at least 8 characters in length and contain at
-            least one uppercase letter, one lowercase letter, one number, and one
-            special character.
+            least one uppercase letter, one lowercase letter, one number, and
+            one special character.
           </div>
-          @if ( isFieldInvalid("password")) {
+          @if (isFieldInvalid("password")) {
             <div class="mt-0.5 text-xs text-red-500">
               @for (error of getErrorMessages("password"); track error) {
-                <small>{{ error }}</small><br/>
+                {{ error }}<br />
               }
             </div>
           }
@@ -210,27 +210,49 @@
             class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('confirmPassword')"
           />
-          @if ( isFieldInvalid("confirmPassword")) {
+          @if (isFieldInvalid("confirmPassword")) {
             <div class="mt-0.5 text-xs text-red-500">
               @for (error of getErrorMessages("confirmPassword"); track error) {
-                <small>{{ error }}</small><br/>
+                {{ error }}<br />
               }
             </div>
           }
         </div>
         <div
-          class="mt-6 flex w-full flex-col items-center justify-center gap-6"
+          class="mt-6 flex w-full flex-col items-center justify-center gap-12"
         >
           <div class="text-sm font-medium">
             <span class="text-red-500">*</span>
             Required fields
           </div>
-          <button
-            type="submit"
-            class="rounded-md bg-blue-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-950"
+          <div class="flex flex-col items-center gap-2">
+            <re-captcha
+              (resolved)="resolved($event)"
+              siteKey="{{ recaptchaSiteKeyV2 }}"
+            ></re-captcha>
+            @if (!recaptchaToken && recaptchaAttempted) {
+              <div class="text-xs text-red-500">
+                Please complete the reCAPTCHA verification
+              </div>
+            }
+          </div>
+          <div
+            class="flex w-full justify-between gap-6 text-sm font-medium *:w-28 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
           >
-            Create Account
-          </button>
+            <button
+              type="button"
+              class="border bg-white text-sky-900 hover:bg-gray-100"
+              [routerLink]="['../']"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-900 text-white hover:bg-blue-950"
+            >
+              Register
+            </button>
+          </div>
         </div>
       </form>
     </div>

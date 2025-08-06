@@ -4,8 +4,10 @@ import { GalaxyRegisterComponent } from './galaxy-register.component';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { ValidationService } from '../../../core/services/validation.service';
+import { of } from 'rxjs';
 
 describe('GalaxyRegisterComponent', () => {
   let component: GalaxyRegisterComponent;
@@ -14,7 +16,17 @@ describe('GalaxyRegisterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, GalaxyRegisterComponent],
-      providers: [provideHttpClient()]
+      providers: [
+        provideHttpClient(),
+        ValidationService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { params: {} },
+            params: of({})
+          }
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalaxyRegisterComponent);
@@ -92,7 +104,19 @@ describe('GalaxyRegisterComponent submission', () => {
     router = jasmine.createSpyObj('Router', ['navigate']);
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule, GalaxyRegisterComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), {provide: Router, useValue: router}],
+      providers: [
+        provideHttpClient(), 
+        provideHttpClientTesting(), 
+        { provide: Router, useValue: router },
+        ValidationService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: { params: {} },
+            params: of({})
+          }
+        }
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalaxyRegisterComponent);
@@ -134,7 +158,7 @@ describe('GalaxyRegisterComponent submission', () => {
     tick();
     fixture.detectChanges();
 
-    expect(router.navigate).toHaveBeenCalledWith(['/galaxy/register-success']);
+    expect(router.navigate).toHaveBeenCalledWith(['success'], { relativeTo: component.route });
     expect(component.errorMessage).toBeNull();
   }));
 
@@ -184,5 +208,6 @@ describe('GalaxyRegisterComponent submission', () => {
 
     expect(component.registerForm.invalid).toBeTrue();
     expect(component.errorMessage).toBeNull();
+    httpMock.expectNone(`${environment.auth0.backend}/galaxy/register/get-registration-token`);
   });
 });
