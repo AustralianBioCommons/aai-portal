@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
-import { RecaptchaSettings, RECAPTCHA_SETTINGS } from 'ng-recaptcha';
+import { RecaptchaSettings, RECAPTCHA_SETTINGS } from 'ng-recaptcha-2';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -12,7 +12,7 @@ import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { passwordRequirements } from '../../../../utils/validation/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
-import { RecaptchaModule } from 'ng-recaptcha';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 
 interface Organization {
   id: string;
