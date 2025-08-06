@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -12,6 +12,7 @@ import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { passwordRequirements } from '../../../../utils/validation/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 
 interface Organization {
   id: string;
@@ -31,7 +32,7 @@ export interface RegistrationRequest {
 @Component({
   selector: 'app-bpa-register',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, RecaptchaModule],
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
@@ -43,8 +44,13 @@ export class BpaRegisterComponent {
   private http = inject(HttpClient);
   private router = inject(Router);
   private validationService = inject(ValidationService);
+  private route = inject(ActivatedRoute);
 
+  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   errorNotification = signal<string | null>(null);
+
+  recaptchaToken: string | null = null;
+  recaptchaAttempted = false;
 
   organizations: Organization[] = [
     {
@@ -139,7 +145,8 @@ export class BpaRegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.registrationForm.valid) {
+    this.recaptchaAttempted = true;
+    if (this.registrationForm.valid && this.recaptchaToken) {
       const formValue = this.registrationForm.value;
       const requestBody: RegistrationRequest = {
         username: formValue.username || '',
@@ -151,7 +158,8 @@ export class BpaRegisterComponent {
       };
 
       this.http.post(this.backendURL, requestBody).subscribe({
-        next: () => this.router.navigate(['/bpa/registration-success']),
+        next: () =>
+          this.router.navigate(['success'], { relativeTo: this.route }),
         error: (error) => this.showErrorNotification(error?.error?.detail),
       });
     } else {
@@ -166,6 +174,10 @@ export class BpaRegisterComponent {
         }
       }
     }
+  }
+
+  resolved(captchaResponse: string | null): void {
+    this.recaptchaToken = captchaResponse;
   }
 
   resetForm(): void {
@@ -183,6 +195,8 @@ export class BpaRegisterComponent {
     });
     this.registrationForm.markAsPristine();
     this.registrationForm.markAsUntouched();
+    this.recaptchaToken = null;
+    this.recaptchaAttempted = false;
   }
 
   showErrorNotification(message: string): void {
@@ -198,10 +212,18 @@ export class BpaRegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    return this.validationService.isFieldInvalid(this.registrationForm, fieldName);
+    return this.validationService.isFieldInvalid(
+      this.registrationForm,
+      fieldName,
+    );
   }
 
-  getErrorMessages(fieldName: keyof RegistrationRequest | "confirmPassword"): string[] {
-    return this.validationService.getErrorMessages(this.registrationForm, fieldName);
+  getErrorMessages(
+    fieldName: keyof RegistrationRequest | 'confirmPassword',
+  ): string[] {
+    return this.validationService.getErrorMessages(
+      this.registrationForm,
+      fieldName,
+    );
   }
 }

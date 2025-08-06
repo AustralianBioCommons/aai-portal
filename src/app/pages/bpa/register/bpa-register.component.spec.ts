@@ -4,15 +4,20 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { BpaRegisterComponent, RegistrationRequest } from './bpa-register.component';
+import {
+  BpaRegisterComponent,
+  RegistrationRequest,
+} from './bpa-register.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../../environments/environment';
+import { ValidationService } from '../../../core/services/validation.service';
+import { of } from 'rxjs';
 
 describe('BpaRegisterComponent', () => {
   let component: BpaRegisterComponent;
@@ -30,6 +35,15 @@ describe('BpaRegisterComponent', () => {
           provide: Router,
           useValue: { navigate: jasmine.createSpy('navigate') },
         },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({}),
+            queryParams: of({}),
+            snapshot: { params: {}, queryParams: {} },
+          },
+        },
+        ValidationService,
       ],
     }).compileComponents();
 
@@ -67,7 +81,10 @@ describe('BpaRegisterComponent', () => {
 
   describe('Form Validation', () => {
     it('should validate required fields', () => {
-      const requiredControls: (keyof RegistrationRequest | "confirmPassword")[] = [
+      const requiredControls: (
+        | keyof RegistrationRequest
+        | 'confirmPassword'
+      )[] = [
         'username',
         'fullname',
         'email',
@@ -93,7 +110,13 @@ describe('BpaRegisterComponent', () => {
       invalidPasswords.forEach((password) => {
         passwordControl?.setValue(password);
         const errors = passwordControl?.errors;
-        expect([errors?.['lowercaseRequired'], errors?.['uppercaseRequired'], errors?.['numberRequired'], errors?.['specialCharacterRequired'], errors?.['minlength']]).toBeTruthy();
+        expect([
+          errors?.['lowercaseRequired'],
+          errors?.['uppercaseRequired'],
+          errors?.['numberRequired'],
+          errors?.['specialCharacterRequired'],
+          errors?.['minlength'],
+        ]).toBeTruthy();
       });
 
       passwordControl?.setValue('StrongPass123!');
@@ -147,6 +170,8 @@ describe('BpaRegisterComponent', () => {
       component.organizations.forEach((org) => {
         organizationsGroup?.get(org.id)?.setValue(false);
       });
+
+      component.recaptchaToken = 'mock-recaptcha-token';
     });
 
     it('should submit form successfully', fakeAsync(() => {
@@ -159,9 +184,9 @@ describe('BpaRegisterComponent', () => {
       req.flush({});
 
       tick();
-      expect(router.navigate).toHaveBeenCalledWith([
-        '/bpa/registration-success',
-      ]);
+      expect(router.navigate).toHaveBeenCalledWith(['success'], {
+        relativeTo: jasmine.any(Object),
+      });
     }));
 
     it('should handle form submission error', fakeAsync(() => {
@@ -183,6 +208,7 @@ describe('BpaRegisterComponent', () => {
 
     it('should scroll to first invalid field on invalid submit', () => {
       component.registrationForm.reset();
+      component.recaptchaToken = null;
       const mockElement = document.createElement('div');
       spyOn(mockElement, 'scrollIntoView');
       spyOn(document, 'getElementById').and.returnValue(mockElement);
@@ -237,5 +263,32 @@ describe('BpaRegisterComponent', () => {
     expect(component.getErrorMessages('confirmPassword')).toContain(
       'Passwords do not match',
     );
+  });
+
+  describe('reCAPTCHA Integration', () => {
+    it('should not submit form without recaptcha token', () => {
+      component.registrationForm.patchValue({
+        username: 'testuser',
+        fullname: 'Test User',
+        email: 'test@example.com',
+        reason: 'Testing purpose',
+        password: 'StrongPass123!',
+        confirmPassword: 'StrongPass123!',
+      });
+      component.recaptchaToken = null;
+
+      component.onSubmit();
+
+      httpTestingController.expectNone(
+        `${environment.auth0.backend}/bpa/register`,
+      );
+      expect(component.recaptchaAttempted).toBe(true);
+    });
+
+    it('should handle recaptcha resolved callback', () => {
+      const mockToken = 'mock-recaptcha-token';
+      component.resolved(mockToken);
+      expect(component.recaptchaToken).toBe(mockToken);
+    });
   });
 });

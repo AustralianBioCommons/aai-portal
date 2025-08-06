@@ -9,7 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import {
@@ -43,6 +43,7 @@ export class GalaxyRegisterComponent {
   private router = inject(Router);
   private validationService = inject(ValidationService);
   registerForm: FormGroup<GalaxyRegistrationForm>;
+  route = inject(ActivatedRoute);
 
   errorMessage: string | null = null;
   isFrameLoading = true;
@@ -131,7 +132,7 @@ export class GalaxyRegisterComponent {
         if (result) {
           this.errorMessage = null;
           this.registerForm.reset();
-          this.router.navigate(['/galaxy/register-success']);
+          this.router.navigate(['success'], { relativeTo: this.route });
         }
       });
   }
