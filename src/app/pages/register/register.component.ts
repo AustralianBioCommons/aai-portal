@@ -14,6 +14,8 @@ import { BUNDLES, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../utils/validation/usernames';
 import { ValidationService } from '../../core/services/validation.service';
+import { environment } from '../../../environments/environment';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 
 interface RegistrationForm {
   firstName: FormControl<string>;
@@ -27,7 +29,7 @@ interface RegistrationForm {
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule],
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
@@ -39,6 +41,10 @@ export class RegisterComponent {
 
   currentStep = 1;
   totalSteps = 5;
+
+  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
+  recaptchaToken: string | null = null;
+  recaptchaAttempted = false;
 
   bundles: Bundle[] = BUNDLES;
 
@@ -63,10 +69,7 @@ export class RegisterComponent {
         Validators.email,
       ]),
       username: this.formBuilder.nonNullable.control('', usernameRequirements),
-      password: this.formBuilder.nonNullable.control(
-        '',
-        passwordRequirements,
-      ),
+      password: this.formBuilder.nonNullable.control('', passwordRequirements),
       confirmPassword: this.formBuilder.nonNullable.control('', [
         Validators.required,
         this.confirmPasswordValidator,
@@ -92,6 +95,10 @@ export class RegisterComponent {
   getSelectedBundle(): Bundle | undefined {
     const selectedId = this.bundleForm.get('selectedBundle')?.value;
     return this.bundles.find((bundle) => bundle.id === selectedId);
+  }
+
+  resolved(captchaResponse: string | null): void {
+    this.recaptchaToken = captchaResponse;
   }
 
   private initializeTermsForm() {
@@ -136,6 +143,14 @@ export class RegisterComponent {
   }
 
   private handleStepValidation(form: FormGroup, onSuccess?: () => void) {
+    if (this.currentStep === 2) {
+      this.recaptchaAttempted = true;
+      if (!this.recaptchaToken) {
+        form.markAllAsTouched();
+        return;
+      }
+    }
+
     if (form.valid) {
       if (onSuccess) {
         onSuccess();
@@ -161,11 +176,17 @@ export class RegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    return this.validationService.isFieldInvalid(this.registrationForm, fieldName);
+    return this.validationService.isFieldInvalid(
+      this.registrationForm,
+      fieldName,
+    );
   }
 
   getErrorMessages(fieldName: keyof RegistrationForm): string[] {
-    return this.validationService.getErrorMessages(this.registrationForm, fieldName);
+    return this.validationService.getErrorMessages(
+      this.registrationForm,
+      fieldName,
+    );
   }
 
   private completeRegistration() {

@@ -46,9 +46,9 @@ export class BpaRegisterComponent {
   private validationService = inject(ValidationService);
   private route = inject(ActivatedRoute);
 
-  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   errorNotification = signal<string | null>(null);
 
+  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken: string | null = null;
   recaptchaAttempted = false;
 

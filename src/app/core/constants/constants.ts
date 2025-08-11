@@ -7,7 +7,6 @@ export interface BundleService {
 export interface Bundle {
   id: string;
   name: string;
-  description: string;
   logoUrls: string[];
   listItems: string[];
   disabled?: boolean;
@@ -36,11 +35,10 @@ export const BUNDLES: Bundle[] = [
   {
     id: 'data-portal-galaxy',
     name: 'Data Portal and Galaxy',
-    description: 'Bundle includes:',
     logoUrls: ['/assets/bpa-logo.png', '/assets/galaxy-logo.png'],
     listItems: [
-      'The <span class="font-medium">Data Portal</span> public data access',
-      'The <span class="font-medium">Galaxy Australia</span> data access',
+      'The <span class="font-medium text-gray-900">Data Portal</span> public data access',
+      'The <span class="font-medium text-gray-900">Galaxy Australia</span> data access',
       'Easily import data into Galaxy from the Data Portal',
     ],
     services: [bpaBundleService, galaxyBundleService],
@@ -48,10 +46,9 @@ export const BUNDLES: Bundle[] = [
   {
     id: 'tsi',
     name: 'Threatened Species Initiative',
-    description: 'Bundle includes:',
     logoUrls: ['/assets/tsi-logo.jpg'],
     listItems: [
-      'The <span class="font-medium">Data Portal</span> and <span class="font-medium">Galaxy Australia</span> data access',
+      'The <span class="font-medium text-gray-900">Data Portal</span> and <span class="font-medium text-gray-900">Galaxy Australia</span> data access',
       'TSI public and restricted datasets in the Data Portal',
       'Galaxy Australia 2TB storage space, high memory nodes, workflows and tools',
       'Easily import data into Galaxy from the Data Portal',
@@ -61,7 +58,6 @@ export const BUNDLES: Bundle[] = [
   {
     id: 'fungi',
     name: "Fungi Functional 'Omics",
-    description: '',
     logoUrls: ['/assets/aff-logo.png'],
     listItems: [],
     disabled: true,

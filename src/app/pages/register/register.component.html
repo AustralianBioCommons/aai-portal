@@ -26,21 +26,19 @@
     </div>
   </div>
 
-  @if (currentStep < totalSteps) {
+  @if (currentStep < totalSteps && router.url === "/register") {
     <div
       class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
     >
-      @if (router.url === "/register") {
-        <div class="flex items-center justify-center gap-2">
-          <div class="font-light text-gray-500">Already have an account?</div>
-          <button
-            class="font-medium text-blue-600 hover:text-blue-700"
-            (click)="login()"
-          >
-            Log in
-          </button>
-        </div>
-      }
+      <div class="flex items-center justify-center gap-2">
+        <div class="font-light text-gray-500">Already have an account?</div>
+        <button
+          class="font-medium text-blue-600 hover:text-blue-700"
+          (click)="login()"
+        >
+          Log in
+        </button>
+      </div>
     </div>
   }
 
@@ -51,10 +49,12 @@
     >
       <form
         [formGroup]="bundleForm"
-        class="flex w-full max-w-4xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
       >
-        <h1 class="text-3xl font-semibold text-gray-900">Access bundles</h1>
-        <p class="font-light text-gray-500">
+        <h1 class="text-center text-3xl font-semibold text-gray-900">
+          Access bundles
+        </h1>
+        <p class="text-center font-light text-gray-500">
           Request access to a bundle you need for your research.
         </p>
 
@@ -62,71 +62,95 @@
           bundleForm.get("selectedBundle")?.invalid &&
           bundleForm.get("selectedBundle")?.touched
         ) {
-          <div class="text-sm text-red-500">
+          <div class="text-center text-sm text-red-500">
             Please select a bundle to continue
           </div>
         }
 
-        <!-- Bundle selection cards -->
-        @for (bundle of bundles; track bundle.id) {
-          <div
-            tabindex="0"
-            class="flex w-full rounded-md bg-white shadow-md transition-all duration-200"
-            [ngClass]="{
-              'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
-                !bundle.disabled,
-              'cursor-not-allowed opacity-50': bundle.disabled,
-              'ring-2 ring-red-500':
-                bundleForm.get('selectedBundle')?.invalid &&
-                bundleForm.get('selectedBundle')?.touched &&
-                !bundleForm.get('selectedBundle')?.value &&
-                !bundle.disabled,
-              'ring-2 ring-blue-500':
-                bundleForm.get('selectedBundle')?.value === bundle.id,
-            }"
-            (click)="!bundle.disabled && selectBundle(bundle.id)"
-            (keyup.enter)="!bundle.disabled && selectBundle(bundle.id)"
-          >
-            <!-- Bundle content -->
-            <div class="flex w-5/6 items-center justify-start border-r p-12">
-              <div class="w-1/6">
-                @for (logo of bundle.logoUrls; track logo) {
-                  <img
-                    [src]="logo"
-                    [alt]="bundle.name + ' logo'"
-                    class="h-16 w-auto"
-                    [class.-ml-4]="bundle.id === 'fungi'"
-                    [class.h-20]="bundle.id === 'fungi'"
-                  />
-                }
-              </div>
-              <div class="flex w-4/6 flex-col gap-6">
+        <div class="mt-6 flex flex-wrap items-stretch justify-center gap-6">
+          <!-- Bundle selection cards -->
+          @for (bundle of bundles; track bundle.id) {
+            <div
+              tabindex="0"
+              class="flex min-h-96 min-w-80 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all duration-200"
+              [ngClass]="{
+                'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
+                  !bundle.disabled,
+                'cursor-not-allowed opacity-50': bundle.disabled,
+                group: !bundle.disabled,
+                'ring-2 ring-red-500':
+                  bundleForm.get('selectedBundle')?.invalid &&
+                  bundleForm.get('selectedBundle')?.touched &&
+                  !bundleForm.get('selectedBundle')?.value &&
+                  !bundle.disabled,
+                'ring-2 ring-blue-500':
+                  bundleForm.get('selectedBundle')?.value === bundle.id,
+              }"
+              (click)="!bundle.disabled && selectBundle(bundle.id)"
+              (keyup.enter)="!bundle.disabled && selectBundle(bundle.id)"
+            >
+              <!-- Bundle content -->
+              <div class="flex flex-col gap-6">
+                <div class="flex gap-6">
+                  @for (logo of bundle.logoUrls; track logo) {
+                    <img
+                      [src]="logo"
+                      [alt]="bundle.name + ' logo'"
+                      class="h-16 w-auto"
+                      [class.-ml-4]="bundle.id === 'fungi'"
+                      [class.h-20]="bundle.id === 'fungi'"
+                    />
+                  }
+                </div>
                 <div class="text-2xl font-semibold">{{ bundle.name }}</div>
-                @if (bundle.description.length) {
+                @if (bundle.listItems.length) {
                   <div>
-                    <div class="mb-2 font-medium">{{ bundle.description }}</div>
                     @if (bundle.listItems.length > 0) {
-                      <ul class="list-disc pl-6 font-light text-gray-500">
+                      <div class="text-sm/6 font-light text-gray-500">
                         @for (item of bundle.listItems; track item) {
-                          <li [innerHTML]="item"></li>
+                          <div
+                            class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="2"
+                              stroke="currentColor"
+                              class="mt-1 size-5 min-h-5 min-w-5 text-blue-600"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="m4.5 12.75 6 6 9-13.5"
+                              />
+                            </svg>
+                            <div [innerHTML]="item"></div>
+                          </div>
                         }
-                      </ul>
+                      </div>
                     }
                   </div>
                 }
               </div>
-            </div>
-            <div class="flex w-1/6 items-center justify-center p-6">
+
               <input
                 type="radio"
                 formControlName="selectedBundle"
                 [value]="bundle.id"
                 [disabled]="bundle.disabled ?? false"
-                class="pointer-events-none h-4 w-4 text-blue-900"
+                class="sr-only"
               />
+              <button
+                type="button"
+                class="font-mdeium w-full rounded-md bg-blue-500 px-2 py-2.5 text-sm font-medium text-white group-hover:bg-blue-600"
+                [class.cursor-not-allowed]="bundle.disabled"
+              >
+                Select
+              </button>
             </div>
-          </div>
-        }
+          }
+        </div>
       </form>
     </div>
   }
@@ -287,6 +311,18 @@
               @for (error of getErrorMessages("confirmPassword"); track error) {
                 {{ error }}<br />
               }
+            </div>
+          }
+        </div>
+
+        <div class="mt-6 flex flex-col items-center gap-0.5">
+          <re-captcha
+            (resolved)="resolved($event)"
+            siteKey="{{ recaptchaSiteKeyV2 }}"
+          ></re-captcha>
+          @if (!recaptchaToken && recaptchaAttempted) {
+            <div class="text-xs text-red-500">
+              Please complete the reCAPTCHA verification
             </div>
           }
         </div>
@@ -466,6 +502,7 @@
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
       <div
         class="flex w-full max-w-4xl justify-between text-sm font-medium *:w-28 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
+        [class.max-w-6xl]="currentStep === 1"
       >
         <button
           type="button"

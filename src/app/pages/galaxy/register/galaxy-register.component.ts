@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
@@ -12,13 +11,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import {
-  passwordRequirements,
-} from '../../../../utils/validation/passwords';
+import { passwordRequirements } from '../../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { environment } from '../../../../environments/environment';
 import { ValidationService } from '../../../core/services/validation.service';
-
+import { RecaptchaModule } from 'ng-recaptcha-2';
 
 interface GalaxyRegistrationForm {
   email: FormControl<string>;
@@ -33,7 +30,7 @@ interface GalaxyRegistrationToken {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, LoadingSpinnerComponent],
+  imports: [ReactiveFormsModule, LoadingSpinnerComponent, RecaptchaModule],
   templateUrl: './galaxy-register.component.html',
   styleUrl: './galaxy-register.component.css',
 })
@@ -42,8 +39,14 @@ export class GalaxyRegisterComponent {
   private formBuilder = inject(FormBuilder);
   private router = inject(Router);
   private validationService = inject(ValidationService);
-  registerForm: FormGroup<GalaxyRegistrationForm>;
+
   route = inject(ActivatedRoute);
+
+  registerForm: FormGroup<GalaxyRegistrationForm>;
+
+  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
+  recaptchaToken: string | null = null;
+  recaptchaAttempted = false;
 
   errorMessage: string | null = null;
   isFrameLoading = true;
@@ -52,55 +55,52 @@ export class GalaxyRegisterComponent {
     this.isFrameLoading = false;
   }
 
-  /**
-   * Checks that the password and password_confirmation
-   * fields have the same value
-   */
-  passwordMatchValidator(
-    group: AbstractControl<GalaxyRegistrationForm>,
-  ): ValidationErrors | null {
-    const password = group.get('password')?.value;
-    const confirm = group.get('password_confirmation')?.value;
+  private confirmPasswordValidator = (): ValidationErrors | null => {
+    const password = this.registerForm?.get('password')?.value;
+    const confirm = this.registerForm?.get('password_confirmation')?.value;
     return password === confirm ? null : { passwordMismatch: true };
-  }
+  };
 
   constructor() {
-    this.validationService.addFieldErrorMessages("username",
-      {
-        'required': 'Please enter a public name that will be used to identify you',
-        'minlength': 'Your public name needs at least 3 characters',
-        'maxlength': 'Your public name cannot be longer than 100 characters',
-        'pattern': 'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
-      }
-    )
-    this.registerForm = this.formBuilder.group(
-      {
-        email: new FormControl('', {
-          nonNullable: true,
-          validators: [Validators.required, Validators.email],
-        }),
-        password: new FormControl('', {
-          nonNullable: true,
-          validators: [passwordRequirements],
-        }),
-        password_confirmation: new FormControl('', {
-          nonNullable: true,
-          validators: [Validators.required],
-        }),
-        username: new FormControl('', {
-          nonNullable: true,
-          validators: [
-            usernameRequirements
-          ],
-        }),
-      },
-      { validators: [this.passwordMatchValidator],
-        updateOn: 'blur'},
-    );
+    this.validationService.addFieldErrorMessages('username', {
+      required: 'Please enter a public name that will be used to identify you',
+      minlength: 'Your public name needs at least 3 characters',
+      maxlength: 'Your public name cannot be longer than 100 characters',
+      pattern:
+        'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
+    });
+    this.registerForm = this.formBuilder.group({
+      email: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, Validators.email],
+      }),
+      password: new FormControl('', {
+        nonNullable: true,
+        validators: [passwordRequirements],
+      }),
+      password_confirmation: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required, this.confirmPasswordValidator],
+      }),
+      username: new FormControl('', {
+        nonNullable: true,
+        validators: [usernameRequirements],
+      }),
+    });
+
+    this.registerForm.get('password')?.valueChanges.subscribe(() => {
+      this.registerForm.get('password_confirmation')?.updateValueAndValidity();
+    });
+  }
+
+  resolved(captchaResponse: string | null): void {
+    this.recaptchaToken = captchaResponse;
   }
 
   onSubmit() {
-    if (this.registerForm.invalid) {
+    this.recaptchaAttempted = true;
+
+    if (this.registerForm.invalid || !this.recaptchaToken) {
       this.registerForm.markAllAsTouched();
       return;
     }
@@ -117,9 +117,13 @@ export class GalaxyRegisterComponent {
           if (!token) throw new Error('No token received');
 
           const headers = new HttpHeaders().set('registration-token', token);
-          return this.http.post(`${environment.auth0.backend}/galaxy/register`, formData, {
-            headers,
-          });
+          return this.http.post(
+            `${environment.auth0.backend}/galaxy/register`,
+            formData,
+            {
+              headers,
+            },
+          );
         }),
         catchError((error) => {
           console.error('Registration failed:', error);
@@ -142,6 +146,9 @@ export class GalaxyRegisterComponent {
   }
 
   getErrorMessages(fieldName: keyof GalaxyRegistrationForm): string[] {
-    return this.validationService.getErrorMessages(this.registerForm, fieldName);
+    return this.validationService.getErrorMessages(
+      this.registerForm,
+      fieldName,
+    );
   }
 }

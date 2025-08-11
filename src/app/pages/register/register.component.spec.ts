@@ -137,8 +137,30 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
+      component.recaptchaToken = 'test-recaptcha-token';
+
       component.nextStep();
       expect(component.currentStep).toBe(3);
+    });
+
+    it('should not proceed from step 2 without reCAPTCHA completion', () => {
+      component.currentStep = 2;
+      component.selectBundle('data-portal-galaxy');
+
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+
+      component.recaptchaToken = null;
+
+      component.nextStep();
+      expect(component.currentStep).toBe(2);
+      expect(component.recaptchaAttempted).toBe(true);
     });
 
     it('should go back from step 2 to step 1', () => {
