@@ -81,16 +81,9 @@ export class GalaxyRegisterComponent {
         validators: [usernameRequirements],
       }),
     });
-    this.registerForm
-      .get('confirmPassword')
-      ?.addValidators(
-        this.validationService.createPasswordConfirmationValidator(
-          this.registerForm,
-        ),
-      );
-    this.registerForm.get('password')?.valueChanges.subscribe(() => {
-      this.registerForm.get('confirmPassword')?.updateValueAndValidity();
-    });
+    this.validationService.setupPasswordConfirmationValidation(
+      this.registerForm,
+    );
   }
 
   resolved(captchaResponse: string | null): void {

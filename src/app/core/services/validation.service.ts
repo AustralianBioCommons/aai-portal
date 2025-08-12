@@ -115,4 +115,30 @@ export class ValidationService {
       return password === confirm ? null : { passwordMismatch: true };
     };
   }
+
+  /**
+   * Sets up password confirmation validation for a form
+   * @param form The form group containing password fields
+   * @param passwordFieldName Name of the password field (default: 'password')
+   * @param confirmFieldName Name of the confirm password field (default: 'confirmPassword')
+   */
+  setupPasswordConfirmationValidation(
+    form: FormGroup,
+    passwordFieldName: string = 'password',
+    confirmFieldName: string = 'confirmPassword',
+  ): void {
+    form
+      .get(confirmFieldName)
+      ?.addValidators(
+        this.createPasswordConfirmationValidator(
+          form,
+          passwordFieldName,
+          confirmFieldName,
+        ),
+      );
+
+    form.get(passwordFieldName)?.valueChanges.subscribe(() => {
+      form.get(confirmFieldName)?.updateValueAndValidity();
+    });
+  }
 }

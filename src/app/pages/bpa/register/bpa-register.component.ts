@@ -133,16 +133,9 @@ export class BpaRegisterComponent {
   });
 
   constructor() {
-    this.registrationForm
-      .get('confirmPassword')
-      ?.addValidators(
-        this.validationService.createPasswordConfirmationValidator(
-          this.registrationForm,
-        ),
-      );
-    this.registrationForm.get('password')?.valueChanges.subscribe(() => {
-      this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
-    });
+    this.validationService.setupPasswordConfirmationValidation(
+      this.registrationForm,
+    );
   }
 
   onSubmit(): void {
