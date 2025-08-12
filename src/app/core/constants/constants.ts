@@ -31,7 +31,7 @@ const tsiBundleService: BundleService = {
   termsUrl: 'https://threatenedspeciesinitiative.com/',
 };
 
-export const BUNDLES: Bundle[] = [
+export const biocommonsBundles: Bundle[] = [
   {
     id: 'data-portal-galaxy',
     name: 'Data Portal and Galaxy',

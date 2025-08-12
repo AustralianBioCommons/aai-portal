@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { BUNDLES, Bundle } from '../../core/constants/constants';
+import { biocommonsBundles, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../utils/validation/usernames';
 import { ValidationService } from '../../core/services/validation.service';
@@ -24,6 +24,15 @@ interface RegistrationForm {
   username: FormControl<string>;
   password: FormControl<string>;
   confirmPassword: FormControl<string>;
+}
+
+export interface RegistrationRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+  bundle: string;
 }
 
 @Component({
@@ -46,7 +55,7 @@ export class RegisterComponent {
   recaptchaToken: string | null = null;
   recaptchaAttempted = false;
 
-  bundles: Bundle[] = BUNDLES;
+  bundles: Bundle[] = biocommonsBundles;
 
   bundleForm: FormGroup = this.formBuilder.group({
     selectedBundle: ['', Validators.required],
