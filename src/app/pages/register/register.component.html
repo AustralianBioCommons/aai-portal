@@ -132,7 +132,7 @@
               />
               <button
                 type="button"
-                class="font-mdeium w-full rounded-md bg-blue-500 px-2 py-2.5 text-sm font-medium text-white group-hover:bg-blue-600"
+                class="font-mdeium w-full rounded-md bg-blue-600 px-2 py-2.5 text-sm font-medium text-white group-hover:bg-blue-700"
                 [class.cursor-not-allowed]="bundle.disabled"
               >
                 Select
@@ -490,7 +490,7 @@
       <div class="text-center">
         <button
           type="button"
-          class="rounded-md bg-blue-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           (click)="getFinalPageButton().action()"
         >
           {{ getFinalPageButton().text }}
@@ -507,14 +507,14 @@
       >
         <button
           type="button"
-          class="border bg-white text-blue-500 hover:bg-gray-100"
+          class="border bg-white text-blue-600 hover:bg-gray-100"
           (click)="prevStep()"
         >
           Back
         </button>
         <button
           type="button"
-          class="bg-blue-500 text-white hover:bg-blue-600"
+          class="bg-blue-600 text-white hover:bg-blue-700"
           (click)="nextStep()"
         >
           {{ currentStep === 4 ? "Submit" : "Next" }}
