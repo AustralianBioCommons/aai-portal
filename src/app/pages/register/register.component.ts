@@ -5,7 +5,6 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
-  ValidationErrors,
   FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -218,6 +217,14 @@ export class RegisterComponent {
     );
   }
 
+  private completeRegistration() {
+    console.log('Submitting registration...', {
+      bundle: this.bundleForm.value,
+      registration: this.registrationForm.value,
+      terms: this.termsForm.value,
+    });
+  }
+
   getFinalPageButton(): { text: string; action: () => void } {
     const currentUrl = this.router.url;
 
@@ -239,13 +246,5 @@ export class RegisterComponent {
         action: () => this.router.navigate(['/login']),
       };
     }
-  }
-
-  private completeRegistration() {
-    console.log('Submitting registration...', {
-      bundle: this.bundleForm.value,
-      registration: this.registrationForm.value,
-      terms: this.termsForm.value,
-    });
   }
 }

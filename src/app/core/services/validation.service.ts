@@ -106,8 +106,8 @@ export class ValidationService {
    */
   createPasswordConfirmationValidator(
     formGroup: FormGroup,
-    passwordFieldName: string = 'password',
-    confirmFieldName: string = 'confirmPassword',
+    passwordFieldName = 'password',
+    confirmFieldName = 'confirmPassword',
   ) {
     return (): ValidationErrors | null => {
       const password = formGroup?.get(passwordFieldName)?.value;
@@ -124,8 +124,8 @@ export class ValidationService {
    */
   setupPasswordConfirmationValidation(
     form: FormGroup,
-    passwordFieldName: string = 'password',
-    confirmFieldName: string = 'confirmPassword',
+    passwordFieldName = 'password',
+    confirmFieldName = 'confirmPassword',
   ): void {
     form
       .get(confirmFieldName)
