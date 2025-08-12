@@ -49,7 +49,7 @@
     >
       <form
         [formGroup]="bundleForm"
-        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
         <h1 class="text-center text-3xl font-semibold text-gray-900">
           Access bundles
@@ -62,7 +62,7 @@
           @for (bundle of bundles; track bundle.id) {
             <div
               tabindex="0"
-              class="flex min-h-96 min-w-80 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all duration-200"
+              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all duration-200"
               [ngClass]="{
                 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
                   !bundle.disabled,

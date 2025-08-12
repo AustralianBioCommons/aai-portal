@@ -42,6 +42,13 @@ describe('GalaxyRegisterComponent', () => {
     fixture.detectChanges();
   });
 
+  function markAllAsTouched() {
+    Object.values(component.registerForm.controls).forEach((control) => {
+      control.markAsTouched();
+    });
+    fixture.detectChanges();
+  }
+
   it('should create the form with default empty values', () => {
     expect(component.registerForm).toBeDefined();
     expect(component.registerForm.get('email')?.value).toBe('');
@@ -91,6 +98,20 @@ describe('GalaxyRegisterComponent', () => {
   it('should accept a valid username', () => {
     component.registerForm.controls['username'].setValue('valid_name-123');
     expect(component.registerForm.controls['username'].valid).toBeTrue();
+  });
+
+  it('should show "Your public name should contain only..." when username is invalid', () => {
+    component.registerForm.controls['username'].setValue('Invalid@Name');
+    markAllAsTouched();
+
+    const errorElements =
+      fixture.debugElement.nativeElement.querySelectorAll('.text-red-500');
+    const patternError = Array.from(
+      errorElements as NodeListOf<HTMLElement>,
+    ).find((e: HTMLElement) => {
+      return e.textContent?.includes('Your public name should contain only');
+    });
+    expect(patternError).toBeTruthy();
   });
 });
 
