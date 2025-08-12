@@ -52,12 +52,6 @@ export class RegisterComponent {
     selectedBundle: ['', Validators.required],
   });
 
-  private confirmPasswordValidator = (): ValidationErrors | null => {
-    const password = this.registrationForm?.get('password')?.value;
-    const confirm = this.registrationForm?.get('confirmPassword')?.value;
-    return password === confirm ? null : { passwordMismatch: true };
-  };
-
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
       firstName: this.formBuilder.nonNullable.control('', [
@@ -72,33 +66,22 @@ export class RegisterComponent {
       password: this.formBuilder.nonNullable.control('', passwordRequirements),
       confirmPassword: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        this.confirmPasswordValidator,
       ]),
     });
 
   termsForm: FormGroup = this.formBuilder.group({});
 
   constructor() {
+    this.registrationForm
+      .get('confirmPassword')
+      ?.addValidators(
+        this.validationService.createPasswordConfirmationValidator(
+          this.registrationForm,
+        ),
+      );
     this.registrationForm.get('password')?.valueChanges.subscribe(() => {
       this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
     });
-  }
-
-  selectBundle(value: string) {
-    this.bundleForm.patchValue({ selectedBundle: value });
-  }
-
-  login() {
-    this.authService.login();
-  }
-
-  getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.bundleForm.get('selectedBundle')?.value;
-    return this.bundles.find((bundle) => bundle.id === selectedId);
-  }
-
-  resolved(captchaResponse: string | null): void {
-    this.recaptchaToken = captchaResponse;
   }
 
   private initializeTermsForm() {
@@ -114,6 +97,35 @@ export class RegisterComponent {
       });
 
       this.termsForm = this.formBuilder.group(termsControls);
+    }
+  }
+
+  login() {
+    this.authService.login();
+  }
+
+  resolved(captchaResponse: string | null): void {
+    this.recaptchaToken = captchaResponse;
+  }
+
+  selectBundle(value: string) {
+    const bundle = this.bundles.find((bundle) => bundle.id === value);
+    if (!bundle?.disabled) {
+      this.bundleForm.patchValue({ selectedBundle: value });
+    }
+  }
+
+  getSelectedBundle(): Bundle | undefined {
+    const selectedId = this.bundleForm.get('selectedBundle')?.value;
+    return this.bundles.find((bundle) => bundle.id === selectedId);
+  }
+
+  prevStep() {
+    if (this.currentStep === 1) {
+      this.router.navigate(['../'], { relativeTo: this.route });
+    } else if (this.currentStep > 1) {
+      this.resetStepValidation(this.currentStep);
+      this.currentStep--;
     }
   }
 
@@ -151,22 +163,37 @@ export class RegisterComponent {
       }
     }
 
+    form.markAllAsTouched();
     if (form.valid) {
       if (onSuccess) {
         onSuccess();
       }
       this.currentStep++;
     } else {
-      form.markAllAsTouched();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
-  prevStep() {
-    if (this.currentStep === 1) {
-      this.router.navigate(['../'], { relativeTo: this.route });
-    } else if (this.currentStep > 1) {
-      this.currentStep--;
+  private resetStepValidation(step: number) {
+    switch (step) {
+      case 1:
+        this.bundleForm.markAsUntouched();
+        this.bundleForm.markAsPristine();
+        break;
+      case 2:
+        this.registrationForm.markAsUntouched();
+        this.registrationForm.markAsPristine();
+        this.recaptchaToken = null;
+        this.recaptchaAttempted = false;
+        break;
+      case 3:
+        this.termsForm.markAsUntouched();
+        this.termsForm.markAsPristine();
+        this.recaptchaToken = null;
+        this.recaptchaAttempted = false;
+        break;
+      case 4:
+        break;
     }
   }
 
@@ -187,14 +214,6 @@ export class RegisterComponent {
       this.registrationForm,
       fieldName,
     );
-  }
-
-  private completeRegistration() {
-    console.log('Submitting registration...', {
-      bundle: this.bundleForm.value,
-      registration: this.registrationForm.value,
-      terms: this.termsForm.value,
-    });
   }
 
   getFinalPageButton(): { text: string; action: () => void } {
@@ -218,5 +237,13 @@ export class RegisterComponent {
         action: () => this.router.navigate(['/login']),
       };
     }
+  }
+
+  private completeRegistration() {
+    console.log('Submitting registration...', {
+      bundle: this.bundleForm.value,
+      registration: this.registrationForm.value,
+      terms: this.termsForm.value,
+    });
   }
 }

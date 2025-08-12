@@ -20,7 +20,7 @@ import { RecaptchaModule } from 'ng-recaptcha-2';
 interface GalaxyRegistrationForm {
   email: FormControl<string>;
   password: FormControl<string>;
-  password_confirmation: FormControl<string>;
+  confirmPassword: FormControl<string>;
   username: FormControl<string>;
 }
 
@@ -55,12 +55,6 @@ export class GalaxyRegisterComponent {
     this.isFrameLoading = false;
   }
 
-  private confirmPasswordValidator = (): ValidationErrors | null => {
-    const password = this.registerForm?.get('password')?.value;
-    const confirm = this.registerForm?.get('password_confirmation')?.value;
-    return password === confirm ? null : { passwordMismatch: true };
-  };
-
   constructor() {
     this.validationService.addFieldErrorMessages('username', {
       required: 'Please enter a public name that will be used to identify you',
@@ -78,18 +72,24 @@ export class GalaxyRegisterComponent {
         nonNullable: true,
         validators: [passwordRequirements],
       }),
-      password_confirmation: new FormControl('', {
+      confirmPassword: new FormControl('', {
         nonNullable: true,
-        validators: [Validators.required, this.confirmPasswordValidator],
+        validators: [Validators.required],
       }),
       username: new FormControl('', {
         nonNullable: true,
         validators: [usernameRequirements],
       }),
     });
-
+    this.registerForm
+      .get('confirmPassword')
+      ?.addValidators(
+        this.validationService.createPasswordConfirmationValidator(
+          this.registerForm,
+        ),
+      );
     this.registerForm.get('password')?.valueChanges.subscribe(() => {
-      this.registerForm.get('password_confirmation')?.updateValueAndValidity();
+      this.registerForm.get('confirmPassword')?.updateValueAndValidity();
     });
   }
 

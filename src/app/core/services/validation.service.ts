@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FormGroup} from '@angular/forms';
-import {ALLOWED_SPECIAL_CHARACTERS} from '../../../utils/validation/passwords';
+import { FormGroup, ValidationErrors } from '@angular/forms';
+import { ALLOWED_SPECIAL_CHARACTERS } from '../../../utils/validation/passwords';
 
 /**
  * Form validation service to reuse across our registration forms.
@@ -9,29 +9,30 @@ import {ALLOWED_SPECIAL_CHARACTERS} from '../../../utils/validation/passwords';
  * specific forms)
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ValidationService {
   private defaultErrorMessages: Record<string, string> = {
-    'required': 'This field is required',
-    'email': 'Please enter a valid email address',
-    'passwordMismatch': 'Passwords do not match',
+    required: 'This field is required',
+    email: 'Please enter a valid email address',
+    passwordMismatch: 'Passwords do not match',
   };
 
   private fieldSpecificErrorMessages: Record<string, Record<string, string>> = {
-    'password': {
-      'minlength': 'Password must be at least 8 characters',
-      'maxlength': 'Password cannot be longer than 128 characters',
-      'lowercaseRequired': 'Password must contain at least one lowercase letter',
-      'uppercaseRequired': 'Password must contain at least one uppercase letter',
-      'digitRequired': 'Password must contain at least one digit',
-      'specialCharacterRequired': `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`
+    password: {
+      minlength: 'Password must be at least 8 characters',
+      maxlength: 'Password cannot be longer than 128 characters',
+      lowercaseRequired: 'Password must contain at least one lowercase letter',
+      uppercaseRequired: 'Password must contain at least one uppercase letter',
+      digitRequired: 'Password must contain at least one digit',
+      specialCharacterRequired: `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`,
     },
-    'username': {
-      'minlength': 'Your username needs at least 3 characters',
-      'maxlength': 'Your username cannot be longer than 100 characters',
-      'pattern': 'Your username should contain only lower-case letters, numbers, dots, underscores and dashes',
-    }
+    username: {
+      minlength: 'Your username needs at least 3 characters',
+      maxlength: 'Your username cannot be longer than 100 characters',
+      pattern:
+        'Your username should contain only lower-case letters, numbers, dots, underscores and dashes',
+    },
   };
 
   /**
@@ -46,11 +47,16 @@ export class ValidationService {
 
     // Return all error messages that apply to this control
     return Object.keys(control.errors)
-      .filter(key =>
-        this.fieldSpecificErrorMessages[fieldName]?.[key] || this.defaultErrorMessages[key]
+      .filter(
+        (key) =>
+          this.fieldSpecificErrorMessages[fieldName]?.[key] ||
+          this.defaultErrorMessages[key],
       )
-      .map(key =>
-        this.fieldSpecificErrorMessages[fieldName]?.[key] || this.defaultErrorMessages[key] || `Error: ${key}`
+      .map(
+        (key) =>
+          this.fieldSpecificErrorMessages[fieldName]?.[key] ||
+          this.defaultErrorMessages[key] ||
+          `Error: ${key}`,
       );
   }
 
@@ -70,10 +76,13 @@ export class ValidationService {
    * @param fieldName The field name to add error messages for
    * @param errorMessages Record of error key to error message mappings
    */
-  addFieldErrorMessages(fieldName: string, errorMessages: Record<string, string>): void {
+  addFieldErrorMessages(
+    fieldName: string,
+    errorMessages: Record<string, string>,
+  ): void {
     this.fieldSpecificErrorMessages[fieldName] = {
       ...(this.fieldSpecificErrorMessages[fieldName] || {}),
-      ...errorMessages
+      ...errorMessages,
     };
   }
 
@@ -84,7 +93,26 @@ export class ValidationService {
   addDefaultErrorMessages(errorMessages: Record<string, string>): void {
     this.defaultErrorMessages = {
       ...this.defaultErrorMessages,
-      ...errorMessages
+      ...errorMessages,
+    };
+  }
+
+  /**
+   * Creates a password confirmation validator for a form control
+   * @param formGroup The parent form group
+   * @param passwordFieldName Name of the password field (default: 'password')
+   * @param confirmFieldName Name of the confirm field (default: 'confirmPassword')
+   * @returns Validator function
+   */
+  createPasswordConfirmationValidator(
+    formGroup: FormGroup,
+    passwordFieldName: string = 'password',
+    confirmFieldName: string = 'confirmPassword',
+  ) {
+    return (): ValidationErrors | null => {
+      const password = formGroup?.get(passwordFieldName)?.value;
+      const confirm = formGroup?.get(confirmFieldName)?.value;
+      return password === confirm ? null : { passwordMismatch: true };
     };
   }
 }

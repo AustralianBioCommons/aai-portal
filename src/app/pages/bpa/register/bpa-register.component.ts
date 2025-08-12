@@ -117,19 +117,13 @@ export class BpaRegisterComponent {
     },
   ];
 
-  private confirmPasswordValidator = (): ValidationErrors | null => {
-    const password = this.registrationForm?.get('password')?.value;
-    const confirm = this.registrationForm?.get('confirmPassword')?.value;
-    return password === confirm ? null : { passwordMismatch: true };
-  };
-
   registrationForm = this.formBuilder.group({
     username: ['', [usernameRequirements]],
     fullname: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     reason: ['', [Validators.required]],
     password: ['', passwordRequirements],
-    confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
+    confirmPassword: ['', [Validators.required]],
     organizations: this.formBuilder.group(
       this.organizations.reduce(
         (acc, org) => ({ ...acc, [org.id]: [false] }),
@@ -139,6 +133,13 @@ export class BpaRegisterComponent {
   });
 
   constructor() {
+    this.registrationForm
+      .get('confirmPassword')
+      ?.addValidators(
+        this.validationService.createPasswordConfirmationValidator(
+          this.registrationForm,
+        ),
+      );
     this.registrationForm.get('password')?.valueChanges.subscribe(() => {
       this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
     });

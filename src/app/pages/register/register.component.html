@@ -57,16 +57,6 @@
         <p class="text-center font-light text-gray-500">
           Request access to a bundle you need for your research.
         </p>
-
-        @if (
-          bundleForm.get("selectedBundle")?.invalid &&
-          bundleForm.get("selectedBundle")?.touched
-        ) {
-          <div class="text-center text-sm text-red-500">
-            Please select a bundle to continue
-          </div>
-        }
-
         <div class="mt-6 flex flex-wrap items-stretch justify-center gap-6">
           <!-- Bundle selection cards -->
           @for (bundle of bundles; track bundle.id) {
@@ -138,7 +128,6 @@
                 type="radio"
                 formControlName="selectedBundle"
                 [value]="bundle.id"
-                [disabled]="bundle.disabled ?? false"
                 class="sr-only"
               />
               <button
@@ -151,6 +140,14 @@
             </div>
           }
         </div>
+        @if (
+          bundleForm.get("selectedBundle")?.invalid &&
+          bundleForm.get("selectedBundle")?.touched
+        ) {
+          <div class="text-center text-sm text-red-500">
+            Please select a bundle to continue
+          </div>
+        }
       </form>
     </div>
   }
@@ -162,7 +159,7 @@
     >
       <form
         [formGroup]="registrationForm"
-        class="flex w-full max-w-4xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
       >
         <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
         <p class="font-light text-gray-500">
@@ -337,7 +334,7 @@
     >
       <form
         [formGroup]="termsForm"
-        class="flex w-full max-w-4xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
       >
         <h1 class="text-3xl font-semibold text-gray-900">
           Accept terms and conditions
@@ -359,15 +356,20 @@
             ) {
               <div
                 tabindex="0"
-                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                [ngClass]="{
-                  'ring-2 ring-red-500':
-                    termsForm.get(service.id)?.invalid &&
-                    termsForm.get(service.id)?.touched &&
-                    !termsForm.get(service.id)?.value,
-                  'ring-2 ring-blue-500':
-                    termsForm.get(service.id)?.value === true,
-                }"
+                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                [class.ring-transparent]="
+                  termsForm.get(service.id)?.value !== true &&
+                  (!termsForm.get(service.id)?.invalid ||
+                    !termsForm.get(service.id)?.touched)
+                "
+                [class.ring-red-500]="
+                  termsForm.get(service.id)?.value !== true &&
+                  termsForm.get(service.id)?.invalid &&
+                  termsForm.get(service.id)?.touched
+                "
+                [class.ring-blue-500]="
+                  termsForm.get(service.id)?.value === true
+                "
                 (click)="toggleTermsAcceptance(service.id)"
                 (keyup.enter)="toggleTermsAcceptance(service.id)"
               >
@@ -417,7 +419,7 @@
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
-      <div class="flex w-full max-w-4xl flex-1 flex-col gap-12">
+      <div class="flex w-full max-w-6xl flex-1 flex-col gap-12">
         <div class="flex flex-col gap-6">
           <h1 class="text-3xl font-semibold text-gray-900">
             Details confirmation
@@ -501,8 +503,7 @@
   @if (currentStep < totalSteps) {
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
       <div
-        class="flex w-full max-w-4xl justify-between text-sm font-medium *:w-28 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
-        [class.max-w-6xl]="currentStep === 1"
+        class="flex w-full max-w-6xl justify-between text-sm font-medium *:w-28 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
       >
         <button
           type="button"

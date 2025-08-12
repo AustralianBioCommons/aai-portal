@@ -46,23 +46,19 @@ describe('GalaxyRegisterComponent', () => {
     expect(component.registerForm).toBeDefined();
     expect(component.registerForm.get('email')?.value).toBe('');
     expect(component.registerForm.get('password')?.value).toBe('');
-    expect(component.registerForm.get('password_confirmation')?.value).toBe('');
+    expect(component.registerForm.get('confirmPassword')?.value).toBe('');
     expect(component.registerForm.get('username')?.value).toBe('');
   });
 
   it('should detect mismatching passwords', () => {
     component.registerForm.controls['password'].setValue('Password123!');
-    component.registerForm.controls['password_confirmation'].setValue(
-      'notmatching',
-    );
+    component.registerForm.controls['confirmPassword'].setValue('notmatching');
 
-    component.registerForm.controls[
-      'password_confirmation'
-    ].updateValueAndValidity();
+    component.registerForm.controls['confirmPassword'].updateValueAndValidity();
     fixture.detectChanges();
 
     expect(
-      component.registerForm.controls['password_confirmation'].hasError(
+      component.registerForm.controls['confirmPassword'].hasError(
         'passwordMismatch',
       ),
     ).toBeTrue();
@@ -70,9 +66,7 @@ describe('GalaxyRegisterComponent', () => {
 
   it('should not show mismatch error when passwords match', () => {
     component.registerForm.controls['password'].setValue('Password123!');
-    component.registerForm.controls['password_confirmation'].setValue(
-      'Password123!',
-    );
+    component.registerForm.controls['confirmPassword'].setValue('Password123!');
     component.registerForm.updateValueAndValidity();
 
     expect(component.registerForm.hasError('passwordMismatch')).toBeFalse();
@@ -139,7 +133,7 @@ describe('GalaxyRegisterComponent submission', () => {
     component.registerForm.setValue({
       email: 'test@example.com',
       password: 'Password123!',
-      password_confirmation: 'Password123!',
+      confirmPassword: 'Password123!',
       username: 'testuser',
     });
     component.recaptchaToken = 'mock-recaptcha-token';
@@ -221,7 +215,7 @@ describe('GalaxyRegisterComponent submission', () => {
     component.registerForm.setValue({
       email: '',
       password: '',
-      password_confirmation: '',
+      confirmPassword: '',
       username: '',
     });
 

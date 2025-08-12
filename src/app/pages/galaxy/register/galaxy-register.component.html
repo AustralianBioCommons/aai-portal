@@ -64,22 +64,19 @@
       </div>
 
       <div class="relative">
-        <label for="password_confirmation" class="text-xs text-gray-600">
+        <label for="confirmPassword" class="text-xs text-gray-600">
           Confirm Password
         </label>
         <input
-          id="password_confirmation"
+          id="confirmPassword"
           type="password"
-          formControlName="password_confirmation"
+          formControlName="confirmPassword"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class.border-red-500]="isFieldInvalid('password_confirmation')"
+          [class.border-red-500]="isFieldInvalid('confirmPassword')"
         />
-        @if (isFieldInvalid("password_confirmation")) {
+        @if (isFieldInvalid("confirmPassword")) {
           <div class="mt-0.5 text-xs text-red-500">
-            @for (
-              error of getErrorMessages("password_confirmation");
-              track error
-            ) {
+            @for (error of getErrorMessages("confirmPassword"); track error) {
               {{ error }}
               <br />
             }
