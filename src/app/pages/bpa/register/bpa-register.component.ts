@@ -1,11 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  ValidationErrors,
-} from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -46,9 +41,9 @@ export class BpaRegisterComponent {
   private validationService = inject(ValidationService);
   private route = inject(ActivatedRoute);
 
-  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   errorNotification = signal<string | null>(null);
 
+  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken: string | null = null;
   recaptchaAttempted = false;
 
@@ -117,19 +112,13 @@ export class BpaRegisterComponent {
     },
   ];
 
-  private confirmPasswordValidator = (): ValidationErrors | null => {
-    const password = this.registrationForm?.get('password')?.value;
-    const confirm = this.registrationForm?.get('confirmPassword')?.value;
-    return password === confirm ? null : { passwordMismatch: true };
-  };
-
   registrationForm = this.formBuilder.group({
     username: ['', [usernameRequirements]],
     fullname: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     reason: ['', [Validators.required]],
     password: ['', passwordRequirements],
-    confirmPassword: ['', [Validators.required, this.confirmPasswordValidator]],
+    confirmPassword: ['', [Validators.required]],
     organizations: this.formBuilder.group(
       this.organizations.reduce(
         (acc, org) => ({ ...acc, [org.id]: [false] }),
@@ -139,9 +128,9 @@ export class BpaRegisterComponent {
   });
 
   constructor() {
-    this.registrationForm.get('password')?.valueChanges.subscribe(() => {
-      this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
-    });
+    this.validationService.setupPasswordConfirmationValidation(
+      this.registrationForm,
+    );
   }
 
   onSubmit(): void {

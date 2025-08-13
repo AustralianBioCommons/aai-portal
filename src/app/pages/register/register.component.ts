@@ -5,15 +5,16 @@ import {
   FormGroup,
   Validators,
   ReactiveFormsModule,
-  ValidationErrors,
   FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { BUNDLES, Bundle } from '../../core/constants/constants';
+import { biocommonsBundles, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../utils/validation/usernames';
 import { ValidationService } from '../../core/services/validation.service';
+import { environment } from '../../../environments/environment';
+import { RecaptchaModule } from 'ng-recaptcha-2';
 
 interface RegistrationForm {
   firstName: FormControl<string>;
@@ -24,10 +25,19 @@ interface RegistrationForm {
   confirmPassword: FormControl<string>;
 }
 
+export interface RegistrationRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+  bundle: string;
+}
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule],
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
@@ -40,17 +50,15 @@ export class RegisterComponent {
   currentStep = 1;
   totalSteps = 5;
 
-  bundles: Bundle[] = BUNDLES;
+  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
+  recaptchaToken: string | null = null;
+  recaptchaAttempted = false;
+
+  bundles: Bundle[] = biocommonsBundles;
 
   bundleForm: FormGroup = this.formBuilder.group({
     selectedBundle: ['', Validators.required],
   });
-
-  private confirmPasswordValidator = (): ValidationErrors | null => {
-    const password = this.registrationForm?.get('password')?.value;
-    const confirm = this.registrationForm?.get('confirmPassword')?.value;
-    return password === confirm ? null : { passwordMismatch: true };
-  };
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
@@ -63,35 +71,18 @@ export class RegisterComponent {
         Validators.email,
       ]),
       username: this.formBuilder.nonNullable.control('', usernameRequirements),
-      password: this.formBuilder.nonNullable.control(
-        '',
-        passwordRequirements,
-      ),
+      password: this.formBuilder.nonNullable.control('', passwordRequirements),
       confirmPassword: this.formBuilder.nonNullable.control('', [
         Validators.required,
-        this.confirmPasswordValidator,
       ]),
     });
 
   termsForm: FormGroup = this.formBuilder.group({});
 
   constructor() {
-    this.registrationForm.get('password')?.valueChanges.subscribe(() => {
-      this.registrationForm.get('confirmPassword')?.updateValueAndValidity();
-    });
-  }
-
-  selectBundle(value: string) {
-    this.bundleForm.patchValue({ selectedBundle: value });
-  }
-
-  login() {
-    this.authService.login();
-  }
-
-  getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.bundleForm.get('selectedBundle')?.value;
-    return this.bundles.find((bundle) => bundle.id === selectedId);
+    this.validationService.setupPasswordConfirmationValidation(
+      this.registrationForm,
+    );
   }
 
   private initializeTermsForm() {
@@ -107,6 +98,35 @@ export class RegisterComponent {
       });
 
       this.termsForm = this.formBuilder.group(termsControls);
+    }
+  }
+
+  login() {
+    this.authService.login();
+  }
+
+  resolved(captchaResponse: string | null): void {
+    this.recaptchaToken = captchaResponse;
+  }
+
+  selectBundle(value: string) {
+    const bundle = this.bundles.find((bundle) => bundle.id === value);
+    if (!bundle?.disabled) {
+      this.bundleForm.patchValue({ selectedBundle: value });
+    }
+  }
+
+  getSelectedBundle(): Bundle | undefined {
+    const selectedId = this.bundleForm.get('selectedBundle')?.value;
+    return this.bundles.find((bundle) => bundle.id === selectedId);
+  }
+
+  prevStep() {
+    if (this.currentStep === 1) {
+      this.router.navigate(['../'], { relativeTo: this.route });
+    } else if (this.currentStep > 1) {
+      this.resetStepValidation(this.currentStep);
+      this.currentStep--;
     }
   }
 
@@ -136,22 +156,45 @@ export class RegisterComponent {
   }
 
   private handleStepValidation(form: FormGroup, onSuccess?: () => void) {
+    if (this.currentStep === 2) {
+      this.recaptchaAttempted = true;
+      if (!this.recaptchaToken) {
+        form.markAllAsTouched();
+        return;
+      }
+    }
+
+    form.markAllAsTouched();
     if (form.valid) {
       if (onSuccess) {
         onSuccess();
       }
       this.currentStep++;
     } else {
-      form.markAllAsTouched();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
-  prevStep() {
-    if (this.currentStep === 1) {
-      this.router.navigate(['../'], { relativeTo: this.route });
-    } else if (this.currentStep > 1) {
-      this.currentStep--;
+  private resetStepValidation(step: number) {
+    switch (step) {
+      case 1:
+        this.bundleForm.markAsUntouched();
+        this.bundleForm.markAsPristine();
+        break;
+      case 2:
+        this.registrationForm.markAsUntouched();
+        this.registrationForm.markAsPristine();
+        this.recaptchaToken = null;
+        this.recaptchaAttempted = false;
+        break;
+      case 3:
+        this.termsForm.markAsUntouched();
+        this.termsForm.markAsPristine();
+        this.recaptchaToken = null;
+        this.recaptchaAttempted = false;
+        break;
+      case 4:
+        break;
     }
   }
 
@@ -161,11 +204,17 @@ export class RegisterComponent {
   }
 
   isFieldInvalid(fieldName: string): boolean {
-    return this.validationService.isFieldInvalid(this.registrationForm, fieldName);
+    return this.validationService.isFieldInvalid(
+      this.registrationForm,
+      fieldName,
+    );
   }
 
   getErrorMessages(fieldName: keyof RegistrationForm): string[] {
-    return this.validationService.getErrorMessages(this.registrationForm, fieldName);
+    return this.validationService.getErrorMessages(
+      this.registrationForm,
+      fieldName,
+    );
   }
 
   private completeRegistration() {
