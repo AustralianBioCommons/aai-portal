@@ -39,11 +39,11 @@ describe('BpaRegisterSelectionComponent', () => {
     expect(title.nativeElement.textContent.trim()).toBe('Register');
   });
 
-  it('should display Data Portal Access section', () => {
+  it('should display Bioplatforms Australia Data Portal Access section', () => {
     const sectionTitles = fixture.debugElement.queryAll(By.css('.text-2xl'));
     expect(sectionTitles.length).toBe(2);
     expect(sectionTitles[0].nativeElement.textContent.trim()).toBe(
-      'Data Portal Access',
+      'Bioplatforms Australia Data Portal Access',
     );
   });
 
@@ -51,7 +51,7 @@ describe('BpaRegisterSelectionComponent', () => {
     const sectionTitles = fixture.debugElement.queryAll(By.css('.text-2xl'));
     expect(sectionTitles.length).toBe(2);
     expect(sectionTitles[1].nativeElement.textContent.trim()).toBe(
-      'Data Portal Access + Bundles',
+      'Bioplatforms Australia Data Portal Access + Bundles',
     );
   });
 
@@ -61,10 +61,10 @@ describe('BpaRegisterSelectionComponent', () => {
     );
     expect(descriptions.length).toBe(2);
     expect(descriptions[0].nativeElement.textContent.trim()).toBe(
-      "Access the Data Portal's public and restricted data.",
+      "Access the Bioplatforms Australia Data Portal's public and restricted data.",
     );
     expect(descriptions[1].nativeElement.textContent.trim()).toBe(
-      "Access the Data Portal's public and restricted data, plus the Australian BioCommons service bundles.",
+      "Access the Bioplatforms Australia Data Portal's public and restricted data, plus the Australian BioCommons service bundles.",
     );
   });
 
