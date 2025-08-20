@@ -8,6 +8,8 @@ import {
   FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { biocommonsBundles, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../../utils/validation/passwords';
@@ -26,8 +28,8 @@ interface RegistrationForm {
 }
 
 export interface RegistrationRequest {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   username: string;
   password: string;
@@ -46,6 +48,7 @@ export class RegisterComponent {
   private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
   private validationService = inject(ValidationService);
+  private http = inject(HttpClient);
 
   currentStep = 1;
   totalSteps = 5;
@@ -53,6 +56,9 @@ export class RegisterComponent {
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken: string | null = null;
   recaptchaAttempted = false;
+
+  errorMessage: string | null = null;
+  isSubmitting = false;
 
   bundles: Bundle[] = biocommonsBundles;
 
@@ -145,7 +151,6 @@ export class RegisterComponent {
         break;
       case 4:
         this.completeRegistration();
-        this.currentStep++;
         break;
       default:
         if (this.currentStep < this.totalSteps) {
@@ -176,6 +181,7 @@ export class RegisterComponent {
   }
 
   private resetStepValidation(step: number) {
+    this.errorMessage = null;
     switch (step) {
       case 1:
         this.bundleForm.markAsUntouched();
@@ -194,6 +200,7 @@ export class RegisterComponent {
         this.recaptchaAttempted = false;
         break;
       case 4:
+        this.isSubmitting = false;
         break;
     }
   }
@@ -218,11 +225,41 @@ export class RegisterComponent {
   }
 
   private completeRegistration() {
-    console.log('Submitting registration...', {
-      bundle: this.bundleForm.value,
-      registration: this.registrationForm.value,
-      terms: this.termsForm.value,
-    });
+    this.isSubmitting = true;
+    this.errorMessage = null;
+
+    const registrationData: RegistrationRequest = {
+      first_name: this.registrationForm.get('firstName')!.value,
+      last_name: this.registrationForm.get('lastName')!.value,
+      email: this.registrationForm.get('email')!.value,
+      username: this.registrationForm.get('username')!.value,
+      password: this.registrationForm.get('password')!.value,
+      bundle: this.bundleForm.get('selectedBundle')!.value,
+    };
+
+    this.http
+      .post(
+        `${environment.auth0.backend}/biocommons/register`,
+        registrationData,
+      )
+      .pipe(
+        catchError((error) => {
+          console.error('Registration failed:', error);
+          this.errorMessage =
+            error?.error?.detail ||
+            error?.message ||
+            'Registration failed. Please try again.';
+          this.isSubmitting = false;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return of(null);
+        }),
+      )
+      .subscribe((result) => {
+        this.isSubmitting = false;
+        if (result) {
+          this.currentStep++;
+        }
+      });
   }
 
   getFinalPageButton(): { text: string; action: () => void } {

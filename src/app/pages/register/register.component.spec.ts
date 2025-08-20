@@ -1,10 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { Component } from '@angular/core';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   template: '<div>Mock Login Component</div>',
@@ -21,11 +27,14 @@ class MockAuthService {}
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([
           { path: 'login', component: MockLoginComponent },
           { path: '', component: MockHomeComponent },
@@ -36,7 +45,12 @@ describe('RegisterComponent', () => {
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
+    httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should create', () => {
@@ -86,7 +100,9 @@ describe('RegisterComponent', () => {
       component.selectBundle('data-portal-galaxy');
       const selectedBundle = component.getSelectedBundle();
       expect(selectedBundle?.id).toBe('data-portal-galaxy');
-      expect(selectedBundle?.name).toBe('Data Portal and Galaxy');
+      expect(selectedBundle?.name).toBe(
+        'Bioplatforms Australia Data Portal and Galaxy',
+      );
     });
 
     it('should return undefined for no selection', () => {
@@ -194,16 +210,39 @@ describe('RegisterComponent', () => {
     });
 
     it('should complete registration and advance to final step', () => {
-      spyOn(console, 'log');
+      // Setup valid forms
+      component.bundleForm.patchValue({ selectedBundle: 'data-portal-galaxy' });
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
 
       component.currentStep = 4;
       component.nextStep();
 
-      expect(console.log).toHaveBeenCalledWith(
-        'Submitting registration...',
-        jasmine.any(Object),
+      // Expect HTTP request to be made
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
       );
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        bundle: 'data-portal-galaxy',
+      });
+
+      // Simulate successful response
+      req.flush({ success: true });
+
       expect(component.currentStep).toBe(5);
+      expect(component.isSubmitting).toBe(false);
     });
   });
 
@@ -364,39 +403,62 @@ describe('RegisterComponent', () => {
   });
 
   describe('Complete Registration', () => {
-    it('should log registration data when completing registration', () => {
-      spyOn(console, 'log');
-
-      component.selectBundle('data-portal-galaxy');
+    it('should make HTTP request when completing registration', () => {
+      // Setup valid forms
+      component.bundleForm.patchValue({ selectedBundle: 'data-portal-galaxy' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john.doe@example.com',
+        email: 'john@example.com',
         username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
       });
 
       component.currentStep = 4;
       component.nextStep();
 
-      expect(console.log).toHaveBeenCalledWith(
-        'Submitting registration...',
-        jasmine.objectContaining({
-          bundle: jasmine.any(Object),
-          registration: jasmine.any(Object),
-          terms: jasmine.any(Object),
-        }),
+      // Expect HTTP request
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
       );
+      expect(req.request.method).toBe('POST');
+
+      // Simulate successful response
+      req.flush({ success: true });
+
       expect(component.currentStep).toBe(5);
     });
 
-    it('should advance to final step when registration is completed', () => {
-      component.currentStep = 4;
-      const initialStep = component.currentStep;
+    it('should handle registration error and display error message', () => {
+      // Setup valid forms
+      component.bundleForm.patchValue({ selectedBundle: 'data-portal-galaxy' });
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
 
+      component.currentStep = 4;
       component.nextStep();
 
-      expect(component.currentStep).toBe(initialStep + 1);
-      expect(component.currentStep).toBe(5);
+      // Expect HTTP request
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+
+      // Simulate error response
+      req.flush(
+        { message: 'Email already exists' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      expect(component.currentStep).toBe(4); // Should stay on step 4
+      expect(component.errorMessage).toBeDefined();
+      expect(component.isSubmitting).toBe(false);
     });
   });
 
