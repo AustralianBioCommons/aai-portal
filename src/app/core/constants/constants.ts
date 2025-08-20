@@ -34,12 +34,12 @@ const tsiBundleService: BundleService = {
 export const biocommonsBundles: Bundle[] = [
   {
     id: 'data-portal-galaxy',
-    name: 'Data Portal and Galaxy',
+    name: 'Bioplatforms Australia Data Portal and Galaxy',
     logoUrls: ['/assets/bpa-logo.png', '/assets/galaxy-logo.png'],
     listItems: [
-      'The <span class="font-medium text-gray-900">Data Portal</span> public data access',
-      'The <span class="font-medium text-gray-900">Galaxy Australia</span> data access',
-      'Easily import data into Galaxy from the Data Portal',
+      'The <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Bioplatforms Australia Data Portal</a> public data access',
+      'The <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Galaxy Australia</a> data access',
+      'Easily import data into <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Galaxy Australia</a> from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Bioplatforms Australia Data Portal</a>',
     ],
     services: [bpaBundleService, galaxyBundleService],
   },
@@ -48,10 +48,10 @@ export const biocommonsBundles: Bundle[] = [
     name: 'Threatened Species Initiative',
     logoUrls: ['/assets/tsi-logo.jpg'],
     listItems: [
-      'The <span class="font-medium text-gray-900">Data Portal</span> and <span class="font-medium text-gray-900">Galaxy Australia</span> data access',
-      'TSI public and restricted datasets in the Data Portal',
-      'Galaxy Australia 2TB storage space, high memory nodes, workflows and tools',
-      'Easily import data into Galaxy from the Data Portal',
+      'The <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Bioplatforms Australia Data Portal</a> and <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Galaxy Australia</a> data access',
+      'TSI public and restricted datasets in the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Bioplatforms Australia Data Portal</a>',
+      '<a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Galaxy Australia</a> 2TB storage space, high memory nodes, workflows and tools',
+      'Easily import data into <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Galaxy Australia</a> from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-blue-600 hover:underline">Bioplatforms Australia Data Portal</a>',
     ],
     services: [tsiBundleService, bpaBundleService, galaxyBundleService],
   },

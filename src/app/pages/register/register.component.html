@@ -425,6 +425,11 @@
           <div class="font-light text-gray-500">
             Please review your information and registration details below.
           </div>
+          @if (errorMessage) {
+            <div class="rounded-md bg-red-100 p-4 text-sm text-red-900">
+              {{ errorMessage }}
+            </div>
+          }
         </div>
 
         <div>
@@ -512,10 +517,15 @@
         </button>
         <button
           type="button"
-          class="bg-blue-600 text-white hover:bg-blue-700"
+          class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           (click)="nextStep()"
+          [disabled]="isSubmitting"
         >
-          {{ currentStep === 4 ? "Submit" : "Next" }}
+          @if (currentStep === 4 && isSubmitting) {
+            Submitting...
+          } @else {
+            {{ currentStep === 4 ? "Submit" : "Next" }}
+          }
         </button>
       </div>
     </div>
