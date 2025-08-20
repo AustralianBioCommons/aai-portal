@@ -229,12 +229,12 @@ export class RegisterComponent {
     this.errorMessage = null;
 
     const registrationData: RegistrationRequest = {
-      first_name: this.registrationForm.get('firstName')?.value || '',
-      last_name: this.registrationForm.get('lastName')?.value || '',
-      email: this.registrationForm.get('email')?.value || '',
-      username: this.registrationForm.get('username')?.value || '',
-      password: this.registrationForm.get('password')?.value || '',
-      bundle: this.bundleForm.get('selectedBundle')?.value || '',
+      first_name: this.registrationForm.get('firstName')!.value,
+      last_name: this.registrationForm.get('lastName')!.value,
+      email: this.registrationForm.get('email')!.value,
+      username: this.registrationForm.get('username')!.value,
+      password: this.registrationForm.get('password')!.value,
+      bundle: this.bundleForm.get('selectedBundle')!.value,
     };
 
     this.http
