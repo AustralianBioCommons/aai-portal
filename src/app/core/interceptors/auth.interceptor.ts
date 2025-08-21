@@ -6,16 +6,25 @@ import { throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 /**
+ * Backend endpoints that don't need an access token
+ * (because they involve registration, where the user won't
+ * be logged in)
+ */
+const BYPASS_URLS = [
+  '/register',
+  '/utils/registration_info',
+] as readonly string[];
+/**
  * HTTP interceptor that adds the Auth0 access token to requests sent to the AAI backend API
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth0Service = inject(Auth0Service);
 
   const isBackendRequest = req.url.includes(environment.auth0.backend);
-  const isRegistrationEndpoint = req.url.includes('/register');
+  const isBypassUrl = BYPASS_URLS.some((path) => req.url.includes(path));
 
   // For requests to the AAI backend that's not a registration endpoint
-  if (isBackendRequest && !isRegistrationEndpoint) {
+  if (isBackendRequest && !isBypassUrl) {
     return auth0Service.getAccessTokenSilently().pipe(
       switchMap((token) => {
         // Add Bearer token to request headers
