@@ -285,4 +285,49 @@ describe('ValidationService', () => {
       expect(errors).not.toContain('Default required message');
     });
   });
+
+  describe('setBackendErrorMessages', () => {
+    it('should process backend field errors and make fields invalid', () => {
+      // Create a mock HTTP error response with field errors
+      const mockErrorResponse = {
+        error: {
+          message: 'Registration failed',
+          field_errors: [
+            { field: 'username', message: 'Username already exists' },
+            { field: 'email', message: 'Email is already registered' },
+          ],
+        },
+      } as HttpErrorResponse;
+
+      // Call setBackendErrorMessages
+      service.setBackendErrorMessages(mockErrorResponse);
+
+      // Fields should now be invalid due to backend errors
+      expect(service.isFieldInvalid(testForm, 'username')).toBeTrue();
+      expect(service.isFieldInvalid(testForm, 'email')).toBeTrue();
+    });
+
+    it('should return backend error messages when calling getErrorMessages', () => {
+      // Create a mock HTTP error response with field errors
+      const mockErrorResponse = {
+        error: {
+          message: 'Registration failed',
+          field_errors: [
+            { field: 'username', message: 'Username already exists' },
+            { field: 'email', message: 'Email is already registered' },
+          ],
+        },
+      } as HttpErrorResponse;
+
+      // Call setBackendErrorMessages
+      service.setBackendErrorMessages(mockErrorResponse);
+
+      // Should return the backend error messages
+      const usernameErrors = service.getErrorMessages(testForm, 'username');
+      const emailErrors = service.getErrorMessages(testForm, 'email');
+
+      expect(usernameErrors).toContain('Username already exists');
+      expect(emailErrors).toContain('Email is already registered');
+    });
+  });
 });
