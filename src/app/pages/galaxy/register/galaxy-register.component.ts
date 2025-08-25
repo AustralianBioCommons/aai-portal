@@ -6,7 +6,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+} from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -117,9 +121,10 @@ export class GalaxyRegisterComponent {
             },
           );
         }),
-        catchError((error) => {
-          console.error('Registration failed:', error);
-          this.errorMessage = error?.message || 'Registration failed';
+        catchError((response: HttpErrorResponse) => {
+          console.error('Registration failed:', response);
+          this.validationService.setBackendErrorMessages(response);
+          this.errorMessage = response?.error?.message || 'Registration failed';
           document.getElementById('register_error_message')?.scrollIntoView();
           return of(null); // return observable to allow subscription to complete
         }),
@@ -127,6 +132,7 @@ export class GalaxyRegisterComponent {
       .subscribe((result) => {
         if (result) {
           this.errorMessage = null;
+          this.validationService.reset();
           this.registerForm.reset();
           this.router.navigate(['success'], { relativeTo: this.route });
         }
