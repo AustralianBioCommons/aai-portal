@@ -1,8 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl,
+} from '@angular/forms';
 import { ValidationService } from './validation.service';
-import { ALLOWED_SPECIAL_CHARACTERS, passwordRequirements } from '../../../utils/validation/passwords';
+import {
+  ALLOWED_SPECIAL_CHARACTERS,
+  passwordRequirements,
+} from '../../../utils/validation/passwords';
 import { usernameRequirements } from '../../../utils/validation/usernames';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('ValidationService', () => {
   let service: ValidationService;
@@ -11,7 +20,7 @@ describe('ValidationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ValidationService, FormBuilder]
+      providers: [ValidationService, FormBuilder],
     });
 
     service = TestBed.inject(ValidationService);
@@ -21,7 +30,7 @@ describe('ValidationService', () => {
     testForm = formBuilder.group({
       username: ['', [usernameRequirements]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [passwordRequirements]]
+      password: ['', [passwordRequirements]],
     });
   });
 
@@ -34,7 +43,7 @@ describe('ValidationService', () => {
       testForm.patchValue({
         username: 'validuser',
         email: 'test@example.com',
-        password: 'ValidPassword123!'
+        password: 'ValidPassword123!',
       });
 
       expect(service.isFieldInvalid(testForm, 'username')).toBeFalse();
@@ -81,7 +90,7 @@ describe('ValidationService', () => {
       testForm.patchValue({
         username: 'validuser',
         email: 'test@example.com',
-        password: 'ValidPassword123!'
+        password: 'ValidPassword123!',
       });
 
       expect(service.getErrorMessages(testForm, 'username')).toEqual([]);
@@ -93,8 +102,12 @@ describe('ValidationService', () => {
       testForm.get('username')?.markAsTouched();
       testForm.get('email')?.markAsTouched();
 
-      expect(service.getErrorMessages(testForm, 'username')).toContain('This field is required');
-      expect(service.getErrorMessages(testForm, 'email')).toContain('This field is required');
+      expect(service.getErrorMessages(testForm, 'username')).toContain(
+        'This field is required',
+      );
+      expect(service.getErrorMessages(testForm, 'email')).toContain(
+        'This field is required',
+      );
     });
 
     it('should return field-specific error messages for username', () => {
@@ -115,7 +128,10 @@ describe('ValidationService', () => {
 
     it('should return default error messages when field-specific ones are not available', () => {
       // Add a field without specific error messages
-      testForm.addControl('genericField', new FormControl('', Validators.required));
+      testForm.addControl(
+        'genericField',
+        new FormControl('', Validators.required),
+      );
       testForm.get('genericField')?.markAsTouched();
 
       const errors = service.getErrorMessages(testForm, 'genericField');
@@ -123,7 +139,9 @@ describe('ValidationService', () => {
     });
 
     it('should handle non-existent fields', () => {
-      expect(service.getErrorMessages(testForm, 'nonExistentField')).toEqual([]);
+      expect(service.getErrorMessages(testForm, 'nonExistentField')).toEqual(
+        [],
+      );
     });
 
     it('should include special characters in password error message', () => {
@@ -133,7 +151,9 @@ describe('ValidationService', () => {
 
       const errors = service.getErrorMessages(testForm, 'password');
       const expectedErrorMessage = `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`;
-      expect(errors.some(msg => msg.includes(expectedErrorMessage))).toBeTrue();
+      expect(
+        errors.some((msg) => msg.includes(expectedErrorMessage)),
+      ).toBeTrue();
     });
   });
 
@@ -141,7 +161,7 @@ describe('ValidationService', () => {
     it('should add new error messages for a field', () => {
       // Add custom error messages for a new field
       service.addFieldErrorMessages('customField', {
-        'custom': 'This is a custom error message'
+        custom: 'This is a custom error message',
       });
 
       // Create a control with the custom error
@@ -156,7 +176,7 @@ describe('ValidationService', () => {
     it('should override existing error messages for a field', () => {
       // Override existing username error message
       service.addFieldErrorMessages('username', {
-        'minlength': 'Custom minlength message'
+        minlength: 'Custom minlength message',
       });
 
       testForm.patchValue({ username: 'ab' });
@@ -170,7 +190,7 @@ describe('ValidationService', () => {
     it('should merge new error messages with existing ones', () => {
       // Add a new error message to username without overriding existing ones
       service.addFieldErrorMessages('username', {
-        'newError': 'This is a new error type'
+        newError: 'This is a new error type',
       });
 
       // Create control with both errors
@@ -189,7 +209,7 @@ describe('ValidationService', () => {
     it('should add new default error messages', () => {
       // Add a custom default error message
       service.addDefaultErrorMessages({
-        'customDefault': 'This is a custom default error'
+        customDefault: 'This is a custom default error',
       });
 
       // Create a control with the custom error
@@ -204,7 +224,7 @@ describe('ValidationService', () => {
     it('should override existing default error messages', () => {
       // Override the default 'required' error message
       service.addDefaultErrorMessages({
-        'required': 'Field must be filled out'
+        required: 'Field must be filled out',
       });
 
       testForm.get('username')?.markAsTouched();
@@ -217,7 +237,7 @@ describe('ValidationService', () => {
     it('should merge new default error messages with existing ones', () => {
       // Add a new default error without overriding existing ones
       service.addDefaultErrorMessages({
-        'newDefaultError': 'This is a new default error type'
+        newDefaultError: 'This is a new default error type',
       });
 
       // Create control with both errors
@@ -248,11 +268,11 @@ describe('ValidationService', () => {
     it('should prioritize field-specific error messages over default ones', () => {
       // Add a field-specific and default error message for the same error
       service.addFieldErrorMessages('testField', {
-        'required': 'Field-specific required message'
+        required: 'Field-specific required message',
       });
 
       service.addDefaultErrorMessages({
-        'required': 'Default required message'
+        required: 'Default required message',
       });
 
       // Create a control with the required error
