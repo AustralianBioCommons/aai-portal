@@ -8,7 +8,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { biocommonsBundles, Bundle } from '../../core/constants/constants';
@@ -190,6 +190,7 @@ export class RegisterComponent {
       case 2:
         this.registrationForm.markAsUntouched();
         this.registrationForm.markAsPristine();
+        this.validationService.reset();
         this.recaptchaToken = null;
         this.recaptchaAttempted = false;
         break;
@@ -243,12 +244,11 @@ export class RegisterComponent {
         registrationData,
       )
       .pipe(
-        catchError((error) => {
+        catchError((error: HttpErrorResponse) => {
           console.error('Registration failed:', error);
+          this.validationService.setBackendErrorMessages(error);
           this.errorMessage =
-            error?.error?.detail ||
-            error?.message ||
-            'Registration failed. Please try again.';
+            error?.error?.message || 'Registration failed. Please try again.';
           this.isSubmitting = false;
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return of(null);

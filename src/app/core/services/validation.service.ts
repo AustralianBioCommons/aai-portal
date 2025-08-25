@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { FormGroup, ValidationErrors } from '@angular/forms';
 import { ALLOWED_SPECIAL_CHARACTERS } from '../../../utils/validation/passwords';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  RegistrationErrorResponse,
+  RegistrationFieldError,
+} from '../../shared/types/backend.types';
 
 /**
  * Form validation service to reuse across our registration forms.
@@ -35,6 +40,41 @@ export class ValidationService {
     },
   };
 
+  private backendErrorMessages: Record<string, string> = {};
+
+  /**
+   * Processes the error response from the backend and sets the error messages
+   * for the form fields that are invalid.
+   */
+  setBackendErrorMessages(response: HttpErrorResponse) {
+    // Check if the response matches our expected format
+    function isRegistrationError(
+      error: unknown,
+    ): error is RegistrationErrorResponse {
+      return (
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        'field_errors' in error
+      );
+    }
+
+    if (isRegistrationError(response.error)) {
+      response.error.field_errors.forEach(
+        (fieldError: RegistrationFieldError) => {
+          this.backendErrorMessages[fieldError.field] = fieldError.message;
+        },
+      );
+    }
+  }
+
+  /**
+   * Resets the backend error messages for all fields.
+   */
+  reset() {
+    this.backendErrorMessages = {};
+  }
+
   /**
    * Gets error messages for a form control
    * @param form The form group containing the control
@@ -42,11 +82,13 @@ export class ValidationService {
    * @returns Array of error messages
    */
   getErrorMessages(form: FormGroup, fieldName: string): string[] {
-    const control = form.get(fieldName);
-    if (!control?.errors) return [];
+    const control = form.get(fieldName)!;
+    const inputValid = !control?.errors;
+    const backendValid = !this.backendErrorMessages[fieldName];
+    if (inputValid && backendValid) return [];
 
     // Return all error messages that apply to this control
-    return Object.keys(control.errors)
+    const inputErrors = Object.keys(control.errors || {})
       .filter(
         (key) =>
           this.fieldSpecificErrorMessages[fieldName]?.[key] ||
@@ -58,6 +100,10 @@ export class ValidationService {
           this.defaultErrorMessages[key] ||
           `Error: ${key}`,
       );
+    if (this.backendErrorMessages[fieldName]) {
+      inputErrors.push(this.backendErrorMessages[fieldName]);
+    }
+    return inputErrors;
   }
 
   /**
@@ -68,7 +114,8 @@ export class ValidationService {
    */
   isFieldInvalid(form: FormGroup, fieldName: string): boolean {
     const field = form.get(fieldName);
-    return !!(field?.invalid && (field?.dirty || field?.touched));
+    const invalidInput = !!(field?.invalid && (field?.dirty || field?.touched));
+    return invalidInput || !!this.backendErrorMessages[fieldName];
   }
 
   /**

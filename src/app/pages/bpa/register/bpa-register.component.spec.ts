@@ -198,7 +198,7 @@ describe('BpaRegisterComponent', () => {
       expect(req.request.method).toBe('POST');
 
       req.flush(
-        { detail: 'Registration failed' },
+        { message: 'Registration failed' },
         { status: 400, statusText: 'Bad Request' },
       );
 

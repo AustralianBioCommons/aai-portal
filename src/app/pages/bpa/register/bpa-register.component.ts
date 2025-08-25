@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { passwordRequirements } from '../../../../utils/validation/passwords';
@@ -149,7 +149,10 @@ export class BpaRegisterComponent {
       this.http.post(this.backendURL, requestBody).subscribe({
         next: () =>
           this.router.navigate(['success'], { relativeTo: this.route }),
-        error: (error) => this.showErrorNotification(error?.error?.detail),
+        error: (error: HttpErrorResponse) => {
+          this.showErrorNotification(error?.error?.message);
+          this.validationService.setBackendErrorMessages(error);
+        },
       });
     } else {
       this.registrationForm.markAllAsTouched();
@@ -184,6 +187,7 @@ export class BpaRegisterComponent {
     });
     this.registrationForm.markAsPristine();
     this.registrationForm.markAsUntouched();
+    this.validationService.reset();
     this.recaptchaToken = null;
     this.recaptchaAttempted = false;
   }
