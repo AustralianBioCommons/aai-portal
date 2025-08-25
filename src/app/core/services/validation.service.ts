@@ -42,7 +42,12 @@ export class ValidationService {
 
   private backendErrorMessages: Record<string, string> = {};
 
+  /**
+   * Processes the error response from the backend and sets the error messages
+   * for the form fields that are invalid.
+   */
   setBackendErrorMessages(response: HttpErrorResponse) {
+    // Check if the response matches our expected format
     function isRegistrationError(
       error: unknown,
     ): error is RegistrationErrorResponse {
@@ -53,6 +58,7 @@ export class ValidationService {
         'field_errors' in error
       );
     }
+
     if (isRegistrationError(response.error)) {
       response.error.field_errors.forEach(
         (fieldError: RegistrationFieldError) => {
@@ -62,6 +68,9 @@ export class ValidationService {
     }
   }
 
+  /**
+   * Resets the backend error messages for all fields.
+   */
   reset() {
     this.backendErrorMessages = {};
   }
