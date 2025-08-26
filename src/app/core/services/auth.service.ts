@@ -85,6 +85,7 @@ export class AuthService {
     { initialValue: null },
   );
 
+  // Observable that checks if the current user has admin privileges
   isAdmin$ = this.auth0Service.isAuthenticated$.pipe(
     switchMap((isAuth) =>
       isAuth
@@ -103,6 +104,9 @@ export class AuthService {
           )
         : of(false),
     ),
+    // shareReplay(1) ensures multiple subscribers share the same HTTP request
+    // and new subscribers immediately get the last cached admin status value
+    // This prevents redundant API calls when multiple components check admin permissions
     shareReplay(1),
   );
 
