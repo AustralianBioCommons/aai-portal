@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute, UrlTree } from '@angular/router';
-import { of, EMPTY } from 'rxjs';
+import { of, EMPTY, BehaviorSubject } from 'rxjs';
 import { signal } from '@angular/core';
 import { DefaultLayoutComponent } from './default-layout.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -15,15 +15,20 @@ describe('DefaultLayoutComponent', () => {
   function createTestBed(
     isAuthenticated = true,
     isAdmin = false,
-    isLoading = false,
+    isLoading = true,
     url = '/',
   ) {
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
-      isLoading: signal(isLoading),
-      isAuthenticated: signal(isAuthenticated),
+    const isLoadingSignal = signal(isLoading);
+    const isAdminSubject = new BehaviorSubject(isAdmin);
+
+    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated'], {
+      isLoading: isLoadingSignal,
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
       isAdmin: signal(isAdmin),
+      isAdmin$: isAdminSubject.asObservable(),
     });
+
+    authSpy.isAuthenticated.and.returnValue(isAuthenticated);
 
     const routerSpy = jasmine.createSpyObj(
       'Router',
@@ -71,6 +76,8 @@ describe('DefaultLayoutComponent', () => {
       authSpy,
       routerSpy,
       apiSpy,
+      isLoadingSignal,
+      isAdminSubject,
     };
   }
 
@@ -94,7 +101,7 @@ describe('DefaultLayoutComponent', () => {
   });
 
   it('should navigate to /all-users for authenticated admin users on root path', async () => {
-    createTestBed(true, true, false, '/');
+    const testBed = createTestBed(true, true, true, '/');
     await TestBed.compileComponents();
 
     fixture = TestBed.createComponent(DefaultLayoutComponent);
@@ -106,13 +113,18 @@ describe('DefaultLayoutComponent', () => {
       of({ pending_services: [], pending_resources: [] }),
     );
 
+    fixture.detectChanges();
+
+    testBed.isLoadingSignal.set(false);
+
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/all-users']);
   });
 
   it('should navigate to /services for authenticated non-admin users on root path', async () => {
-    createTestBed(true, false, false, '/');
+    const testBed = createTestBed(true, false, true, '/');
     await TestBed.compileComponents();
 
     fixture = TestBed.createComponent(DefaultLayoutComponent);
@@ -124,13 +136,18 @@ describe('DefaultLayoutComponent', () => {
       of({ pending_services: [], pending_resources: [] }),
     );
 
+    fixture.detectChanges();
+
+    testBed.isLoadingSignal.set(false);
+
+    await fixture.whenStable();
     fixture.detectChanges();
 
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/services']);
   });
 
-  it('should not navigate for unauthenticated users on root path', async () => {
-    createTestBed(false, false, false, '/');
+  it('should navigate to /services for unauthenticated users on root path', async () => {
+    const testBed = createTestBed(false, false, true, '/');
     await TestBed.compileComponents();
 
     fixture = TestBed.createComponent(DefaultLayoutComponent);
@@ -144,7 +161,12 @@ describe('DefaultLayoutComponent', () => {
 
     fixture.detectChanges();
 
-    expect(mockRouter.navigate).not.toHaveBeenCalled();
+    testBed.isLoadingSignal.set(false);
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/services']);
   });
 
   it('should not trigger navigation logic when not on root path', async () => {

@@ -14,10 +14,11 @@ describe('NavbarComponent', () => {
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
       isAdmin: signal(false),
+      isLoading: signal(false),
     });
     const routerSpy = jasmine.createSpyObj(
       'Router',
@@ -95,19 +96,27 @@ describe('NavbarComponent', () => {
     expect(component.pendingCount()).toBe(0);
   });
 
-  it('should return user pages for non-admin', () => {
-    const pages = component.getUserType();
-    expect(pages).toBe(component.userPages);
+  it('should return user navigation pages for non-admin', () => {
+    const pages = component.navigationPages();
+    expect(pages).toEqual([
+      { label: 'Services', route: '/services' },
+      { label: 'Access', route: '/access' },
+      { label: 'Pending', route: '/pending' },
+    ]);
   });
 
-  it('should return admin pages for admin', () => {
+  it('should return admin navigation pages for admin', () => {
     Object.defineProperty(mockAuthService, 'isAdmin', {
       value: signal(true),
     });
     component.isAdmin = mockAuthService.isAdmin;
 
-    const pages = component.getUserType();
-    expect(pages).toBe(component.adminPages);
+    const pages = component.navigationPages();
+    expect(pages).toEqual([
+      { label: 'All users', route: '/all-users' },
+      { label: 'Revoked', route: '/revoked' },
+      { label: 'Requests', route: '/requests' },
+    ]);
   });
 
   it('should toggle user menu', () => {
@@ -126,11 +135,6 @@ describe('NavbarComponent', () => {
   });
 
   it('should call authService.logout when logout is clicked', () => {
-    const logoutSpy = jasmine.createSpy('logout');
-    Object.defineProperty(mockAuthService, 'logout', {
-      value: logoutSpy,
-    });
-
     mockApiService.getAllPending.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
@@ -138,6 +142,6 @@ describe('NavbarComponent', () => {
 
     component.logout();
 
-    expect(logoutSpy).toHaveBeenCalled();
+    expect(mockAuthService.logout).toHaveBeenCalled();
   });
 });

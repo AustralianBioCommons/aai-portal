@@ -7,15 +7,16 @@ import {
 import { adminGuard } from './admin.guard';
 import { AuthService } from '../services/auth.service';
 import { signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 describe('adminGuard', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated', 'isAdmin'], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated'], {
       isLoading: signal(false),
+      isAdmin$: of(false),
     });
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -26,7 +27,9 @@ describe('adminGuard', () => {
       ],
     });
 
-    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    mockAuthService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 
@@ -37,7 +40,10 @@ describe('adminGuard', () => {
 
   it('should return true when user is authenticated and is admin', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(true);
-    mockAuthService.isAdmin.and.returnValue(true);
+    Object.defineProperty(mockAuthService, 'isAdmin$', {
+      value: of(true),
+      writable: true,
+    });
 
     const result = TestBed.runInInjectionContext(() =>
       adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
@@ -52,7 +58,10 @@ describe('adminGuard', () => {
 
   it('should return false and navigate to home when user is not admin', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(true);
-    mockAuthService.isAdmin.and.returnValue(false);
+    Object.defineProperty(mockAuthService, 'isAdmin$', {
+      value: of(false),
+      writable: true,
+    });
 
     const result = TestBed.runInInjectionContext(() =>
       adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
@@ -67,7 +76,6 @@ describe('adminGuard', () => {
 
   it('should return false and navigate to home when user is not authenticated', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(false);
-    mockAuthService.isAdmin.and.returnValue(false);
 
     const result = TestBed.runInInjectionContext(() =>
       adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),

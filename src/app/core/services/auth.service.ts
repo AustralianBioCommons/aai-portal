@@ -1,8 +1,10 @@
 import { DOCUMENT } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { Observable, map, catchError, of, switchMap } from 'rxjs';
+import { Observable, map, catchError, of, switchMap, shareReplay } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
@@ -72,11 +74,39 @@ export interface BiocommonsAuth0User {
 export class AuthService {
   private auth0Service = inject(Auth0Service);
   private document = inject(DOCUMENT);
+  private http = inject(HttpClient);
 
-  isAuthenticated = toSignal(this.auth0Service.isAuthenticated$, { initialValue: false });
+  isAuthenticated = toSignal(this.auth0Service.isAuthenticated$, {
+    initialValue: false,
+  });
   isLoading = toSignal(this.auth0Service.isLoading$, { initialValue: true });
-  user = toSignal(this.auth0Service.user$ as Observable<BiocommonsAuth0User | null>, { initialValue: null });
-  isAdmin = toSignal(this.isAdmin$(), { initialValue: false });
+  user = toSignal(
+    this.auth0Service.user$ as Observable<BiocommonsAuth0User | null>,
+    { initialValue: null },
+  );
+
+  isAdmin$ = this.auth0Service.isAuthenticated$.pipe(
+    switchMap((isAuth) =>
+      isAuth
+        ? this.auth0Service.getAccessTokenSilently().pipe(
+            switchMap((token) =>
+              this.http.get<{ is_admin: boolean }>(
+                `${environment.auth0.backend}/me/is-admin`,
+                { headers: { Authorization: `Bearer ${token}` } },
+              ),
+            ),
+            map((response) => response.is_admin),
+            catchError((error) => {
+              console.error('Failed to check admin status:', error);
+              return of(false);
+            }),
+          )
+        : of(false),
+    ),
+    shareReplay(1),
+  );
+
+  isAdmin = toSignal(this.isAdmin$, { initialValue: false });
 
   login(): void {
     this.auth0Service.loginWithRedirect();
@@ -88,44 +118,5 @@ export class AuthService {
         returnTo: this.document.location.origin,
       },
     });
-  }
-
-  private decodeToken(token: string) {
-    try {
-      if (!token || token.split('.').length !== 3) {
-        throw new Error('Invalid JWT token format');
-      }
-
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = atob(base64);
-
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      return null;
-    }
-  }
-
-  private isAdmin$(): Observable<boolean> {
-    return this.auth0Service.isAuthenticated$.pipe(
-      switchMap((isAuth) => {
-        if (!isAuth) {
-          return of(false);
-        }
-        
-        return this.auth0Service.getAccessTokenSilently().pipe(
-          map((token) => {
-            const decodedToken = this.decodeToken(token);
-            const roles = decodedToken?.['https://biocommons.org.au/roles'] || [];
-            return roles.some((role: string) => role.toLowerCase().includes('admin'));
-          }),
-          catchError((error) => {
-            console.error('Failed to get access token for admin check:', error);
-            return of(false);
-          })
-        );
-      })
-    );
   }
 }
