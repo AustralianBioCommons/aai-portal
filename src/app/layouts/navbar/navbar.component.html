@@ -64,27 +64,29 @@
   <div
     class="align-center mt-12 flex justify-center gap-2 font-light text-sky-900 *:rounded-md *:px-6 *:py-2"
   >
-    @for (page of getUserType(); track page) {
-      <a
-        routerLink="{{ page.route }}"
-        routerLinkActive="active"
-        class="relative bg-gray-100 hover:bg-gray-200"
-        [ngClass]="{
-          'bg-sky-900 text-white hover:bg-sky-950': isActive(page.route),
-        }"
-      >
-        @if (
-          (!isAdmin() && page.label === "Pending" && pendingCount() > 0) ||
-          (isAdmin() && page.label === "Requests" && pendingCount() > 0)
-        ) {
-          <span
-            class="absolute -right-2 -top-2 min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs text-white"
-          >
-            {{ pendingCount() }}
-          </span>
-        }
-        {{ page.label }}
-      </a>
+    @if (!adminStatusLoading()) {
+      @for (page of navigationPages(); track page) {
+        <a
+          routerLink="{{ page.route }}"
+          routerLinkActive="active"
+          class="relative bg-gray-100 hover:bg-gray-200"
+          [ngClass]="{
+            'bg-sky-900 text-white hover:bg-sky-950': isActive(page.route),
+          }"
+        >
+          @if (
+            (!isAdmin() && page.label === "Pending" && pendingCount() > 0) ||
+            (isAdmin() && page.label === "Requests" && pendingCount() > 0)
+          ) {
+            <span
+              class="absolute -right-2 -top-2 min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs text-white"
+            >
+              {{ pendingCount() }}
+            </span>
+          }
+          {{ page.label }}
+        </a>
+      }
     }
   </div>
 </nav>

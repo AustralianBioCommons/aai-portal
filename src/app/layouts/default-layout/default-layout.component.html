@@ -1,7 +1,13 @@
 <div class="flex h-full min-h-screen flex-col">
   <app-navbar />
   <div class="flex h-full flex-1 flex-col bg-gray-100">
-    <router-outlet />
+    @if (isInitializing()) {
+      <div class="flex h-full flex-1 items-center justify-center">
+        <app-loading-spinner />
+      </div>
+    } @else {
+      <router-outlet />
+    }
   </div>
   <app-footer />
 </div>

@@ -1,11 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  provideHttpClientTesting,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { AuthService, BiocommonsAuth0User } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 describe('AuthService', () => {
   let service: AuthService;
   let mockAuth0Service: jasmine.SpyObj<Auth0Service>;
+  let httpMock: HttpTestingController;
 
   const mockUser: BiocommonsAuth0User = {
     created_at: '2023-01-01T00:00:00Z',
@@ -19,14 +26,17 @@ describe('AuthService', () => {
     user_id: 'auth0|123',
   };
 
-  function createService(tokenResponse = of('default.token.signature')) {
+  function createService(
+    isAuthenticated = true,
+    tokenResponse = of('default.token.signature'),
+  ) {
     const auth0Spy = jasmine.createSpyObj(
       'Auth0Service',
       ['loginWithRedirect', 'logout', 'getAccessTokenSilently'],
       {
-        isAuthenticated$: of(true),
+        isAuthenticated$: of(isAuthenticated),
         isLoading$: of(false),
-        user$: of(mockUser),
+        user$: of(isAuthenticated ? mockUser : null),
       },
     );
 
@@ -37,6 +47,8 @@ describe('AuthService', () => {
       providers: [
         AuthService,
         { provide: Auth0Service, useValue: auth0Spy },
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
     });
 
@@ -44,108 +56,127 @@ describe('AuthService', () => {
     mockAuth0Service = TestBed.inject(
       Auth0Service,
     ) as jasmine.SpyObj<Auth0Service>;
-    return { service, mockAuth0Service };
+    httpMock = TestBed.inject(HttpTestingController);
+    return { service, mockAuth0Service, httpMock };
   }
 
+  afterEach(() => {
+    httpMock?.verify();
+  });
+
   it('should be created', () => {
-    createService();
+    const { httpMock } = createService();
     expect(service).toBeTruthy();
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.flush({ is_admin: false });
   });
 
   it('should call loginWithRedirect when login is called', () => {
-    createService();
+    const { httpMock } = createService();
     service.login();
     expect(mockAuth0Service.loginWithRedirect).toHaveBeenCalled();
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.flush({ is_admin: false });
   });
 
   it('should call logout with returnTo parameter', () => {
-    createService();
+    const { httpMock } = createService();
     service.logout();
-    
+
     expect(mockAuth0Service.logout).toHaveBeenCalledWith(
       jasmine.objectContaining({
         logoutParams: jasmine.objectContaining({
-          returnTo: jasmine.any(String)
-        })
-      })
+          returnTo: jasmine.any(String),
+        }),
+      }),
     );
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.flush({ is_admin: false });
   });
 
   it('should return authentication state', () => {
-    createService();
+    const { httpMock } = createService();
     expect(service.isAuthenticated()).toBe(true);
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.flush({ is_admin: false });
   });
 
   it('should return user data', () => {
-    createService();
+    const { httpMock } = createService();
     expect(service.user()).toEqual(mockUser);
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.flush({ is_admin: false });
   });
 
   it('should detect admin role correctly', (done) => {
-    const adminToken = btoa(
-      JSON.stringify({
-        'https://biocommons.org.au/roles': ['user', 'admin'],
-      }),
-    );
-    const mockJWT = `header.${adminToken}.signature`;
-
-    createService(of(mockJWT));
-
-    setTimeout(() => {
-      expect(service.isAdmin()).toBe(true);
+    const { httpMock } = createService();
+    service.isAdmin$.subscribe((isAdmin) => {
+      expect(isAdmin).toBe(true);
       done();
-    }, 100);
+    });
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.headers.get('Authorization')).toBe(
+      'Bearer default.token.signature',
+    );
+    req.flush({ is_admin: true });
   });
 
   it('should detect non-admin user correctly', (done) => {
-    const userToken = btoa(
-      JSON.stringify({
-        'https://biocommons.org.au/roles': ['user'],
-      }),
-    );
-    const mockJWT = `header.${userToken}.signature`;
+    const { httpMock } = createService();
 
-    createService(of(mockJWT));
-
-    setTimeout(() => {
-      expect(service.isAdmin()).toBe(false);
+    service.isAdmin$.subscribe((isAdmin) => {
+      expect(isAdmin).toBe(false);
       done();
-    }, 100);
+    });
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.flush({ is_admin: false });
   });
 
   it('should handle token error gracefully', (done) => {
-    createService(throwError(() => new Error('Token error')));
+    createService(
+      true,
+      throwError(() => new Error('Token error')),
+    );
 
-    setTimeout(() => {
-      expect(service.isAdmin()).toBe(false);
+    service.isAdmin$.subscribe((isAdmin) => {
+      expect(isAdmin).toBe(false);
       done();
-    }, 100);
+    });
+
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-admin`);
   });
 
   it('should return false for admin when not authenticated', (done) => {
-    const unauthenticatedAuth0Spy = jasmine.createSpyObj(
-      'Auth0Service',
-      ['loginWithRedirect', 'logout', 'getAccessTokenSilently'],
-      {
-        isAuthenticated$: of(false),
-        isLoading$: of(false),
-        user$: of(null),
-      },
-    );
+    createService(false);
 
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      providers: [
-        AuthService,
-        { provide: Auth0Service, useValue: unauthenticatedAuth0Spy },
-      ],
+    service.isAdmin$.subscribe((isAdmin) => {
+      expect(isAdmin).toBe(false);
+      done();
     });
 
-    const unauthenticatedService = TestBed.inject(AuthService);
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-admin`);
+  });
 
-    setTimeout(() => {
-      expect(unauthenticatedService.isAdmin()).toBe(false);
+  it('should handle HTTP error gracefully', (done) => {
+    const { httpMock } = createService();
+
+    service.isAdmin$.subscribe((isAdmin) => {
+      expect(isAdmin).toBe(false);
       done();
-    }, 100);
+    });
+
+    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    req.error(new ProgressEvent('error'), {
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
   });
 });
