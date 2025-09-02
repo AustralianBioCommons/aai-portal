@@ -85,9 +85,9 @@ describe('RegisterComponent', () => {
     });
 
     it('should select data portal galaxy bundle', () => {
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
       expect(component.bundleForm.get('selectedBundle')?.value).toBe(
-        'data-portal-galaxy',
+        'bpa_galaxy',
       );
     });
 
@@ -97,9 +97,9 @@ describe('RegisterComponent', () => {
     });
 
     it('should return selected bundle object', () => {
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
       const selectedBundle = component.getSelectedBundle();
-      expect(selectedBundle?.id).toBe('data-portal-galaxy');
+      expect(selectedBundle?.id).toBe('bpa_galaxy');
       expect(selectedBundle?.name).toBe(
         'Bioplatforms Australia Data Portal and Galaxy',
       );
@@ -126,7 +126,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should proceed from step 1 with valid bundle selection', () => {
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
       component.nextStep();
       expect(component.currentStep).toBe(2);
     });
@@ -142,7 +142,7 @@ describe('RegisterComponent', () => {
 
     it('should proceed from step 2 with valid registration form', () => {
       component.currentStep = 2;
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
         firstName: 'John',
@@ -161,7 +161,7 @@ describe('RegisterComponent', () => {
 
     it('should not proceed from step 2 without reCAPTCHA completion', () => {
       component.currentStep = 2;
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
         firstName: 'John',
@@ -187,7 +187,7 @@ describe('RegisterComponent', () => {
 
     it('should not proceed from step 3 with invalid terms form', () => {
       component.currentStep = 3;
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
 
       component.nextStep();
@@ -197,7 +197,7 @@ describe('RegisterComponent', () => {
 
     it('should proceed from step 3 with accepted terms', () => {
       component.currentStep = 3;
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
 
       component.termsForm.patchValue({
@@ -211,7 +211,7 @@ describe('RegisterComponent', () => {
 
     it('should complete registration and advance to final step', () => {
       // Setup valid forms
-      component.bundleForm.patchValue({ selectedBundle: 'data-portal-galaxy' });
+      component.bundleForm.patchValue({ selectedBundle: 'bpa_galaxy' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -235,7 +235,7 @@ describe('RegisterComponent', () => {
         email: 'john@example.com',
         username: 'johndoe',
         password: 'Password123!',
-        bundle: 'data-portal-galaxy',
+        bundle: 'bpa_galaxy',
       });
 
       // Simulate successful response
@@ -321,7 +321,7 @@ describe('RegisterComponent', () => {
 
   describe('Terms Form', () => {
     beforeEach(() => {
-      component.selectBundle('data-portal-galaxy');
+      component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
     });
 
@@ -405,7 +405,7 @@ describe('RegisterComponent', () => {
   describe('Complete Registration', () => {
     it('should make HTTP request when completing registration', () => {
       // Setup valid forms
-      component.bundleForm.patchValue({ selectedBundle: 'data-portal-galaxy' });
+      component.bundleForm.patchValue({ selectedBundle: 'bpa_galaxy' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -432,7 +432,7 @@ describe('RegisterComponent', () => {
 
     it('should handle registration error and display error message', () => {
       // Setup valid forms
-      component.bundleForm.patchValue({ selectedBundle: 'data-portal-galaxy' });
+      component.bundleForm.patchValue({ selectedBundle: 'bpa_galaxy' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -465,14 +465,14 @@ describe('RegisterComponent', () => {
   describe('Bundle Data', () => {
     it('should have correct bundle data structure', () => {
       expect(component.bundles.length).toBe(3);
-      expect(component.bundles[0].id).toBe('data-portal-galaxy');
+      expect(component.bundles[0].id).toBe('bpa_galaxy');
       expect(component.bundles[1].id).toBe('tsi');
       expect(component.bundles[2].id).toBe('fungi');
     });
 
     it('should have services for each bundle', () => {
       const dataPortalBundle = component.bundles.find(
-        (b) => b.id === 'data-portal-galaxy',
+        (b) => b.id === 'bpa_galaxy',
       );
       const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
       const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
@@ -484,7 +484,7 @@ describe('RegisterComponent', () => {
 
     it('should have logoUrls for each bundle', () => {
       const dataPortalBundle = component.bundles.find(
-        (b) => b.id === 'data-portal-galaxy',
+        (b) => b.id === 'bpa_galaxy',
       );
       const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
       const fungiBundle = component.bundles.find((b) => b.id === 'fungi');

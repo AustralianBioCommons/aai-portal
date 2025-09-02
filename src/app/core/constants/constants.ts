@@ -33,7 +33,7 @@ const tsiBundleService: BundleService = {
 
 export const biocommonsBundles: Bundle[] = [
   {
-    id: 'data-portal-galaxy',
+    id: 'bpa_galaxy',
     name: 'Bioplatforms Australia Data Portal and Galaxy',
     logoUrls: ['/assets/bpa-logo.png', '/assets/galaxy-logo.png'],
     listItems: [
