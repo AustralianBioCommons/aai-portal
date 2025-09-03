@@ -31,6 +31,18 @@ export interface ApprovedResourcesResponse {
   approved_resources: Resource[];
 }
 
+export interface FilterOption {
+  id: string;
+  name: string;
+}
+
+export interface BiocommonsUserResponse {
+  id: string;
+  email: string;
+  username: string;
+  created_at: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -52,6 +64,26 @@ export class ApiService {
   getAllPending(): Observable<Pending> {
     return this.http.get<Pending>(
       `${environment.auth0.backend}/me/all/pending`,
+    );
+  }
+
+  getFilterOptions(): Observable<FilterOption[]> {
+    return this.http.get<FilterOption[]>(
+      `${environment.auth0.backend}/admin/filters`,
+    );
+  }
+
+  getUsers(
+    page = 1,
+    pageSize = 20,
+    filterBy?: string,
+  ): Observable<BiocommonsUserResponse[]> {
+    let params = `?page=${page}&page_size=${pageSize}`;
+    if (filterBy) {
+      params += `&filter_by=${filterBy}`;
+    }
+    return this.http.get<BiocommonsUserResponse[]>(
+      `${environment.auth0.backend}/admin/users${params}`,
     );
   }
 }
