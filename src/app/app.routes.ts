@@ -21,6 +21,10 @@ import { loginGuard } from './core/guards/login.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { RegisterComponent } from './pages/register/register.component';
+import {
+  UserDetailsComponent,
+  userDetailsResolver,
+} from './pages/admin/user-details/user-details.component';
 
 export const routes: Routes = [
   // Login route - only accessible when not logged in
@@ -124,6 +128,11 @@ export const routes: Routes = [
       },
       { path: 'access', component: AccessComponent },
       { path: 'pending', component: PendingComponent },
+      {
+        path: 'user/:id',
+        component: UserDetailsComponent,
+        resolve: { user: userDetailsResolver },
+      },
       {
         path: 'all-users',
         component: ListUsersComponent,
