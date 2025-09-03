@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { BiocommonsAuth0User } from './auth.service';
 
 export interface Resource {
   name: string;
@@ -41,6 +42,11 @@ export interface BiocommonsUserResponse {
   email: string;
   username: string;
   created_at: string;
+}
+
+export interface BiocommonsUserDetails extends BiocommonsAuth0User {
+  platform_memberships: [];
+  group_memberships: [];
 }
 
 @Injectable({
@@ -84,6 +90,12 @@ export class ApiService {
     }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users${params}`,
+    );
+  }
+
+  getUserDetails(userId: string): Observable<BiocommonsUserDetails> {
+    return this.http.get<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/admin/users/${userId}/details`,
     );
   }
 }
