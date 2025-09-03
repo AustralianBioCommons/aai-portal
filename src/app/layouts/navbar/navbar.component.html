@@ -7,16 +7,18 @@
         viewBox="0 0 24 24"
         stroke-width="1.5"
         stroke="currentColor"
-        class="size-10"
+        class="size-8"
       >
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
-          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
+          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
         />
       </svg>
     </button>
-    <div class="text-2xl font-semibold text-sky-500">Dashboard</div>
+    <div class="text-3xl font-semibold text-gray-900">
+      {{ isAdmin() ? "Admin Dashboard" : " Dashboard" }}
+    </div>
     <div class="relative">
       <button
         type="button"
@@ -62,7 +64,7 @@
   </div>
 
   <div
-    class="align-center mt-12 flex justify-center gap-2 font-light text-sky-900 *:rounded-md *:px-6 *:py-2"
+    class="align-center mt-12 flex justify-center gap-4 text-sky-900 *:w-36 *:rounded-full *:px-6 *:py-2 *:text-center"
   >
     @if (!adminStatusLoading()) {
       @for (page of navigationPages(); track page) {

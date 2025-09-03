@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { BiocommonsAuth0User } from './auth.service';
 
 export interface Resource {
   name: string;
@@ -84,6 +85,16 @@ export class ApiService {
     }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users${params}`,
+    );
+  }
+
+  getUnverifiedUsers(
+    page = 1,
+    pageSize = 20,
+  ): Observable<BiocommonsAuth0User[]> {
+    let params = `?page=${page}&page_size=${pageSize}`;
+    return this.http.get<BiocommonsAuth0User[]>(
+      `${environment.auth0.backend}/admin/users/unverified${params}`,
     );
   }
 }

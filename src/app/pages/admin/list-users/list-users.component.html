@@ -1,6 +1,4 @@
-<div
-  class="relative flex h-full flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48"
->
+<div class="relative flex flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48">
   <div
     class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
   >
@@ -70,13 +68,13 @@
       </div>
     </div>
     @if (loading) {
-      <div class="flex h-full w-full flex-1 items-center justify-center">
+      <div class="flex w-full flex-1 items-center justify-center">
         <app-loading-spinner />
       </div>
     } @else {
-      <div class="flex h-full flex-1 flex-col gap-6 font-light">
+      <div class="flex flex-1 flex-col gap-6 font-light">
         @if (users.length === 0) {
-          <div class="flex flex-1 items-center justify-center">
+          <div class="flex flex-1 items-center justify-center text-gray-900">
             No users found
           </div>
         } @else {
