@@ -100,7 +100,7 @@ describe('DefaultLayoutComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should navigate to /all-users for authenticated admin users on root path', async () => {
+  it('should navigate to /users for authenticated admin users on root path', async () => {
     const testBed = createTestBed(true, true, true, '/');
     await TestBed.compileComponents();
 
@@ -120,7 +120,7 @@ describe('DefaultLayoutComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/all-users']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/users']);
   });
 
   it('should navigate to /services for authenticated non-admin users on root path', async () => {

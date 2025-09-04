@@ -113,7 +113,7 @@ describe('NavbarComponent', () => {
 
     const pages = component.navigationPages();
     expect(pages).toEqual([
-      { label: 'All users', route: '/all-users' },
+      { label: 'All users', route: '/users' },
       { label: 'Revoked', route: '/revoked' },
       { label: 'Requests', route: '/requests' },
     ]);

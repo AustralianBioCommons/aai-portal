@@ -92,7 +92,7 @@ export class ApiService {
     page = 1,
     pageSize = 20,
   ): Observable<BiocommonsAuth0User[]> {
-    let params = `?page=${page}&page_size=${pageSize}`;
+    const params = `?page=${page}&page_size=${pageSize}`;
     return this.http.get<BiocommonsAuth0User[]>(
       `${environment.auth0.backend}/admin/users/unverified${params}`,
     );
