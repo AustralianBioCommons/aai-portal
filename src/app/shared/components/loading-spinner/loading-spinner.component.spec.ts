@@ -35,7 +35,7 @@ describe('LoadingSpinnerComponent', () => {
     const svg = compiled.querySelector('svg');
 
     expect(svg?.classList.contains('animate-spin')).toBe(true);
-    expect(svg?.classList.contains('fill-sky-500')).toBe(true);
+    expect(svg?.classList.contains('fill-blue-500')).toBe(true);
     expect(svg?.classList.contains('text-gray-200')).toBe(true);
   });
 });

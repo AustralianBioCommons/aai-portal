@@ -18,7 +18,7 @@
         </svg>
       </button>
       <div class="text-3xl font-semibold text-gray-900">
-        {{ isAdmin() ? "Admin Dashboard" : " Dashboard" }}
+        {{ isAdmin() ? "Admin Dashboard" : "User Dashboard" }}
       </div>
     </div>
 
@@ -85,7 +85,7 @@
             (isAdmin() && page.label === "Requests" && pendingCount() > 0)
           ) {
             <span
-              class="min-h-6 min-w-6 rounded-full bg-gray-200 p-1 text-center text-xs font-semibold"
+              class="min-h-6 min-w-6 rounded-full bg-gray-200 p-1 text-center text-xs font-medium"
             >
               {{ pendingCount() }}
             </span>
