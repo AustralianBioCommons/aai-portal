@@ -92,7 +92,7 @@ describe('ApiService', () => {
       ],
     };
 
-    service.getAllPending().subscribe((response) => {
+    service.getAllPendingRequests().subscribe((response) => {
       expect(response).toEqual(mockResponse);
       expect(response.pending_services.length).toBe(1);
       expect(response.pending_resources.length).toBe(1);
@@ -108,7 +108,7 @@ describe('ApiService', () => {
   it('should handle empty responses', () => {
     const mockResponse = { pending_services: [], pending_resources: [] };
 
-    service.getAllPending().subscribe((response) => {
+    service.getAllPendingRequests().subscribe((response) => {
       expect(response.pending_services).toEqual([]);
       expect(response.pending_resources).toEqual([]);
     });

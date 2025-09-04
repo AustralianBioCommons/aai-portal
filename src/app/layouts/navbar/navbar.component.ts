@@ -71,21 +71,38 @@ export class NavbarComponent {
   private setupPendingCountTracking() {
     effect(() => {
       if (this.isAuthenticated() && !this.isLoading()) {
-        this.api
-          .getAllPending()
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: (pendingData) => {
-              const totalPending =
-                (pendingData?.pending_services?.length || 0) +
-                (pendingData?.pending_resources?.length || 0);
-              this.pendingCount.set(totalPending);
-            },
-            error: (error) => {
-              console.error('Failed to fetch pending count:', error);
-              this.pendingCount.set(0);
-            },
-          });
+        if (this.isAdmin()) {
+          // Admin: Get pending users
+          this.api
+            .getPendingUsers()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (pendingUsers) => {
+                this.pendingCount.set(pendingUsers?.length || 0);
+              },
+              error: (error) => {
+                console.error('Failed to fetch pending users count:', error);
+                this.pendingCount.set(0);
+              },
+            });
+        } else {
+          // Non-admin: Get pending requests (services and resources)
+          this.api
+            .getAllPendingRequests()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (pendingData) => {
+                const totalPending =
+                  (pendingData?.pending_services?.length || 0) +
+                  (pendingData?.pending_resources?.length || 0);
+                this.pendingCount.set(totalPending);
+              },
+              error: (error) => {
+                console.error('Failed to fetch pending requests count:', error);
+                this.pendingCount.set(0);
+              },
+            });
+        }
       }
     });
   }

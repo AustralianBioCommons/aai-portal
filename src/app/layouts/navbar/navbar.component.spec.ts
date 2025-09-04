@@ -13,7 +13,9 @@ describe('NavbarComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getAllPendingRequests',
+    ]);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
@@ -58,7 +60,7 @@ describe('NavbarComponent', () => {
   });
 
   it('should create', () => {
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
     fixture.detectChanges();
@@ -79,7 +81,7 @@ describe('NavbarComponent', () => {
       ],
       pending_resources: [{ id: '2', name: 'Resource', status: 'pending' }],
     };
-    mockApiService.getAllPending.and.returnValue(of(mockPending));
+    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
@@ -87,7 +89,7 @@ describe('NavbarComponent', () => {
   });
 
   it('should handle API error gracefully', () => {
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
@@ -135,7 +137,7 @@ describe('NavbarComponent', () => {
   });
 
   it('should call authService.logout when logout is clicked', () => {
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
     fixture.detectChanges();

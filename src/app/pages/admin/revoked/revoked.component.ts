@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ApiService } from '../../../core/services/api.service';
+import { BiocommonsAuth0User } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-revoked',
@@ -8,12 +10,24 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   styleUrl: './revoked.component.css',
 })
 export class RevokedComponent {
-  revokedUserSelected = false;
-  loading = false;
-  selectedRevokedUserName = '';
+  private apiService = inject(ApiService);
 
-  selectRevokedUser(revokedUserName: string): void {
-    this.revokedUserSelected = true;
-    this.selectedRevokedUserName = revokedUserName;
+  loading = false;
+  users: BiocommonsAuth0User[] = [];
+
+  ngOnInit(): void {
+    this.loading = true;
+    this.apiService.getRevokedUsers(1, 50).subscribe({
+      next: (users) => {
+        this.users = users;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading users:', error);
+        ``;
+        this.users = [];
+        this.loading = false;
+      },
+    });
   }
 }

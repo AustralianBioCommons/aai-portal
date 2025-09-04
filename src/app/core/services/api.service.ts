@@ -62,7 +62,7 @@ export class ApiService {
     );
   }
 
-  getAllPending(): Observable<Pending> {
+  getAllPendingRequests(): Observable<Pending> {
     return this.http.get<Pending>(
       `${environment.auth0.backend}/me/all/pending`,
     );
@@ -95,6 +95,20 @@ export class ApiService {
     const params = `?page=${page}&page_size=${pageSize}`;
     return this.http.get<BiocommonsAuth0User[]>(
       `${environment.auth0.backend}/admin/users/unverified${params}`,
+    );
+  }
+
+  getPendingUsers(page = 1, pageSize = 20): Observable<BiocommonsAuth0User[]> {
+    const params = `?page=${page}&page_size=${pageSize}`;
+    return this.http.get<BiocommonsAuth0User[]>(
+      `${environment.auth0.backend}/admin/users/pending${params}`,
+    );
+  }
+
+  getRevokedUsers(page = 1, pageSize = 20): Observable<BiocommonsAuth0User[]> {
+    const params = `?page=${page}&page_size=${pageSize}`;
+    return this.http.get<BiocommonsAuth0User[]>(
+      `${environment.auth0.backend}/admin/users/revoked${params}`,
     );
   }
 }

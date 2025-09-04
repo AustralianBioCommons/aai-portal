@@ -43,7 +43,9 @@ describe('DefaultLayoutComponent', () => {
     routerSpy.createUrlTree.and.returnValue({} as UrlTree);
     routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getAllPendingRequests',
+    ]);
 
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
       snapshot: {
@@ -91,7 +93,7 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
   });
@@ -109,7 +111,7 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
 
@@ -132,7 +134,7 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
 
@@ -155,7 +157,7 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
 
@@ -178,7 +180,7 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
 
