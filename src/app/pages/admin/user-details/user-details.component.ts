@@ -1,36 +1,42 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import {
-  ActivatedRoute,
-  ActivatedRouteSnapshot,
-  ResolveFn,
-} from '@angular/router';
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { DatePipe } from '@angular/common';
 import {
   ApiService,
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
-
-export const userDetailsResolver: ResolveFn<BiocommonsUserDetails> = (
-  route: ActivatedRouteSnapshot,
-): Observable<BiocommonsUserDetails> => {
-  const apiService = inject(ApiService);
-  const userId = route.paramMap.get('id');
-  return apiService.getUserDetails(userId!);
-};
 
 @Component({
   selector: 'app-user-details',
-  imports: [],
+  imports: [DatePipe],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
 })
-export class UserDetailsComponent {
+export class UserDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private data = toSignal(this.route.data);
-  user = computed(() => this.data()?.['user']);
+  private apiService = inject(ApiService);
 
-  constructor() {
-    console.log(this.user());
+  user = signal<BiocommonsUserDetails | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
+
+  ngOnInit() {
+    const userId = this.route.snapshot.paramMap.get('id');
+    if (userId) {
+      this.apiService.getUserDetails(userId).subscribe({
+        next: (user) => {
+          this.user.set(user);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load user details:', err);
+          this.error.set('Failed to load user details');
+          this.loading.set(false);
+        },
+      });
+    } else {
+      this.error.set('No user ID provided');
+      this.loading.set(false);
+    }
   }
 }

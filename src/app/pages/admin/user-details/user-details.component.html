@@ -1,1 +1,94 @@
-<p>user-details works!</p>
+<div class="relative flex flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48">
+  @if (loading()) {
+    <div class="flex items-center justify-center">
+      <div class="text-lg">Loading user details...</div>
+    </div>
+  } @else if (error()) {
+    <div class="flex items-center justify-center">
+      <div class="text-lg text-red-600">{{ error() }}</div>
+    </div>
+  } @else if (user()) {
+    <div class="flex flex-col gap-6">
+      <h1 class="text-3xl font-semibold text-gray-900">User Details</h1>
+
+      <div class="rounded-lg bg-white p-6 shadow">
+        <h2 class="mb-4 text-xl font-medium">Basic Information</h2>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="text-sm font-medium text-gray-500">Name</label>
+            <div class="text-lg">{{ user()?.name }}</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Email</label>
+            <div class="text-lg">{{ user()?.email }}</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Username</label>
+            <div class="text-lg">{{ user()?.nickname }}</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500"
+              >Email Verified</label
+            >
+            <div class="text-lg">
+              {{ user()?.email_verified ? "Yes" : "No" }}
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500">Created</label>
+            <div class="text-lg">{{ user()?.created_at | date }}</div>
+          </div>
+          <div>
+            <label class="text-sm font-medium text-gray-500"
+              >Last Updated</label
+            >
+            <div class="text-lg">{{ user()?.updated_at | date }}</div>
+          </div>
+        </div>
+      </div>
+
+      @if (
+        user()?.app_metadata?.services &&
+        user()!.app_metadata!.services.length > 0
+      ) {
+        <div class="rounded-lg bg-white p-6 shadow">
+          <h2 class="mb-4 text-xl font-medium">Services</h2>
+          <div class="space-y-2">
+            @for (service of user()!.app_metadata!.services; track service.id) {
+              <div class="flex items-center justify-between border-b pb-2">
+                <span>{{ service.name }}</span>
+                <span
+                  class="rounded px-2 py-1 text-sm"
+                  [class]="
+                    service.status === 'approved'
+                      ? 'bg-green-100 text-green-800'
+                      : service.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                  "
+                >
+                  {{ service.status }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (
+        user()?.app_metadata?.groups && user()!.app_metadata!.groups.length > 0
+      ) {
+        <div class="rounded-lg bg-white p-6 shadow">
+          <h2 class="mb-4 text-xl font-medium">Groups</h2>
+          <div class="space-y-2">
+            @for (group of user()!.app_metadata!.groups; track group.id) {
+              <div class="border-b pb-2">
+                {{ group.name }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
