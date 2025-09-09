@@ -63,7 +63,12 @@ describe('ListUsersComponent', () => {
     fixture.detectChanges();
 
     expect(mockApiService.getFilterOptions).toHaveBeenCalled();
-    expect(mockApiService.getUsers).toHaveBeenCalledWith(1, 50, undefined);
+    expect(mockApiService.getUsers).toHaveBeenCalledWith(
+      1,
+      50,
+      undefined,
+      undefined,
+    );
     expect(component.filterOptions).toEqual(mockFilterOptions);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBeFalse();
@@ -94,10 +99,15 @@ describe('ListUsersComponent', () => {
     fixture.detectChanges();
     mockApiService.getUsers.calls.reset();
 
-    component.selectedFilter = 'australian';
+    component.selectedFilter = 'tsi';
     component.loadUsers();
 
-    expect(mockApiService.getUsers).toHaveBeenCalledWith(1, 50, 'australian');
+    expect(mockApiService.getUsers).toHaveBeenCalledWith(
+      1,
+      50,
+      'tsi',
+      undefined,
+    );
   });
 
   it('should set loading state correctly during user loading', () => {
@@ -106,5 +116,42 @@ describe('ListUsersComponent', () => {
     fixture.detectChanges();
 
     expect(component.loading).toBeFalse();
+  });
+
+  it('should trigger search on Enter key press', () => {
+    spyOn(component, 'onSearch');
+
+    const event = new KeyboardEvent('keypress', { key: 'Enter' });
+    component.onSearchKeyPress(event);
+
+    expect(component.onSearch).toHaveBeenCalled();
+  });
+
+  it('should not trigger search on other key presses', () => {
+    spyOn(component, 'onSearch');
+
+    const event = new KeyboardEvent('keypress', { key: 'a' });
+    component.onSearchKeyPress(event);
+
+    expect(component.onSearch).not.toHaveBeenCalled();
+  });
+
+  it('should trigger debounced search on input', (done) => {
+    fixture.detectChanges();
+    mockApiService.getUsers.calls.reset();
+
+    component.searchTerm = 'test';
+    component.onSearchInput();
+
+    // Wait for debounce (500ms + buffer)
+    setTimeout(() => {
+      expect(mockApiService.getUsers).toHaveBeenCalledWith(
+        1,
+        50,
+        undefined,
+        'test',
+      );
+      done();
+    }, 600);
   });
 });

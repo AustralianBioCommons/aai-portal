@@ -3,34 +3,34 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
-import { RevokedComponent } from './revoked.component';
+import { ListUnverifiedUsersComponent } from './list-unverified-users.component';
 import { ApiService } from '../../../core/services/api.service';
 import { BiocommonsAuth0User } from '../../../core/services/auth.service';
 
-describe('RevokedComponent', () => {
-  let component: RevokedComponent;
-  let fixture: ComponentFixture<RevokedComponent>;
+describe('ListUnverifiedUsersComponent', () => {
+  let component: ListUnverifiedUsersComponent;
+  let fixture: ComponentFixture<ListUnverifiedUsersComponent>;
   let apiService: jasmine.SpyObj<ApiService>;
 
   const mockUsers: BiocommonsAuth0User[] = [
     {
       created_at: '2024-01-01T00:00:00.000Z',
-      email: 'revoked1@test.com',
-      email_verified: true,
+      email: 'unverified1@test.com',
+      email_verified: false,
       identities: [],
-      name: 'Revoked User 1',
-      nickname: 'revoked1',
+      name: 'Unverified User 1',
+      nickname: 'unverified1',
       picture: '',
       updated_at: '2024-01-01T00:00:00.000Z',
       user_id: '1',
     } as BiocommonsAuth0User,
     {
       created_at: '2024-01-02T00:00:00.000Z',
-      email: 'revoked2@test.com',
-      email_verified: true,
+      email: 'unverified2@test.com',
+      email_verified: false,
       identities: [],
-      name: 'Revoked User 2',
-      nickname: 'revoked2',
+      name: 'Unverified User 2',
+      nickname: 'unverified2',
       picture: '',
       updated_at: '2024-01-02T00:00:00.000Z',
       user_id: '2',
@@ -39,11 +39,11 @@ describe('RevokedComponent', () => {
 
   beforeEach(async () => {
     const apiServiceSpy = jasmine.createSpyObj('ApiService', [
-      'getRevokedUsers',
+      'getUnverifiedUsers',
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [RevokedComponent],
+      imports: [ListUnverifiedUsersComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -51,42 +51,42 @@ describe('RevokedComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(RevokedComponent);
+    fixture = TestBed.createComponent(ListUnverifiedUsersComponent);
     component = fixture.componentInstance;
     apiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
   });
 
   it('should create', () => {
-    apiService.getRevokedUsers.and.returnValue(of(mockUsers));
+    apiService.getUnverifiedUsers.and.returnValue(of(mockUsers));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should load revoked users on init', () => {
-    apiService.getRevokedUsers.and.returnValue(of(mockUsers));
+  it('should load unverified users on init', () => {
+    apiService.getUnverifiedUsers.and.returnValue(of(mockUsers));
 
     component.ngOnInit();
 
-    expect(apiService.getRevokedUsers).toHaveBeenCalledWith(1, 50);
+    expect(apiService.getUnverifiedUsers).toHaveBeenCalledWith(1, 50);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBe(false);
   });
 
   it('should handle loading state', () => {
-    apiService.getRevokedUsers.and.returnValue(of(mockUsers));
+    apiService.getUnverifiedUsers.and.returnValue(of(mockUsers));
 
     expect(component.loading).toBe(false); // Initially false
 
     component.ngOnInit();
 
-    expect(apiService.getRevokedUsers).toHaveBeenCalledWith(1, 50);
+    expect(apiService.getUnverifiedUsers).toHaveBeenCalledWith(1, 50);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBe(false); // Set to false after successful response
   });
 
   it('should handle error when loading users', () => {
     const consoleErrorSpy = spyOn(console, 'error');
-    apiService.getRevokedUsers.and.returnValue(
+    apiService.getUnverifiedUsers.and.returnValue(
       throwError(() => new Error('Test error')),
     );
 
