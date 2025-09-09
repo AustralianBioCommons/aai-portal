@@ -21,6 +21,7 @@ import { loginGuard } from './core/guards/login.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { RegisterComponent } from './pages/register/register.component';
+import { ListUnverifiedUsersComponent } from './pages/admin/list-unverified-users/list-unverified-users.component';
 
 export const routes: Routes = [
   // Login route - only accessible when not logged in
@@ -125,7 +126,7 @@ export const routes: Routes = [
       { path: 'access', component: AccessComponent },
       { path: 'pending', component: PendingComponent },
       {
-        path: 'all-users',
+        path: 'users',
         component: ListUsersComponent,
         canActivate: [adminGuard],
       },
@@ -137,6 +138,11 @@ export const routes: Routes = [
       {
         path: 'requests',
         component: RequestsComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'users-unverified',
+        component: ListUnverifiedUsersComponent,
         canActivate: [adminGuard],
       },
     ],

@@ -43,7 +43,10 @@ describe('DefaultLayoutComponent', () => {
     routerSpy.createUrlTree.and.returnValue({} as UrlTree);
     routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getAllPendingRequests',
+      'getPendingUsers',
+    ]);
 
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
       snapshot: {
@@ -91,16 +94,17 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should navigate to /all-users for authenticated admin users on root path', async () => {
+  it('should navigate to /users for authenticated admin users on root path', async () => {
     const testBed = createTestBed(true, true, true, '/');
     await TestBed.compileComponents();
 
@@ -109,9 +113,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -120,7 +125,7 @@ describe('DefaultLayoutComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/all-users']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/users']);
   });
 
   it('should navigate to /services for authenticated non-admin users on root path', async () => {
@@ -132,9 +137,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -155,9 +161,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -178,9 +185,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 

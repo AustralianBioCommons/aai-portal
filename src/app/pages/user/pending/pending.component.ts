@@ -25,7 +25,7 @@ export class PendingComponent {
       .pipe(
         takeUntilDestroyed(),
         filter((isAuthenticated) => isAuthenticated),
-        switchMap(() => this.api.getAllPending()),
+        switchMap(() => this.api.getAllPendingRequests()),
       )
       .subscribe({
         next: (res) => {

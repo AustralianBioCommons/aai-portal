@@ -14,7 +14,9 @@ describe('PendingComponent', () => {
   let mockApiService: jasmine.SpyObj<ApiService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getAllPendingRequests',
+    ]);
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       isAuthenticated: signal(true),
     });
@@ -36,7 +38,7 @@ describe('PendingComponent', () => {
   });
 
   it('should create', () => {
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
     fixture.detectChanges();
@@ -68,7 +70,7 @@ describe('PendingComponent', () => {
         { id: '2', name: 'Test Resource', status: 'pending' },
       ],
     };
-    mockApiService.getAllPending.and.returnValue(of(mockPending));
+    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
@@ -79,7 +81,7 @@ describe('PendingComponent', () => {
 
   it('should handle error when loading pending items fails', () => {
     const consoleSpy = spyOn(console, 'error');
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
@@ -101,7 +103,9 @@ describe('PendingComponent', () => {
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       isAuthenticated: signal(false),
     });
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getAllPendingRequests',
+    ]);
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -123,12 +127,12 @@ describe('PendingComponent', () => {
 
     testFixture.detectChanges();
 
-    expect(testApiService.getAllPending).not.toHaveBeenCalled();
+    expect(testApiService.getAllPendingRequests).not.toHaveBeenCalled();
     expect(testComponent.loading()).toBe(true);
   });
 
   it('should display no pending requests message when empty', () => {
-    mockApiService.getAllPending.and.returnValue(
+    mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
     fixture.detectChanges();
@@ -155,7 +159,7 @@ describe('PendingComponent', () => {
         { id: '2', name: 'Test Resource', status: 'pending' },
       ],
     };
-    mockApiService.getAllPending.and.returnValue(of(mockPending));
+    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
@@ -180,7 +184,7 @@ describe('PendingComponent', () => {
         { id: '2', name: 'Test Resource', status: 'pending' },
       ],
     };
-    mockApiService.getAllPending.and.returnValue(of(mockPending));
+    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 

@@ -1,22 +1,27 @@
-<nav class="bg-white p-6 pb-12 shadow lg:px-12">
-  <div class="flex items-center justify-between">
-    <button type="button" class="text-blue-500 hover:cursor-pointer">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="size-10"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
-        />
-      </svg>
-    </button>
-    <div class="text-2xl font-semibold text-sky-500">Dashboard</div>
+<nav class="flex flex-1 flex-col bg-gray-50">
+  <div class="flex items-center justify-between bg-white p-6 shadow lg:px-12">
+    <div class="flex items-center gap-6 lg:gap-12">
+      <button type="button" class="text-blue-500 hover:cursor-pointer">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-8"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+          />
+        </svg>
+      </button>
+      <div class="text-2xl font-semibold text-gray-900">
+        {{ isAdmin() ? "Admin Dashboard" : "User Dashboard" }}
+      </div>
+    </div>
+
     <div class="relative">
       <button
         type="button"
@@ -39,7 +44,7 @@
       </button>
       @if (userMenuOpen()) {
         <div
-          class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow focus:outline-none"
+          class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow focus:outline-none"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="user-menu-button"
@@ -47,7 +52,7 @@
           #menu
         >
           <div
-            class="block px-4 py-2 text-sm text-gray-700 hover:cursor-pointer hover:bg-gray-100"
+            class="block rounded-md px-4 py-3 text-sm text-gray-700 hover:cursor-pointer hover:bg-gray-100"
             role="menuitem"
             tabindex="-1"
             id="user-menu-item-2"
@@ -62,29 +67,29 @@
   </div>
 
   <div
-    class="align-center mt-12 flex justify-center gap-2 font-light text-sky-900 *:rounded-md *:px-6 *:py-2"
+    class="mx-auto mb-6 mt-12 flex max-w-xl flex-1 items-center justify-center gap-6 rounded-lg bg-white px-6 text-center shadow-md"
   >
     @if (!adminStatusLoading()) {
       @for (page of navigationPages(); track page) {
         <a
           routerLink="{{ page.route }}"
           routerLinkActive="active"
-          class="relative bg-gray-100 hover:bg-gray-200"
+          class="flex min-w-28 items-center justify-center gap-2 border-y-4 border-b-transparent border-t-transparent py-3 transition-all duration-200 hover:border-b-gray-200"
           [ngClass]="{
-            'bg-sky-900 text-white hover:bg-sky-950': isActive(page.route),
+            'border-b-blue-500 hover:border-b-blue-600': isActive(page.route),
           }"
         >
+          {{ page.label }}
           @if (
             (!isAdmin() && page.label === "Pending" && pendingCount() > 0) ||
             (isAdmin() && page.label === "Requests" && pendingCount() > 0)
           ) {
             <span
-              class="absolute -right-2 -top-2 min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs text-white"
+              class="min-h-6 min-w-6 rounded-full bg-gray-200 p-1 text-center text-xs font-medium"
             >
               {{ pendingCount() }}
             </span>
           }
-          {{ page.label }}
         </a>
       }
     }

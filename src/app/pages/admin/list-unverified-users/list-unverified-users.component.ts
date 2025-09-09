@@ -1,15 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { ApiService } from '../../../core/services/api.service';
 import { BiocommonsAuth0User } from '../../../core/services/auth.service';
+import { ApiService } from '../../../core/services/api.service';
 
 @Component({
-  selector: 'app-revoked',
+  selector: 'app-list-unverified-users',
   imports: [LoadingSpinnerComponent],
-  templateUrl: './revoked.component.html',
-  styleUrl: './revoked.component.css',
+  templateUrl: './list-unverified-users.component.html',
+  styleUrl: './list-unverified-users.component.css',
 })
-export class RevokedComponent implements OnInit {
+export class ListUnverifiedUsersComponent implements OnInit {
   private apiService = inject(ApiService);
 
   loading = false;
@@ -17,7 +17,7 @@ export class RevokedComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    this.apiService.getRevokedUsers(1, 50).subscribe({
+    this.apiService.getUnverifiedUsers(1, 50).subscribe({
       next: (users) => {
         this.users = users;
         this.loading = false;

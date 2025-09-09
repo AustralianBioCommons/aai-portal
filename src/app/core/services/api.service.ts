@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { BiocommonsAuth0User } from './auth.service';
 
 export interface Resource {
   name: string;
@@ -61,7 +62,7 @@ export class ApiService {
     );
   }
 
-  getAllPending(): Observable<Pending> {
+  getAllPendingRequests(): Observable<Pending> {
     return this.http.get<Pending>(
       `${environment.auth0.backend}/me/all/pending`,
     );
@@ -77,13 +78,41 @@ export class ApiService {
     page = 1,
     pageSize = 20,
     filterBy?: string,
+    search?: string,
   ): Observable<BiocommonsUserResponse[]> {
     let params = `?page=${page}&page_size=${pageSize}`;
     if (filterBy) {
       params += `&filter_by=${filterBy}`;
     }
+    if (search && search.trim().length > 0) {
+      params += `&search=${encodeURIComponent(search.trim())}`;
+    }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users${params}`,
+    );
+  }
+
+  getUnverifiedUsers(
+    page = 1,
+    pageSize = 20,
+  ): Observable<BiocommonsAuth0User[]> {
+    const params = `?page=${page}&page_size=${pageSize}`;
+    return this.http.get<BiocommonsAuth0User[]>(
+      `${environment.auth0.backend}/admin/users/unverified${params}`,
+    );
+  }
+
+  getPendingUsers(page = 1, pageSize = 20): Observable<BiocommonsAuth0User[]> {
+    const params = `?page=${page}&page_size=${pageSize}`;
+    return this.http.get<BiocommonsAuth0User[]>(
+      `${environment.auth0.backend}/admin/users/pending${params}`,
+    );
+  }
+
+  getRevokedUsers(page = 1, pageSize = 20): Observable<BiocommonsAuth0User[]> {
+    const params = `?page=${page}&page_size=${pageSize}`;
+    return this.http.get<BiocommonsAuth0User[]>(
+      `${environment.auth0.backend}/admin/users/revoked${params}`,
     );
   }
 }
