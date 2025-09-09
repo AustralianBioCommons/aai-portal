@@ -17,7 +17,7 @@
           />
         </svg>
       </button>
-      <div class="text-3xl font-semibold text-gray-900">
+      <div class="text-2xl font-semibold text-gray-900">
         {{ isAdmin() ? "Admin Dashboard" : "User Dashboard" }}
       </div>
     </div>
@@ -67,7 +67,7 @@
   </div>
 
   <div
-    class="mx-auto mb-6 mt-12 flex max-w-xl flex-1 items-center justify-center gap-6 rounded-md bg-white px-6 text-center shadow-md"
+    class="mx-auto mb-6 mt-12 flex max-w-xl flex-1 items-center justify-center gap-6 rounded-lg bg-white px-6 text-center shadow-md"
   >
     @if (!adminStatusLoading()) {
       @for (page of navigationPages(); track page) {

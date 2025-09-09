@@ -45,6 +45,7 @@ describe('DefaultLayoutComponent', () => {
 
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getAllPendingRequests',
+      'getPendingUsers',
     ]);
 
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
@@ -96,6 +97,7 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
   });
 
   it('should create', () => {
@@ -114,6 +116,7 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -137,6 +140,7 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -160,6 +164,7 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -183,6 +188,7 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getAllPendingRequests.and.returnValue(
       of({ pending_services: [], pending_resources: [] }),
     );
+    mockApiService.getPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 

@@ -19,10 +19,13 @@
           type="text"
           placeholder="By name or email address"
           [(ngModel)]="searchTerm"
+          (input)="onSearchInput()"
+          (keypress)="onSearchKeyPress($event)"
         />
         <button
           type="button"
           class="rounded-full p-2 transition-all duration-200 hover:bg-gray-200"
+          (click)="onSearch()"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +57,7 @@
         id="filter-select"
         class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light shadow outline-gray-200 focus-within:ring-2 focus-within:ring-blue-100 hover:cursor-pointer"
         [(ngModel)]="selectedFilter"
-        (change)="loadUsers()"
+        (change)="onFilterChange()"
         [disabled]="loading"
       >
         <option value="">All</option>

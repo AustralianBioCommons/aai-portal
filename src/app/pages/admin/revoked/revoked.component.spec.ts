@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { RevokedComponent } from './revoked.component';
 
@@ -8,9 +10,9 @@ describe('RevokedComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RevokedComponent]
-    })
-    .compileComponents();
+      imports: [RevokedComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RevokedComponent);
     component = fixture.componentInstance;

@@ -78,10 +78,14 @@ export class ApiService {
     page = 1,
     pageSize = 20,
     filterBy?: string,
+    search?: string,
   ): Observable<BiocommonsUserResponse[]> {
     let params = `?page=${page}&page_size=${pageSize}`;
     if (filterBy) {
       params += `&filter_by=${filterBy}`;
+    }
+    if (search && search.trim().length > 0) {
+      params += `&search=${encodeURIComponent(search.trim())}`;
     }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users${params}`,

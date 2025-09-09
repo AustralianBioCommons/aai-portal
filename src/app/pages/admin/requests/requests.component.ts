@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ApiService } from '../../../core/services/api.service';
 import { BiocommonsAuth0User } from '../../../core/services/auth.service';
@@ -9,7 +9,7 @@ import { BiocommonsAuth0User } from '../../../core/services/auth.service';
   templateUrl: './requests.component.html',
   styleUrl: './requests.component.css',
 })
-export class RequestsComponent {
+export class RequestsComponent implements OnInit {
   private apiService = inject(ApiService);
 
   loading = false;
@@ -24,7 +24,6 @@ export class RequestsComponent {
       },
       error: (error) => {
         console.error('Error loading users:', error);
-        ``;
         this.users = [];
         this.loading = false;
       },
