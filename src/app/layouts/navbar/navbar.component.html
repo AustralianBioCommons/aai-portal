@@ -72,11 +72,13 @@
     @if (!adminStatusLoading()) {
       @for (page of navigationPages(); track page) {
         <a
-          routerLink="{{ page.route }}"
-          routerLinkActive="active"
-          class="flex min-w-28 items-center justify-center gap-2 border-y-4 border-b-transparent border-t-transparent py-3 transition-all duration-200 hover:border-b-gray-200"
+          [routerLink]="page.route"
+          routerLinkActive="border-b-blue-500 hover:border-b-blue-600"
+          class="flex min-w-28 items-center justify-center gap-2 border-y-4 border-t-transparent py-3 transition-all duration-200"
           [ngClass]="{
-            'border-b-blue-500 hover:border-b-blue-600': isActive(page.route),
+            'border-b-transparent hover:border-b-gray-200': !isActive(
+              page.route
+            ),
           }"
         >
           {{ page.label }}
