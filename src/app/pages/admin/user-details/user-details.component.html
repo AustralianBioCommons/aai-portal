@@ -1,73 +1,185 @@
-<div class="relative flex flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48">
+<div
+  class="flex flex-1 flex-col items-center justify-center gap-12 p-6 lg:p-12 lg:px-24"
+>
   @if (loading()) {
-    <div class="flex items-center justify-center">
-      <div class="text-lg">Loading user details...</div>
-    </div>
+    <app-loading-spinner />
   } @else if (error()) {
-    <div class="flex items-center justify-center">
-      <div class="text-lg text-red-600">{{ error() }}</div>
-    </div>
+    <div class="font-light text-red-500">{{ error() }}</div>
   } @else if (user()) {
     <div class="flex flex-col gap-6">
-      <h1 class="text-3xl font-semibold text-gray-900">User Details</h1>
+      <div class="flex items-center justify-between">
+        <a
+          routerLink="/users"
+          class="flex items-center gap-2 text-sm text-gray-600 transition-all duration-200 hover:text-gray-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+            />
+          </svg>
+          Back to Users
+        </a>
+
+        <div class="relative">
+          <button
+            type="button"
+            class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            (click)="toggleActionMenu()"
+            #actionMenuButton
+          >
+            Actions
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-4"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m19.5 8.25-7.5 7.5-7.5-7.5"
+              />
+            </svg>
+          </button>
+
+          @if (actionMenuOpen()) {
+            <div
+              class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+              role="menu"
+              aria-orientation="vertical"
+              tabindex="-1"
+              #actionMenu
+            >
+              <div role="none">
+                <button
+                  (click)="resendVerificationEmail()"
+                  class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  role="menuitem"
+                  tabindex="-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="mr-2 size-4"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+                    />
+                  </svg>
+
+                  Resend Verification Email
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6">
+        <img
+          [src]="user()?.picture"
+          [alt]="user()?.name || 'User profile'"
+          class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+        />
+        <div class="space-y-2">
+          <h1 class="text-3xl font-semibold text-gray-900">
+            {{ user()?.name }}
+          </h1>
+          <div class="text-sm font-light text-gray-500">
+            user_id:
+            <span
+              class="rounded bg-gray-100 px-1 py-1 font-mono text-xs text-gray-600"
+            >
+              {{ user()?.user_id }}
+            </span>
+          </div>
+        </div>
+      </div>
 
       <div class="rounded-lg bg-white p-6 shadow">
-        <h2 class="mb-4 text-xl font-medium">Basic Information</h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label class="text-sm font-medium text-gray-500">Name</label>
-            <div class="text-lg">{{ user()?.name }}</div>
+            <label class="text-sm font-light text-gray-500">Name</label>
+            <div>{{ user()?.name }}</div>
           </div>
           <div>
-            <label class="text-sm font-medium text-gray-500">Email</label>
-            <div class="text-lg">{{ user()?.email }}</div>
+            <label class="text-sm font-light text-gray-500">Username</label>
+            <div>{{ user()?.username }}</div>
           </div>
           <div>
-            <label class="text-sm font-medium text-gray-500">Username</label>
-            <div class="text-lg">{{ user()?.nickname }}</div>
-          </div>
-          <div>
-            <label class="text-sm font-medium text-gray-500"
-              >Email Verified</label
-            >
-            <div class="text-lg">
-              {{ user()?.email_verified ? "Yes" : "No" }}
+            <label class="text-sm font-light text-gray-500">Email</label>
+            <div class="flex items-center gap-2">
+              <span>{{ user()?.email }}</span>
+              <span
+                class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                [class]="
+                  user()?.email_verified
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                "
+              >
+                {{ user()?.email_verified ? "Verified" : "Unverified" }}
+              </span>
             </div>
           </div>
           <div>
-            <label class="text-sm font-medium text-gray-500">Created</label>
-            <div class="text-lg">{{ user()?.created_at | date }}</div>
+            <label class="text-sm font-light text-gray-500">Signed Up</label>
+            <div>{{ user()?.created_at | date }}</div>
           </div>
           <div>
-            <label class="text-sm font-medium text-gray-500"
-              >Last Updated</label
-            >
-            <div class="text-lg">{{ user()?.updated_at | date }}</div>
+            <label class="text-sm font-light text-gray-500">Latest Login</label>
+            <div>
+              {{ user()?.last_login ? (user()?.last_login | date) : "Never" }}
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-light text-gray-500">Last Updated</label>
+            <div>{{ user()?.updated_at | date }}</div>
           </div>
         </div>
       </div>
 
       @if (
-        user()?.app_metadata?.services &&
-        user()!.app_metadata!.services.length > 0
+        user()?.platform_memberships && user()!.platform_memberships.length > 0
       ) {
-        <div class="rounded-lg bg-white p-6 shadow">
-          <h2 class="mb-4 text-xl font-medium">Services</h2>
-          <div class="space-y-2">
-            @for (service of user()!.app_metadata!.services; track service.id) {
-              <div class="flex items-center justify-between border-b pb-2">
-                <span>{{ service.name }}</span>
+        <div class="space-y-6 rounded-lg bg-white p-6 shadow">
+          <h2 class="text-2xl font-semibold">Platform Memberships</h2>
+          <div class="space-y-6">
+            @for (
+              membership of user()!.platform_memberships;
+              track membership.id
+            ) {
+              <div class="flex items-center justify-between">
+                <div>
+                  {{ getPlatformName(membership.platform_id) }}
+                </div>
                 <span
-                  class="rounded px-2 py-1 text-sm"
+                  class="rounded px-2 py-1 text-xs font-semibold uppercase"
                   [class]="
-                    service.status === 'approved'
+                    membership.approval_status === 'approved'
                       ? 'bg-green-100 text-green-800'
-                      : service.status === 'pending'
+                      : membership.approval_status === 'pending'
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                   "
                 >
-                  {{ service.status }}
+                  {{ membership.approval_status }}
                 </span>
               </div>
             }
@@ -75,15 +187,30 @@
         </div>
       }
 
-      @if (
-        user()?.app_metadata?.groups && user()!.app_metadata!.groups.length > 0
-      ) {
-        <div class="rounded-lg bg-white p-6 shadow">
-          <h2 class="mb-4 text-xl font-medium">Groups</h2>
-          <div class="space-y-2">
-            @for (group of user()!.app_metadata!.groups; track group.id) {
-              <div class="border-b pb-2">
-                {{ group.name }}
+      @if (user()?.group_memberships && user()!.group_memberships.length > 0) {
+        <div class="space-y-6 rounded-lg bg-white p-6 shadow">
+          <h2 class="text-2xl font-semibold">Group Memberships</h2>
+          <div class="space-y-6">
+            @for (
+              membership of user()!.group_memberships;
+              track membership.id
+            ) {
+              <div class="flex items-center justify-between">
+                <div>
+                  {{ membership.group_name }}
+                </div>
+                <span
+                  class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                  [class]="
+                    membership.approval_status === 'approved'
+                      ? 'bg-green-100 text-green-800'
+                      : membership.approval_status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-red-100 text-red-800'
+                  "
+                >
+                  {{ membership.approval_status }}
+                </span>
               </div>
             }
           </div>

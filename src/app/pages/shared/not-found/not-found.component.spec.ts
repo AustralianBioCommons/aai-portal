@@ -30,7 +30,7 @@ describe('NotFoundComponent', () => {
   });
 
   it('should display 404 error code', () => {
-    const errorCode = fixture.debugElement.query(By.css('p.text-sky-500'));
+    const errorCode = fixture.debugElement.query(By.css('p.text-blue-500'));
     expect(errorCode.nativeElement.textContent.trim()).toBe('404');
   });
 
