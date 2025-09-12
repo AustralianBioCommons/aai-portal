@@ -100,9 +100,9 @@
           class="h-16 w-16 rounded-full bg-gray-200 object-cover"
         />
         <div class="space-y-2">
-          <h1 class="text-3xl font-semibold text-gray-900">
+          <div class="text-3xl font-semibold text-gray-900">
             {{ user()?.name }}
-          </h1>
+          </div>
           <div class="text-sm font-light text-gray-500">
             user_id:
             <span
@@ -119,18 +119,18 @@
         <!-- Left Column - User Details -->
         <div class="space-y-6">
           <div class="rounded-lg bg-white p-6 shadow">
-            <h2 class="mb-6 text-2xl font-semibold">User Details</h2>
+            <div class="mb-6 text-2xl font-semibold">User Details</div>
             <div class="space-y-6">
               <div>
-                <label class="text-sm font-light text-gray-500">Name</label>
+                <div class="text-sm font-light text-gray-500">Name</div>
                 <div>{{ user()?.name }}</div>
               </div>
               <div>
-                <label class="text-sm font-light text-gray-500">Username</label>
+                <div class="text-sm font-light text-gray-500">Username</div>
                 <div>{{ user()?.username }}</div>
               </div>
               <div>
-                <label class="text-sm font-light text-gray-500">Email</label>
+                <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center gap-2">
                   <span>{{ user()?.email }}</span>
                   <span
@@ -146,15 +146,11 @@
                 </div>
               </div>
               <div>
-                <label class="text-sm font-light text-gray-500"
-                  >Signed Up</label
-                >
+                <div class="text-sm font-light text-gray-500">Signed Up</div>
                 <div>{{ user()?.created_at | date: "medium" }}</div>
               </div>
               <div>
-                <label class="text-sm font-light text-gray-500"
-                  >Latest Login</label
-                >
+                <div class="text-sm font-light text-gray-500">Latest Login</div>
                 <div>
                   {{
                     user()?.last_login
@@ -164,9 +160,7 @@
                 </div>
               </div>
               <div>
-                <label class="text-sm font-light text-gray-500"
-                  >Last Updated</label
-                >
+                <div class="text-sm font-light text-gray-500">Last Updated</div>
                 <div>{{ user()?.updated_at | date: "medium" }}</div>
               </div>
             </div>
@@ -180,7 +174,7 @@
             user()!.platform_memberships.length > 0
           ) {
             <div class="space-y-6 rounded-lg bg-white p-6 shadow">
-              <h2 class="text-2xl font-semibold">Platform Memberships</h2>
+              <div class="text-2xl font-semibold">Platform Memberships</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.platform_memberships;
@@ -212,7 +206,7 @@
             user()?.group_memberships && user()!.group_memberships.length > 0
           ) {
             <div class="space-y-6 rounded-lg bg-white p-6 shadow">
-              <h2 class="text-2xl font-semibold">Group Memberships</h2>
+              <div class="text-2xl font-semibold">Group Memberships</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.group_memberships;
