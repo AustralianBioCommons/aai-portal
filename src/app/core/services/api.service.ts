@@ -145,7 +145,7 @@ export class ApiService {
 
   resendVerificationEmail(userId: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${environment.auth0.backend}/users/${userId}/verification-email/resend`,
+      `${environment.auth0.backend}/admin/users/${userId}/verification-email/resend`,
       {},
     );
   }

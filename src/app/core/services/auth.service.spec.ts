@@ -18,6 +18,7 @@ describe('AuthService', () => {
     created_at: '2023-01-01T00:00:00Z',
     email: 'test@example.com',
     email_verified: true,
+    username: 'testuser',
     identities: [],
     name: 'Test User',
     nickname: 'testuser',

@@ -16,6 +16,7 @@ describe('RevokedComponent', () => {
     {
       created_at: '2024-01-01T00:00:00.000Z',
       email: 'revoked1@test.com',
+      username: 'revoked1',
       email_verified: true,
       identities: [],
       name: 'Revoked User 1',
@@ -28,6 +29,7 @@ describe('RevokedComponent', () => {
       created_at: '2024-01-02T00:00:00.000Z',
       email: 'revoked2@test.com',
       email_verified: true,
+      username: 'revoked2',
       identities: [],
       name: 'Revoked User 2',
       nickname: 'revoked2',

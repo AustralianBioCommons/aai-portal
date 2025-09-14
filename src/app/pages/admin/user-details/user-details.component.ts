@@ -35,6 +35,8 @@ export class UserDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
+  successNotification = signal<string | null>(null);
+  errorNotification = signal<string | null>(null);
 
   platformNames: Record<string, string> = {
     bpa_data_portal: 'Bioplatforms Australia Data Portal',
@@ -71,20 +73,23 @@ export class UserDetailsComponent implements OnInit {
     const userId = this.user()?.user_id;
     if (!userId) {
       console.error('No user ID available');
+      this.errorNotification.set('No user ID available');
+      this.hideNotificationsAfterDelay();
       return;
     }
 
+    this.successNotification.set(null);
+    this.errorNotification.set(null);
+
     this.apiService.resendVerificationEmail(userId).subscribe({
-      next: (response) => {
-        console.log(
-          'Verification email resent successfully:',
-          response.message,
-        );
-        // TODO: Show success notification to user
+      next: () => {
+        this.successNotification.set('Verification email sent successfully');
+        this.hideNotificationsAfterDelay();
       },
       error: (error) => {
         console.error('Failed to resend verification email:', error);
-        // TODO: Show error notification to user
+        this.errorNotification.set('Failed to resend verification email');
+        this.hideNotificationsAfterDelay();
       },
     });
 
@@ -93,6 +98,13 @@ export class UserDetailsComponent implements OnInit {
 
   getPlatformName(platformId: string): string {
     return this.platformNames[platformId] || platformId;
+  }
+
+  private hideNotificationsAfterDelay() {
+    setTimeout(() => {
+      this.successNotification.set(null);
+      this.errorNotification.set(null);
+    }, 5000);
   }
 
   private setupClickOutsideMenuHandler() {
