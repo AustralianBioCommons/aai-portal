@@ -30,7 +30,7 @@ jobs:
 
       # Build the project
       - name: Build the project
-        run: npm run build
+        run: npm run build -- --configuration test
 
       # Authenticate with AWS using OIDC
       - name: Configure AWS credentials using OIDC
