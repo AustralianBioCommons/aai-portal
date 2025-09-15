@@ -1,10 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FooterComponent } from '../footer/footer.component';
 import { NavbarComponent } from '../navbar/navbar.component';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { filter, take, switchMap, tap, map } from 'rxjs/operators';
+import { filter, take, switchMap, tap, map, startWith } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { of } from 'rxjs';
 
@@ -19,22 +19,31 @@ import { of } from 'rxjs';
   templateUrl: './default-layout.component.html',
   styleUrl: './default-layout.component.css',
 })
-export class DefaultLayoutComponent {
+export class DefaultLayoutComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  private authLoading$ = toObservable(this.authService.isLoading);
+
   isInitializing = signal(false);
 
-  constructor() {
-    if (this.router.url === '/') {
-      this.handleRootNavigation();
-    }
+  ngOnInit() {
+    this.router.events
+      .pipe(
+        startWith(new NavigationEnd(0, this.router.url, this.router.url)),
+        filter(
+          (event): event is NavigationEnd =>
+            event instanceof NavigationEnd && event.url === '/',
+        ),
+        tap(() => this.handleRootNavigation()),
+      )
+      .subscribe();
   }
 
   private handleRootNavigation(): void {
     this.isInitializing.set(true);
 
-    toObservable(this.authService.isLoading)
+    this.authLoading$
       .pipe(
         filter((isLoading) => !isLoading),
         take(1),
@@ -48,13 +57,11 @@ export class DefaultLayoutComponent {
   }
 
   private getNavigationRoute() {
-    if (!this.authService.isAuthenticated()) {
-      return of('/services');
-    }
-
-    return this.authService.isAdmin$.pipe(
-      take(1),
-      map((isAdmin) => (isAdmin ? '/users' : '/services')),
-    );
+    return this.authService.isAuthenticated()
+      ? this.authService.isAdmin$.pipe(
+          take(1),
+          map((isAdmin) => (isAdmin ? '/users' : '/services')),
+        )
+      : of('/services');
   }
 }

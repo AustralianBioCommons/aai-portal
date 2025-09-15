@@ -44,6 +44,27 @@ export interface BiocommonsUserResponse {
   created_at: string;
 }
 
+export interface PlatformMembership {
+  id: string;
+  platform_id: string;
+  user_id: string;
+  approval_status: string;
+  updated_by: string;
+}
+
+export interface GroupMembership {
+  id: string;
+  group_id: string;
+  group_name: string;
+  approval_status: string;
+  updated_by: string;
+}
+
+export interface BiocommonsUserDetails extends BiocommonsAuth0User {
+  platform_memberships: PlatformMembership[];
+  group_memberships: GroupMembership[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -92,6 +113,12 @@ export class ApiService {
     );
   }
 
+  getUserDetails(userId: string): Observable<BiocommonsUserDetails> {
+    return this.http.get<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/admin/users/${userId}/details`,
+    );
+  }
+
   getUnverifiedUsers(
     page = 1,
     pageSize = 20,
@@ -113,6 +140,13 @@ export class ApiService {
     const params = `?page=${page}&page_size=${pageSize}`;
     return this.http.get<BiocommonsAuth0User[]>(
       `${environment.auth0.backend}/admin/users/revoked${params}`,
+    );
+  }
+
+  resendVerificationEmail(userId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/admin/users/${userId}/verification-email/resend`,
+      {},
     );
   }
 }

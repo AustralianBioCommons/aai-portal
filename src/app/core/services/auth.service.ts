@@ -61,6 +61,7 @@ export interface BiocommonsAuth0User {
   picture: string;
   updated_at: string;
   user_id: string;
+  username: string;
   user_metadata?: BiocommonsUserMetadata;
   app_metadata?: BiocommonsAppMetadata;
   last_ip?: string;

@@ -127,6 +127,11 @@ export class NavbarComponent {
     return this.router.url === url;
   }
 
+  isNavigationPage(): boolean {
+    const currentUrl = this.router.url;
+    return this.navigationPages().some((page) => page.route === currentUrl);
+  }
+
   logout() {
     this.authService.logout();
   }

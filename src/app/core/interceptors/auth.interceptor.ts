@@ -27,7 +27,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (isBackendRequest && !isBypassUrl) {
     return auth0Service.getAccessTokenSilently().pipe(
       switchMap((token) => {
-        // Add Bearer token to request headers
         const authReq = req.clone({
           setHeaders: {
             Authorization: `Bearer ${token}`,

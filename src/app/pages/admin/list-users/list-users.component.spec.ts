@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { ListUsersComponent } from './list-users.component';
 import {
@@ -41,9 +42,18 @@ describe('ListUsersComponent', () => {
       'getUsers',
     ]);
 
+    const mockActivatedRoute = {
+      snapshot: { params: {} },
+      params: of({}),
+      queryParams: of({}),
+    };
+
     await TestBed.configureTestingModule({
       imports: [ListUsersComponent, FormsModule, LoadingSpinnerComponent],
-      providers: [{ provide: ApiService, useValue: apiSpy }],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ListUsersComponent);

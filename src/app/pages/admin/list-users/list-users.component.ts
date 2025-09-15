@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import {
   ApiService,
   FilterOption,
@@ -11,7 +12,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list-users',
-  imports: [FormsModule, LoadingSpinnerComponent],
+  imports: [FormsModule, LoadingSpinnerComponent, RouterLink],
   templateUrl: './list-users.component.html',
   styleUrl: './list-users.component.css',
 })
