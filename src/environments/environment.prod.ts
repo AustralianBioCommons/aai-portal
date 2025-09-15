@@ -1,5 +1,6 @@
+// Production build but uses test infrastructure for now
 export const environment = {
-  production: false,
+  production: true,
   auth0: {
     domain: 'login.test.biocommons.org.au',
     clientId: 'oXjPRRuMIVrzpJY7Ku2ojs0gZNmPVKmS',
