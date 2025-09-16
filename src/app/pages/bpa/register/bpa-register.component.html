@@ -145,31 +145,6 @@
           }
         </div>
 
-        <div class="my-6 flex flex-col gap-6">
-          <div class="text-base font-normal">
-            Select organizations that you wish to request membership of:
-          </div>
-          <div class="flex flex-col gap-4" formGroupName="organizations">
-            @for (org of organizations; track org.id) {
-              <div class="form-group">
-                <div class="controls flex items-center gap-2">
-                  <input
-                    [id]="org.id"
-                    type="checkbox"
-                    [formControlName]="org.id"
-                    [name]="'org-' + org.id"
-                    class="h-4 w-4 rounded-md border-gray-300 bg-gray-100 text-bpa-primary"
-                  />
-                  <label class="text-sm font-medium" [for]="org.id">
-                    {{ org.name }}
-                  </label>
-                </div>
-              </div>
-            }
-          </div>
-        </div>
-
-        <div>Please provide a password for your account:</div>
         <div class="w-full">
           <label for="password" class="block text-sm font-medium">
             Password

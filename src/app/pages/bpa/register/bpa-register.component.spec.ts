@@ -64,18 +64,12 @@ describe('BpaRegisterComponent', () => {
     });
 
     it('should initialize with empty form fields', () => {
-      const organizationsGroup =
-        component.registrationForm.get('organizations');
       expect(component.registrationForm.get('username')?.value).toBe('');
       expect(component.registrationForm.get('fullname')?.value).toBe('');
       expect(component.registrationForm.get('email')?.value).toBe('');
       expect(component.registrationForm.get('reason')?.value).toBe('');
       expect(component.registrationForm.get('password')?.value).toBe('');
       expect(component.registrationForm.get('confirmPassword')?.value).toBe('');
-
-      component.organizations.forEach((org) => {
-        expect(organizationsGroup?.get(org.id)?.value).toBeFalse();
-      });
     });
   });
 
@@ -163,12 +157,6 @@ describe('BpaRegisterComponent', () => {
         reason: 'Testing purpose',
         password: 'StrongPass123!',
         confirmPassword: 'StrongPass123!',
-      });
-
-      const organizationsGroup =
-        component.registrationForm.get('organizations');
-      component.organizations.forEach((org) => {
-        organizationsGroup?.get(org.id)?.setValue(false);
       });
 
       component.recaptchaToken = 'mock-recaptcha-token';

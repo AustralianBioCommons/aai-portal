@@ -9,19 +9,12 @@ import { passwordRequirements } from '../../../../utils/validation/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 
-interface Organization {
-  id: string;
-  name: string;
-  selected: boolean;
-}
-
 export interface RegistrationRequest {
   username: string;
   fullname: string;
   email: string;
   reason: string;
   password: string;
-  organizations: Record<string, boolean>;
 }
 
 @Component({
@@ -47,71 +40,6 @@ export class BpaRegisterComponent {
   recaptchaToken: string | null = null;
   recaptchaAttempted = false;
 
-  organizations: Organization[] = [
-    {
-      id: 'bpa-bioinformatics-workshop',
-      name: '2024 Fungi Bioinformatics Workshop',
-      selected: false,
-    },
-    {
-      id: 'cipps',
-      name: 'ARC for Innovations in Peptide and Protein Science (CIPPS)',
-      selected: false,
-    },
-    {
-      id: 'ausarg',
-      name: 'Australian Amphibian and Reptile Genomics',
-      selected: false,
-    },
-    { id: 'aus-avian', name: 'Australian Avian Genomics', selected: false },
-    { id: 'aus-fish', name: 'Australian Fish Genomics', selected: false },
-    {
-      id: 'grasslands',
-      name: 'Australian Grasslands Initiative',
-      selected: false,
-    },
-    { id: 'fungi', name: "Fungi Functional 'Omics", selected: false },
-    {
-      id: 'forest-resilience',
-      name: 'Genomics for Forest Resilience',
-      selected: false,
-    },
-    {
-      id: 'bpa-great-barrier-reef',
-      name: 'Great Barrier Reef',
-      selected: false,
-    },
-    {
-      id: 'bpa-ipm',
-      name: "Integrated Pest Management 'Omics",
-      selected: false,
-    },
-    { id: 'bpa-omg', name: 'Oz Mammals Genomics Initiative', selected: false },
-    { id: 'plant-pathogen', name: "Plant Pathogen 'Omics", selected: false },
-    { id: 'ppa', name: 'Plant Protein Atlas', selected: false },
-    {
-      id: 'australian-microbiome',
-      name: 'The Australian Microbiome Initiative',
-      selected: false,
-    },
-    {
-      id: 'threatened-species',
-      name: 'Threatened Species Initiative',
-      selected: false,
-    },
-    { id: 'bpa-wheat-cultivars', name: 'Wheat Cultivars', selected: false },
-    {
-      id: 'bpa-wheat-pathogens-genomes',
-      name: 'Wheat Pathogens Genomes',
-      selected: false,
-    },
-    {
-      id: 'bpa-wheat-pathogens-transcript',
-      name: 'Wheat Pathogens Transcript',
-      selected: false,
-    },
-  ];
-
   registrationForm = this.formBuilder.group({
     username: ['', [usernameRequirements]],
     fullname: ['', [Validators.required]],
@@ -119,12 +47,6 @@ export class BpaRegisterComponent {
     reason: ['', [Validators.required]],
     password: ['', passwordRequirements],
     confirmPassword: ['', [Validators.required]],
-    organizations: this.formBuilder.group(
-      this.organizations.reduce(
-        (acc, org) => ({ ...acc, [org.id]: [false] }),
-        {},
-      ),
-    ),
   });
 
   constructor() {
@@ -143,7 +65,6 @@ export class BpaRegisterComponent {
         email: formValue.email || '',
         reason: formValue.reason || '',
         password: formValue.password || '',
-        organizations: formValue.organizations || {},
       };
 
       this.http.post(this.backendURL, requestBody).subscribe({
@@ -180,10 +101,6 @@ export class BpaRegisterComponent {
       reason: '',
       password: '',
       confirmPassword: '',
-      organizations: this.organizations.reduce(
-        (acc, org) => ({ ...acc, [org.id]: false }),
-        {},
-      ),
     });
     this.registrationForm.markAsPristine();
     this.registrationForm.markAsUntouched();
