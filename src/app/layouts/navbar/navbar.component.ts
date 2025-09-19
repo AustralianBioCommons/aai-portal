@@ -86,7 +86,7 @@ export class NavbarComponent {
               },
             });
         } else {
-          // Non-admin: Get pending requests (services and resources)
+          // Non-admin: Get pending requests (platforms and groups)
           this.api
             .getUserAllPending()
             .pipe(takeUntilDestroyed(this.destroyRef))
