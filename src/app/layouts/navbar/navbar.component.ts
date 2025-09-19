@@ -93,7 +93,7 @@ export class NavbarComponent {
             .subscribe({
               next: (pendingData) => {
                 const totalPending =
-                  (pendingData?.platforms.length || 0) +
+                  (pendingData?.platforms?.length || 0) +
                   (pendingData?.groups?.length || 0);
                 this.pendingCount.set(totalPending);
               },
