@@ -13,6 +13,12 @@ export interface Bundle {
   services: BundleService[];
 }
 
+export type PLATFORM_IDS = 'galaxy' | 'bpa_data_portal';
+export const PLATFORM_NAMES = {
+  galaxy: 'Galaxy Australia',
+  bpa_data_portal: 'Bioplatforms Australia Data Portal',
+};
+
 const bpaBundleService: BundleService = {
   id: 'bpa',
   name: 'Bioplatforms Australia Data Portal Terms and Conditions',
