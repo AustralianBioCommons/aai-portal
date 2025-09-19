@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { BiocommonsAuth0User } from '../../../core/services/auth.service';
 import {
   ApiService,
   BiocommonsUserResponse,

@@ -4,7 +4,6 @@ import {
   ApiService,
   BiocommonsUserResponse,
 } from '../../../core/services/api.service';
-import { BiocommonsAuth0User } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-requests',
