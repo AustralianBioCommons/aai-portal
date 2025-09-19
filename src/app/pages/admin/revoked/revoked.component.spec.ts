@@ -4,44 +4,36 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { RevokedComponent } from './revoked.component';
-import { ApiService } from '../../../core/services/api.service';
-import { BiocommonsAuth0User } from '../../../core/services/auth.service';
+import {
+  ApiService,
+  BiocommonsUserResponse,
+} from '../../../core/services/api.service';
 
 describe('RevokedComponent', () => {
   let component: RevokedComponent;
   let fixture: ComponentFixture<RevokedComponent>;
   let apiService: jasmine.SpyObj<ApiService>;
 
-  const mockUsers: BiocommonsAuth0User[] = [
+  const mockUsers: BiocommonsUserResponse[] = [
     {
-      created_at: '2024-01-01T00:00:00.000Z',
-      email: 'revoked1@test.com',
-      username: 'revoked1',
+      id: '1',
+      email: 'user1@example.com',
+      username: 'user1',
       email_verified: true,
-      identities: [],
-      name: 'Revoked User 1',
-      nickname: 'revoked1',
-      picture: '',
-      updated_at: '2024-01-01T00:00:00.000Z',
-      user_id: '1',
-    } as BiocommonsAuth0User,
+      created_at: '2023-01-01T00:00:00Z',
+    },
     {
-      created_at: '2024-01-02T00:00:00.000Z',
-      email: 'revoked2@test.com',
+      id: '2',
+      email: 'user2@example.com',
       email_verified: true,
-      username: 'revoked2',
-      identities: [],
-      name: 'Revoked User 2',
-      nickname: 'revoked2',
-      picture: '',
-      updated_at: '2024-01-02T00:00:00.000Z',
-      user_id: '2',
-    } as BiocommonsAuth0User,
+      username: 'user2',
+      created_at: '2023-01-02T00:00:00Z',
+    },
   ];
 
   beforeEach(async () => {
     const apiServiceSpy = jasmine.createSpyObj('ApiService', [
-      'getRevokedUsers',
+      'getAdminRevokedUsers',
     ]);
 
     await TestBed.configureTestingModule({
@@ -59,36 +51,36 @@ describe('RevokedComponent', () => {
   });
 
   it('should create', () => {
-    apiService.getRevokedUsers.and.returnValue(of(mockUsers));
+    apiService.getAdminRevokedUsers.and.returnValue(of(mockUsers));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should load revoked users on init', () => {
-    apiService.getRevokedUsers.and.returnValue(of(mockUsers));
+    apiService.getAdminRevokedUsers.and.returnValue(of(mockUsers));
 
     component.ngOnInit();
 
-    expect(apiService.getRevokedUsers).toHaveBeenCalledWith(1, 50);
+    expect(apiService.getAdminRevokedUsers).toHaveBeenCalledWith(1, 50);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBe(false);
   });
 
   it('should handle loading state', () => {
-    apiService.getRevokedUsers.and.returnValue(of(mockUsers));
+    apiService.getAdminRevokedUsers.and.returnValue(of(mockUsers));
 
-    expect(component.loading).toBe(false); // Initially false
+    expect(component.loading).toBe(true);
 
     component.ngOnInit();
 
-    expect(apiService.getRevokedUsers).toHaveBeenCalledWith(1, 50);
+    expect(apiService.getAdminRevokedUsers).toHaveBeenCalledWith(1, 50);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBe(false); // Set to false after successful response
   });
 
   it('should handle error when loading users', () => {
     const consoleErrorSpy = spyOn(console, 'error');
-    apiService.getRevokedUsers.and.returnValue(
+    apiService.getAdminRevokedUsers.and.returnValue(
       throwError(() => new Error('Test error')),
     );
 

@@ -58,16 +58,17 @@ export class PendingComponent {
     if (!this.pendingItems) {
       return [];
     }
-    return [
-      ...this.pendingItems.platforms.map((platform) => {
+    const platforms =
+      this.pendingItems.platforms?.map((platform) => {
         return {
           id: platform.platform_id,
           name: PLATFORM_NAMES[platform.platform_id] || platform.platform_id,
         };
-      }),
-      ...this.pendingItems.groups.map((group) => {
+      }) || [];
+    const groups =
+      this.pendingItems.groups?.map((group) => {
         return { id: group.group_id, name: group.group_name };
-      }),
-    ];
+      }) || [];
+    return [...platforms, ...groups];
   }
 }

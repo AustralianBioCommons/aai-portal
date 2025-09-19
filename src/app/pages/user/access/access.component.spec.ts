@@ -14,7 +14,9 @@ describe('AccessComponent', () => {
   let mockApiService: jasmine.SpyObj<ApiService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getApprovedResources']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getUserApprovedGroups',
+    ]);
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       isAuthenticated: signal(true),
     });
@@ -36,30 +38,30 @@ describe('AccessComponent', () => {
   });
 
   it('should create', () => {
-    mockApiService.getApprovedResources.and.returnValue(
-      of({ approved_resources: [] }),
-    );
+    mockApiService.getUserApprovedGroups.and.returnValue(of([]));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should load approved resources successfully', () => {
-    const mockResources = [
-      { id: '1', name: 'Test Resource', status: 'active' },
+  it('should load approved groups successfully', () => {
+    const mockGroups = [
+      {
+        group_id: 'tsi',
+        group_name: 'Threatened Species Initiative',
+        approval_status: 'approved',
+      },
     ];
-    mockApiService.getApprovedResources.and.returnValue(
-      of({ approved_resources: mockResources }),
-    );
+    mockApiService.getUserApprovedGroups.and.returnValue(of(mockGroups));
 
     fixture.detectChanges();
 
-    expect(component.approvedResources).toEqual(mockResources);
+    expect(component.approvedGroups).toEqual(mockGroups);
     expect(component.loading()).toBe(false);
     expect(component.error()).toBeNull();
   });
 
   it('should handle error when loading resources fails', () => {
-    mockApiService.getApprovedResources.and.returnValue(
+    mockApiService.getUserApprovedGroups.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
@@ -70,9 +72,7 @@ describe('AccessComponent', () => {
   });
 
   it('should display no access message when empty', () => {
-    mockApiService.getApprovedResources.and.returnValue(
-      of({ approved_resources: [] }),
-    );
+    mockApiService.getUserApprovedGroups.and.returnValue(of([]));
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
@@ -80,16 +80,18 @@ describe('AccessComponent', () => {
   });
 
   it('should display resources when available', () => {
-    const mockResources = [
-      { id: '1', name: 'Test Resource', status: 'active' },
+    const mockGroups = [
+      {
+        group_id: 'tsi',
+        group_name: 'Threatened Species Initiative',
+        approval_status: 'approved',
+      },
     ];
-    mockApiService.getApprovedResources.and.returnValue(
-      of({ approved_resources: mockResources }),
-    );
+    mockApiService.getUserApprovedGroups.and.returnValue(of(mockGroups));
 
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Test Resource');
+    expect(compiled.textContent).toContain('Threatened Species Initiative');
   });
 });
