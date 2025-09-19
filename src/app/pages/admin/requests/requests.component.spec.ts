@@ -4,44 +4,36 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { RequestsComponent } from './requests.component';
-import { ApiService } from '../../../core/services/api.service';
-import { BiocommonsAuth0User } from '../../../core/services/auth.service';
+import {
+  ApiService,
+  BiocommonsUserResponse,
+} from '../../../core/services/api.service';
 
 describe('RequestsComponent', () => {
   let component: RequestsComponent;
   let fixture: ComponentFixture<RequestsComponent>;
   let apiService: jasmine.SpyObj<ApiService>;
 
-  const mockUsers: BiocommonsAuth0User[] = [
+  const mockUsers: BiocommonsUserResponse[] = [
     {
-      created_at: '2024-01-01T00:00:00.000Z',
-      email: 'user1@test.com',
-      email_verified: true,
+      id: '1',
+      email: 'user1@example.com',
       username: 'user1',
-      identities: [],
-      name: 'User 1',
-      nickname: 'user1',
-      picture: '',
-      updated_at: '2024-01-01T00:00:00.000Z',
-      user_id: '1',
-    } as BiocommonsAuth0User,
+      email_verified: true,
+      created_at: '2023-01-01T00:00:00Z',
+    },
     {
-      created_at: '2024-01-02T00:00:00.000Z',
-      email: 'user2@test.com',
+      id: '2',
+      email: 'user2@example.com',
       email_verified: true,
       username: 'user2',
-      identities: [],
-      name: 'User 2',
-      nickname: 'user2',
-      picture: '',
-      updated_at: '2024-01-02T00:00:00.000Z',
-      user_id: '2',
-    } as BiocommonsAuth0User,
+      created_at: '2023-01-02T00:00:00Z',
+    },
   ];
 
   beforeEach(async () => {
     const apiServiceSpy = jasmine.createSpyObj('ApiService', [
-      'getPendingUsers',
+      'getAdminPendingUsers',
     ]);
 
     await TestBed.configureTestingModule({
@@ -59,36 +51,36 @@ describe('RequestsComponent', () => {
   });
 
   it('should create', () => {
-    apiService.getPendingUsers.and.returnValue(of(mockUsers));
+    apiService.getAdminPendingUsers.and.returnValue(of(mockUsers));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should load pending users on init', () => {
-    apiService.getPendingUsers.and.returnValue(of(mockUsers));
+    apiService.getAdminPendingUsers.and.returnValue(of(mockUsers));
 
     component.ngOnInit();
 
-    expect(apiService.getPendingUsers).toHaveBeenCalledWith(1, 50);
+    expect(apiService.getAdminPendingUsers).toHaveBeenCalledWith(1, 50);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBe(false);
   });
 
   it('should handle loading state', () => {
-    apiService.getPendingUsers.and.returnValue(of(mockUsers));
+    apiService.getAdminPendingUsers.and.returnValue(of(mockUsers));
 
     expect(component.loading).toBe(false); // Initially false
 
     component.ngOnInit();
 
-    expect(apiService.getPendingUsers).toHaveBeenCalledWith(1, 50);
+    expect(apiService.getAdminPendingUsers).toHaveBeenCalledWith(1, 50);
     expect(component.users).toEqual(mockUsers);
     expect(component.loading).toBe(false); // Set to false after successful response
   });
 
   it('should handle error when loading users', () => {
     const consoleErrorSpy = spyOn(console, 'error');
-    apiService.getPendingUsers.and.returnValue(
+    apiService.getAdminPendingUsers.and.returnValue(
       throwError(() => new Error('Test error')),
     );
 

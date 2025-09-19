@@ -1,12 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PendingComponent } from './pending.component';
-import { ApiService, Pending } from '../../../core/services/api.service';
+import {
+  AllPendingResponse,
+  ApiService,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { provideMockAuth0Service } from '../../../../utils/testingUtils';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
+import { PLATFORM_NAMES } from '../../../core/constants/constants';
 
 describe('PendingComponent', () => {
   let component: PendingComponent;
@@ -14,9 +18,7 @@ describe('PendingComponent', () => {
   let mockApiService: jasmine.SpyObj<ApiService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', [
-      'getAllPendingRequests',
-    ]);
+    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserAllPending']);
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       isAuthenticated: signal(true),
     });
@@ -38,8 +40,8 @@ describe('PendingComponent', () => {
   });
 
   it('should create', () => {
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
     fixture.detectChanges();
     expect(component).toBeTruthy();
@@ -47,30 +49,25 @@ describe('PendingComponent', () => {
 
   it('should initialize with default values', () => {
     expect(component.pendingItems).toEqual({
-      pending_services: [],
-      pending_resources: [],
+      platforms: [],
+      groups: [],
     });
     expect(component.loading()).toBe(true);
     expect(component.error()).toBeNull();
   });
 
   it('should load pending items successfully', () => {
-    const mockPending = {
-      pending_services: [
+    const mockPending: AllPendingResponse = {
+      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
+      groups: [
         {
-          id: '1',
-          name: 'Test Service',
-          status: 'pending',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
+          group_id: 'tsi',
+          group_name: 'Threatened Species Initiative',
+          approval_status: 'pending',
         },
       ],
-      pending_resources: [
-        { id: '2', name: 'Test Resource', status: 'pending' },
-      ],
     };
-    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
+    mockApiService.getUserAllPending.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
@@ -81,7 +78,7 @@ describe('PendingComponent', () => {
 
   it('should handle error when loading pending items fails', () => {
     const consoleSpy = spyOn(console, 'error');
-    mockApiService.getAllPendingRequests.and.returnValue(
+    mockApiService.getUserAllPending.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
@@ -90,8 +87,8 @@ describe('PendingComponent', () => {
     expect(component.loading()).toBe(false);
     expect(component.error()).toBe('Failed to load pending requests');
     expect(component.pendingItems).toEqual({
-      pending_services: [],
-      pending_resources: [],
+      platforms: [],
+      groups: [],
     });
     expect(consoleSpy).toHaveBeenCalledWith(
       'Failed to retrieve pending requests',
@@ -103,9 +100,7 @@ describe('PendingComponent', () => {
     const authSpy = jasmine.createSpyObj('AuthService', [], {
       isAuthenticated: signal(false),
     });
-    const apiSpy = jasmine.createSpyObj('ApiService', [
-      'getAllPendingRequests',
-    ]);
+    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserAllPending']);
 
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -127,13 +122,13 @@ describe('PendingComponent', () => {
 
     testFixture.detectChanges();
 
-    expect(testApiService.getAllPendingRequests).not.toHaveBeenCalled();
+    expect(testApiService.getUserAllPending).not.toHaveBeenCalled();
     expect(testComponent.loading()).toBe(true);
   });
 
   it('should display no pending requests message when empty', () => {
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
     fixture.detectChanges();
 
@@ -144,81 +139,64 @@ describe('PendingComponent', () => {
   });
 
   it('should display pending items when available', () => {
-    const mockPending = {
-      pending_services: [
+    const mockPending: AllPendingResponse = {
+      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
+      groups: [
         {
-          id: '1',
-          name: 'Test Service',
-          status: 'pending',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
+          group_id: 'tsi',
+          group_name: 'Threatened Species Initiative',
+          approval_status: 'pending',
         },
       ],
-      pending_resources: [
-        { id: '2', name: 'Test Resource', status: 'pending' },
-      ],
     };
-    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
+    mockApiService.getUserAllPending.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Test Service');
-    expect(compiled.textContent).toContain('Test Resource');
+    expect(compiled.textContent).toContain('Galaxy Australia');
+    expect(compiled.textContent).toContain('Threatened Species Initiative');
   });
 
   it('should calculate pendingItemsArray correctly', () => {
-    const mockPending = {
-      pending_services: [
+    const mockPending: AllPendingResponse = {
+      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
+      groups: [
         {
-          id: '1',
-          name: 'Test Service',
-          status: 'pending',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
+          group_id: 'tsi',
+          group_name: 'Threatened Species Initiative',
+          approval_status: 'pending',
         },
       ],
-      pending_resources: [
-        { id: '2', name: 'Test Resource', status: 'pending' },
-      ],
     };
-    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
+    mockApiService.getUserAllPending.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
     expect(component.pendingItemsArray.length).toBe(2);
-    expect(component.pendingItemsArray[0].name).toBe('Test Service');
-    expect(component.pendingItemsArray[1].name).toBe('Test Resource');
+    expect(component.pendingItemsArray[0].name).toBe(PLATFORM_NAMES.galaxy);
+    expect(component.pendingItemsArray[1].name).toBe(
+      'Threatened Species Initiative',
+    );
   });
 
   it('should return empty array from pendingItemsArray when pendingItems is null', () => {
-    component.pendingItems = null as unknown as Pending;
+    component.pendingItems = null as unknown as AllPendingResponse;
     expect(component.pendingItemsArray).toEqual([]);
   });
 
   it('should handle missing arrays in pendingItems', () => {
-    component.pendingItems = {} as Pending;
+    component.pendingItems = {} as AllPendingResponse;
     expect(component.pendingItemsArray).toEqual([]);
   });
 
   it('should handle partial data in pendingItems', () => {
     component.pendingItems = {
-      pending_services: [
-        {
-          id: '1',
-          name: 'Test Service',
-          status: 'pending',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
-        },
-      ],
-      pending_resources: undefined as unknown as never[],
+      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
+      groups: undefined as unknown as never[],
     };
 
     expect(component.pendingItemsArray.length).toBe(1);
-    expect(component.pendingItemsArray[0].name).toBe('Test Service');
+    expect(component.pendingItemsArray[0].name).toBe(PLATFORM_NAMES.galaxy);
   });
 });

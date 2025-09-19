@@ -8,26 +8,6 @@ import { environment } from '../../../environments/environment';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
-export interface Resource {
-  name: string;
-  status: Status;
-  id: string;
-}
-
-export interface Service {
-  name: string;
-  id: string;
-  status: Status;
-  last_updated: string;
-  updated_by: string;
-  resources: Resource[];
-}
-
-export interface Group {
-  name: string;
-  id: string;
-}
-
 export interface Identity {
   connection: string;
   provider: string;
@@ -46,8 +26,6 @@ export interface BiocommonsUserMetadata {
 }
 
 export interface BiocommonsAppMetadata {
-  groups: Group[];
-  services: Service[];
   registration_from?: 'biocommons' | 'galaxy' | 'bpa';
 }
 

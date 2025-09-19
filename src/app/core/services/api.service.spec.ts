@@ -4,7 +4,12 @@ import {
   provideHttpClientTesting,
   HttpTestingController,
 } from '@angular/common/http/testing';
-import { ApiService } from './api.service';
+import {
+  AllPendingResponse,
+  ApiService,
+  GroupUserResponse,
+  PlatformUserResponse,
+} from './api.service';
 import { environment } from '../../../environments/environment';
 
 describe('ApiService', () => {
@@ -28,74 +33,61 @@ describe('ApiService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should fetch approved services', () => {
-    const mockResponse = {
-      approved_services: [
-        {
-          id: '1',
-          name: 'Test Service',
-          status: 'active',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
-        },
-      ],
-    };
+  it('should fetch approved platforms', () => {
+    const mockResponse: PlatformUserResponse[] = [
+      { platform_id: 'galaxy', approval_status: 'approved' },
+    ];
 
-    service.getApprovedServices().subscribe((response) => {
+    service.getUserApprovedPlatforms().subscribe((response) => {
       expect(response).toEqual(mockResponse);
-      expect(response.approved_services.length).toBe(1);
-      expect(response.approved_services[0].name).toBe('Test Service');
+      expect(response.length).toBe(1);
     });
 
     const req = httpMock.expectOne(
-      `${environment.auth0.backend}/me/services/approved`,
+      `${environment.auth0.backend}/me/platforms/approved`,
     );
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
   });
 
-  it('should fetch approved resources', () => {
-    const mockResponse = {
-      approved_resources: [
-        { id: '1', name: 'Test Resource', status: 'active' },
-      ],
-    };
+  it('should fetch approved groups', () => {
+    const mockResponse: GroupUserResponse[] = [
+      {
+        group_name: 'Threatened Species Initiative',
+        group_id: 'tsi',
+        approval_status: 'approved',
+      },
+    ];
 
-    service.getApprovedResources().subscribe((response) => {
+    service.getUserApprovedGroups().subscribe((response) => {
       expect(response).toEqual(mockResponse);
-      expect(response.approved_resources.length).toBe(1);
-      expect(response.approved_resources[0].name).toBe('Test Resource');
+      expect(response.length).toBe(1);
+      expect(response[0].group_name).toBe('Threatened Species Initiative');
     });
 
     const req = httpMock.expectOne(
-      `${environment.auth0.backend}/me/resources/approved`,
+      `${environment.auth0.backend}/me/groups/approved`,
     );
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
   });
 
   it('should fetch all pending items', () => {
-    const mockResponse = {
-      pending_services: [
+    const mockResponse: AllPendingResponse = {
+      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
+      groups: [
         {
-          id: '1',
-          name: 'Pending Service',
-          status: 'pending',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
+          group_id: 'tsi',
+          group_name: 'Threatened Species Initiative',
+          approval_status: 'pending',
         },
-      ],
-      pending_resources: [
-        { id: '2', name: 'Pending Resource', status: 'pending' },
       ],
     };
 
-    service.getAllPendingRequests().subscribe((response) => {
+    service.getUserAllPending().subscribe((response) => {
       expect(response).toEqual(mockResponse);
-      expect(response.pending_services.length).toBe(1);
-      expect(response.pending_resources.length).toBe(1);
+      expect(response.platforms.length).toBe(1);
+      expect(response.groups.length).toBe(1);
     });
 
     const req = httpMock.expectOne(
@@ -106,11 +98,11 @@ describe('ApiService', () => {
   });
 
   it('should handle empty responses', () => {
-    const mockResponse = { pending_services: [], pending_resources: [] };
+    const mockResponse: AllPendingResponse = { platforms: [], groups: [] };
 
-    service.getAllPendingRequests().subscribe((response) => {
-      expect(response.pending_services).toEqual([]);
-      expect(response.pending_resources).toEqual([]);
+    service.getUserAllPending().subscribe((response) => {
+      expect(response.platforms).toEqual([]);
+      expect(response.groups).toEqual([]);
     });
 
     const req = httpMock.expectOne(

@@ -44,8 +44,8 @@ describe('DefaultLayoutComponent', () => {
     routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
     const apiSpy = jasmine.createSpyObj('ApiService', [
-      'getAllPendingRequests',
-      'getPendingUsers',
+      'getUserAllPending',
+      'getAdminPendingUsers',
     ]);
 
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
@@ -94,10 +94,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
-    mockApiService.getPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
   });
 
   it('should create', () => {
@@ -113,10 +113,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
-    mockApiService.getPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -137,10 +137,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
-    mockApiService.getPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -161,10 +161,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
-    mockApiService.getPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -185,10 +185,10 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
-    mockApiService.getPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
