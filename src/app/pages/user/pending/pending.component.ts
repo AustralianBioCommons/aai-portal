@@ -1,10 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
-import { ApiService, Pending } from '../../../core/services/api.service';
+import {
+  AllPendingResponse,
+  ApiService,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, switchMap } from 'rxjs/operators';
+import { PLATFORM_NAMES } from '../../../core/constants/constants';
+
+interface PendingItem {
+  id: string;
+  name: string;
+}
 
 @Component({
   selector: 'app-pending',
@@ -13,7 +22,7 @@ import { filter, switchMap } from 'rxjs/operators';
   styleUrl: './pending.component.css',
 })
 export class PendingComponent {
-  pendingItems: Pending = { pending_services: [], pending_resources: [] };
+  pendingItems: AllPendingResponse = { platforms: [], groups: [] };
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -25,7 +34,7 @@ export class PendingComponent {
       .pipe(
         takeUntilDestroyed(),
         filter((isAuthenticated) => isAuthenticated),
-        switchMap(() => this.api.getAllPendingRequests()),
+        switchMap(() => this.api.getUserAllPending()),
       )
       .subscribe({
         next: (res) => {
@@ -40,18 +49,25 @@ export class PendingComponent {
           console.error('Failed to retrieve pending requests', error);
           this.error.set('Failed to load pending requests');
           this.loading.set(false);
-          this.pendingItems = { pending_services: [], pending_resources: [] };
+          this.pendingItems = { platforms: [], groups: [] };
         },
       });
   }
 
-  get pendingItemsArray() {
+  get pendingItemsArray(): PendingItem[] {
     if (!this.pendingItems) {
       return [];
     }
     return [
-      ...(this.pendingItems.pending_services || []),
-      ...(this.pendingItems.pending_resources || []),
+      ...this.pendingItems.platforms.map((platform) => {
+        return {
+          id: platform.platform_id,
+          name: PLATFORM_NAMES[platform.platform_id] || platform.platform_id,
+        };
+      }),
+      ...this.pendingItems.groups.map((group) => {
+        return { id: group.group_id, name: group.group_name };
+      }),
     ];
   }
 }

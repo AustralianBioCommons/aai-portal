@@ -1,6 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { ApiService } from '../../../core/services/api.service';
+import {
+  ApiService,
+  BiocommonsUserResponse,
+} from '../../../core/services/api.service';
 import { BiocommonsAuth0User } from '../../../core/services/auth.service';
 
 @Component({
@@ -12,12 +15,11 @@ import { BiocommonsAuth0User } from '../../../core/services/auth.service';
 export class RevokedComponent implements OnInit {
   private apiService = inject(ApiService);
 
-  loading = false;
-  users: BiocommonsAuth0User[] = [];
+  loading = true;
+  users: BiocommonsUserResponse[] = [];
 
   ngOnInit(): void {
-    this.loading = true;
-    this.apiService.getRevokedUsers(1, 50).subscribe({
+    this.apiService.getAdminRevokedUsers(1, 50).subscribe({
       next: (users) => {
         this.users = users;
         this.loading = false;

@@ -1,5 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import { ApiService, Resource } from '../../../core/services/api.service';
+import {
+  ApiService,
+  GroupUserResponse,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -14,7 +17,7 @@ import { RouterModule } from '@angular/router';
   styleUrl: './access.component.css',
 })
 export class AccessComponent {
-  approvedResources: Resource[] = [];
+  approvedGroups: GroupUserResponse[] = [];
   loading = signal(true);
   error = signal<string | null>(null);
 
@@ -26,11 +29,11 @@ export class AccessComponent {
       .pipe(
         takeUntilDestroyed(),
         filter((isAuthenticated) => isAuthenticated),
-        switchMap(() => this.api.getApprovedResources()),
+        switchMap(() => this.api.getUserApprovedGroups()),
       )
       .subscribe({
         next: (res) => {
-          this.approvedResources = res.approved_resources || [];
+          this.approvedGroups = res || [];
           this.error.set(null);
           this.loading.set(false);
         },
