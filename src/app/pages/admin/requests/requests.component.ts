@@ -1,7 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { ApiService } from '../../../core/services/api.service';
-import { BiocommonsAuth0User } from '../../../core/services/auth.service';
+import {
+  ApiService,
+  BiocommonsUserResponse,
+} from '../../../core/services/api.service';
 
 @Component({
   selector: 'app-requests',
@@ -13,11 +15,11 @@ export class RequestsComponent implements OnInit {
   private apiService = inject(ApiService);
 
   loading = false;
-  users: BiocommonsAuth0User[] = [];
+  users: BiocommonsUserResponse[] = [];
 
   ngOnInit(): void {
     this.loading = true;
-    this.apiService.getPendingUsers(1, 50).subscribe({
+    this.apiService.getAdminPendingUsers(1, 50).subscribe({
       next: (users) => {
         this.users = users;
         this.loading = false;

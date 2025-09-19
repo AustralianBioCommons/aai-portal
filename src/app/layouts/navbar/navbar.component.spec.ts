@@ -3,7 +3,10 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError, EMPTY } from 'rxjs';
 import { signal } from '@angular/core';
 import { NavbarComponent } from './navbar.component';
-import { ApiService } from '../../core/services/api.service';
+import {
+  AllPendingResponse,
+  ApiService,
+} from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 
 describe('NavbarComponent', () => {
@@ -13,9 +16,7 @@ describe('NavbarComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', [
-      'getAllPendingRequests',
-    ]);
+    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserAllPending']);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
@@ -60,28 +61,21 @@ describe('NavbarComponent', () => {
   });
 
   it('should create', () => {
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('should calculate pending count correctly', () => {
-    const mockPending = {
-      pending_services: [
-        {
-          id: '1',
-          name: 'Service',
-          status: 'pending',
-          last_updated: '',
-          updated_by: '',
-          resources: [],
-        },
+    const mockPending: AllPendingResponse = {
+      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
+      groups: [
+        { group_id: 'tsi', group_name: 'TSI', approval_status: 'pending' },
       ],
-      pending_resources: [{ id: '2', name: 'Resource', status: 'pending' }],
     };
-    mockApiService.getAllPendingRequests.and.returnValue(of(mockPending));
+    mockApiService.getUserAllPending.and.returnValue(of(mockPending));
 
     fixture.detectChanges();
 
@@ -89,7 +83,7 @@ describe('NavbarComponent', () => {
   });
 
   it('should handle API error gracefully', () => {
-    mockApiService.getAllPendingRequests.and.returnValue(
+    mockApiService.getUserAllPending.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
@@ -138,8 +132,8 @@ describe('NavbarComponent', () => {
   });
 
   it('should call authService.logout when logout is clicked', () => {
-    mockApiService.getAllPendingRequests.and.returnValue(
-      of({ pending_services: [], pending_resources: [] }),
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
     );
     fixture.detectChanges();
 

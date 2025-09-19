@@ -74,7 +74,7 @@ export class NavbarComponent {
         if (this.isAdmin()) {
           // Admin: Get pending users
           this.api
-            .getPendingUsers()
+            .getAdminPendingUsers()
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (pendingUsers) => {
@@ -86,15 +86,15 @@ export class NavbarComponent {
               },
             });
         } else {
-          // Non-admin: Get pending requests (services and resources)
+          // Non-admin: Get pending requests (platforms and groups)
           this.api
-            .getAllPendingRequests()
+            .getUserAllPending()
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (pendingData) => {
                 const totalPending =
-                  (pendingData?.pending_services?.length || 0) +
-                  (pendingData?.pending_resources?.length || 0);
+                  (pendingData?.platforms?.length || 0) +
+                  (pendingData?.groups?.length || 0);
                 this.pendingCount.set(totalPending);
               },
               error: (error) => {

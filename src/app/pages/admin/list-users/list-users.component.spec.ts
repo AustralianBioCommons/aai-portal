@@ -26,11 +26,13 @@ describe('ListUsersComponent', () => {
       id: '1',
       email: 'user1@example.com',
       username: 'user1',
+      email_verified: true,
       created_at: '2023-01-01T00:00:00Z',
     },
     {
       id: '2',
       email: 'user2@example.com',
+      email_verified: true,
       username: 'user2',
       created_at: '2023-01-02T00:00:00Z',
     },
