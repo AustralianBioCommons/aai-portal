@@ -3,33 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
+import { PLATFORM_IDS } from '../constants/constants';
 
-export interface Resource {
-  name: string;
-  status: string;
-  id: string;
+export interface PlatformUserResponse {
+  platform_id: PLATFORM_IDS;
+  approval_status: string;
 }
 
-export interface Service {
-  name: string;
-  id: string;
-  status: string;
-  last_updated: string;
-  updated_by: string;
-  resources: Resource[];
+export interface GroupUserResponse {
+  group_id: string;
+  approval_status: string;
+  group_name: string;
 }
 
-export interface Pending {
-  pending_services: Service[];
-  pending_resources: Resource[];
-}
-
-export interface ApprovedServicesResponse {
-  approved_services: Service[];
-}
-
-export interface ApprovedResourcesResponse {
-  approved_resources: Resource[];
+export interface AllPendingResponse {
+  platforms: PlatformUserResponse[];
+  groups: GroupUserResponse[];
 }
 
 export interface FilterOption {
@@ -40,13 +29,14 @@ export interface FilterOption {
 export interface BiocommonsUserResponse {
   id: string;
   email: string;
+  email_verified: boolean;
   username: string;
   created_at: string;
 }
 
 export interface PlatformMembership {
   id: string;
-  platform_id: string;
+  platform_id: PLATFORM_IDS;
   user_id: string;
   approval_status: string;
   updated_by: string;
@@ -71,20 +61,20 @@ export interface BiocommonsUserDetails extends BiocommonsAuth0User {
 export class ApiService {
   private http = inject(HttpClient);
 
-  getApprovedServices(): Observable<ApprovedServicesResponse> {
-    return this.http.get<ApprovedServicesResponse>(
-      `${environment.auth0.backend}/me/services/approved`,
+  getUserApprovedPlatforms(): Observable<PlatformUserResponse[]> {
+    return this.http.get<PlatformUserResponse[]>(
+      `${environment.auth0.backend}/me/platforms/approved`,
     );
   }
 
-  getApprovedResources(): Observable<ApprovedResourcesResponse> {
-    return this.http.get<ApprovedResourcesResponse>(
-      `${environment.auth0.backend}/me/resources/approved`,
+  getUserApprovedGroups(): Observable<GroupUserResponse[]> {
+    return this.http.get<GroupUserResponse[]>(
+      `${environment.auth0.backend}/me/groups/approved`,
     );
   }
 
-  getAllPendingRequests(): Observable<Pending> {
-    return this.http.get<Pending>(
+  getUserAllPending(): Observable<AllPendingResponse> {
+    return this.http.get<AllPendingResponse>(
       `${environment.auth0.backend}/me/all/pending`,
     );
   }
@@ -119,26 +109,32 @@ export class ApiService {
     );
   }
 
-  getUnverifiedUsers(
+  getAdminUnverifiedUsers(
     page = 1,
     pageSize = 20,
-  ): Observable<BiocommonsAuth0User[]> {
+  ): Observable<BiocommonsUserResponse[]> {
     const params = `?page=${page}&page_size=${pageSize}`;
-    return this.http.get<BiocommonsAuth0User[]>(
+    return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users/unverified${params}`,
     );
   }
 
-  getPendingUsers(page = 1, pageSize = 20): Observable<BiocommonsAuth0User[]> {
+  getAdminPendingUsers(
+    page = 1,
+    pageSize = 20,
+  ): Observable<BiocommonsUserResponse[]> {
     const params = `?page=${page}&page_size=${pageSize}`;
-    return this.http.get<BiocommonsAuth0User[]>(
+    return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users/pending${params}`,
     );
   }
 
-  getRevokedUsers(page = 1, pageSize = 20): Observable<BiocommonsAuth0User[]> {
+  getAdminRevokedUsers(
+    page = 1,
+    pageSize = 20,
+  ): Observable<BiocommonsUserResponse[]> {
     const params = `?page=${page}&page_size=${pageSize}`;
-    return this.http.get<BiocommonsAuth0User[]>(
+    return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users/revoked${params}`,
     );
   }
