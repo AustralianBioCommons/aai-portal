@@ -12,10 +12,7 @@ import {
 } from '@angular/common/http/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
-import {
-  SbpRegisterComponent,
-  RegistrationRequest,
-} from './sbp-register.component';
+import { SbpRegisterComponent } from './sbp-register.component';
 import { ValidationService } from '../../../core/services/validation.service';
 import { environment } from '../../../../environments/environment';
 
