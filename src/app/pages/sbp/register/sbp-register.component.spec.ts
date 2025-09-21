@@ -77,7 +77,12 @@ describe('SbpRegisterComponent', () => {
   describe('Form Validation', () => {
     it('should validate required fields', () => {
       const requiredControls: (
-        | keyof RegistrationRequest
+        | 'firstName'
+        | 'lastName'
+        | 'email'
+        | 'username'
+        | 'reason'
+        | 'password'
         | 'confirmPassword'
       )[] = [
         'firstName',

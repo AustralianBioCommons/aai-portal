@@ -11,8 +11,8 @@ import { RecaptchaModule } from 'ng-recaptcha-2';
 
 export interface RegistrationRequest {
   username: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   reason: string;
   password: string;
@@ -62,8 +62,8 @@ export class SbpRegisterComponent {
     if (this.registrationForm.valid && this.recaptchaToken) {
       const formValue = this.registrationForm.value;
       const requestBody: RegistrationRequest = {
-        firstName: formValue.firstName!,
-        lastName: formValue.lastName!,
+        first_name: formValue.firstName!,
+        last_name: formValue.lastName!,
         email: formValue.email!,
         username: formValue.username!,
         reason: formValue.reason!,
@@ -133,7 +133,11 @@ export class SbpRegisterComponent {
   }
 
   getErrorMessages(
-    fieldName: keyof RegistrationRequest | 'confirmPassword',
+    fieldName:
+      | keyof RegistrationRequest
+      | 'confirmPassword'
+      | 'firstName'
+      | 'lastName',
   ): string[] {
     return this.validationService.getErrorMessages(
       this.registrationForm,
