@@ -51,7 +51,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PORTAL_DIR="$(cd "$SCRIPT_DIR/../" && pwd)"
 
 FRONTEND_PREFIXES=("/${ENVIRONMENT}/frontend" "/aai/frontend/${ENVIRONMENT}")
-SECRET_NAMES=("${ENVIRONMENT}/auth0" "/aai/backend/${ENVIRONMENT}/auth0")
 
 ssm_param() {
   local key="$1" value
@@ -70,9 +69,20 @@ ssm_param() {
   exit 1
 }
 
-SECRET_JSON=""
-for secret in "${SECRET_NAMES[@]}"; do
-  if SECRET_JSON=$(aws secretsmanager get-secret-value \
+BACKEND_BASE_URL=$(ssm_param "backend-base-url")
+SITE_URL=$(ssm_param "site-url")
+SITE_BUCKET=$(ssm_param "bucket-name")
+DISTRIBUTION_ID=$(ssm_param "distribution-id")
+
+FRONTEND_SECRET_JSON=""
+FRONTEND_SECRET_CANDIDATES=(
+  "${ENVIRONMENT}/frontend/secrets"
+  "/${ENVIRONMENT}/frontend/secrets"
+  "aai/frontend/${ENVIRONMENT}/secrets"
+  "/aai/frontend/${ENVIRONMENT}/secrets"
+)
+for secret in "${FRONTEND_SECRET_CANDIDATES[@]}"; do
+  if FRONTEND_SECRET_JSON=$(aws secretsmanager get-secret-value \
     --secret-id "$secret" \
     --profile "$PROFILE" \
     --query 'SecretString' \
@@ -81,35 +91,19 @@ for secret in "${SECRET_NAMES[@]}"; do
   fi
 done
 
-if [[ -z "$SECRET_JSON" ]]; then
-  echo "Error: unable to fetch Auth0 secret for env '${ENVIRONMENT}'." >&2
+if [[ -z "$FRONTEND_SECRET_JSON" ]]; then
+  echo "Error: unable to fetch frontend secret for env '${ENVIRONMENT}'. Tried: ${FRONTEND_SECRET_CANDIDATES[*]}" >&2
   exit 1
 fi
 
-AUTH0_DOMAIN=$(echo "$SECRET_JSON" | jq -r '.DOMAIN // empty')
-AUTH0_CLIENT_ID=$(echo "$SECRET_JSON" | jq -r '.CLIENT_ID // empty')
-AUTH0_AUDIENCE=$(echo "$SECRET_JSON" | jq -r '.AUDIENCE // empty')
+AUTH0_DOMAIN=$(echo "$FRONTEND_SECRET_JSON" | jq -r '.DOMAIN // empty')
+AUTH0_CLIENT_ID=$(echo "$FRONTEND_SECRET_JSON" | jq -r '.CLIENT_ID // empty')
+AUTH0_AUDIENCE=$(echo "$FRONTEND_SECRET_JSON" | jq -r '.AUDIENCE // empty')
+RECAPTCHA_KEY=$(echo "$FRONTEND_SECRET_JSON" | jq -r '.RECAPTCHA_KEY // empty')
 
 if [[ -z "$AUTH0_DOMAIN" || -z "$AUTH0_CLIENT_ID" || -z "$AUTH0_AUDIENCE" ]]; then
-  echo "Error: Auth0 secret missing DOMAIN, CLIENT_ID, or AUDIENCE." >&2
+  echo "Error: frontend secret missing DOMAIN, CLIENT_ID, or AUDIENCE." >&2
   exit 1
-fi
-
-BACKEND_BASE_URL=$(ssm_param "backend-base-url")
-SITE_URL=$(ssm_param "site-url")
-SITE_BUCKET=$(ssm_param "bucket-name")
-DISTRIBUTION_ID=$(ssm_param "distribution-id")
-
-FRONTEND_SECRET_JSON=""
-FRONTEND_SECRET_ID="/${ENVIRONMENT}/frontend/secrets"
-if FRONTEND_SECRET_JSON=$(aws secretsmanager get-secret-value \
-  --secret-id "$FRONTEND_SECRET_ID" \
-  --profile "$PROFILE" \
-  --query 'SecretString' \
-  --output text 2>/dev/null); then
-  RECAPTCHA_KEY=$(echo "$FRONTEND_SECRET_JSON" | jq -r '.RECAPTCHA_KEY // empty')
-else
-  RECAPTCHA_KEY=""
 fi
 
 case "$ENVIRONMENT" in
@@ -164,7 +158,12 @@ npm install
 npx ng build --configuration "${ANGULAR_CONFIG}"
 popd >/dev/null
 
-aws s3 sync "$PORTAL_DIR/dist/aai-portal/" "s3://${SITE_BUCKET}/" \
+BUILD_DIR="$PORTAL_DIR/dist/aai-portal/browser"
+if [[ ! -d "$BUILD_DIR" ]]; then
+  BUILD_DIR="$PORTAL_DIR/dist/aai-portal"
+fi
+
+aws s3 sync "$BUILD_DIR/" "s3://${SITE_BUCKET}/" \
   --delete \
   --profile "$PROFILE"
 
