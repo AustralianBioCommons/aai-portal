@@ -23,6 +23,8 @@ import { adminGuard } from './core/guards/admin.guard';
 import { RegisterComponent } from './pages/register/register.component';
 import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
 import { ListUnverifiedUsersComponent } from './pages/admin/list-unverified-users/list-unverified-users.component';
+import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.component';
+import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 
 export const routes: Routes = [
   // Login & register routes - only accessible when not logged in
@@ -106,6 +108,22 @@ export const routes: Routes = [
         path: 'email-verified',
         component: EmailVerifiedComponent,
         data: { title: 'Email Verification' },
+      },
+    ],
+  },
+  {
+    path: 'sbp',
+    children: [
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
+      {
+        path: 'register',
+        component: SbpRegisterComponent,
+        data: { title: 'Register | Structural Biology Platform' },
+      },
+      {
+        path: 'register/success',
+        component: SbpRegistrationSuccessComponent,
+        data: { title: 'Registration Success | Structural Biology Platform' },
       },
     ],
   },
