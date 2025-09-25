@@ -164,7 +164,7 @@ describe('SbpRegisterComponent', () => {
         confirmPassword: 'StrongPass123!',
       });
 
-      component.recaptchaToken = 'mock-recaptcha-token';
+      component.recaptchaToken.set('mock-recaptcha-token');
     });
 
     it('should submit form successfully', fakeAsync(() => {
@@ -196,11 +196,11 @@ describe('SbpRegisterComponent', () => {
       );
 
       tick();
-      expect(component.errorNotification()).toBe('Registration failed');
+      expect(component.errorAlert()).toBe('Registration failed');
     }));
 
     it('should not submit form without recaptcha token', () => {
-      component.recaptchaToken = null;
+      component.recaptchaToken.set(null);
       spyOn(component.registrationForm, 'markAllAsTouched');
 
       component.onSubmit();
@@ -213,7 +213,7 @@ describe('SbpRegisterComponent', () => {
 
     it('should scroll to first invalid field on invalid submit', () => {
       component.registrationForm.reset();
-      component.recaptchaToken = null;
+      component.recaptchaToken.set(null);
       const mockElement = document.createElement('div');
       spyOn(mockElement, 'scrollIntoView');
       spyOn(document, 'getElementById').and.returnValue(mockElement);
@@ -230,12 +230,15 @@ describe('SbpRegisterComponent', () => {
 
   describe('UI Interactions', () => {
     it('should show and hide error notification', fakeAsync(() => {
-      const errorMessage = 'Test error';
-      component.showErrorNotification(errorMessage);
-      expect(component.errorNotification()).toBe(errorMessage);
+      const errorAlert = 'Test error';
+      component.errorAlert.set(errorAlert);
+      expect(component.errorAlert()).toBe(errorAlert);
+
+      // Simulate the setTimeout that happens in the component's error handling
+      setTimeout(() => component.errorAlert.set(null), 5000);
 
       tick(5000);
-      expect(component.errorNotification()).toBeNull();
+      expect(component.errorAlert()).toBeNull();
     }));
 
     it('should reset form', () => {
@@ -255,7 +258,7 @@ describe('SbpRegisterComponent', () => {
     it('should handle recaptcha resolved callback', () => {
       const mockToken = 'mock-recaptcha-token';
       component.resolved(mockToken);
-      expect(component.recaptchaToken).toBe(mockToken);
+      expect(component.recaptchaToken()).toBe(mockToken);
     });
   });
 

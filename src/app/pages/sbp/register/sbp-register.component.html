@@ -29,12 +29,15 @@
   <div
     class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
   >
-    @if (errorNotification()) {
-      <div
-        class="fixed right-12 top-12 z-50 rounded-sm bg-red-600 p-6 text-white shadow-lg"
+    @if (errorAlert()) {
+      <app-alert
+        type="error"
+        positionClass="right-12 top-12"
+        [message]="errorAlert()!"
+        [dismissible]="true"
+        (dismissed)="errorAlert.set(null)"
       >
-        {{ errorNotification() }}
-      </div>
+      </app-alert>
     }
     <form
       [formGroup]="registrationForm"
@@ -213,7 +216,7 @@
           (resolved)="resolved($event)"
           siteKey="{{ recaptchaSiteKeyV2 }}"
         ></re-captcha>
-        @if (!recaptchaToken && recaptchaAttempted) {
+        @if (!recaptchaToken() && recaptchaAttempted()) {
           <div class="text-xs text-red-500">
             Please complete the reCAPTCHA verification
           </div>

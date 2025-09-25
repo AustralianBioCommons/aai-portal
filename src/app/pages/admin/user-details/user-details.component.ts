@@ -14,11 +14,12 @@ import {
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-user-details',
   standalone: true,
-  imports: [DatePipe, LoadingSpinnerComponent, RouterLink],
+  imports: [DatePipe, LoadingSpinnerComponent, RouterLink, AlertComponent],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
 })
@@ -35,8 +36,8 @@ export class UserDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
-  successNotification = signal<string | null>(null);
-  errorNotification = signal<string | null>(null);
+  successAlert = signal<string | null>(null);
+  errorAlert = signal<string | null>(null);
 
   platformNames: Record<string, string> = {
     bpa_data_portal: 'Bioplatforms Australia Data Portal',
@@ -73,23 +74,23 @@ export class UserDetailsComponent implements OnInit {
     const userId = this.user()?.user_id;
     if (!userId) {
       console.error('No user ID available');
-      this.errorNotification.set('No user ID available');
-      this.hideNotificationsAfterDelay();
+      this.errorAlert.set('No user ID available');
+      this.hideAlertsAfterDelay();
       return;
     }
 
-    this.successNotification.set(null);
-    this.errorNotification.set(null);
+    this.successAlert.set(null);
+    this.errorAlert.set(null);
 
     this.apiService.resendVerificationEmail(userId).subscribe({
       next: () => {
-        this.successNotification.set('Verification email sent successfully');
-        this.hideNotificationsAfterDelay();
+        this.successAlert.set('Verification email sent successfully');
+        this.hideAlertsAfterDelay();
       },
       error: (error) => {
         console.error('Failed to resend verification email:', error);
-        this.errorNotification.set('Failed to resend verification email');
-        this.hideNotificationsAfterDelay();
+        this.errorAlert.set('Failed to resend verification email');
+        this.hideAlertsAfterDelay();
       },
     });
 
@@ -100,10 +101,10 @@ export class UserDetailsComponent implements OnInit {
     return this.platformNames[platformId] || platformId;
   }
 
-  private hideNotificationsAfterDelay() {
+  private hideAlertsAfterDelay() {
     setTimeout(() => {
-      this.successNotification.set(null);
-      this.errorNotification.set(null);
+      this.successAlert.set(null);
+      this.errorAlert.set(null);
     }, 5000);
   }
 

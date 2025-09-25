@@ -13,10 +13,11 @@ export interface Bundle {
   services: BundleService[];
 }
 
-export type PLATFORM_IDS = 'galaxy' | 'bpa_data_portal';
+export type PLATFORM_IDS = 'galaxy' | 'bpa_data_portal' | 'sbp';
 export const PLATFORM_NAMES = {
   galaxy: 'Galaxy Australia',
   bpa_data_portal: 'Bioplatforms Australia Data Portal',
+  sbp: 'Structural Biology Platform',
 };
 
 const bpaBundleService: BundleService = {
@@ -65,7 +66,7 @@ export const biocommonsBundles: Bundle[] = [
     id: 'fungi',
     name: "Fungi Functional 'Omics",
     logoUrls: ['/assets/aff-logo.png'],
-    listItems: [],
+    listItems: ['Coming soon!'],
     disabled: true,
     services: [],
   },

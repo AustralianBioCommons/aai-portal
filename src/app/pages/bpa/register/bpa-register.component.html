@@ -1,12 +1,15 @@
 <div
   class="flex min-h-full flex-col items-center justify-center bg-white md:bg-gray-50"
 >
-  @if (errorNotification()) {
-    <div
-      class="fixed right-12 top-12 z-50 rounded-sm bg-red-600 p-6 text-white shadow-lg"
+  @if (errorAlert()) {
+    <app-alert
+      type="error"
+      positionClass="right-12 top-12"
+      [message]="errorAlert()!"
+      [dismissible]="true"
+      (dismissed)="errorAlert.set(null)"
     >
-      {{ errorNotification() }}
-    </div>
+    </app-alert>
   }
   <!-- Header -->
   <div class="flex w-full items-center justify-center bg-bpa-primary p-12">
@@ -205,7 +208,7 @@
               (resolved)="resolved($event)"
               siteKey="{{ recaptchaSiteKeyV2 }}"
             ></re-captcha>
-            @if (!recaptchaToken && recaptchaAttempted) {
+            @if (!recaptchaToken() && recaptchaAttempted()) {
               <div class="text-xs text-red-500">
                 Please complete the reCAPTCHA verification
               </div>

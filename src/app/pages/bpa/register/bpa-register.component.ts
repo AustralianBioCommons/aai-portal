@@ -8,6 +8,7 @@ import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { passwordRequirements } from '../../../../utils/validation/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
 
 export interface RegistrationRequest {
   username: string;
@@ -20,25 +21,30 @@ export interface RegistrationRequest {
 @Component({
   selector: 'app-bpa-register',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink, RecaptchaModule],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    RouterLink,
+    RecaptchaModule,
+    AlertComponent,
+  ],
   templateUrl: './bpa-register.component.html',
   styleUrl: './bpa-register.component.css',
 })
 export class BpaRegisterComponent {
-  private readonly errorNotificationTimeout = 5000;
-  private readonly backendURL = `${environment.auth0.backend}/bpa/register`;
-
   private formBuilder = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
   private validationService = inject(ValidationService);
   private route = inject(ActivatedRoute);
 
-  errorNotification = signal<string | null>(null);
+  private readonly backendURL = `${environment.auth0.backend}/bpa/register`;
+
+  errorAlert = signal<string | null>(null);
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
-  recaptchaToken: string | null = null;
-  recaptchaAttempted = false;
+  recaptchaToken = signal<string | null>(null);
+  recaptchaAttempted = signal(false);
 
   registrationForm = this.formBuilder.group({
     username: ['', [usernameRequirements]],
@@ -56,8 +62,8 @@ export class BpaRegisterComponent {
   }
 
   onSubmit(): void {
-    this.recaptchaAttempted = true;
-    if (this.registrationForm.valid && this.recaptchaToken) {
+    this.recaptchaAttempted.set(true);
+    if (this.registrationForm.valid && this.recaptchaToken()) {
       const formValue = this.registrationForm.value;
       const requestBody: RegistrationRequest = {
         username: formValue.username || '',
@@ -71,7 +77,8 @@ export class BpaRegisterComponent {
         next: () =>
           this.router.navigate(['success'], { relativeTo: this.route }),
         error: (error: HttpErrorResponse) => {
-          this.showErrorNotification(error?.error?.message);
+          this.errorAlert.set(error?.error?.message);
+          setTimeout(() => this.errorAlert.set(null), 5000);
           this.validationService.setBackendErrorMessages(error);
         },
       });
@@ -90,7 +97,7 @@ export class BpaRegisterComponent {
   }
 
   resolved(captchaResponse: string | null): void {
-    this.recaptchaToken = captchaResponse;
+    this.recaptchaToken.set(captchaResponse);
   }
 
   resetForm(): void {
@@ -105,16 +112,8 @@ export class BpaRegisterComponent {
     this.registrationForm.markAsPristine();
     this.registrationForm.markAsUntouched();
     this.validationService.reset();
-    this.recaptchaToken = null;
-    this.recaptchaAttempted = false;
-  }
-
-  showErrorNotification(message: string): void {
-    this.errorNotification.set(message);
-    setTimeout(
-      () => this.errorNotification.set(null),
-      this.errorNotificationTimeout,
-    );
+    this.recaptchaToken.set(null);
+    this.recaptchaAttempted.set(false);
   }
 
   scrollToTop(): void {

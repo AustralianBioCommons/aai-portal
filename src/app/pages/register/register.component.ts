@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
@@ -17,6 +17,7 @@ import { usernameRequirements } from '../../../utils/validation/usernames';
 import { ValidationService } from '../../core/services/validation.service';
 import { environment } from '../../../environments/environment';
 import { RecaptchaModule } from 'ng-recaptcha-2';
+import { AlertComponent } from '../../shared/components/alert/alert.component';
 
 interface RegistrationForm {
   firstName: FormControl<string>;
@@ -39,7 +40,7 @@ export interface RegistrationRequest {
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule],
+  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule, AlertComponent],
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {
@@ -50,15 +51,15 @@ export class RegisterComponent {
   private validationService = inject(ValidationService);
   private http = inject(HttpClient);
 
-  currentStep = 1;
+  currentStep = signal(1);
   totalSteps = 5;
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
-  recaptchaToken: string | null = null;
-  recaptchaAttempted = false;
+  recaptchaToken = signal<string | null>(null);
+  recaptchaAttempted = signal(false);
 
-  errorMessage: string | null = null;
-  isSubmitting = false;
+  errorAlert = signal<string | null>(null);
+  isSubmitting = signal<boolean>(false);
 
   bundles: Bundle[] = biocommonsBundles;
 
@@ -112,7 +113,7 @@ export class RegisterComponent {
   }
 
   resolved(captchaResponse: string | null): void {
-    this.recaptchaToken = captchaResponse;
+    this.recaptchaToken.set(captchaResponse);
   }
 
   selectBundle(value: string) {
@@ -128,16 +129,16 @@ export class RegisterComponent {
   }
 
   prevStep() {
-    if (this.currentStep === 1) {
+    if (this.currentStep() === 1) {
       this.router.navigate(['../'], { relativeTo: this.route });
-    } else if (this.currentStep > 1) {
-      this.resetStepValidation(this.currentStep);
-      this.currentStep--;
+    } else if (this.currentStep() > 1) {
+      this.resetStepValidation(this.currentStep());
+      this.currentStep.update((step) => step - 1);
     }
   }
 
   nextStep() {
-    switch (this.currentStep) {
+    switch (this.currentStep()) {
       case 1:
         this.handleStepValidation(this.bundleForm);
         break;
@@ -153,17 +154,17 @@ export class RegisterComponent {
         this.completeRegistration();
         break;
       default:
-        if (this.currentStep < this.totalSteps) {
-          this.currentStep++;
+        if (this.currentStep() < this.totalSteps) {
+          this.currentStep.update((step) => step + 1);
         }
         break;
     }
   }
 
   private handleStepValidation(form: FormGroup, onSuccess?: () => void) {
-    if (this.currentStep === 2) {
-      this.recaptchaAttempted = true;
-      if (!this.recaptchaToken) {
+    if (this.currentStep() === 2) {
+      this.recaptchaAttempted.set(true);
+      if (!this.recaptchaToken()) {
         form.markAllAsTouched();
         return;
       }
@@ -174,14 +175,14 @@ export class RegisterComponent {
       if (onSuccess) {
         onSuccess();
       }
-      this.currentStep++;
+      this.currentStep.update((step) => step + 1);
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   private resetStepValidation(step: number) {
-    this.errorMessage = null;
+    this.errorAlert.set(null);
     switch (step) {
       case 1:
         this.bundleForm.markAsUntouched();
@@ -191,17 +192,17 @@ export class RegisterComponent {
         this.registrationForm.markAsUntouched();
         this.registrationForm.markAsPristine();
         this.validationService.reset();
-        this.recaptchaToken = null;
-        this.recaptchaAttempted = false;
+        this.recaptchaToken.set(null);
+        this.recaptchaAttempted.set(false);
         break;
       case 3:
         this.termsForm.markAsUntouched();
         this.termsForm.markAsPristine();
-        this.recaptchaToken = null;
-        this.recaptchaAttempted = false;
+        this.recaptchaToken.set(null);
+        this.recaptchaAttempted.set(false);
         break;
       case 4:
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         break;
     }
   }
@@ -226,8 +227,8 @@ export class RegisterComponent {
   }
 
   private completeRegistration() {
-    this.isSubmitting = true;
-    this.errorMessage = null;
+    this.isSubmitting.set(true);
+    this.errorAlert.set(null);
 
     const registrationData: RegistrationRequest = {
       first_name: this.registrationForm.get('firstName')!.value,
@@ -247,17 +248,18 @@ export class RegisterComponent {
         catchError((error: HttpErrorResponse) => {
           console.error('Registration failed:', error);
           this.validationService.setBackendErrorMessages(error);
-          this.errorMessage =
-            error?.error?.message || 'Registration failed. Please try again.';
-          this.isSubmitting = false;
+          this.errorAlert.set(
+            error?.error?.message || 'Registration failed. Please try again.',
+          );
+          this.isSubmitting.set(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return of(null);
         }),
       )
       .subscribe((result) => {
-        this.isSubmitting = false;
+        this.isSubmitting.set(false);
         if (result) {
-          this.currentStep++;
+          this.currentStep.update((step) => step + 1);
         }
       });
   }

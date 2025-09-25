@@ -1,55 +1,21 @@
 <!-- Notifications -->
-@if (successNotification()) {
-  <div
-    class="fixed right-12 top-24 z-50 flex cursor-pointer items-center gap-2 rounded-sm bg-green-500 p-4 text-white shadow-lg transition-opacity hover:opacity-90"
-    role="button"
-    tabindex="0"
-    (click)="successNotification.set(null)"
-    (keyup.enter)="successNotification.set(null)"
-    (keyup.space)="successNotification.set(null)"
-  >
-    {{ successNotification() }}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      class="size-6"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-      />
-    </svg>
-  </div>
+@if (successAlert()) {
+  <app-alert
+    type="success"
+    positionClass="right-12 top-24"
+    [message]="successAlert()!"
+    [dismissible]="true"
+    (dismissed)="successAlert.set(null)"
+  ></app-alert>
 }
-@if (errorNotification()) {
-  <div
-    class="fixed right-12 top-24 z-50 flex cursor-pointer items-center gap-2 rounded-sm bg-red-600 p-4 text-white shadow-lg transition-opacity hover:opacity-90"
-    role="button"
-    tabindex="0"
-    (click)="errorNotification.set(null)"
-    (keyup.enter)="errorNotification.set(null)"
-    (keyup.space)="errorNotification.set(null)"
-  >
-    {{ errorNotification() }}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      class="size-6"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-      />
-    </svg>
-  </div>
+@if (errorAlert()) {
+  <app-alert
+    type="error"
+    positionClass="right-12 top-24"
+    [message]="errorAlert()!"
+    [dismissible]="true"
+    (dismissed)="errorAlert.set(null)"
+  ></app-alert>
 }
 
 <div
@@ -228,7 +194,7 @@
             user()!.platform_memberships.length > 0
           ) {
             <div class="space-y-6 rounded-lg bg-white p-6 shadow">
-              <div class="text-2xl font-semibold">Platform Memberships</div>
+              <div class="text-2xl font-semibold">Platform Access</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.platform_memberships;
@@ -260,7 +226,7 @@
             user()?.group_memberships && user()!.group_memberships.length > 0
           ) {
             <div class="space-y-6 rounded-lg bg-white p-6 shadow">
-              <div class="text-2xl font-semibold">Group Memberships</div>
+              <div class="text-2xl font-semibold">Bundle Access</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.group_memberships;

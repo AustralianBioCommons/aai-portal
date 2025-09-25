@@ -59,7 +59,7 @@ describe('RegisterComponent', () => {
 
   describe('Form Initialization', () => {
     it('should initialize with step 1', () => {
-      expect(component.currentStep).toBe(1);
+      expect(component.currentStep()).toBe(1);
     });
 
     it('should have 5 total steps', () => {
@@ -80,7 +80,7 @@ describe('RegisterComponent', () => {
 
   describe('Bundle Selection', () => {
     beforeEach(() => {
-      component.currentStep = 1;
+      component.currentStep.set(1);
       component.bundleForm.reset();
     });
 
@@ -114,34 +114,34 @@ describe('RegisterComponent', () => {
 
   describe('Step Navigation', () => {
     beforeEach(() => {
-      component.currentStep = 1;
+      component.currentStep.set(1);
       component.bundleForm.reset();
       component.registrationForm.reset();
     });
 
     it('should not proceed from step 1 without bundle selection', () => {
       component.nextStep();
-      expect(component.currentStep).toBe(1);
+      expect(component.currentStep()).toBe(1);
       expect(component.bundleForm.get('selectedBundle')?.touched).toBe(true);
     });
 
     it('should proceed from step 1 with valid bundle selection', () => {
       component.selectBundle('bpa_galaxy');
       component.nextStep();
-      expect(component.currentStep).toBe(2);
+      expect(component.currentStep()).toBe(2);
     });
 
     it('should not proceed from step 2 with invalid registration form', () => {
-      component.currentStep = 2;
+      component.currentStep.set(2);
       component.registrationForm.reset();
 
       component.nextStep();
-      expect(component.currentStep).toBe(2);
+      expect(component.currentStep()).toBe(2);
       expect(component.registrationForm.get('firstName')?.touched).toBe(true);
     });
 
     it('should proceed from step 2 with valid registration form', () => {
-      component.currentStep = 2;
+      component.currentStep.set(2);
       component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
@@ -153,14 +153,14 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.recaptchaToken = 'test-recaptcha-token';
+      component.recaptchaToken.set('test-recaptcha-token');
 
       component.nextStep();
-      expect(component.currentStep).toBe(3);
+      expect(component.currentStep()).toBe(3);
     });
 
     it('should not proceed from step 2 without reCAPTCHA completion', () => {
-      component.currentStep = 2;
+      component.currentStep.set(2);
       component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
@@ -172,31 +172,31 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.recaptchaToken = null;
+      component.recaptchaToken.set(null);
 
       component.nextStep();
-      expect(component.currentStep).toBe(2);
-      expect(component.recaptchaAttempted).toBe(true);
+      expect(component.currentStep()).toBe(2);
+      expect(component.recaptchaAttempted()).toBe(true);
     });
 
     it('should go back from step 2 to step 1', () => {
-      component.currentStep = 2;
+      component.currentStep.set(2);
       component.prevStep();
-      expect(component.currentStep).toBe(1);
+      expect(component.currentStep()).toBe(1);
     });
 
     it('should not proceed from step 3 with invalid terms form', () => {
-      component.currentStep = 3;
+      component.currentStep.set(3);
       component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
 
       component.nextStep();
-      expect(component.currentStep).toBe(3);
+      expect(component.currentStep()).toBe(3);
       expect(component.termsForm.get('bpa')?.touched).toBe(true);
     });
 
     it('should proceed from step 3 with accepted terms', () => {
-      component.currentStep = 3;
+      component.currentStep.set(3);
       component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
 
@@ -206,7 +206,7 @@ describe('RegisterComponent', () => {
       });
 
       component.nextStep();
-      expect(component.currentStep).toBe(4);
+      expect(component.currentStep()).toBe(4);
     });
 
     it('should complete registration and advance to final step', () => {
@@ -221,7 +221,7 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.currentStep = 4;
+      component.currentStep.set(4);
       component.nextStep();
 
       // Expect HTTP request to be made
@@ -241,8 +241,8 @@ describe('RegisterComponent', () => {
       // Simulate successful response
       req.flush({ success: true });
 
-      expect(component.currentStep).toBe(5);
-      expect(component.isSubmitting).toBe(false);
+      expect(component.currentStep()).toBe(5);
+      expect(component.isSubmitting()).toBe(false);
     });
   });
 
@@ -354,7 +354,7 @@ describe('RegisterComponent', () => {
 
   describe('Template Rendering', () => {
     it('should display step 1 bundle selection', () => {
-      component.currentStep = 1;
+      component.currentStep.set(1);
       fixture.detectChanges();
       expect(
         fixture.debugElement
@@ -364,7 +364,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should display step 2 registration form when on step 2', () => {
-      component.currentStep = 2;
+      component.currentStep.set(2);
       fixture.detectChanges();
       expect(
         fixture.debugElement
@@ -374,7 +374,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should display step 3 terms acceptance when on step 3', () => {
-      component.currentStep = 3;
+      component.currentStep.set(3);
       fixture.detectChanges();
       expect(
         fixture.debugElement
@@ -384,7 +384,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should display step 4 confirmation when on step 4', () => {
-      component.currentStep = 4;
+      component.currentStep.set(4);
       fixture.detectChanges();
       expect(
         fixture.debugElement
@@ -394,7 +394,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should display thank you message on final step', () => {
-      component.currentStep = 5;
+      component.currentStep.set(5);
       fixture.detectChanges();
 
       const thankYouText = fixture.debugElement.query(By.css('.text-4xl'));
@@ -415,7 +415,7 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.currentStep = 4;
+      component.currentStep.set(4);
       component.nextStep();
 
       // Expect HTTP request
@@ -427,7 +427,7 @@ describe('RegisterComponent', () => {
       // Simulate successful response
       req.flush({ success: true });
 
-      expect(component.currentStep).toBe(5);
+      expect(component.currentStep()).toBe(5);
     });
 
     it('should handle registration error and display error message', () => {
@@ -442,7 +442,7 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.currentStep = 4;
+      component.currentStep.set(4);
       component.nextStep();
 
       // Expect HTTP request
@@ -456,9 +456,9 @@ describe('RegisterComponent', () => {
         { status: 400, statusText: 'Bad Request' },
       );
 
-      expect(component.currentStep).toBe(4); // Should stay on step 4
-      expect(component.errorMessage).toBeDefined();
-      expect(component.isSubmitting).toBe(false);
+      expect(component.currentStep()).toBe(4); // Should stay on step 4
+      expect(component.errorAlert()).toBeDefined();
+      expect(component.isSubmitting()).toBe(false);
     });
   });
 
