@@ -19,6 +19,5 @@ export class AlertComponent {
 
   onDismiss() {
     this.dismissed.emit();
-    console.log(this.dismissed);
   }
 }
