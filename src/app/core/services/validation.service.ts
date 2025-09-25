@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormGroup, ValidationErrors } from '@angular/forms';
-import { ALLOWED_SPECIAL_CHARACTERS } from '../../shared/utils/validation/passwords';
+import { ALLOWED_SPECIAL_CHARACTERS } from '../../shared/validators/passwords';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   RegistrationErrorResponse,

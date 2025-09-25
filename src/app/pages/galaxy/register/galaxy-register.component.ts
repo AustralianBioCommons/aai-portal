@@ -14,8 +14,8 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { passwordRequirements } from '../../../shared/utils/validation/passwords';
-import { usernameRequirements } from '../../../shared/utils/validation/usernames';
+import { passwordRequirements } from '../../../shared/validators/passwords';
+import { usernameRequirements } from '../../../shared/validators/usernames';
 import { environment } from '../../../../environments/environment';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';

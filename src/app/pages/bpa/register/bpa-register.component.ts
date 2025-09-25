@@ -10,8 +10,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { usernameRequirements } from '../../../shared/utils/validation/usernames';
-import { passwordRequirements } from '../../../shared/utils/validation/passwords';
+import { usernameRequirements } from '../../../shared/validators/usernames';
+import { passwordRequirements } from '../../../shared/validators/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';

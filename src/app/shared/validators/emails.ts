@@ -1,5 +1,5 @@
 import { AbstractControl, ValidationErrors, Validators } from '@angular/forms';
-import { SBP_ALLOWED_EMAIL_DOMAINS } from '../../../core/constants/constants';
+import { SBP_ALLOWED_EMAIL_DOMAINS } from '../../core/constants/constants';
 
 interface SbpEmailErrors {
   required?: boolean;
