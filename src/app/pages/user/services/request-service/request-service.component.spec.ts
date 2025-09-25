@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RequestServiceComponent } from './request-service.component';
-import { provideMockAuth0Service } from '../../../../../utils/testingUtils';
+import { provideMockAuth0Service } from '../../../../shared/utils/testingUtils';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 
@@ -14,8 +14,8 @@ describe('RequestServiceComponent', () => {
       providers: [
         provideMockAuth0Service({ isAuthenticated: true }),
         provideHttpClient(),
-        provideRouter([])
-      ]
+        provideRouter([]),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RequestServiceComponent);

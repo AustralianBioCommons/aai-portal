@@ -12,14 +12,14 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { biocommonsBundles, Bundle } from '../../core/constants/constants';
-import { passwordRequirements } from '../../../utils/validation/passwords';
-import { usernameRequirements } from '../../../utils/validation/usernames';
+import { passwordRequirements } from '../../shared/utils/validation/passwords';
+import { usernameRequirements } from '../../shared/utils/validation/usernames';
 import { ValidationService } from '../../core/services/validation.service';
 import { environment } from '../../../environments/environment';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 
-interface RegistrationForm {
+export interface RegistrationForm {
   firstName: FormControl<string>;
   lastName: FormControl<string>;
   email: FormControl<string>;
@@ -28,7 +28,7 @@ interface RegistrationForm {
   confirmPassword: FormControl<string>;
 }
 
-export interface RegistrationRequest {
+interface RegistrationRequest {
   first_name: string;
   last_name: string;
   email: string;
@@ -63,28 +63,21 @@ export class RegisterComponent {
 
   bundles: Bundle[] = biocommonsBundles;
 
-  bundleForm: FormGroup = this.formBuilder.group({
+  bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     selectedBundle: ['', Validators.required],
   });
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
-      firstName: this.formBuilder.nonNullable.control('', [
-        Validators.required,
-      ]),
-      lastName: this.formBuilder.nonNullable.control('', [Validators.required]),
-      email: this.formBuilder.nonNullable.control('', [
-        Validators.required,
-        Validators.email,
-      ]),
-      username: this.formBuilder.nonNullable.control('', usernameRequirements),
-      password: this.formBuilder.nonNullable.control('', passwordRequirements),
-      confirmPassword: this.formBuilder.nonNullable.control('', [
-        Validators.required,
-      ]),
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      username: ['', usernameRequirements],
+      password: ['', passwordRequirements],
+      confirmPassword: ['', Validators.required],
     });
 
-  termsForm: FormGroup = this.formBuilder.group({});
+  termsForm: FormGroup = this.formBuilder.nonNullable.group({});
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
@@ -94,18 +87,16 @@ export class RegisterComponent {
 
   private initializeTermsForm() {
     const selectedBundle = this.getSelectedBundle();
-    if (selectedBundle) {
-      const termsControls: Record<string, FormControl<boolean>> = {};
+    if (!selectedBundle) return;
 
-      selectedBundle.services.forEach((service) => {
-        termsControls[service.id] = this.formBuilder.control(false, {
-          validators: Validators.requiredTrue,
-          nonNullable: true,
-        });
-      });
+    const termsControls = Object.fromEntries(
+      selectedBundle.services.map((service) => [
+        service.id,
+        this.formBuilder.nonNullable.control(false, Validators.requiredTrue),
+      ]),
+    );
 
-      this.termsForm = this.formBuilder.group(termsControls);
-    }
+    this.termsForm = this.formBuilder.nonNullable.group(termsControls);
   }
 
   login() {
@@ -212,7 +203,7 @@ export class RegisterComponent {
     this.termsForm.patchValue({ [serviceId]: !currentValue });
   }
 
-  isFieldInvalid(fieldName: string): boolean {
+  isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
     return this.validationService.isFieldInvalid(
       this.registrationForm,
       fieldName,
@@ -230,20 +221,18 @@ export class RegisterComponent {
     this.isSubmitting.set(true);
     this.errorAlert.set(null);
 
-    const registrationData: RegistrationRequest = {
-      first_name: this.registrationForm.get('firstName')!.value,
-      last_name: this.registrationForm.get('lastName')!.value,
-      email: this.registrationForm.get('email')!.value,
-      username: this.registrationForm.get('username')!.value,
-      password: this.registrationForm.get('password')!.value,
+    const formValue = this.registrationForm.value;
+    const requestBody: RegistrationRequest = {
+      first_name: formValue.firstName!,
+      last_name: formValue.lastName!,
+      email: formValue.email!,
+      username: formValue.username!,
+      password: formValue.password!,
       bundle: this.bundleForm.get('selectedBundle')!.value,
     };
 
     this.http
-      .post(
-        `${environment.auth0.backend}/biocommons/register`,
-        registrationData,
-      )
+      .post(`${environment.auth0.backend}/biocommons/register`, requestBody)
       .pipe(
         catchError((error: HttpErrorResponse) => {
           console.error('Registration failed:', error);

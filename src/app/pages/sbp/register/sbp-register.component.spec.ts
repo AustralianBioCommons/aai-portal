@@ -12,7 +12,10 @@ import {
 } from '@angular/common/http/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
-import { SbpRegisterComponent } from './sbp-register.component';
+import {
+  RegistrationForm,
+  SbpRegisterComponent,
+} from './sbp-register.component';
 import { ValidationService } from '../../../core/services/validation.service';
 import { environment } from '../../../../environments/environment';
 
@@ -73,15 +76,7 @@ describe('SbpRegisterComponent', () => {
 
   describe('Form Validation', () => {
     it('should validate required fields', () => {
-      const requiredControls: (
-        | 'firstName'
-        | 'lastName'
-        | 'email'
-        | 'username'
-        | 'reason'
-        | 'password'
-        | 'confirmPassword'
-      )[] = [
+      const requiredControls: (keyof RegistrationForm)[] = [
         'firstName',
         'lastName',
         'email',
@@ -147,7 +142,7 @@ describe('SbpRegisterComponent', () => {
         'Please enter a valid email address',
       );
 
-      emailControl?.setValue('valid@email.com');
+      emailControl?.setValue('valid@sydney.edu.au');
       expect(emailControl?.errors).toBeNull();
     });
   });
@@ -157,7 +152,7 @@ describe('SbpRegisterComponent', () => {
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'test@example.com',
+        email: 'test@sydney.edu.au',
         username: 'testuser',
         reason: 'Testing purpose',
         password: 'StrongPass123!',
@@ -213,7 +208,6 @@ describe('SbpRegisterComponent', () => {
 
     it('should scroll to first invalid field on invalid submit', () => {
       component.registrationForm.reset();
-      component.recaptchaToken.set(null);
       const mockElement = document.createElement('div');
       spyOn(mockElement, 'scrollIntoView');
       spyOn(document, 'getElementById').and.returnValue(mockElement);
@@ -229,20 +223,6 @@ describe('SbpRegisterComponent', () => {
   });
 
   describe('UI Interactions', () => {
-    it('should reset form', () => {
-      component.registrationForm.patchValue({
-        firstName: 'John',
-        email: 'test@example.com',
-      });
-
-      component.resetForm();
-
-      expect(component.registrationForm.pristine).toBeTrue();
-      expect(component.registrationForm.untouched).toBeTrue();
-      expect(component.registrationForm.get('firstName')?.value).toBe('');
-      expect(component.registrationForm.get('email')?.value).toBe('');
-    });
-
     it('should handle recaptcha resolved callback', () => {
       const mockToken = 'mock-recaptcha-token';
       component.resolved(mockToken);

@@ -8,7 +8,7 @@ import {
 } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
 import { Component } from '@angular/core';
-import { RegisterComponent } from './register.component';
+import { RegisterComponent, RegistrationForm } from './register.component';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -252,12 +252,23 @@ describe('RegisterComponent', () => {
     });
 
     it('should validate required fields', () => {
-      const firstName = component.registrationForm.get('firstName');
-      firstName?.markAsTouched();
-      expect(component.isFieldInvalid('firstName')).toBe(true);
-      expect(component.getErrorMessages('firstName')).toContain(
-        'This field is required',
-      );
+      const requiredControls: (keyof RegistrationForm)[] = [
+        'firstName',
+        'lastName',
+        'email',
+        'username',
+        'password',
+        'confirmPassword',
+      ];
+
+      requiredControls.forEach((controlName) => {
+        const control = component.registrationForm.get(controlName);
+        control?.markAsTouched();
+        expect(control?.errors?.['required']).toBeTruthy();
+        expect(component.getErrorMessages(controlName)).toContain(
+          'This field is required',
+        );
+      });
     });
 
     it('should validate email format', () => {

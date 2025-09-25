@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { BiocommonsAuth0User } from '../app/core/services/auth.service';
-import { AuthService } from '../app/core/services/auth.service';
+import { BiocommonsAuth0User } from '../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { signal } from '@angular/core';
 
 /**

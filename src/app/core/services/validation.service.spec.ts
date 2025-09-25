@@ -9,8 +9,8 @@ import { ValidationService } from './validation.service';
 import {
   ALLOWED_SPECIAL_CHARACTERS,
   passwordRequirements,
-} from '../../../utils/validation/passwords';
-import { usernameRequirements } from '../../../utils/validation/usernames';
+} from '../../shared/utils/validation/passwords';
+import { usernameRequirements } from '../../shared/utils/validation/usernames';
 import { HttpErrorResponse } from '@angular/common/http';
 
 describe('ValidationService', () => {
