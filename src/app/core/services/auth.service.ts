@@ -121,13 +121,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Clear the current authentication error
-   */
-  clearAuthError(): void {
-    this.authError.set(null);
-  }
-
   login(): void {
     this.auth0Service.loginWithRedirect();
   }
