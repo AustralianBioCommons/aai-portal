@@ -39,8 +39,7 @@ export class UserDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
-  successAlert = signal<string | null>(null);
-  errorAlert = signal<string | null>(null);
+  alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
 
   ngOnInit() {
     const userId = this.route.snapshot.paramMap.get('id');
@@ -72,20 +71,25 @@ export class UserDetailsComponent implements OnInit {
     const userId = this.user()?.user_id;
     if (!userId) {
       console.error('No user ID available');
-      this.errorAlert.set('No user ID available');
+      this.alert.set({ type: 'error', message: 'No user ID available' });
       return;
     }
 
-    this.successAlert.set(null);
-    this.errorAlert.set(null);
+    this.alert.set(null);
 
     this.apiService.resendVerificationEmail(userId).subscribe({
       next: () => {
-        this.successAlert.set('Verification email sent successfully');
+        this.alert.set({
+          type: 'success',
+          message: 'Verification email sent successfully',
+        });
       },
       error: (error) => {
         console.error('Failed to resend verification email:', error);
-        this.errorAlert.set('Failed to resend verification email');
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to resend verification email',
+        });
       },
     });
 

@@ -12,7 +12,7 @@ import { AlertComponent } from '../../shared/components/alert/alert.component';
   styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit {
-  authService = inject(AuthService);
+  private authService = inject(AuthService);
 
   authError = this.authService.authError;
   isAutoLoggingIn = signal(false);

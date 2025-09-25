@@ -1,20 +1,11 @@
 <!-- Notifications -->
-@if (successAlert()) {
+@if (alert()) {
   <app-alert
-    type="success"
     positionClass="right-12 top-12"
-    [message]="successAlert()!"
+    [type]="alert()!.type"
+    [message]="alert()!.message"
     [dismissible]="true"
-    (dismissed)="successAlert.set(null)"
-  ></app-alert>
-}
-@if (errorAlert()) {
-  <app-alert
-    type="error"
-    positionClass="right-12 top-12"
-    [message]="errorAlert()!"
-    [dismissible]="true"
-    (dismissed)="errorAlert.set(null)"
+    (dismissed)="alert.set(null)"
   ></app-alert>
 }
 

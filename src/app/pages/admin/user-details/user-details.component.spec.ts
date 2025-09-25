@@ -245,10 +245,10 @@ describe('UserDetailsComponent', () => {
 
     expect(mockApiService.resendVerificationEmail).toHaveBeenCalledWith('123');
     expect(component.actionMenuOpen()).toBeFalse();
-    expect(component.successAlert()).toBe(
-      'Verification email sent successfully',
-    );
-    expect(component.errorAlert()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Verification email sent successfully',
+    });
   });
 
   it('should handle error when resending verification email', () => {
@@ -264,8 +264,10 @@ describe('UserDetailsComponent', () => {
       'Failed to resend verification email:',
       jasmine.any(Error),
     );
-    expect(component.errorAlert()).toBe('Failed to resend verification email');
-    expect(component.successAlert()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'Failed to resend verification email',
+    });
   });
 
   it('should handle resend verification email with no user ID', () => {
@@ -276,24 +278,25 @@ describe('UserDetailsComponent', () => {
 
     expect(mockApiService.resendVerificationEmail).not.toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledWith('No user ID available');
-    expect(component.errorAlert()).toBe('No user ID available');
-    expect(component.successAlert()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'No user ID available',
+    });
   });
 
   it('should clear notifications before resending verification email', () => {
     const mockResponse = { message: 'Email sent successfully' };
     mockApiService.resendVerificationEmail.and.returnValue(of(mockResponse));
 
-    component.successAlert.set('Previous success');
-    component.errorAlert.set('Previous error');
+    component.alert.set({ type: 'error', message: 'Previous error' });
     component.user.set(mockUserDetails);
 
     component.resendVerificationEmail();
 
-    expect(component.successAlert()).toBe(
-      'Verification email sent successfully',
-    );
-    expect(component.errorAlert()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Verification email sent successfully',
+    });
   });
 
   it('should display error message when there is an error', () => {
