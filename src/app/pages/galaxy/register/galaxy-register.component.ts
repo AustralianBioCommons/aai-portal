@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -48,14 +48,14 @@ export class GalaxyRegisterComponent {
   registerForm: FormGroup<GalaxyRegistrationForm>;
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
-  recaptchaToken: string | null = null;
-  recaptchaAttempted = false;
+  recaptchaToken = signal<string | null>(null);
+  recaptchaAttempted = signal(false);
 
-  errorMessage: string | null = null;
-  isFrameLoading = true;
+  errorMessage = signal<string | null>(null);
+  isFrameLoading = signal(true);
 
   onFrameLoad(): void {
-    this.isFrameLoading = false;
+    this.isFrameLoading.set(false);
   }
 
   constructor() {
@@ -90,13 +90,13 @@ export class GalaxyRegisterComponent {
   }
 
   resolved(captchaResponse: string | null): void {
-    this.recaptchaToken = captchaResponse;
+    this.recaptchaToken.set(captchaResponse);
   }
 
   onSubmit() {
-    this.recaptchaAttempted = true;
+    this.recaptchaAttempted.set(true);
 
-    if (this.registerForm.invalid || !this.recaptchaToken) {
+    if (this.registerForm.invalid || !this.recaptchaToken()) {
       this.registerForm.markAllAsTouched();
       return;
     }
@@ -124,14 +124,16 @@ export class GalaxyRegisterComponent {
         catchError((response: HttpErrorResponse) => {
           console.error('Registration failed:', response);
           this.validationService.setBackendErrorMessages(response);
-          this.errorMessage = response?.error?.message || 'Registration failed';
+          this.errorMessage.set(
+            response?.error?.message || 'Registration failed',
+          );
           document.getElementById('register_error_message')?.scrollIntoView();
           return of(null); // return observable to allow subscription to complete
         }),
       )
       .subscribe((result) => {
         if (result) {
-          this.errorMessage = null;
+          this.errorMessage.set(null);
           this.validationService.reset();
           this.registerForm.reset();
           this.router.navigate(['success'], { relativeTo: this.route });

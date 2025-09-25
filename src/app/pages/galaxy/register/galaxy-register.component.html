@@ -9,12 +9,12 @@
       resources. Multiple registrations are monitored and will result in account
       termination and data deletion.
     </div>
-    @if (errorMessage) {
+    @if (errorMessage()) {
       <div
         id="register_error_message"
         class="rounded-md bg-red-100 p-4 text-sm text-red-900"
       >
-        Registration failed: {{ errorMessage }}
+        Registration failed: {{ errorMessage() }}
       </div>
     }
 
@@ -116,7 +116,7 @@
           (resolved)="resolved($event)"
           siteKey="{{ recaptchaSiteKeyV2 }}"
         ></re-captcha>
-        @if (!recaptchaToken && recaptchaAttempted) {
+        @if (!recaptchaToken() && recaptchaAttempted()) {
           <div class="text-xs text-red-500">
             Please complete the reCAPTCHA verification
           </div>
@@ -143,7 +143,7 @@
   </div>
 
   <div class="relative min-h-96 w-full flex-1 lg:w-1/2">
-    @if (isFrameLoading) {
+    @if (isFrameLoading()) {
       <div class="absolute inset-0 z-10 flex flex-col justify-between">
         <div class="mt-36 pt-2 text-2xl font-medium text-gray-800">
           Terms of service
