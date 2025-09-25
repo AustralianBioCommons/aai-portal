@@ -21,8 +21,8 @@ describe('AlertComponent', () => {
   });
 
   it('should display success alert with correct styling', () => {
-    component.type = 'success';
-    component.message = 'Success message';
+    fixture.componentRef.setInput('type', 'success');
+    fixture.componentRef.setInput('message', 'Success message');
     fixture.detectChanges();
 
     const alertDiv = fixture.debugElement.query(By.css('.fixed'));
@@ -35,8 +35,8 @@ describe('AlertComponent', () => {
   });
 
   it('should display error alert with correct styling', () => {
-    component.type = 'error';
-    component.message = 'Error message';
+    fixture.componentRef.setInput('type', 'error');
+    fixture.componentRef.setInput('message', 'Error message');
     fixture.detectChanges();
 
     const alertDiv = fixture.debugElement.query(By.css('.fixed'));
@@ -49,7 +49,7 @@ describe('AlertComponent', () => {
   });
 
   it('should show dismiss button when dismissible is true', () => {
-    component.dismissible = true;
+    fixture.componentRef.setInput('dismissible', true);
     fixture.detectChanges();
 
     const dismissButton = fixture.debugElement.query(By.css('button'));
@@ -57,7 +57,7 @@ describe('AlertComponent', () => {
   });
 
   it('should not show dismiss button when dismissible is false', () => {
-    component.dismissible = false;
+    fixture.componentRef.setInput('dismissible', false);
     fixture.detectChanges();
 
     const dismissButton = fixture.debugElement.query(By.css('button'));
@@ -66,7 +66,7 @@ describe('AlertComponent', () => {
 
   it('should emit dismissed event when dismiss button is clicked', () => {
     spyOn(component.dismissed, 'emit');
-    component.dismissible = true;
+    fixture.componentRef.setInput('dismissible', true);
     fixture.detectChanges();
 
     const dismissButton = fixture.debugElement.query(By.css('button'));
@@ -76,7 +76,7 @@ describe('AlertComponent', () => {
   });
 
   it('should apply custom position class', () => {
-    component.positionClass = 'left-4 bottom-4';
+    fixture.componentRef.setInput('positionClass', 'left-4 bottom-4');
     fixture.detectChanges();
 
     const alertDiv = fixture.debugElement.query(By.css('.fixed'));

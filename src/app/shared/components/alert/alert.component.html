@@ -1,12 +1,12 @@
 <div
   class="fixed z-50 flex max-w-md items-center gap-2 rounded-lg p-4 shadow"
   [class]="
-    positionClass + ' ' + (type === 'success' ? 'bg-green-50' : 'bg-red-50')
+    positionClass() + ' ' + (type() === 'success' ? 'bg-green-50' : 'bg-red-50')
   "
-  [class.pr-8]="!dismissible"
+  [class.pr-8]="!dismissible()"
 >
   <!-- Icon -->
-  @if (type === "success") {
+  @if (type() === "success") {
     <!-- Success icon (checkmark circle) -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -38,20 +38,20 @@
 
   <!-- Content -->
   <div
-    class="flex-1 text-sm"
-    [class]="type === 'success' ? 'text-green-700' : 'text-red-700'"
+    class="text-md flex-1"
+    [class]="type() === 'success' ? 'text-green-700' : 'text-red-700'"
   >
-    {{ message }}
+    {{ message() }}
   </div>
 
-  @if (dismissible) {
+  @if (dismissible()) {
     <!-- Dismiss button -->
     <button
       (click)="onDismiss()"
       aria-label="close"
       class="flex-shrink-0 rounded-md p-1 focus:outline-none focus:ring-2"
       [class]="
-        type === 'success'
+        type() === 'success'
           ? 'text-green-500 hover:bg-green-100 focus:ring-green-500'
           : 'text-red-500 hover:bg-red-100 focus:ring-red-500'
       "

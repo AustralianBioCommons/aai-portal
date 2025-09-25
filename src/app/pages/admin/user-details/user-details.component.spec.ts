@@ -296,22 +296,6 @@ describe('UserDetailsComponent', () => {
     expect(component.errorAlert()).toBeNull();
   });
 
-  it('should hide notifications after delay', () => {
-    jasmine.clock().install();
-
-    component.successAlert.set('Test success');
-    component.errorAlert.set('Test error');
-
-    component['hideAlertsAfterDelay']();
-
-    jasmine.clock().tick(5000);
-
-    expect(component.successAlert()).toBeNull();
-    expect(component.errorAlert()).toBeNull();
-
-    jasmine.clock().uninstall();
-  });
-
   it('should display error message when there is an error', () => {
     component.error.set('Test error message');
     component.loading.set(false);

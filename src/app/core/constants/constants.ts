@@ -13,12 +13,39 @@ export interface Bundle {
   services: BundleService[];
 }
 
-export type PLATFORM_IDS = 'galaxy' | 'bpa_data_portal' | 'sbp';
+export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';
+
 export const PLATFORM_NAMES = {
   galaxy: 'Galaxy Australia',
   bpa_data_portal: 'Bioplatforms Australia Data Portal',
   sbp: 'Structural Biology Platform',
-};
+} as const;
+
+/**
+ * Allowed email domains for SBP (Structural Biology Platform) registration
+ */
+export const SBP_ALLOWED_EMAIL_DOMAINS = [
+  // UNSW
+  '@unsw.edu.au',
+  '@ad.unsw.edu.au',
+  '@student.unsw.edu.au',
+  // BioCommons
+  '@biocommons.org.au',
+  // USyd
+  '@sydney.edu.au',
+  '@uni.sydney.edu.au',
+  // WEHI
+  '@wehi.edu.au',
+  // Monash
+  '@monash.edu',
+  '@student.monash.edu',
+  // Griffith
+  '@griffith.edu.au',
+  '@griffithuni.edu.au',
+  // UoM
+  '@unimelb.edu.au',
+  '@student.unimelb.edu.au',
+] as const;
 
 const bpaBundleService: BundleService = {
   id: 'bpa',

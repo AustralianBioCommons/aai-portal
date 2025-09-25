@@ -229,18 +229,6 @@ describe('SbpRegisterComponent', () => {
   });
 
   describe('UI Interactions', () => {
-    it('should show and hide error notification', fakeAsync(() => {
-      const errorAlert = 'Test error';
-      component.errorAlert.set(errorAlert);
-      expect(component.errorAlert()).toBe(errorAlert);
-
-      // Simulate the setTimeout that happens in the component's error handling
-      setTimeout(() => component.errorAlert.set(null), 5000);
-
-      tick(5000);
-      expect(component.errorAlert()).toBeNull();
-    }));
-
     it('should reset form', () => {
       component.registrationForm.patchValue({
         firstName: 'John',

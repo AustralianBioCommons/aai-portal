@@ -45,6 +45,7 @@ export const routes: Routes = [
   {
     path: 'galaxy',
     component: GalaxyLayoutComponent,
+    canActivate: [loginGuard],
     data: { favicon: '/assets/galaxy-favicon.ico' },
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
@@ -73,6 +74,7 @@ export const routes: Routes = [
   },
   {
     path: 'bpa',
+    canActivate: [loginGuard],
     data: { favicon: '/assets/bpa-favicon.ico' },
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
@@ -103,6 +105,7 @@ export const routes: Routes = [
   },
   {
     path: 'user',
+    canActivate: [loginGuard],
     children: [
       {
         path: 'email-verified',
@@ -113,6 +116,7 @@ export const routes: Routes = [
   },
   {
     path: 'sbp',
+    canActivate: [loginGuard],
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
       {

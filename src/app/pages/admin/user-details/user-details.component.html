@@ -2,7 +2,7 @@
 @if (successAlert()) {
   <app-alert
     type="success"
-    positionClass="right-12 top-24"
+    positionClass="right-12 top-12"
     [message]="successAlert()!"
     [dismissible]="true"
     (dismissed)="successAlert.set(null)"
@@ -11,7 +11,7 @@
 @if (errorAlert()) {
   <app-alert
     type="error"
-    positionClass="right-12 top-24"
+    positionClass="right-12 top-12"
     [message]="errorAlert()!"
     [dismissible]="true"
     (dismissed)="errorAlert.set(null)"

@@ -78,7 +78,6 @@ export class BpaRegisterComponent {
           this.router.navigate(['success'], { relativeTo: this.route }),
         error: (error: HttpErrorResponse) => {
           this.errorAlert.set(error?.error?.message);
-          setTimeout(() => this.errorAlert.set(null), 5000);
           this.validationService.setBackendErrorMessages(error);
         },
       });

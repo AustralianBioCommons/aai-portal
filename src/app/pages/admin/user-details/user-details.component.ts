@@ -15,6 +15,7 @@ import {
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { PLATFORM_NAMES } from '../../../core/constants/constants';
 
 @Component({
   selector: 'app-user-details',
@@ -28,6 +29,8 @@ export class UserDetailsComponent implements OnInit {
   private apiService = inject(ApiService);
   private renderer = inject(Renderer2);
 
+  protected readonly PLATFORM_NAMES = PLATFORM_NAMES;
+
   @ViewChild('actionMenu', { read: ElementRef }) actionMenu!: ElementRef;
   @ViewChild('actionMenuButton', { read: ElementRef })
   actionMenuButton!: ElementRef;
@@ -38,11 +41,6 @@ export class UserDetailsComponent implements OnInit {
   actionMenuOpen = signal(false);
   successAlert = signal<string | null>(null);
   errorAlert = signal<string | null>(null);
-
-  platformNames: Record<string, string> = {
-    bpa_data_portal: 'Bioplatforms Australia Data Portal',
-    galaxy: 'Galaxy Australia',
-  };
 
   ngOnInit() {
     const userId = this.route.snapshot.paramMap.get('id');
@@ -75,7 +73,6 @@ export class UserDetailsComponent implements OnInit {
     if (!userId) {
       console.error('No user ID available');
       this.errorAlert.set('No user ID available');
-      this.hideAlertsAfterDelay();
       return;
     }
 
@@ -85,12 +82,10 @@ export class UserDetailsComponent implements OnInit {
     this.apiService.resendVerificationEmail(userId).subscribe({
       next: () => {
         this.successAlert.set('Verification email sent successfully');
-        this.hideAlertsAfterDelay();
       },
       error: (error) => {
         console.error('Failed to resend verification email:', error);
         this.errorAlert.set('Failed to resend verification email');
-        this.hideAlertsAfterDelay();
       },
     });
 
@@ -98,14 +93,10 @@ export class UserDetailsComponent implements OnInit {
   }
 
   getPlatformName(platformId: string): string {
-    return this.platformNames[platformId] || platformId;
-  }
-
-  private hideAlertsAfterDelay() {
-    setTimeout(() => {
-      this.successAlert.set(null);
-      this.errorAlert.set(null);
-    }, 5000);
+    return (
+      this.PLATFORM_NAMES[platformId as keyof typeof PLATFORM_NAMES] ||
+      platformId
+    );
   }
 
   private setupClickOutsideMenuHandler() {
