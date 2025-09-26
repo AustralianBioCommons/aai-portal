@@ -5,6 +5,14 @@ import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
 import { PlatformId } from '../constants/constants';
 
+/**
+ * response for which platforms the admin can manage
+ */
+export interface AdminPlatformResponse {
+  id: PlatformId;
+  name: string;
+}
+
 export interface PlatformUserResponse {
   platform_id: PlatformId;
   approval_status: string;
@@ -82,6 +90,12 @@ export class ApiService {
   getFilterOptions(): Observable<FilterOption[]> {
     return this.http.get<FilterOption[]>(
       `${environment.auth0.backend}/admin/filters`,
+    );
+  }
+
+  getAdminPlatforms(): Observable<AdminPlatformResponse[]> {
+    return this.http.get<AdminPlatformResponse[]>(
+      `${environment.auth0.backend}/me/platforms/admin-roles`,
     );
   }
 
