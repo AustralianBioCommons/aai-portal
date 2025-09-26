@@ -2,7 +2,7 @@
 export const environment = {
   production: true,
   auth0: {
-    domain: 'login.test.biocommons.org.au',
+    domain: 'dev.login.aai.test.biocommons.org.au',
     clientId: 'oXjPRRuMIVrzpJY7Ku2ojs0gZNmPVKmS',
     redirectUri: window.location.origin,
     backend: 'https://aaibackend.test.biocommons.org.au',

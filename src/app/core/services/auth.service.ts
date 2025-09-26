@@ -1,12 +1,18 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { Observable, map, catchError, of, switchMap, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export type Status = 'approved' | 'revoked' | 'pending';
+
+export interface AuthError {
+  error: string;
+  error_description: string;
+  state?: string;
+}
 
 export interface Identity {
   connection: string;
@@ -55,6 +61,8 @@ export class AuthService {
   private document = inject(DOCUMENT);
   private http = inject(HttpClient);
 
+  authError = signal<AuthError | null>(null);
+
   isAuthenticated = toSignal(this.auth0Service.isAuthenticated$, {
     initialValue: false,
   });
@@ -63,6 +71,10 @@ export class AuthService {
     this.auth0Service.user$ as Observable<BiocommonsAuth0User | null>,
     { initialValue: null },
   );
+
+  constructor() {
+    this.checkForAuthErrors();
+  }
 
   // Observable that checks if the current user has admin privileges
   isAdmin$ = this.auth0Service.isAuthenticated$.pipe(
@@ -90,6 +102,24 @@ export class AuthService {
   );
 
   isAdmin = toSignal(this.isAdmin$, { initialValue: false });
+
+  /**
+   * Check for Auth0 callback errors in URL parameters
+   */
+  private checkForAuthErrors(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const errorDescription = urlParams.get('error_description');
+    const state = urlParams.get('state');
+
+    if (error && errorDescription) {
+      this.authError.set({
+        error,
+        error_description: errorDescription,
+        state: state || undefined,
+      });
+    }
+  }
 
   login(): void {
     this.auth0Service.loginWithRedirect();

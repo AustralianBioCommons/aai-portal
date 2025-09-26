@@ -204,7 +204,7 @@ describe('UserDetailsComponent', () => {
 
     const allElements = fixture.debugElement.queryAll(By.css('div'));
     const platformSection = allElements.find((el) =>
-      el.nativeElement.textContent?.includes('Platform Memberships'),
+      el.nativeElement.textContent?.includes('Platform Access'),
     );
     expect(platformSection).toBeTruthy();
 
@@ -220,7 +220,7 @@ describe('UserDetailsComponent', () => {
 
     const allElements = fixture.debugElement.queryAll(By.css('div'));
     const groupSection = allElements.find((el) =>
-      el.nativeElement.textContent?.includes('Group Memberships'),
+      el.nativeElement.textContent?.includes('Bundle Access'),
     );
     expect(groupSection).toBeTruthy();
 
@@ -245,10 +245,10 @@ describe('UserDetailsComponent', () => {
 
     expect(mockApiService.resendVerificationEmail).toHaveBeenCalledWith('123');
     expect(component.actionMenuOpen()).toBeFalse();
-    expect(component.successNotification()).toBe(
-      'Verification email sent successfully',
-    );
-    expect(component.errorNotification()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Verification email sent successfully',
+    });
   });
 
   it('should handle error when resending verification email', () => {
@@ -264,10 +264,10 @@ describe('UserDetailsComponent', () => {
       'Failed to resend verification email:',
       jasmine.any(Error),
     );
-    expect(component.errorNotification()).toBe(
-      'Failed to resend verification email',
-    );
-    expect(component.successNotification()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'Failed to resend verification email',
+    });
   });
 
   it('should handle resend verification email with no user ID', () => {
@@ -278,40 +278,25 @@ describe('UserDetailsComponent', () => {
 
     expect(mockApiService.resendVerificationEmail).not.toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledWith('No user ID available');
-    expect(component.errorNotification()).toBe('No user ID available');
-    expect(component.successNotification()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'No user ID available',
+    });
   });
 
   it('should clear notifications before resending verification email', () => {
     const mockResponse = { message: 'Email sent successfully' };
     mockApiService.resendVerificationEmail.and.returnValue(of(mockResponse));
 
-    component.successNotification.set('Previous success');
-    component.errorNotification.set('Previous error');
+    component.alert.set({ type: 'error', message: 'Previous error' });
     component.user.set(mockUserDetails);
 
     component.resendVerificationEmail();
 
-    expect(component.successNotification()).toBe(
-      'Verification email sent successfully',
-    );
-    expect(component.errorNotification()).toBeNull();
-  });
-
-  it('should hide notifications after delay', () => {
-    jasmine.clock().install();
-
-    component.successNotification.set('Test success');
-    component.errorNotification.set('Test error');
-
-    component['hideNotificationsAfterDelay']();
-
-    jasmine.clock().tick(5000);
-
-    expect(component.successNotification()).toBeNull();
-    expect(component.errorNotification()).toBeNull();
-
-    jasmine.clock().uninstall();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Verification email sent successfully',
+    });
   });
 
   it('should display error message when there is an error', () => {

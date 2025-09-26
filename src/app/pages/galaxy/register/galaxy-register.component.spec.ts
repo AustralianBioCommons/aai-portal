@@ -157,7 +157,7 @@ describe('GalaxyRegisterComponent submission', () => {
       confirmPassword: 'Password123!',
       username: 'testuser',
     });
-    component.recaptchaToken = 'mock-recaptcha-token';
+    component.recaptchaToken.set('mock-recaptcha-token');
   }
 
   it('should redirect to success page on successful registration', fakeAsync(() => {
@@ -182,7 +182,7 @@ describe('GalaxyRegisterComponent submission', () => {
     expect(router.navigate).toHaveBeenCalledWith(['success'], {
       relativeTo: component.route,
     });
-    expect(component.errorMessage).toBeNull();
+    expect(component.errorMessage()).toBeNull();
   }));
 
   it('should display error message on failed registration token request', fakeAsync(() => {
@@ -244,7 +244,7 @@ describe('GalaxyRegisterComponent submission', () => {
     fixture.detectChanges();
 
     expect(component.registerForm.invalid).toBeTrue();
-    expect(component.errorMessage).toBeNull();
+    expect(component.errorMessage()).toBeNull();
     httpMock.expectNone(
       `${environment.auth0.backend}/galaxy/register/get-registration-token`,
     );
@@ -252,18 +252,18 @@ describe('GalaxyRegisterComponent submission', () => {
 
   it('should not submit if recaptcha is not completed', () => {
     fillFormWithValidData();
-    component.recaptchaToken = null;
-    component.recaptchaAttempted = false;
+    component.recaptchaToken.set(null);
+    component.recaptchaAttempted.set(false);
 
     component.onSubmit();
 
-    expect(component.recaptchaAttempted).toBeTrue();
+    expect(component.recaptchaAttempted()).toBeTrue();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('should show recaptcha error message when attempted but not completed', () => {
-    component.recaptchaAttempted = true;
-    component.recaptchaToken = null;
+    component.recaptchaAttempted.set(true);
+    component.recaptchaToken.set(null);
     fixture.detectChanges();
 
     const errorElement =

@@ -3,10 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
-import { PLATFORM_IDS } from '../constants/constants';
+import { PlatformId } from '../constants/constants';
 
 export interface PlatformUserResponse {
-  platform_id: PLATFORM_IDS;
+  platform_id: PlatformId;
   approval_status: string;
 }
 
@@ -36,7 +36,7 @@ export interface BiocommonsUserResponse {
 
 export interface PlatformMembership {
   id: string;
-  platform_id: PLATFORM_IDS;
+  platform_id: PlatformId;
   user_id: string;
   approval_status: string;
   updated_by: string;

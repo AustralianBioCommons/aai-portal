@@ -8,6 +8,7 @@ import { usernameRequirements } from '../../../../utils/validation/usernames';
 import { passwordRequirements } from '../../../../utils/validation/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
 
 export interface RegistrationRequest {
   username: string;
@@ -21,25 +22,24 @@ export interface RegistrationRequest {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule],
+  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule, AlertComponent],
   templateUrl: './sbp-register.component.html',
   styleUrl: './sbp-register.component.css',
 })
 export class SbpRegisterComponent {
-  private readonly errorNotificationTimeout = 5000;
-  private readonly backendURL = `${environment.auth0.backend}/sbp/register`;
-
   private formBuilder = inject(FormBuilder);
   private http = inject(HttpClient);
   private router = inject(Router);
   private validationService = inject(ValidationService);
   private route = inject(ActivatedRoute);
 
-  errorNotification = signal<string | null>(null);
+  private readonly backendURL = `${environment.auth0.backend}/sbp/register`;
+
+  errorAlert = signal<string | null>(null);
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
-  recaptchaToken: string | null = null;
-  recaptchaAttempted = false;
+  recaptchaToken = signal<string | null>(null);
+  recaptchaAttempted = signal(false);
 
   registrationForm = this.formBuilder.group({
     firstName: ['', [Validators.required]],
@@ -58,8 +58,8 @@ export class SbpRegisterComponent {
   }
 
   onSubmit(): void {
-    this.recaptchaAttempted = true;
-    if (this.registrationForm.valid && this.recaptchaToken) {
+    this.recaptchaAttempted.set(true);
+    if (this.registrationForm.valid && this.recaptchaToken()) {
       const formValue = this.registrationForm.value;
       const requestBody: RegistrationRequest = {
         first_name: formValue.firstName!,
@@ -74,7 +74,7 @@ export class SbpRegisterComponent {
         next: () =>
           this.router.navigate(['success'], { relativeTo: this.route }),
         error: (error: HttpErrorResponse) => {
-          this.showErrorNotification(error?.error?.message);
+          this.errorAlert.set(error?.error?.message);
           this.validationService.setBackendErrorMessages(error);
         },
       });
@@ -93,7 +93,7 @@ export class SbpRegisterComponent {
   }
 
   resolved(captchaResponse: string | null): void {
-    this.recaptchaToken = captchaResponse;
+    this.recaptchaToken.set(captchaResponse);
   }
 
   resetForm(): void {
@@ -109,16 +109,8 @@ export class SbpRegisterComponent {
     this.registrationForm.markAsPristine();
     this.registrationForm.markAsUntouched();
     this.validationService.reset();
-    this.recaptchaToken = null;
-    this.recaptchaAttempted = false;
-  }
-
-  showErrorNotification(message: string): void {
-    this.errorNotification.set(message);
-    setTimeout(
-      () => this.errorNotification.set(null),
-      this.errorNotificationTimeout,
-    );
+    this.recaptchaToken.set(null);
+    this.recaptchaAttempted.set(false);
   }
 
   scrollToTop(): void {

@@ -14,11 +14,13 @@ import {
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { PLATFORM_NAMES } from '../../../core/constants/constants';
 
 @Component({
   selector: 'app-user-details',
   standalone: true,
-  imports: [DatePipe, LoadingSpinnerComponent, RouterLink],
+  imports: [DatePipe, LoadingSpinnerComponent, RouterLink, AlertComponent],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
 })
@@ -26,6 +28,8 @@ export class UserDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private apiService = inject(ApiService);
   private renderer = inject(Renderer2);
+
+  protected readonly PLATFORM_NAMES = PLATFORM_NAMES;
 
   @ViewChild('actionMenu', { read: ElementRef }) actionMenu!: ElementRef;
   @ViewChild('actionMenuButton', { read: ElementRef })
@@ -35,13 +39,7 @@ export class UserDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
-  successNotification = signal<string | null>(null);
-  errorNotification = signal<string | null>(null);
-
-  platformNames: Record<string, string> = {
-    bpa_data_portal: 'Bioplatforms Australia Data Portal',
-    galaxy: 'Galaxy Australia',
-  };
+  alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
 
   ngOnInit() {
     const userId = this.route.snapshot.paramMap.get('id');
@@ -73,23 +71,25 @@ export class UserDetailsComponent implements OnInit {
     const userId = this.user()?.user_id;
     if (!userId) {
       console.error('No user ID available');
-      this.errorNotification.set('No user ID available');
-      this.hideNotificationsAfterDelay();
+      this.alert.set({ type: 'error', message: 'No user ID available' });
       return;
     }
 
-    this.successNotification.set(null);
-    this.errorNotification.set(null);
+    this.alert.set(null);
 
     this.apiService.resendVerificationEmail(userId).subscribe({
       next: () => {
-        this.successNotification.set('Verification email sent successfully');
-        this.hideNotificationsAfterDelay();
+        this.alert.set({
+          type: 'success',
+          message: 'Verification email sent successfully',
+        });
       },
       error: (error) => {
         console.error('Failed to resend verification email:', error);
-        this.errorNotification.set('Failed to resend verification email');
-        this.hideNotificationsAfterDelay();
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to resend verification email',
+        });
       },
     });
 
@@ -97,14 +97,10 @@ export class UserDetailsComponent implements OnInit {
   }
 
   getPlatformName(platformId: string): string {
-    return this.platformNames[platformId] || platformId;
-  }
-
-  private hideNotificationsAfterDelay() {
-    setTimeout(() => {
-      this.successNotification.set(null);
-      this.errorNotification.set(null);
-    }, 5000);
+    return (
+      this.PLATFORM_NAMES[platformId as keyof typeof PLATFORM_NAMES] ||
+      platformId
+    );
   }
 
   private setupClickOutsideMenuHandler() {

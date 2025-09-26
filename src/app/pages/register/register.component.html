@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  @if (currentStep < totalSteps && router.url === "/register") {
+  @if (currentStep() < totalSteps && router.url === "/register") {
     <div
       class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
     >
@@ -43,7 +43,7 @@
   }
 
   <!-- Select bundle step -->
-  @if (currentStep === 1) {
+  @if (currentStep() === 1) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
@@ -151,7 +151,7 @@
   }
 
   <!-- Registration form step -->
-  @else if (currentStep === 2) {
+  @else if (currentStep() === 2) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
@@ -315,7 +315,7 @@
             (resolved)="resolved($event)"
             siteKey="{{ recaptchaSiteKeyV2 }}"
           ></re-captcha>
-          @if (!recaptchaToken && recaptchaAttempted) {
+          @if (!recaptchaToken() && recaptchaAttempted()) {
             <div class="text-xs text-red-500">
               Please complete the reCAPTCHA verification
             </div>
@@ -326,7 +326,7 @@
   }
 
   <!-- Accept terms & conditions step -->
-  @else if (currentStep === 3) {
+  @else if (currentStep() === 3) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
@@ -413,10 +413,20 @@
   }
 
   <!-- Review details step -->
-  @else if (currentStep === 4) {
+  @else if (currentStep() === 4) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
+      @if (errorAlert()) {
+        <app-alert
+          type="error"
+          positionClass="right-12 top-12"
+          [message]="errorAlert()!"
+          [dismissible]="true"
+          (dismissed)="errorAlert.set(null)"
+        >
+        </app-alert>
+      }
       <div class="flex w-full max-w-6xl flex-1 flex-col gap-12">
         <div class="flex flex-col gap-6">
           <h1 class="text-3xl font-semibold text-gray-900">
@@ -425,11 +435,6 @@
           <div class="font-light text-gray-500">
             Please review your information and registration details below.
           </div>
-          @if (errorMessage) {
-            <div class="rounded-md bg-red-100 p-4 text-sm text-red-900">
-              {{ errorMessage }}
-            </div>
-          }
         </div>
 
         <div>
@@ -503,10 +508,10 @@
   }
 
   <!-- Shared navigation buttons -->
-  @if (currentStep < totalSteps) {
+  @if (currentStep() < totalSteps) {
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
       <div
-        class="flex w-full max-w-6xl justify-between text-sm font-medium *:w-28 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
+        class="flex w-full max-w-6xl justify-between text-sm font-medium *:w-32 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
       >
         <button
           type="button"
@@ -519,12 +524,12 @@
           type="button"
           class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           (click)="nextStep()"
-          [disabled]="isSubmitting"
+          [disabled]="isSubmitting()"
         >
-          @if (currentStep === 4 && isSubmitting) {
-            Submitting...
+          @if (currentStep() === 4 && isSubmitting()) {
+            Submitting
           } @else {
-            {{ currentStep === 4 ? "Submit" : "Next" }}
+            {{ currentStep() === 4 ? "Submit" : "Next" }}
           }
         </button>
       </div>

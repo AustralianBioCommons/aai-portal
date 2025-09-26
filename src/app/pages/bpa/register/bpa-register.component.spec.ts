@@ -159,7 +159,7 @@ describe('BpaRegisterComponent', () => {
         confirmPassword: 'StrongPass123!',
       });
 
-      component.recaptchaToken = 'mock-recaptcha-token';
+      component.recaptchaToken.set('mock-recaptcha-token');
     });
 
     it('should submit form successfully', fakeAsync(() => {
@@ -191,12 +191,12 @@ describe('BpaRegisterComponent', () => {
       );
 
       tick();
-      expect(component.errorNotification()).toBe('Registration failed');
+      expect(component.errorAlert()).toBe('Registration failed');
     }));
 
     it('should scroll to first invalid field on invalid submit', () => {
       component.registrationForm.reset();
-      component.recaptchaToken = null;
+      component.recaptchaToken.set(null);
       const mockElement = document.createElement('div');
       spyOn(mockElement, 'scrollIntoView');
       spyOn(document, 'getElementById').and.returnValue(mockElement);
@@ -212,15 +212,6 @@ describe('BpaRegisterComponent', () => {
   });
 
   describe('UI Interactions', () => {
-    it('should show and hide error notification', fakeAsync(() => {
-      const errorMessage = 'Test error';
-      component.showErrorNotification(errorMessage);
-      expect(component.errorNotification()).toBe(errorMessage);
-
-      tick(5000);
-      expect(component.errorNotification()).toBeNull();
-    }));
-
     it('should reset form', () => {
       component.registrationForm.patchValue({
         username: 'testuser',
@@ -263,20 +254,20 @@ describe('BpaRegisterComponent', () => {
         password: 'StrongPass123!',
         confirmPassword: 'StrongPass123!',
       });
-      component.recaptchaToken = null;
+      component.recaptchaToken.set(null);
 
       component.onSubmit();
 
       httpTestingController.expectNone(
         `${environment.auth0.backend}/bpa/register`,
       );
-      expect(component.recaptchaAttempted).toBe(true);
+      expect(component.recaptchaAttempted()).toBe(true);
     });
 
     it('should handle recaptcha resolved callback', () => {
       const mockToken = 'mock-recaptcha-token';
       component.resolved(mockToken);
-      expect(component.recaptchaToken).toBe(mockToken);
+      expect(component.recaptchaToken()).toBe(mockToken);
     });
   });
 });
