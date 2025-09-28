@@ -139,6 +139,48 @@ export class ApiService {
     );
   }
 
+  approvePlatformAccess(
+    userId: string,
+    platformId: PlatformId,
+  ): Observable<{ status: string; updated: boolean }> {
+    return this.http.post<{ status: string; updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/approve`,
+      {},
+    );
+  }
+
+  revokePlatformAccess(
+    userId: string,
+    platformId: PlatformId,
+    reason?: string,
+  ): Observable<{ status: string; updated: boolean }> {
+    return this.http.post<{ status: string; updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/revoke`,
+      reason ? { reason } : {},
+    );
+  }
+
+  approveGroupAccess(
+    userId: string,
+    groupId: string,
+  ): Observable<{ status: string; updated: boolean }> {
+    return this.http.post<{ status: string; updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/approve`,
+      {},
+    );
+  }
+
+  revokeGroupAccess(
+    userId: string,
+    groupId: string,
+    reason?: string,
+  ): Observable<{ status: string; updated: boolean }> {
+    return this.http.post<{ status: string; updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
+      reason ? { reason } : {},
+    );
+  }
+
   resendVerificationEmail(userId: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/admin/users/${userId}/verification-email/resend`,
