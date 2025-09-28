@@ -26,25 +26,25 @@ export const PLATFORM_NAMES = {
  */
 export const SBP_ALLOWED_EMAIL_DOMAINS = [
   // UNSW
-  '@unsw.edu.au',
-  '@ad.unsw.edu.au',
-  '@student.unsw.edu.au',
+  'unsw.edu.au',
+  'ad.unsw.edu.au',
+  'student.unsw.edu.au',
   // BioCommons
-  '@biocommons.org.au',
+  'biocommons.org.au',
   // USyd
-  '@sydney.edu.au',
-  '@uni.sydney.edu.au',
+  'sydney.edu.au',
+  'uni.sydney.edu.au',
   // WEHI
-  '@wehi.edu.au',
+  'wehi.edu.au',
   // Monash
-  '@monash.edu',
-  '@student.monash.edu',
+  'monash.edu',
+  'student.monash.edu',
   // Griffith
-  '@griffith.edu.au',
-  '@griffithuni.edu.au',
+  'griffith.edu.au',
+  'griffithuni.edu.au',
   // UoM
-  '@unimelb.edu.au',
-  '@student.unimelb.edu.au',
+  'unimelb.edu.au',
+  'student.unimelb.edu.au',
 ] as const;
 
 const bpaBundleService: BundleService = {

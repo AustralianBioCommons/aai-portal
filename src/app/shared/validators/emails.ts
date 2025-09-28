@@ -10,13 +10,21 @@ interface SbpEmailErrors {
 export function sbpEmailDomainRequired(
   control: AbstractControl,
 ): ValidationErrors | null {
-  const email = control.value.toLowerCase();
+  const email = control.value?.toLowerCase();
   if (!email) {
     return null;
   }
-  const isValidDomain = SBP_ALLOWED_EMAIL_DOMAINS.some((domain) =>
-    email.endsWith(domain.toLowerCase()),
-  );
+
+  const atIndex = email.lastIndexOf('@');
+  if (atIndex === -1) {
+    return { invalidSbpEmailDomain: true };
+  }
+
+  const domain = email.slice(atIndex + 1);
+  const isValidDomain = SBP_ALLOWED_EMAIL_DOMAINS.map((d) =>
+    d.toLowerCase().replace(/^@/, '').replace(/\.$/, ''),
+  ).includes(domain);
+
   return isValidDomain ? null : { invalidSbpEmailDomain: true };
 }
 

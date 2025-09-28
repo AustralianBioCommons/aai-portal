@@ -71,9 +71,10 @@ describe('SBP Email Validator', () => {
         'test@yahoo.com',
         'test@hotmail.com',
         'test@example.com',
-        'test@usyd.edu.au', // typo, should be sydney.edu.au
-        'test@unsw.com', // wrong TLD
-        'test@student.unsw.com', // wrong TLD
+        'test@usyd.edu.au',
+        'test@unsw.com',
+        'test@student.unsw.com',
+        'user@evilunsw.edu.au',
       ];
 
       invalidEmails.forEach((email) => {
