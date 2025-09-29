@@ -5,6 +5,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import {
+  AdminPlatformResponse,
   AllPendingResponse,
   ApiService,
   GroupUserResponse,
@@ -45,6 +46,22 @@ describe('ApiService', () => {
 
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/platforms/approved`,
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(mockResponse);
+  });
+
+  it('should fetch platforms the user has admin rights to', () => {
+    const mockResponse: AdminPlatformResponse[] = [
+      { id: 'galaxy', name: 'Galaxy' },
+    ];
+
+    service.getAdminPlatforms().subscribe((response) => {
+      expect(response).toEqual(mockResponse);
+      expect(response.length).toBe(1);
+    });
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/platforms/admin-roles`,
     );
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
