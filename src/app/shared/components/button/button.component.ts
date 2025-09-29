@@ -17,10 +17,4 @@ export class ButtonComponent {
   widthClass = input<string>('w-auto');
   disabled = input<boolean>(false);
   loading = input<boolean>(false);
-
-  clicked = output<void>();
-
-  onClick() {
-    if (!this.disabled() && !this.loading()) this.clicked.emit();
-  }
 }

@@ -49,11 +49,11 @@
     <button
       (click)="onDismiss()"
       aria-label="close"
-      class="flex-shrink-0 rounded-md p-1 focus:outline-none focus:ring-2"
+      class="flex-shrink-0 rounded-md p-1 focus-visible:outline-none focus-visible:ring-2"
       [class]="
         type() === 'success'
-          ? 'text-green-500 hover:bg-green-100 focus:ring-green-500'
-          : 'text-red-500 hover:bg-red-100 focus:ring-red-500'
+          ? 'text-green-500 hover:bg-green-100 focus-visible:ring-green-500'
+          : 'text-red-500 hover:bg-red-100 focus-visible:ring-red-500'
       "
     >
       <svg

@@ -16,6 +16,7 @@ import { sbpEmailRequirements } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -37,7 +38,13 @@ interface RegistrationRequest {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule, AlertComponent],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    RecaptchaModule,
+    AlertComponent,
+    ButtonComponent,
+  ],
   templateUrl: './sbp-register.component.html',
   styleUrl: './sbp-register.component.css',
 })
@@ -51,6 +58,7 @@ export class SbpRegisterComponent {
   private readonly backendURL = `${environment.auth0.backend}/sbp/register`;
 
   errorAlert = signal<string | null>(null);
+  isSubmitting = signal(false);
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken = signal<string | null>(null);
@@ -76,6 +84,7 @@ export class SbpRegisterComponent {
   onSubmit(): void {
     this.recaptchaAttempted.set(true);
     if (this.registrationForm.valid && this.recaptchaToken()) {
+      this.isSubmitting.set(true);
       const formValue = this.registrationForm.value;
       const requestBody: RegistrationRequest = {
         first_name: formValue.firstName!,
@@ -87,9 +96,12 @@ export class SbpRegisterComponent {
       };
 
       this.http.post(this.backendURL, requestBody).subscribe({
-        next: () =>
-          this.router.navigate(['success'], { relativeTo: this.route }),
+        next: () => {
+          this.isSubmitting.set(false);
+          this.router.navigate(['success'], { relativeTo: this.route });
+        },
         error: (error: HttpErrorResponse) => {
+          this.isSubmitting.set(false);
           this.errorAlert.set(error?.error?.message);
           this.validationService.setBackendErrorMessages(error);
         },
