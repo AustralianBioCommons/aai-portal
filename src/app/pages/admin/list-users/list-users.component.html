@@ -24,7 +24,7 @@
         />
         <button
           type="button"
-          class="rounded-full p-2 transition-all duration-200 hover:bg-gray-200"
+          class="rounded-full p-2 transition-all hover:bg-gray-200"
           (click)="onSearch()"
         >
           <svg
@@ -89,7 +89,7 @@
           @for (user of users; track user.id) {
             <a
               [routerLink]="['/user', user.id]"
-              class="flex items-center justify-between rounded-md bg-white p-4 font-normal shadow transition-all duration-200 hover:-translate-y-0.5 hover:cursor-pointer"
+              class="flex items-center justify-between rounded-md bg-white p-4 font-normal shadow transition-all hover:-translate-y-0.5 hover:cursor-pointer"
             >
               {{ user.email }}
             </a>

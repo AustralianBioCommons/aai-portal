@@ -62,7 +62,7 @@
           @for (bundle of bundles; track bundle.id) {
             <div
               tabindex="0"
-              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all duration-200"
+              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
               [ngClass]="{
                 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
                   !bundle.disabled,
@@ -354,7 +354,7 @@
             ) {
               <div
                 tabindex="0"
-                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                 [class.ring-transparent]="
                   termsForm.get(service.id)?.value !== true &&
                   (!termsForm.get(service.id)?.invalid ||
@@ -498,7 +498,7 @@
       <div class="text-center">
         <button
           type="button"
-          class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          class="bg-biocommons-primary rounded-md px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-sky-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           (click)="getFinalPageButton().action()"
         >
           {{ getFinalPageButton().text }}
@@ -515,14 +515,14 @@
       >
         <button
           type="button"
-          class="border bg-white text-blue-600 hover:bg-gray-100"
+          class="text-biocommons-primary border bg-white hover:bg-gray-100"
           (click)="prevStep()"
         >
           Back
         </button>
         <button
           type="button"
-          class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="bg-biocommons-primary text-white hover:bg-sky-900 disabled:cursor-not-allowed disabled:opacity-50"
           (click)="nextStep()"
           [disabled]="isSubmitting()"
         >
