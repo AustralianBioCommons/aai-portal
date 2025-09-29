@@ -8,19 +8,12 @@
         alt="Australian Biocommons Logo"
       />
     </a>
-    <div class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12">
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/about">
-        About
-      </a>
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/">
-        FAQ
-      </a>
-      <a
-        class="hover:text-blue-950"
-        href="https://www.biocommons.org.au/contact-form"
-      >
-        Contact us
-      </a>
+    <div
+      class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12 [&>a:hover]:text-sky-900"
+    >
+      <a href="https://www.biocommons.org.au/about"> About </a>
+      <a href="https://www.biocommons.org.au/"> FAQ </a>
+      <a href="https://www.biocommons.org.au/contact-form"> Contact us </a>
     </div>
   </div>
 
@@ -31,7 +24,7 @@
       <div class="flex items-center justify-center gap-2">
         <div class="font-light text-gray-500">Already have an account?</div>
         <button
-          class="font-medium text-blue-600 hover:text-blue-700"
+          class="font-medium text-sky-500 hover:text-sky-600"
           (click)="login()"
         >
           Log in
@@ -71,7 +64,7 @@
                   bundleForm.get('selectedBundle')?.touched &&
                   !bundleForm.get('selectedBundle')?.value &&
                   !bundle.disabled,
-                'ring-2 ring-blue-500':
+                'ring-2 ring-sky-400':
                   bundleForm.get('selectedBundle')?.value === bundle.id,
               }"
               (click)="!bundle.disabled && selectBundle(bundle.id)"
@@ -103,7 +96,7 @@
                               viewBox="0 0 24 24"
                               stroke-width="2"
                               stroke="currentColor"
-                              class="mt-1 size-5 min-h-5 min-w-5 text-blue-600"
+                              class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
                             >
                               <path
                                 stroke-linecap="round"
@@ -366,16 +359,14 @@
                   termsForm.get(service.id)?.invalid &&
                   termsForm.get(service.id)?.touched
                 "
-                [class.ring-blue-500]="
-                  termsForm.get(service.id)?.value === true
-                "
+                [class.ring-sky-400]="termsForm.get(service.id)?.value === true"
                 (click)="toggleTermsAcceptance(service.id)"
                 (keyup.enter)="toggleTermsAcceptance(service.id)"
               >
                 <a
                   [href]="service.termsUrl"
                   target="_blank"
-                  class="flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                  class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
                   (click)="$event.stopPropagation()"
                 >
                   {{ service.name }}
@@ -397,7 +388,7 @@
                 <input
                   type="checkbox"
                   [formControlName]="service.id"
-                  class="pointer-events-none h-4 w-4 text-blue-900"
+                  class="pointer-events-none h-4 w-4 text-sky-900"
                 />
               </div>
             }
