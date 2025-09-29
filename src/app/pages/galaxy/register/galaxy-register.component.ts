@@ -14,8 +14,8 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { passwordRequirements } from '../../../../utils/validation/passwords';
-import { usernameRequirements } from '../../../../utils/validation/usernames';
+import { passwordRequirements } from '../../../shared/validators/passwords';
+import { usernameRequirements } from '../../../shared/validators/usernames';
 import { environment } from '../../../../environments/environment';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
@@ -45,8 +45,6 @@ export class GalaxyRegisterComponent {
 
   route = inject(ActivatedRoute);
 
-  registerForm: FormGroup<GalaxyRegistrationForm>;
-
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken = signal<string | null>(null);
   recaptchaAttempted = signal(false);
@@ -54,9 +52,13 @@ export class GalaxyRegisterComponent {
   errorMessage = signal<string | null>(null);
   isFrameLoading = signal(true);
 
-  onFrameLoad(): void {
-    this.isFrameLoading.set(false);
-  }
+  registerForm: FormGroup<GalaxyRegistrationForm> =
+    this.formBuilder.nonNullable.group({
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', passwordRequirements],
+      confirmPassword: ['', Validators.required],
+      username: ['', usernameRequirements],
+    });
 
   constructor() {
     this.validationService.addFieldErrorMessages('username', {
@@ -66,43 +68,20 @@ export class GalaxyRegisterComponent {
       pattern:
         'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
     });
-    this.registerForm = this.formBuilder.group({
-      email: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required, Validators.email],
-      }),
-      password: new FormControl('', {
-        nonNullable: true,
-        validators: [passwordRequirements],
-      }),
-      confirmPassword: new FormControl('', {
-        nonNullable: true,
-        validators: [Validators.required],
-      }),
-      username: new FormControl('', {
-        nonNullable: true,
-        validators: [usernameRequirements],
-      }),
-    });
+
     this.validationService.setupPasswordConfirmationValidation(
       this.registerForm,
     );
   }
 
-  resolved(captchaResponse: string | null): void {
-    this.recaptchaToken.set(captchaResponse);
-  }
-
   onSubmit() {
     this.recaptchaAttempted.set(true);
-
     if (this.registerForm.invalid || !this.recaptchaToken()) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
     const formData = this.registerForm.value;
-
     this.http
       .get<GalaxyRegistrationToken>(
         `${environment.auth0.backend}/galaxy/register/get-registration-token`,
@@ -141,6 +120,10 @@ export class GalaxyRegisterComponent {
       });
   }
 
+  resolved(captchaResponse: string | null): void {
+    this.recaptchaToken.set(captchaResponse);
+  }
+
   isFieldInvalid(fieldName: string): boolean {
     return this.validationService.isFieldInvalid(this.registerForm, fieldName);
   }
@@ -150,5 +133,9 @@ export class GalaxyRegisterComponent {
       this.registerForm,
       fieldName,
     );
+  }
+
+  onFrameLoad(): void {
+    this.isFrameLoading.set(false);
   }
 }

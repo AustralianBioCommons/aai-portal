@@ -1,16 +1,31 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  FormControl,
+  FormGroup,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
-import { usernameRequirements } from '../../../../utils/validation/usernames';
-import { passwordRequirements } from '../../../../utils/validation/passwords';
+import { usernameRequirements } from '../../../shared/validators/usernames';
+import { passwordRequirements } from '../../../shared/validators/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 
-export interface RegistrationRequest {
+export interface RegistrationForm {
+  username: FormControl<string>;
+  fullname: FormControl<string>;
+  email: FormControl<string>;
+  reason: FormControl<string>;
+  password: FormControl<string>;
+  confirmPassword: FormControl<string>;
+}
+
+interface RegistrationRequest {
   username: string;
   fullname: string;
   email: string;
@@ -46,14 +61,15 @@ export class BpaRegisterComponent {
   recaptchaToken = signal<string | null>(null);
   recaptchaAttempted = signal(false);
 
-  registrationForm = this.formBuilder.group({
-    username: ['', [usernameRequirements]],
-    fullname: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    reason: ['', [Validators.required]],
-    password: ['', passwordRequirements],
-    confirmPassword: ['', [Validators.required]],
-  });
+  registrationForm: FormGroup<RegistrationForm> =
+    this.formBuilder.nonNullable.group({
+      username: ['', usernameRequirements],
+      fullname: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      reason: ['', Validators.required],
+      password: ['', passwordRequirements],
+      confirmPassword: ['', Validators.required],
+    });
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
@@ -66,11 +82,11 @@ export class BpaRegisterComponent {
     if (this.registrationForm.valid && this.recaptchaToken()) {
       const formValue = this.registrationForm.value;
       const requestBody: RegistrationRequest = {
-        username: formValue.username || '',
-        fullname: formValue.fullname || '',
-        email: formValue.email || '',
-        reason: formValue.reason || '',
-        password: formValue.password || '',
+        username: formValue.username!,
+        fullname: formValue.fullname!,
+        email: formValue.email!,
+        reason: formValue.reason!,
+        password: formValue.password!,
       };
 
       this.http.post(this.backendURL, requestBody).subscribe({
@@ -99,39 +115,21 @@ export class BpaRegisterComponent {
     this.recaptchaToken.set(captchaResponse);
   }
 
-  resetForm(): void {
-    this.registrationForm.reset({
-      username: '',
-      fullname: '',
-      email: '',
-      reason: '',
-      password: '',
-      confirmPassword: '',
-    });
-    this.registrationForm.markAsPristine();
-    this.registrationForm.markAsUntouched();
-    this.validationService.reset();
-    this.recaptchaToken.set(null);
-    this.recaptchaAttempted.set(false);
-  }
-
-  scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
+  isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
     return this.validationService.isFieldInvalid(
       this.registrationForm,
       fieldName,
     );
   }
 
-  getErrorMessages(
-    fieldName: keyof RegistrationRequest | 'confirmPassword',
-  ): string[] {
+  getErrorMessages(fieldName: keyof RegistrationForm): string[] {
     return this.validationService.getErrorMessages(
       this.registrationForm,
       fieldName,
     );
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

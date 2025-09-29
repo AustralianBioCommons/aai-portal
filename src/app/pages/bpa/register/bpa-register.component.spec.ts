@@ -6,7 +6,7 @@ import {
 } from '@angular/core/testing';
 import {
   BpaRegisterComponent,
-  RegistrationRequest,
+  RegistrationForm,
 } from './bpa-register.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
@@ -75,10 +75,7 @@ describe('BpaRegisterComponent', () => {
 
   describe('Form Validation', () => {
     it('should validate required fields', () => {
-      const requiredControls: (
-        | keyof RegistrationRequest
-        | 'confirmPassword'
-      )[] = [
+      const requiredControls: (keyof RegistrationForm)[] = [
         'username',
         'fullname',
         'email',
@@ -208,22 +205,6 @@ describe('BpaRegisterComponent', () => {
         behavior: 'smooth',
         block: 'center',
       });
-    });
-  });
-
-  describe('UI Interactions', () => {
-    it('should reset form', () => {
-      component.registrationForm.patchValue({
-        username: 'testuser',
-        email: 'test@example.com',
-      });
-
-      component.resetForm();
-
-      expect(component.registrationForm.pristine).toBeTrue();
-      expect(component.registrationForm.untouched).toBeTrue();
-      expect(component.registrationForm.get('username')?.value).toBe('');
-      expect(component.registrationForm.get('email')?.value).toBe('');
     });
   });
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormGroup, ValidationErrors } from '@angular/forms';
-import { ALLOWED_SPECIAL_CHARACTERS } from '../../../utils/validation/passwords';
+import { ALLOWED_SPECIAL_CHARACTERS } from '../../shared/validators/passwords';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   RegistrationErrorResponse,
@@ -37,6 +37,10 @@ export class ValidationService {
       maxlength: 'Your username cannot be longer than 100 characters',
       pattern:
         'Your username should contain only lower-case letters, numbers, dots, underscores and dashes',
+    },
+    email: {
+      invalidSbpEmailDomain:
+        'Email must be from an authorized institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
     },
   };
 

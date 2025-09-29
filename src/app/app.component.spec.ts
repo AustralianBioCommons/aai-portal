@@ -1,14 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import {provideMockAuth0Service} from '../utils/testingUtils';
-import {provideHttpClient} from '@angular/common/http';
-import {provideRouter} from '@angular/router';
+import { provideMockAuth0Service } from './shared/utils/testingUtils';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideMockAuth0Service(), provideHttpClient(), provideRouter([])]
+      providers: [
+        provideMockAuth0Service(),
+        provideHttpClient(),
+        provideRouter([]),
+      ],
     }).compileComponents();
   });
 
@@ -22,6 +26,6 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector("nav")).toBeDefined();
+    expect(compiled.querySelector('nav')).toBeDefined();
   });
 });

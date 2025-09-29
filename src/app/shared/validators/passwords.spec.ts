@@ -6,7 +6,7 @@ import {
   digitRequired,
   specialCharacterRequired,
   passwordRequirements,
-  ALLOWED_SPECIAL_CHARACTERS
+  ALLOWED_SPECIAL_CHARACTERS,
 } from './passwords';
 
 describe('Password Validators', () => {
@@ -137,7 +137,7 @@ describe('Password Validators', () => {
         lowercaseRequired: true,
         uppercaseRequired: true,
         digitRequired: true,
-        specialCharacterRequired: true
+        specialCharacterRequired: true,
       });
     });
 
@@ -145,18 +145,18 @@ describe('Password Validators', () => {
       const control = new FormControl('test');
       const result = passwordRequirements(control);
       expect(result).toEqual({
-        minlength: {requiredLength: 8, actualLength: 4},
+        minlength: { requiredLength: 8, actualLength: 4 },
         uppercaseRequired: true,
         digitRequired: true,
-        specialCharacterRequired: true
+        specialCharacterRequired: true,
       });
 
       const control2 = new FormControl('TEST123');
       const result2 = passwordRequirements(control2);
       expect(result2).toEqual({
-        minlength: {requiredLength: 8, actualLength: 7},
+        minlength: { requiredLength: 8, actualLength: 7 },
         lowercaseRequired: true,
-        specialCharacterRequired: true
+        specialCharacterRequired: true,
       });
     });
   });
