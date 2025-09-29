@@ -1,10 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { platformAdminGuard } from './platform-admin.guard';
-import { signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { ApiService } from '../services/api.service';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 describe('adminGuard', () => {
   let mockApiService: jasmine.SpyObj<ApiService>;
