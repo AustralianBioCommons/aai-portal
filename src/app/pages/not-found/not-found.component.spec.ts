@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 
 import { NotFoundComponent } from './not-found.component';
 import { provideHttpClient } from '@angular/common/http';
-import { provideMockAuth0Service } from '../../shared/utils/testingUtils';
+import { provideMockAuth0Service } from '../../shared/utils/testing-utils';
 import { provideRouter } from '@angular/router';
 
 describe('NotFoundComponent', () => {

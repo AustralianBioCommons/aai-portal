@@ -10,6 +10,9 @@ module.exports = {
         galaxy: {
           primary: '#243e8f',
         },
+        biocommons: {
+          primary: '#205a86',
+        },
       },
     },
   },
