@@ -14,7 +14,7 @@ export class ButtonComponent {
   type = input<ButtonType>('button');
   variant = input<ButtonVariant>('primary');
   colorClasses = input<string | undefined>();
-  widthClass = input<string>('w-auto');
+  widthClass = input<string>('w-28');
   disabled = input<boolean>(false);
   loading = input<boolean>(false);
 }

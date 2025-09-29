@@ -8,17 +8,15 @@
         alt="Structural Biology Platform Logo"
       />
     </a>
-    <div
-      class="flex justify-between gap-6 font-light *:text-blue-900 sm:gap-12"
-    >
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/about">
+    <div class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12">
+      <a class="hover:text-sky-900" href="https://www.biocommons.org.au/about">
         About
       </a>
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/">
+      <a class="hover:text-sky-900" href="https://www.biocommons.org.au/">
         FAQ
       </a>
       <a
-        class="hover:text-blue-950"
+        class="hover:text-sky-900"
         href="https://www.biocommons.org.au/contact-form"
       >
         Contact us
@@ -224,12 +222,7 @@
       </div>
 
       <div class="mt-6 flex justify-center">
-        <app-button
-          type="submit"
-          variant="primary"
-          widthClass="w-28"
-          [loading]="isSubmitting()"
-        >
+        <app-button type="submit" variant="primary" [loading]="isSubmitting()">
           Register
         </app-button>
       </div>
