@@ -45,7 +45,7 @@
       restricted sequence files (projects currently under embargo).<br /><br />
 
       Please contact
-      <span class="text-blue-700 hover:text-blue-800">
+      <span class="text-blue-600 hover:text-blue-700">
         <a href="mailto:help@bioplatforms.com"> help&#64;bioplatforms.com </a>
       </span>
       with details of your username, the embargo section you would like access
@@ -214,22 +214,25 @@
               </div>
             }
           </div>
-          <div
-            class="flex w-full justify-between gap-6 text-sm font-medium *:w-28 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
-          >
-            <button
+          <div class="flex w-full justify-between gap-6">
+            <app-button
               type="button"
-              class="border bg-white text-blue-900 hover:bg-gray-100"
+              variant="secondary"
+              widthClass="w-24"
+              colorClasses="text-blue-900"
               [routerLink]="['../']"
             >
               Back
-            </button>
-            <button
+            </app-button>
+            <app-button
               type="submit"
-              class="bg-blue-900 text-white hover:bg-blue-950"
+              variant="primary"
+              widthClass="w-24"
+              colorClasses="bg-blue-900 hover:bg-blue-950"
+              [loading]="isSubmitting()"
             >
               Register
-            </button>
+            </app-button>
           </div>
         </div>
       </form>

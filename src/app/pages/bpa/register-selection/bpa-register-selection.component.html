@@ -29,13 +29,15 @@
             Access the Bioplatforms Australia Data Portal's public and
             restricted data.
           </div>
-          <button
-            [routerLink]="['standard-access']"
+          <app-button
             type="button"
-            class="w-fit rounded-md border bg-transparent px-4 py-2.5 text-sm font-medium text-blue-900 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+            variant="secondary"
+            widthClass="w-24"
+            colorClasses="text-blue-900"
+            [routerLink]="['standard-access']"
           >
             Continue
-          </button>
+          </app-button>
         </div>
         <div
           class="flex w-full flex-col justify-between gap-6 pt-12 md:w-1/2 md:pl-12 md:pt-0"
@@ -47,13 +49,15 @@
             Access the Bioplatforms Australia Data Portal's public and
             restricted data, plus the Australian BioCommons service bundles.
           </div>
-          <button
-            [routerLink]="['bundle-access']"
+          <app-button
             type="button"
-            class="w-fit rounded-md bg-blue-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-950"
+            variant="primary"
+            widthClass="w-24"
+            colorClasses="bg-blue-900 hover:bg-blue-950"
+            [routerLink]="['bundle-access']"
           >
             Continue
-          </button>
+          </app-button>
         </div>
       </div>
     </div>
