@@ -142,8 +142,8 @@ export class ApiService {
   approvePlatformAccess(
     userId: string,
     platformId: PlatformId,
-  ): Observable<{ status: string; updated: boolean }> {
-    return this.http.post<{ status: string; updated: boolean }>(
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/approve`,
       {},
     );
@@ -153,8 +153,8 @@ export class ApiService {
     userId: string,
     platformId: PlatformId,
     reason?: string,
-  ): Observable<{ status: string; updated: boolean }> {
-    return this.http.post<{ status: string; updated: boolean }>(
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/revoke`,
       reason ? { reason } : {},
     );
@@ -163,8 +163,8 @@ export class ApiService {
   approveGroupAccess(
     userId: string,
     groupId: string,
-  ): Observable<{ status: string; updated: boolean }> {
-    return this.http.post<{ status: string; updated: boolean }>(
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/approve`,
       {},
     );
@@ -174,8 +174,8 @@ export class ApiService {
     userId: string,
     groupId: string,
     reason?: string,
-  ): Observable<{ status: string; updated: boolean }> {
-    return this.http.post<{ status: string; updated: boolean }>(
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
       reason ? { reason } : {},
     );

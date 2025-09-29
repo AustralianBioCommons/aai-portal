@@ -116,7 +116,7 @@ describe('ApiService', () => {
     const platformId = 'galaxy';
 
     service.approvePlatformAccess(userId, platformId).subscribe((response) => {
-      expect(response).toEqual({ status: 'ok', updated: true });
+      expect(response).toEqual({ updated: true });
     });
 
     const req = httpMock.expectOne(
@@ -124,7 +124,7 @@ describe('ApiService', () => {
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({});
-    req.flush({ status: 'ok', updated: true });
+    req.flush({ updated: true });
   });
 
   it('should call revoke platform endpoint with optional reason', () => {
@@ -135,7 +135,7 @@ describe('ApiService', () => {
     service
       .revokePlatformAccess(userId, platformId, reason)
       .subscribe((response) => {
-        expect(response).toEqual({ status: 'ok', updated: true });
+        expect(response).toEqual({ updated: true });
       });
 
     const req = httpMock.expectOne(
@@ -143,7 +143,7 @@ describe('ApiService', () => {
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ reason });
-    req.flush({ status: 'ok', updated: true });
+    req.flush({ updated: true });
   });
 
   it('should call revoke platform endpoint without reason', () => {
@@ -153,7 +153,7 @@ describe('ApiService', () => {
     service
       .revokePlatformAccess(userId, platformId)
       .subscribe((response) => {
-        expect(response).toEqual({ status: 'ok', updated: true });
+        expect(response).toEqual({ updated: true });
       });
 
     const req = httpMock.expectOne(
@@ -161,7 +161,7 @@ describe('ApiService', () => {
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({});
-    req.flush({ status: 'ok', updated: true });
+    req.flush({ updated: true });
   });
 
   it('should call approve group endpoint', () => {
@@ -169,7 +169,7 @@ describe('ApiService', () => {
     const groupId = 'tsi';
 
     service.approveGroupAccess(userId, groupId).subscribe((response) => {
-      expect(response).toEqual({ status: 'ok', updated: true });
+      expect(response).toEqual({ updated: true });
     });
 
     const req = httpMock.expectOne(
@@ -177,7 +177,7 @@ describe('ApiService', () => {
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({});
-    req.flush({ status: 'ok', updated: true });
+    req.flush({ updated: true });
   });
 
   it('should call revoke group endpoint with optional reason', () => {
@@ -188,7 +188,7 @@ describe('ApiService', () => {
     service
       .revokeGroupAccess(userId, groupId, reason)
       .subscribe((response) => {
-        expect(response).toEqual({ status: 'ok', updated: true });
+        expect(response).toEqual({ updated: true });
       });
 
     const req = httpMock.expectOne(
@@ -196,6 +196,6 @@ describe('ApiService', () => {
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ reason });
-    req.flush({ status: 'ok', updated: true });
+    req.flush({ updated: true });
   });
 });
