@@ -5,6 +5,6 @@ import { RouterLink } from '@angular/router';
   selector: 'app-register-selection',
   imports: [RouterLink],
   templateUrl: './bpa-register-selection.component.html',
-  styleUrls: ['./bpa-register-selection.component.css'],
+  styleUrl: './bpa-register-selection.component.css',
 })
 export class BpaRegisterSelectionComponent {}

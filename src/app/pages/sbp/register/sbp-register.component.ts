@@ -37,7 +37,6 @@ interface RegistrationRequest {
 
 @Component({
   selector: 'app-register',
-  standalone: true,
   imports: [ReactiveFormsModule, CommonModule, RecaptchaModule, AlertComponent],
   templateUrl: './sbp-register.component.html',
   styleUrl: './sbp-register.component.css',

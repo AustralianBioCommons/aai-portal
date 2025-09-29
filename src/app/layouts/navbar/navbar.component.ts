@@ -18,9 +18,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-navbar',
   imports: [RouterLink, RouterLinkActive, CommonModule],
-  standalone: true,
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css'],
+  styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
   private authService = inject(AuthService);

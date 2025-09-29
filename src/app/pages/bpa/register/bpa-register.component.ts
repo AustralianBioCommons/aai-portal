@@ -35,7 +35,6 @@ interface RegistrationRequest {
 
 @Component({
   selector: 'app-bpa-register',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     CommonModule,

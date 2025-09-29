@@ -15,8 +15,7 @@ interface UserInfoResponse {
 @Component({
   selector: 'app-email-verified',
   templateUrl: './email-verified.component.html',
-  styleUrls: ['./email-verified.component.css'],
-  standalone: true,
+  styleUrl: './email-verified.component.css',
 })
 export class EmailVerifiedComponent {
   private readonly route = inject(ActivatedRoute);

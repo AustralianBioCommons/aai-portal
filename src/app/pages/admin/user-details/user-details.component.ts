@@ -19,7 +19,6 @@ import { PLATFORM_NAMES } from '../../../core/constants/constants';
 
 @Component({
   selector: 'app-user-details',
-  standalone: true,
   imports: [DatePipe, LoadingSpinnerComponent, RouterLink, AlertComponent],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',

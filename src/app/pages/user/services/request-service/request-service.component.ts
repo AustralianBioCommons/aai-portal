@@ -18,9 +18,8 @@ interface ServiceOption {
 @Component({
   selector: 'app-request-service',
   imports: [RouterLink, ReactiveFormsModule, LoadingSpinnerComponent],
-  standalone: true,
   templateUrl: './request-service.component.html',
-  styleUrls: ['./request-service.component.css'],
+  styleUrl: './request-service.component.css',
 })
 export class RequestServiceComponent {
   private router = inject(Router);
