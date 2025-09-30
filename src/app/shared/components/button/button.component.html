@@ -1,16 +1,16 @@
+@let base =
+  "rounded-md px-4 py-2.5 text-sm font-medium shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50";
+@let color = colorClasses()?.trim();
+@let variantClasses =
+  variant() === "primary"
+    ? "text-white " + (color || "bg-biocommons-primary hover:bg-sky-900")
+    : "border bg-white hover:bg-gray-100 " +
+      (color || "text-biocommons-primary");
+
 <button
   [type]="type()"
   [disabled]="disabled() || loading()"
-  [class]="
-    'rounded-md px-4 py-2.5 text-sm font-medium shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50 ' +
-    widthClass() +
-    ' ' +
-    (variant() === 'primary'
-      ? 'text-white ' +
-        (colorClasses()?.trim() || 'bg-biocommons-primary hover:bg-sky-900')
-      : 'border bg-white hover:bg-gray-100 ' +
-        (colorClasses()?.trim() || 'text-biocommons-primary'))
-  "
+  [class]="base + ' ' + widthClass() + ' ' + variantClasses"
 >
   @if (loading()) {
     <div class="flex items-center justify-center">

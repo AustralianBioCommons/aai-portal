@@ -9,20 +9,11 @@
       />
     </a>
     <div
-      class="flex justify-between gap-6 font-light *:text-blue-900 sm:gap-12"
+      class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12 [&>a:hover]:text-sky-900"
     >
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/about">
-        About
-      </a>
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/">
-        FAQ
-      </a>
-      <a
-        class="hover:text-blue-950"
-        href="https://www.biocommons.org.au/contact-form"
-      >
-        Contact us
-      </a>
+      <a href="https://www.biocommons.org.au/about"> About </a>
+      <a href="https://www.biocommons.org.au/"> FAQ </a>
+      <a href="https://www.biocommons.org.au/contact-form"> Contact us </a>
     </div>
   </div>
 
@@ -36,11 +27,13 @@
       Please check your email and verify your email address. Your request has
       been sent to an administrator for approval.
     </div>
-    <a
-      href="https://www.biocommons.org.au/"
-      class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+    <app-button
+      type="button"
+      variant="primary"
+      widthClass="w-auto"
+      (click)="navigateToSBP()"
     >
       Return to Structural Biology Platform
-    </a>
+    </app-button>
   </div>
 </div>

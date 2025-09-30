@@ -17,4 +17,5 @@ export class ButtonComponent {
   widthClass = input<string>('w-28');
   disabled = input<boolean>(false);
   loading = input<boolean>(false);
+  href = input<string | undefined>();
 }
