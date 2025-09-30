@@ -127,4 +127,74 @@ describe('ApiService', () => {
     );
     req.flush(mockResponse);
   });
+
+  it('should call approve platform endpoint', () => {
+    const userId = 'auth0|123';
+    const platformId = 'galaxy';
+
+    service.approvePlatformAccess(userId, platformId).subscribe((response) => {
+      expect(response).toEqual({ updated: true });
+    });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/approve`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({ updated: true });
+  });
+
+  it('should call revoke platform endpoint with reason', () => {
+    const userId = 'auth0|123';
+    const platformId = 'galaxy';
+    const reason = 'No longer required';
+
+    service
+      .revokePlatformAccess(userId, platformId, reason)
+      .subscribe((response) => {
+        expect(response).toEqual({ updated: true });
+      });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/revoke`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ reason });
+    req.flush({ updated: true });
+  });
+
+  it('should call approve group endpoint', () => {
+    const userId = 'auth0|123';
+    const groupId = 'tsi';
+
+    service.approveGroupAccess(userId, groupId).subscribe((response) => {
+      expect(response).toEqual({ updated: true });
+    });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/approve`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({ updated: true });
+  });
+
+  it('should call revoke group endpoint with reason', () => {
+    const userId = 'auth0|123';
+    const groupId = 'tsi';
+    const reason = 'Membership expired';
+
+    service
+      .revokeGroupAccess(userId, groupId, reason)
+      .subscribe((response) => {
+        expect(response).toEqual({ updated: true });
+      });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ reason });
+    req.flush({ updated: true });
+  });
 });
