@@ -152,7 +152,7 @@ export class ApiService {
   revokePlatformAccess(
     userId: string,
     platformId: PlatformId,
-    reason?: string,
+    reason: string,
   ): Observable<{ updated: boolean }> {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/revoke`,
@@ -173,7 +173,7 @@ export class ApiService {
   revokeGroupAccess(
     userId: string,
     groupId: string,
-    reason?: string,
+    reason: string,
   ): Observable<{ updated: boolean }> {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
