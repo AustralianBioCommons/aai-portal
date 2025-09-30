@@ -19,6 +19,7 @@ import { usernameRequirements } from '../../../shared/validators/usernames';
 import { environment } from '../../../../environments/environment';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 interface GalaxyRegistrationForm {
   email: FormControl<string>;
@@ -33,7 +34,12 @@ interface GalaxyRegistrationToken {
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, LoadingSpinnerComponent, RecaptchaModule],
+  imports: [
+    ReactiveFormsModule,
+    LoadingSpinnerComponent,
+    RecaptchaModule,
+    ButtonComponent,
+  ],
   templateUrl: './galaxy-register.component.html',
   styleUrl: './galaxy-register.component.css',
 })

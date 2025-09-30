@@ -10,11 +10,14 @@
       <span class="font-medium text-gray-800">verify your email address</span>
       before logging in.
     </div>
-    <a
-      href="https://galaxy.test.biocommons.org.au"
-      class="rounded-md bg-galaxy-primary px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:cursor-pointer hover:bg-blue-950"
+    <app-button
+      type="button"
+      variant="primary"
+      widthClass="w-auto"
+      colorClasses="bg-blue-800 hover:bg-blue-900"
+      (click)="navigateToGalaxy()"
     >
       Return to Galaxy Australia
-    </a>
+    </app-button>
   </div>
 </div>

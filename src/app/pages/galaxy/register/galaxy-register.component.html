@@ -111,7 +111,7 @@
         }
       </div>
 
-      <div class="flex flex-col items-center gap-0.5 py-2">
+      <div class="flex flex-col items-center gap-0.5 pb-6 pt-2">
         <re-captcha
           (resolved)="resolved($event)"
           siteKey="{{ recaptchaSiteKeyV2 }}"
@@ -123,17 +123,19 @@
         }
       </div>
 
-      <button
+      <app-button
         type="submit"
-        class="hover:cursor w-full rounded-md bg-blue-800 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-blue-900"
+        variant="primary"
+        widthClass="w-full"
+        colorClasses="bg-blue-800 hover:bg-blue-900"
       >
         Register
-      </button>
+      </app-button>
     </form>
     <span class="text-sm text-gray-800">
       Already have an account?
       <a
-        class="font-medium text-blue-500 hover:text-blue-600"
+        class="font-medium text-blue-600 hover:text-blue-700"
         href="https://galaxy.test.biocommons.org.au/"
       >
         Return to Galaxy
