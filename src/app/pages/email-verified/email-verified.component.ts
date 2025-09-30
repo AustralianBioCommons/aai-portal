@@ -2,8 +2,9 @@ import { Component, computed, signal, inject, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
-import { BrandingService } from '../../../core/services/branding.service';
+import { environment } from '../../../environments/environment';
+import { BrandingService } from '../../core/services/branding.service';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 
 type AppId = 'bpa' | 'galaxy' | 'biocommons';
 
@@ -14,6 +15,7 @@ interface UserInfoResponse {
 
 @Component({
   selector: 'app-email-verified',
+  imports: [ButtonComponent],
   templateUrl: './email-verified.component.html',
   styleUrl: './email-verified.component.css',
 })
@@ -69,5 +71,9 @@ export class EmailVerifiedComponent {
           console.error(`Failed to fetch app info: ${err}`);
         },
       });
+  }
+
+  navigateToApp(): void {
+    window.location.href = this.appUrl();
   }
 }
