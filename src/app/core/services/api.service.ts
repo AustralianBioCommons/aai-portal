@@ -156,7 +156,7 @@ export class ApiService {
   ): Observable<{ updated: boolean }> {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/revoke`,
-      reason ? { reason } : {},
+      { reason },
     );
   }
 
@@ -177,7 +177,7 @@ export class ApiService {
   ): Observable<{ updated: boolean }> {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
-      reason ? { reason } : {},
+      { reason },
     );
   }
 

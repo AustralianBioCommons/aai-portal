@@ -127,7 +127,7 @@ describe('ApiService', () => {
     req.flush({ updated: true });
   });
 
-  it('should call revoke platform endpoint with optional reason', () => {
+  it('should call revoke platform endpoint with reason', () => {
     const userId = 'auth0|123';
     const platformId = 'galaxy';
     const reason = 'No longer required';
@@ -143,24 +143,6 @@ describe('ApiService', () => {
     );
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ reason });
-    req.flush({ updated: true });
-  });
-
-  it('should call revoke platform endpoint without reason', () => {
-    const userId = 'auth0|123';
-    const platformId = 'galaxy';
-
-    service
-      .revokePlatformAccess(userId, platformId)
-      .subscribe((response) => {
-        expect(response).toEqual({ updated: true });
-      });
-
-    const req = httpMock.expectOne(
-      `${environment.auth0.backend}/admin/users/${userId}/platforms/${platformId}/revoke`,
-    );
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({});
     req.flush({ updated: true });
   });
 
@@ -180,7 +162,7 @@ describe('ApiService', () => {
     req.flush({ updated: true });
   });
 
-  it('should call revoke group endpoint with optional reason', () => {
+  it('should call revoke group endpoint with reason', () => {
     const userId = 'auth0|123';
     const groupId = 'tsi';
     const reason = 'Membership expired';
