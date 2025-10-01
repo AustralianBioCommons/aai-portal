@@ -10,26 +10,6 @@
       type="image/x-icon"
       href="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/0b7ee000-0f7e-4ca3-a28a-83c52b057f04/Australian-Biocommons-Favicon-RGB_cropped.png?format=100w&content-type=image%2Fpng"
     />
-    <script>
-      (function () {
-        try {
-          var request = new XMLHttpRequest();
-          request.open("GET", "assets/config/app-config.json", false);
-          request.send(null);
-
-          if (request.status >= 200 && request.status < 300) {
-            window.__APP_CONFIG__ = JSON.parse(request.responseText);
-          } else {
-            console.error(
-              "Failed to load runtime config: HTTP",
-              request.status,
-            );
-          }
-        } catch (error) {
-          console.error("Failed to load runtime config:", error);
-        }
-      })();
-    </script>
   </head>
   <body>
     <app-root></app-root>

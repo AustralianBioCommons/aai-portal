@@ -1,4 +1,8 @@
-import { EnvironmentConfig, withRuntimeConfig } from './runtime-config';
+import {
+  EnvironmentConfig,
+  RuntimeEnvironmentConfig,
+  mergeEnvironmentConfig,
+} from './runtime-config';
 
 const defaults: EnvironmentConfig = {
   production: false,
@@ -13,4 +17,13 @@ const defaults: EnvironmentConfig = {
   },
 };
 
-export const environment = withRuntimeConfig(defaults);
+export const environment: EnvironmentConfig = mergeEnvironmentConfig(defaults);
+
+export function updateEnvironment(runtime?: RuntimeEnvironmentConfig): void {
+  const merged = mergeEnvironmentConfig(defaults, runtime);
+  environment.production = merged.production;
+  environment.auth0 = merged.auth0;
+  environment.recaptcha = merged.recaptcha;
+}
+
+export const environmentDefaults = defaults;

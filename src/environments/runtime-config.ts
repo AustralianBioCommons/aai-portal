@@ -21,52 +21,28 @@ export interface RuntimeEnvironmentConfig {
   recaptcha?: Partial<RecaptchaConfig>;
 }
 
-interface RuntimeWindow extends Window {
-  __APP_CONFIG__?: RuntimeEnvironmentConfig;
+function resolveRedirectUri(value: string | undefined): string {
+  return value && value.length > 0 ? value : window.location.origin;
 }
 
-function applyRedirectFallback(config: EnvironmentConfig): EnvironmentConfig {
-  return {
-    ...config,
-    auth0: {
-      ...config.auth0,
-      redirectUri:
-        config.auth0.redirectUri && config.auth0.redirectUri.length > 0
-          ? config.auth0.redirectUri
-          : window.location.origin,
-    },
-  };
-}
-
-export function withRuntimeConfig(
+export function mergeEnvironmentConfig(
   defaults: EnvironmentConfig,
+  runtime?: RuntimeEnvironmentConfig,
 ): EnvironmentConfig {
-  const runtime = (window as RuntimeWindow).__APP_CONFIG__;
+  const mergedAuth0 = {
+    ...defaults.auth0,
+    ...(runtime?.auth0 ?? {}),
+  };
 
-  if (!runtime) {
-    return applyRedirectFallback(defaults);
-  }
-
-  const merged: EnvironmentConfig = {
-    ...defaults,
-    ...runtime,
+  return {
+    production: runtime?.production ?? defaults.production,
     auth0: {
-      ...defaults.auth0,
-      ...runtime.auth0,
+      ...mergedAuth0,
+      redirectUri: resolveRedirectUri(mergedAuth0.redirectUri),
     },
     recaptcha: {
       ...defaults.recaptcha,
-      ...runtime.recaptcha,
+      ...(runtime?.recaptcha ?? {}),
     },
   };
-
-  return applyRedirectFallback(merged);
 }
-
-declare global {
-  interface Window {
-    __APP_CONFIG__?: RuntimeEnvironmentConfig;
-  }
-}
-
-export {};

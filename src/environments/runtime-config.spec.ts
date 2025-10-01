@@ -1,7 +1,7 @@
 import {
   EnvironmentConfig,
   RuntimeEnvironmentConfig,
-  withRuntimeConfig,
+  mergeEnvironmentConfig,
 } from './runtime-config';
 
 describe('Runtime configuration Tests', () => {
@@ -18,16 +18,8 @@ describe('Runtime configuration Tests', () => {
     },
   };
 
-  const runtimeWindow = window as Window & {
-    __APP_CONFIG__?: RuntimeEnvironmentConfig;
-  };
-
-  beforeEach(() => {
-    delete runtimeWindow.__APP_CONFIG__;
-  });
-
-  it('returns defaults merged with redirect fallback when no runtime config is present', () => {
-    const result = withRuntimeConfig(defaults);
+  it('returns defaults merged with redirect fallback when runtime config is absent', () => {
+    const result = mergeEnvironmentConfig(defaults);
 
     expect(result.production).toBe(false);
     expect(result.auth0.domain).toBe('default.domain');
@@ -51,9 +43,7 @@ describe('Runtime configuration Tests', () => {
       },
     };
 
-    runtimeWindow.__APP_CONFIG__ = runtime;
-
-    const result = withRuntimeConfig(defaults);
+    const result = mergeEnvironmentConfig(defaults, runtime);
 
     expect(result.production).toBe(true);
     expect(result.auth0.domain).toBe('override.domain');
@@ -69,24 +59,20 @@ describe('Runtime configuration Tests', () => {
   });
 
   it('honours runtime redirectUri when provided and falls back when empty', () => {
-    runtimeWindow.__APP_CONFIG__ = {
+    const withRedirect = mergeEnvironmentConfig(defaults, {
       auth0: {
         redirectUri: 'https://app.example.org/callback',
       },
-    } satisfies RuntimeEnvironmentConfig;
-
-    const withRedirect = withRuntimeConfig(defaults);
+    });
     expect(withRedirect.auth0.redirectUri).toBe(
       'https://app.example.org/callback',
     );
 
-    runtimeWindow.__APP_CONFIG__ = {
+    const fallbackRedirect = mergeEnvironmentConfig(defaults, {
       auth0: {
         redirectUri: '',
       },
-    } satisfies RuntimeEnvironmentConfig;
-
-    const fallbackRedirect = withRuntimeConfig(defaults);
+    });
     expect(fallbackRedirect.auth0.redirectUri).toBe(window.location.origin);
   });
 });
