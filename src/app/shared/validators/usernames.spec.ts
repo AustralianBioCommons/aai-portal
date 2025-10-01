@@ -10,11 +10,11 @@ describe('usernameRequirements', () => {
       'john_doe',
       'a-b-c',
       'abc',
-      'a'.repeat(100) // Maximum length
+      'a'.repeat(100), // Maximum length
     ];
 
     // Act & Assert
-    validUsernames.forEach(username => {
+    validUsernames.forEach((username) => {
       const control = new FormControl(username);
       const result = usernameRequirements(control);
       expect(result).toBeNull();
@@ -26,7 +26,7 @@ describe('usernameRequirements', () => {
     const tooShortUsernames = ['a', 'ab'];
 
     // Act & Assert
-    tooShortUsernames.forEach(username => {
+    tooShortUsernames.forEach((username) => {
       const control = new FormControl(username);
       const result = usernameRequirements(control);
       expect(result).not.toBeNull();
@@ -55,11 +55,11 @@ describe('usernameRequirements', () => {
       'user.name', // Period not allowed
       'user name', // Space not allowed
       'üser123', // Non-ASCII character
-      'UPPERCASE'
+      'UPPERCASE',
     ];
 
     // Act & Assert
-    invalidPatternUsernames.forEach(username => {
+    invalidPatternUsernames.forEach((username) => {
       const control = new FormControl(username);
       const result = usernameRequirements(control);
       expect(result).not.toBeNull();

@@ -8,9 +8,8 @@ describe('GalaxyLayoutComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GalaxyLayoutComponent]
-    })
-    .compileComponents();
+      imports: [GalaxyLayoutComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GalaxyLayoutComponent);
     component = fixture.componentInstance;

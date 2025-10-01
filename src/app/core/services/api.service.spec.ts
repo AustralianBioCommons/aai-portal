@@ -184,11 +184,9 @@ describe('ApiService', () => {
     const groupId = 'tsi';
     const reason = 'Membership expired';
 
-    service
-      .revokeGroupAccess(userId, groupId, reason)
-      .subscribe((response) => {
-        expect(response).toEqual({ updated: true });
-      });
+    service.revokeGroupAccess(userId, groupId, reason).subscribe((response) => {
+      expect(response).toEqual({ updated: true });
+    });
 
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
