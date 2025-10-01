@@ -9,7 +9,7 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return toObservable(authService.isLoading).pipe(
-    filter(isLoading => !isLoading),
+    filter((isLoading) => !isLoading),
     take(1),
     map(() => {
       if (authService.isAuthenticated()) {
@@ -18,6 +18,6 @@ export const authGuard: CanActivateFn = () => {
         router.navigate(['/login']);
         return false;
       }
-    })
+    }),
   );
 };
