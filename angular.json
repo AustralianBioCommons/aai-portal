@@ -30,6 +30,8 @@
           },
           "configurations": {
             "production": {
+              "optimization": true,
+              "sourceMap": false,
               "budgets": [
                 {
                   "type": "initial",
@@ -41,40 +43,23 @@
                   "maximumWarning": "4kB",
                   "maximumError": "8kB"
                 }
-              ],
-              "outputHashing": "all",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
               ]
             },
-            "test": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
-              ],
-              "outputHashing": "all",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.test.ts"
-                }
-              ]
-            },
-            "development": {
+            "debug": {
               "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2MB",
+                  "maximumError": "5MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "20kB",
+                  "maximumError": "40kB"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -85,11 +70,11 @@
             "production": {
               "buildTarget": "aai-portal:build:production"
             },
-            "development": {
-              "buildTarget": "aai-portal:build:development"
+            "debug": {
+              "buildTarget": "aai-portal:build:debug"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "debug"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"
