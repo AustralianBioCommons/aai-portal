@@ -15,10 +15,11 @@ export interface EnvironmentConfig {
   recaptcha: RecaptchaConfig;
 }
 
-export type RuntimeEnvironmentConfig = Partial<EnvironmentConfig> & {
+export interface RuntimeEnvironmentConfig {
+  production?: boolean;
   auth0?: Partial<Auth0Config>;
   recaptcha?: Partial<RecaptchaConfig>;
-};
+}
 
 interface RuntimeWindow extends Window {
   __APP_CONFIG__?: RuntimeEnvironmentConfig;
