@@ -2,8 +2,8 @@ repos:
   - repo: local
     hooks:
       - id: prettier-npx
-        name: prettier (npx latest)
-        entry: npx --yes prettier@latest --write
+        name: prettier (project version)
+        entry: npx --no-install prettier --write
         language: system
         pass_filenames: true
         types_or:
