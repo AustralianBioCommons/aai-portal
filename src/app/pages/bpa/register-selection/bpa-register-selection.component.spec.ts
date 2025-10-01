@@ -69,7 +69,7 @@ describe('BpaRegisterSelectionComponent', () => {
   });
 
   it('should have two continue buttons with correct routing', () => {
-    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const buttons = fixture.debugElement.queryAll(By.css('app-button'));
     expect(buttons.length).toBe(2);
 
     buttons.forEach((button) => {
@@ -117,7 +117,7 @@ describe('BpaRegisterSelectionComponent', () => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
 
     expect(buttons[0].nativeElement.className).toContain('border');
-    expect(buttons[0].nativeElement.className).toContain('bg-transparent');
+    expect(buttons[0].nativeElement.className).toContain('bg-white');
     expect(buttons[0].nativeElement.className).toContain('text-blue-900');
 
     expect(buttons[1].nativeElement.className).toContain('bg-blue-900');

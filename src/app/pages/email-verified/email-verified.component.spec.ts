@@ -131,7 +131,7 @@ describe('EmailVerifiedComponent', () => {
       'Your email has been successfully verified',
     );
 
-    const link = compiled.querySelector('a');
+    const link = compiled.querySelector('app-button');
     expect(link?.textContent).toContain('Continue');
   });
 
