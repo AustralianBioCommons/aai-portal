@@ -13,7 +13,6 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 - `main` branch is manually synced from `test` branch.
   - Automated releases from `main` branch will be added in [AAI-154](https://biocloud.atlassian.net/browse/AAI-154).
 
-
 ## Development server
 
 To start a local development server, run:
