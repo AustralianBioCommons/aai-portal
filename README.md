@@ -12,6 +12,11 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
   - Automated deployment will be added in [AAI-153](https://biocloud.atlassian.net/browse/AAI-153).
 - `main` branch is manually synced from `test` branch.
   - Automated releases from `main` branch will be added in [AAI-154](https://biocloud.atlassian.net/browse/AAI-154).
+ 
+### Secrets Configuration
+This repository references a [shared spreadsheet](https://docs.google.com/spreadsheets/d/16lGloFh4VxMmu6cJdeFVLy2654hdq-ZeErhB8UifSfI/edit?usp=sharing) (ask the AAI dev team for access if required) used to manage environment variables and other sensitive values, usually set in [Github Secrets](https://github.com/AustralianBioCommons/aai-portal/settings/secrets/actions). 
+
+For any new or updated secrets, the entries in the [shared spreadsheet](https://docs.google.com/spreadsheets/d/16lGloFh4VxMmu6cJdeFVLy2654hdq-ZeErhB8UifSfI/edit?usp=sharing) should be updated and synced with the [GitHub Secrets](https://github.com/AustralianBioCommons/aai-portal/settings/secrets/actions).
 
 ## Development server
 
