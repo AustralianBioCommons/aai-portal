@@ -26,7 +26,9 @@ describe('loginGuard', () => {
       ],
     });
 
-    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    mockAuthService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
   });
 

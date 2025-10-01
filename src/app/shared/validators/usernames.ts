@@ -5,11 +5,10 @@ const USERNAME_MAX_LENGTH = 128;
 
 interface UsernameErrors {
   required?: boolean;
-  minlength?: {requiredLength: number, actualLength: number};
-  maxlength?: {requiredLength: number, actualLength: number};
+  minlength?: { requiredLength: number; actualLength: number };
+  maxlength?: { requiredLength: number; actualLength: number };
   pattern?: boolean;
 }
-
 
 /**
  * Validate requirements for our usernames in Auth0.
@@ -17,12 +16,14 @@ interface UsernameErrors {
  * Max length of 128 (from Auth0)
  * lowercase letters, digits, hyphen and underscore only (based on platform requirements)
  */
-export function usernameRequirements(control: AbstractControl): UsernameErrors | null {
+export function usernameRequirements(
+  control: AbstractControl,
+): UsernameErrors | null {
   const validator = Validators.compose([
     Validators.required,
     Validators.minLength(USERNAME_MIN_LENGTH),
     Validators.maxLength(USERNAME_MAX_LENGTH),
     Validators.pattern(/^[a-z0-9_-]+$/),
-  ])
+  ]);
   return validator!(control);
 }

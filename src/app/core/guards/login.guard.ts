@@ -9,17 +9,17 @@ export const loginGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   return toObservable(authService.isLoading).pipe(
-    filter(isLoading => !isLoading),
+    filter((isLoading) => !isLoading),
     take(1),
     map(() => {
       const isAuthenticated = authService.isAuthenticated();
-      
+
       if (isAuthenticated) {
         router.navigate(['/']);
         return false;
       } else {
         return true;
       }
-    })
+    }),
   );
 };

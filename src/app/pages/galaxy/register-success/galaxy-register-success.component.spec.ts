@@ -8,9 +8,8 @@ describe('RegisterSuccessComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GalaxyRegisterSuccessComponent]
-    })
-    .compileComponents();
+      imports: [GalaxyRegisterSuccessComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GalaxyRegisterSuccessComponent);
     component = fixture.componentInstance;

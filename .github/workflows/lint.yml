@@ -4,13 +4,12 @@ name: Code Style/Lint
 
 on:
   push:
-    branches: [ "main", "test" ]
+    branches: ["main", "test"]
   pull_request:
-    branches: [ "main", "test" ]
+    branches: ["main", "test"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -24,6 +23,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
       - run: npm ci
       - run: npm run lint
