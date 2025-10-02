@@ -14,9 +14,8 @@ import { PLATFORM_NAMES } from '../../../core/constants/constants';
 @Component({
   selector: 'app-services',
   imports: [RouterLink, RouterModule, LoadingSpinnerComponent],
-  standalone: true,
   templateUrl: './services.component.html',
-  styleUrls: ['./services.component.css'],
+  styleUrl: './services.component.css',
 })
 export class ServicesComponent {
   approvedPlatforms: PlatformUserResponse[] = [];

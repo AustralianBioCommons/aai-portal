@@ -13,7 +13,7 @@ import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.com
 import { GalaxyRegisterSuccessComponent } from './pages/galaxy/register-success/galaxy-register-success.component';
 import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
 import { BpaRegistrationSuccessComponent } from './pages/bpa/registration-success/bpa-registration-success.component';
-import { EmailVerifiedComponent } from './pages/user/email-verified/email-verified.component';
+import { EmailVerifiedComponent } from './pages/email-verified/email-verified.component';
 import { BpaRegisterSelectionComponent } from './pages/bpa/register-selection/bpa-register-selection.component';
 import { GalaxyRegisterSelectionComponent } from './pages/galaxy/register-selection/galaxy-register-selection.component';
 import { LoginComponent } from './pages/login/login.component';

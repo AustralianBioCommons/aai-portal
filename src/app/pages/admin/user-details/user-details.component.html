@@ -1,7 +1,6 @@
 <!-- Notifications -->
 @if (alert()) {
   <app-alert
-    positionClass="right-12 top-12"
     [type]="alert()!.type"
     [message]="alert()!.message"
     [dismissible]="true"
@@ -21,7 +20,7 @@
       <div class="flex items-center justify-between">
         <a
           routerLink="/users"
-          class="flex items-center gap-2 text-sm text-gray-600 transition-all duration-200 hover:text-gray-700"
+          class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -42,28 +41,30 @@
 
         @if (!user()?.email_verified) {
           <div class="relative">
-            <button
+            <app-button
               type="button"
-              class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              variant="primary"
               (click)="toggleActionMenu()"
               #actionMenuButton
             >
-              Actions
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                />
-              </svg>
-            </button>
+              <div class="flex items-center justify-center gap-2">
+                Actions
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </div>
+            </app-button>
 
             @if (actionMenuOpen()) {
               <div
@@ -129,7 +130,7 @@
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Left Column - User Details -->
         <div class="space-y-6">
-          <div class="rounded-lg bg-white p-6 shadow">
+          <div class="rounded-md bg-white p-6 shadow">
             <div class="mb-6 text-2xl font-semibold">User Details</div>
             <div class="space-y-6">
               <div>
@@ -184,7 +185,7 @@
             user()?.platform_memberships &&
             user()!.platform_memberships.length > 0
           ) {
-            <div class="space-y-6 rounded-lg bg-white p-6 shadow">
+            <div class="space-y-6 rounded-md bg-white p-6 shadow">
               <div class="text-2xl font-semibold">Platform Access</div>
               <div class="space-y-4">
                 @for (
@@ -216,7 +217,7 @@
           @if (
             user()?.group_memberships && user()!.group_memberships.length > 0
           ) {
-            <div class="space-y-6 rounded-lg bg-white p-6 shadow">
+            <div class="space-y-6 rounded-md bg-white p-6 shadow">
               <div class="text-2xl font-semibold">Bundle Access</div>
               <div class="space-y-4">
                 @for (

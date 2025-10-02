@@ -5,7 +5,7 @@ import {
   PlatformUserResponse,
 } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { provideMockAuth0Service } from '../../../shared/utils/testingUtils';
+import { provideMockAuth0Service } from '../../../shared/utils/testing-utils';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';

@@ -4,10 +4,17 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink, CommonModule, LoadingSpinnerComponent, AlertComponent],
+  imports: [
+    RouterLink,
+    CommonModule,
+    LoadingSpinnerComponent,
+    AlertComponent,
+    ButtonComponent,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })

@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 describe('EmailVerifiedComponent', () => {
   let fixture: ComponentFixture<EmailVerifiedComponent>;
@@ -131,7 +131,7 @@ describe('EmailVerifiedComponent', () => {
       'Your email has been successfully verified',
     );
 
-    const link = compiled.querySelector('a');
+    const link = compiled.querySelector('app-button');
     expect(link?.textContent).toContain('Continue');
   });
 

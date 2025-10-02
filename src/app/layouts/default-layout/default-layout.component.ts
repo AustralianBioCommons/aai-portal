@@ -42,7 +42,6 @@ export class DefaultLayoutComponent implements OnInit {
 
   private handleRootNavigation(): void {
     this.isInitializing.set(true);
-
     this.authLoading$
       .pipe(
         filter((isLoading) => !isLoading),

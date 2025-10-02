@@ -2,7 +2,7 @@
   class="flex h-full min-h-screen flex-1 flex-col items-center justify-center bg-gray-50 p-12"
 >
   <div
-    class="flex min-h-96 min-w-96 max-w-lg flex-col items-center justify-center gap-10 rounded-md bg-white px-16 py-24 text-center shadow-lg"
+    class="flex min-h-96 min-w-96 max-w-lg flex-col items-center justify-center gap-6 rounded-md bg-white px-16 py-24 text-center shadow-lg"
   >
     @if (emailVerified()) {
       <svg
@@ -24,11 +24,9 @@
         Your email has been successfully verified.<br />
         You can now log in.
       </p>
-      <div
-        class="flex flex-1 flex-col gap-6 *:rounded-md *:bg-blue-800 *:px-6 *:py-3 *:text-white"
-      >
-        <a class="hover:bg-blue-900" [href]="appUrl()"> Continue </a>
-      </div>
+      <app-button type="button" variant="primary" (click)="navigateToApp()">
+        Continue
+      </app-button>
     } @else {
       <svg
         xmlns="http://www.w3.org/2000/svg"

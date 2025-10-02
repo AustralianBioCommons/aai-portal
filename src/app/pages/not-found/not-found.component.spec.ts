@@ -3,7 +3,7 @@ import { By } from '@angular/platform-browser';
 
 import { NotFoundComponent } from './not-found.component';
 import { provideHttpClient } from '@angular/common/http';
-import { provideMockAuth0Service } from '../../shared/utils/testingUtils';
+import { provideMockAuth0Service } from '../../shared/utils/testing-utils';
 import { provideRouter } from '@angular/router';
 
 describe('NotFoundComponent', () => {
@@ -30,7 +30,7 @@ describe('NotFoundComponent', () => {
   });
 
   it('should display 404 error code', () => {
-    const errorCode = fixture.debugElement.query(By.css('p.text-blue-500'));
+    const errorCode = fixture.debugElement.query(By.css('p.text-sky-500'));
     expect(errorCode.nativeElement.textContent.trim()).toBe('404');
   });
 
@@ -47,7 +47,7 @@ describe('NotFoundComponent', () => {
   });
 
   it('should have "Go back" button with home route', () => {
-    const button = fixture.debugElement.query(By.css('a'));
+    const button = fixture.debugElement.query(By.css('app-button'));
     expect(button).toBeTruthy();
     expect(button.nativeElement.textContent.trim()).toBe('Go back');
     expect(button.attributes['ng-reflect-router-link']).toBe('/');

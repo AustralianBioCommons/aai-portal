@@ -18,6 +18,7 @@ import { ValidationService } from '../../core/services/validation.service';
 import { environment } from '../../../environments/environment';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -40,7 +41,13 @@ interface RegistrationRequest {
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  imports: [ReactiveFormsModule, CommonModule, RecaptchaModule, AlertComponent],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    RecaptchaModule,
+    AlertComponent,
+    ButtonComponent,
+  ],
   styleUrl: './register.component.css',
 })
 export class RegisterComponent {

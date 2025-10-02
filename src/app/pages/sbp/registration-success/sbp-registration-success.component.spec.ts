@@ -45,7 +45,7 @@ describe('SbpRegistrationSuccessComponent', () => {
   });
 
   it('should have return link to Structural Biology Platform', () => {
-    const returnLink = fixture.debugElement.query(By.css('a.rounded-md'));
+    const returnLink = fixture.debugElement.query(By.css('app-button'));
     expect(returnLink).toBeTruthy();
     expect(returnLink.nativeElement.textContent.trim()).toBe(
       'Return to Structural Biology Platform',

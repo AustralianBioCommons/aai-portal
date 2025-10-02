@@ -9,20 +9,11 @@
       />
     </a>
     <div
-      class="flex justify-between gap-6 font-light *:text-blue-900 sm:gap-12"
+      class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12 [&>a:hover]:text-sky-900"
     >
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/about">
-        About
-      </a>
-      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/">
-        FAQ
-      </a>
-      <a
-        class="hover:text-blue-950"
-        href="https://www.biocommons.org.au/contact-form"
-      >
-        Contact us
-      </a>
+      <a href="https://www.biocommons.org.au/about"> About </a>
+      <a href="https://www.biocommons.org.au/"> FAQ </a>
+      <a href="https://www.biocommons.org.au/contact-form"> Contact us </a>
     </div>
   </div>
 
@@ -33,7 +24,7 @@
       <div class="flex items-center justify-center gap-2">
         <div class="font-light text-gray-500">Already have an account?</div>
         <button
-          class="font-medium text-blue-600 hover:text-blue-700"
+          class="font-medium text-sky-500 hover:text-sky-600"
           (click)="login()"
         >
           Log in
@@ -62,7 +53,7 @@
           @for (bundle of bundles; track bundle.id) {
             <div
               tabindex="0"
-              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all duration-200"
+              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
               [ngClass]="{
                 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
                   !bundle.disabled,
@@ -73,7 +64,7 @@
                   bundleForm.get('selectedBundle')?.touched &&
                   !bundleForm.get('selectedBundle')?.value &&
                   !bundle.disabled,
-                'ring-2 ring-blue-500':
+                'ring-2 ring-sky-400':
                   bundleForm.get('selectedBundle')?.value === bundle.id,
               }"
               (click)="!bundle.disabled && selectBundle(bundle.id)"
@@ -105,7 +96,7 @@
                               viewBox="0 0 24 24"
                               stroke-width="2"
                               stroke="currentColor"
-                              class="mt-1 size-5 min-h-5 min-w-5 text-blue-600"
+                              class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
                             >
                               <path
                                 stroke-linecap="round"
@@ -128,13 +119,16 @@
                 [value]="bundle.id"
                 class="sr-only"
               />
-              <button
+
+              <app-button
                 type="button"
-                class="font-mdeium w-full rounded-md bg-blue-600 px-2 py-2.5 text-sm font-medium text-white group-hover:bg-blue-700"
-                [class.cursor-not-allowed]="bundle.disabled"
+                variant="primary"
+                widthClass="w-full"
+                colorClasses="bg-biocommons-primary hover:bg-sky-900 group-hover:bg-sky-900 focus-visible:ring-biocommons-primary"
+                [disabled]="bundle.disabled!"
               >
                 Select
-              </button>
+              </app-button>
             </div>
           }
         </div>
@@ -182,7 +176,6 @@
               placeholder="John"
               class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
               [class.border-red-500]="isFieldInvalid('firstName')"
-              [class.border-gray-300]="!isFieldInvalid('firstName')"
             />
             @if (isFieldInvalid("firstName")) {
               <div class="mt-0.5 text-xs text-red-500">
@@ -207,7 +200,6 @@
               placeholder="Doe"
               class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
               [class.border-red-500]="isFieldInvalid('lastName')"
-              [class.border-gray-300]="!isFieldInvalid('lastName')"
             />
             @if (isFieldInvalid("lastName")) {
               <div class="mt-0.5 text-xs text-red-500">
@@ -230,7 +222,6 @@
             placeholder="john.doe@example.com"
             class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('email')"
-            [class.border-gray-300]="!isFieldInvalid('email')"
           />
           @if (isFieldInvalid("email")) {
             <div class="mt-0.5 text-xs text-red-500">
@@ -252,7 +243,6 @@
             placeholder="johndoe"
             class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('username')"
-            [class.border-gray-300]="!isFieldInvalid('username')"
           />
           @if (isFieldInvalid("username")) {
             <div class="mt-0.5 text-xs text-red-500">
@@ -274,7 +264,6 @@
             placeholder="••••••••"
             class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('password')"
-            [class.border-gray-300]="!isFieldInvalid('password')"
           />
           @if (isFieldInvalid("password")) {
             <div class="mt-0.5 text-xs text-red-500">
@@ -299,7 +288,6 @@
             placeholder="••••••••"
             class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
             [class.border-red-500]="isFieldInvalid('confirmPassword')"
-            [class.border-gray-300]="!isFieldInvalid('confirmPassword')"
           />
           @if (isFieldInvalid("confirmPassword")) {
             <div class="mt-0.5 text-xs text-red-500">
@@ -354,7 +342,7 @@
             ) {
               <div
                 tabindex="0"
-                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                 [class.ring-transparent]="
                   termsForm.get(service.id)?.value !== true &&
                   (!termsForm.get(service.id)?.invalid ||
@@ -365,16 +353,14 @@
                   termsForm.get(service.id)?.invalid &&
                   termsForm.get(service.id)?.touched
                 "
-                [class.ring-blue-500]="
-                  termsForm.get(service.id)?.value === true
-                "
+                [class.ring-sky-400]="termsForm.get(service.id)?.value === true"
                 (click)="toggleTermsAcceptance(service.id)"
                 (keyup.enter)="toggleTermsAcceptance(service.id)"
               >
                 <a
                   [href]="service.termsUrl"
                   target="_blank"
-                  class="flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                  class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
                   (click)="$event.stopPropagation()"
                 >
                   {{ service.name }}
@@ -396,7 +382,7 @@
                 <input
                   type="checkbox"
                   [formControlName]="service.id"
-                  class="pointer-events-none h-4 w-4 text-blue-900"
+                  class="pointer-events-none h-4 w-4 text-sky-900"
                 />
               </div>
             }
@@ -420,7 +406,6 @@
       @if (errorAlert()) {
         <app-alert
           type="error"
-          positionClass="right-12 top-12"
           [message]="errorAlert()!"
           [dismissible]="true"
           (dismissed)="errorAlert.set(null)"
@@ -496,13 +481,14 @@
         approved.
       </div>
       <div class="text-center">
-        <button
+        <app-button
           type="button"
-          class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          variant="primary"
+          widthClass="w-auto"
           (click)="getFinalPageButton().action()"
         >
           {{ getFinalPageButton().text }}
-        </button>
+        </app-button>
       </div>
     </div>
   }
@@ -510,28 +496,18 @@
   <!-- Shared navigation buttons -->
   @if (currentStep() < totalSteps) {
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
-      <div
-        class="flex w-full max-w-6xl justify-between text-sm font-medium *:w-32 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
-      >
-        <button
-          type="button"
-          class="border bg-white text-blue-600 hover:bg-gray-100"
-          (click)="prevStep()"
-        >
+      <div class="flex w-full max-w-6xl justify-between">
+        <app-button type="button" variant="secondary" (click)="prevStep()">
           Back
-        </button>
-        <button
+        </app-button>
+        <app-button
           type="button"
-          class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          variant="primary"
           (click)="nextStep()"
-          [disabled]="isSubmitting()"
+          [loading]="isSubmitting()"
         >
-          @if (currentStep() === 4 && isSubmitting()) {
-            Submitting
-          } @else {
-            {{ currentStep() === 4 ? "Submit" : "Next" }}
-          }
-        </button>
+          {{ currentStep() === 4 ? "Submit" : "Next" }}
+        </app-button>
       </div>
     </div>
   }

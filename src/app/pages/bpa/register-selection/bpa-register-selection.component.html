@@ -29,13 +29,14 @@
             Access the Bioplatforms Australia Data Portal's public and
             restricted data.
           </div>
-          <button
-            [routerLink]="['standard-access']"
+          <app-button
             type="button"
-            class="w-fit rounded-md border bg-transparent px-4 py-2.5 text-sm font-medium text-blue-900 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+            variant="secondary"
+            colorClasses="text-blue-900 focus-visible:ring-blue-900"
+            [routerLink]="['standard-access']"
           >
             Continue
-          </button>
+          </app-button>
         </div>
         <div
           class="flex w-full flex-col justify-between gap-6 pt-12 md:w-1/2 md:pl-12 md:pt-0"
@@ -47,20 +48,21 @@
             Access the Bioplatforms Australia Data Portal's public and
             restricted data, plus the Australian BioCommons service bundles.
           </div>
-          <button
-            [routerLink]="['bundle-access']"
+          <app-button
             type="button"
-            class="w-fit rounded-md bg-blue-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-950"
+            variant="primary"
+            colorClasses="bg-blue-900 hover:bg-blue-950 focus-visible:ring-blue-900"
+            [routerLink]="['bundle-access']"
           >
             Continue
-          </button>
+          </app-button>
         </div>
       </div>
     </div>
     <div class="mx-12 mb-12 font-light text-gray-500 md:mb-0">
       Already have an account?
       <a
-        class="font-medium text-blue-500 hover:text-blue-600"
+        class="font-medium text-blue-600 hover:text-blue-700"
         href="https://aaidemo.bioplatforms.com/"
       >
         Return to Bioplatforms Australia Data Portal

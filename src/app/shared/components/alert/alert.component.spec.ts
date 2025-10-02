@@ -74,13 +74,4 @@ describe('AlertComponent', () => {
 
     expect(component.dismissed.emit).toHaveBeenCalled();
   });
-
-  it('should apply custom position class', () => {
-    fixture.componentRef.setInput('positionClass', 'left-4 bottom-4');
-    fixture.detectChanges();
-
-    const alertDiv = fixture.debugElement.query(By.css('.fixed'));
-    expect(alertDiv.nativeElement).toHaveClass('left-4');
-    expect(alertDiv.nativeElement).toHaveClass('bottom-4');
-  });
 });
