@@ -1,4 +1,4 @@
-name: Upload Portal Builds
+name: Upload Portal Builds (Dev)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   upload-builds:
-    name: Build and Upload Portal Artifacts
+    name: Build and Deploy Dev Portal
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -58,7 +58,6 @@ jobs:
         run: npx ng build --configuration debug --output-path dist/aai-portal-debug
 
       - name: Determine release version
-        id: version
         run: |
           set -euo pipefail
           VERSION=$(node -p "require('./package.json').version")
@@ -67,7 +66,6 @@ jobs:
             exit 1
           fi
           echo "Using release version ${VERSION}"
-          echo "build_version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -100,36 +98,6 @@ jobs:
           fi
           echo "bucket=${BUCKET}" >> "${GITHUB_OUTPUT}"
           echo "distribution_id=${DIST_ID}" >> "${GITHUB_OUTPUT}"
-
-      - name: Upload production versioned build
-        env:
-          VERSION: ${{ steps.version.outputs.build_version }}
-          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
-        run: |
-          set -euo pipefail
-          aws s3 sync dist/aai-portal-prod/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/prod/version/${VERSION}/" --delete
-
-      - name: Update production dev build
-        env:
-          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
-        run: |
-          set -euo pipefail
-          aws s3 sync dist/aai-portal-prod/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/prod/dev/" --delete
-
-      - name: Upload debug versioned build
-        env:
-          VERSION: ${{ steps.version.outputs.build_version }}
-          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
-        run: |
-          set -euo pipefail
-          aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/version/${VERSION}/" --delete
-
-      - name: Update debug dev build
-        env:
-          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
-        run: |
-          set -euo pipefail
-          aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/dev/" --delete
 
       - name: Prepare dev deployment assets
         run: |
