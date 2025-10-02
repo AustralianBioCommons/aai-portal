@@ -6,7 +6,7 @@ const path = require("path");
 function usage(message) {
   const lines = [
     message,
-    "Usage: node tools/render-app-config.js --config <path> (--secret-file <path> | --secret-json <json>) [--set-production <true|false>]",
+    "Usage: node tools/render-app-config.js --config <path> (--secret-file <path> | --secret-json <json>) [--set-production <true|false>] [--backend-url <url>]",
   ].filter(Boolean);
   console.error(lines.join("\n"));
   process.exit(1);
@@ -37,6 +37,13 @@ function parseArgs(argv) {
           usage("Missing value for --secret-json");
         }
         args.secretJson = next;
+        i += 1;
+        break;
+      case "--backend-url":
+        if (!next) {
+          usage("Missing value for --backend-url");
+        }
+        args.backendUrl = next;
         i += 1;
         break;
       case "--set-production":
@@ -135,6 +142,10 @@ function main() {
     if (value !== undefined && value !== null && value !== "") {
       setNestedValue(config, pathParts, value);
     }
+  }
+
+  if (args.backendUrl) {
+    setNestedValue(config, ["auth0", "backend"], args.backendUrl);
   }
 
   if (args.production !== undefined) {
