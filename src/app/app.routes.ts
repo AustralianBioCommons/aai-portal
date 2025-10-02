@@ -3,27 +3,179 @@ import { ServicesComponent } from './pages/user/services/services.component';
 import { AccessComponent } from './pages/user/access/access.component';
 import { PendingComponent } from './pages/user/pending/pending.component';
 import { RequestServiceComponent } from './pages/user/services/request-service/request-service.component';
-import { NotFoundComponent } from './pages/shared/not-found/not-found.component';
+import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { ListUsersComponent } from './pages/admin/list-users/list-users.component';
 import { RequestsComponent } from './pages/admin/requests/requests.component';
 import { RevokedComponent } from './pages/admin/revoked/revoked.component';
+import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
+import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
+import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
+import { GalaxyRegisterSuccessComponent } from './pages/galaxy/register-success/galaxy-register-success.component';
+import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
+import { BpaRegistrationSuccessComponent } from './pages/bpa/registration-success/bpa-registration-success.component';
+import { EmailVerifiedComponent } from './pages/user/email-verified/email-verified.component';
+import { BpaRegisterSelectionComponent } from './pages/bpa/register-selection/bpa-register-selection.component';
+import { GalaxyRegisterSelectionComponent } from './pages/galaxy/register-selection/galaxy-register-selection.component';
+import { LoginComponent } from './pages/login/login.component';
+import { loginGuard } from './core/guards/login.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
+import { RegisterComponent } from './pages/register/register.component';
+import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
+import { ListUnverifiedUsersComponent } from './pages/admin/list-unverified-users/list-unverified-users.component';
+import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.component';
+import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/services', pathMatch: 'full' },
+  // Login & register routes - only accessible when not logged in
   {
-    path: 'services',
-    component: ServicesComponent,
+    path: 'login',
+    component: LoginComponent,
+    canActivate: [loginGuard],
+    data: { title: 'Login | AAI Portal' },
+  },
+  {
+    path: 'register',
+    component: RegisterComponent,
+    canActivate: [loginGuard],
+    data: { title: 'Register | AAI Portal' },
+  },
+
+  // Standalone routes without DefaultLayoutComponent
+  {
+    path: 'galaxy',
+    component: GalaxyLayoutComponent,
+    canActivate: [loginGuard],
+    data: { favicon: '/assets/galaxy-favicon.ico' },
     children: [
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
       {
-        path: 'request',
-        component: RequestServiceComponent,
+        path: 'register',
+        component: GalaxyRegisterSelectionComponent,
+        data: { title: 'Galaxy Australia - Register' },
+      },
+      {
+        path: 'register/standard-access',
+        component: GalaxyRegisterComponent,
+        data: { title: 'Galaxy Australia - Register' },
+      },
+      {
+        path: 'register/standard-access/success',
+        component: GalaxyRegisterSuccessComponent,
+        data: { title: 'Galaxy Australia - Registration successful' },
+      },
+      {
+        path: 'register/bundle-access',
+        component: RegisterComponent,
+        canActivate: [loginGuard],
+        data: { title: 'Galaxy Australia - Register' },
       },
     ],
   },
-  { path: 'access', component: AccessComponent },
-  { path: 'pending', component: PendingComponent },
-  { path: 'all-users', component: ListUsersComponent },
-  { path: 'revoked', component: RevokedComponent },
-  { path: 'requests', component: RequestsComponent },
+  {
+    path: 'bpa',
+    canActivate: [loginGuard],
+    data: { favicon: '/assets/bpa-favicon.ico' },
+    children: [
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
+      {
+        path: 'register',
+        component: BpaRegisterSelectionComponent,
+        data: { title: 'Register | Bioplatforms Australia Data Portal' },
+      },
+      {
+        path: 'register/standard-access',
+        component: BpaRegisterComponent,
+        data: { title: 'Register | Bioplatforms Australia Data Portal' },
+      },
+      {
+        path: 'register/standard-access/success',
+        component: BpaRegistrationSuccessComponent,
+        data: {
+          title: 'Registration Successful | Bioplatforms Australia Data Portal',
+        },
+      },
+      {
+        path: 'register/bundle-access',
+        component: RegisterComponent,
+        canActivate: [loginGuard],
+        data: { title: 'Register | Bioplatforms Australia Data Portal' },
+      },
+    ],
+  },
+  {
+    path: 'user',
+    canActivate: [loginGuard],
+    children: [
+      {
+        path: 'email-verified',
+        component: EmailVerifiedComponent,
+        data: { title: 'Email Verification' },
+      },
+    ],
+  },
+  {
+    path: 'sbp',
+    canActivate: [loginGuard],
+    children: [
+      { path: '', redirectTo: 'register', pathMatch: 'full' },
+      {
+        path: 'register',
+        component: SbpRegisterComponent,
+        data: { title: 'Register | Structural Biology Platform' },
+      },
+      {
+        path: 'register/success',
+        component: SbpRegistrationSuccessComponent,
+        data: { title: 'Registration Success | Structural Biology Platform' },
+      },
+    ],
+  },
+
+  // All other routes that use DefaultLayoutComponent
+  {
+    path: '',
+    component: DefaultLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'services',
+        component: ServicesComponent,
+        children: [
+          {
+            path: 'request',
+            component: RequestServiceComponent,
+          },
+        ],
+      },
+      { path: 'access', component: AccessComponent },
+      { path: 'pending', component: PendingComponent },
+      {
+        path: 'user/:id',
+        component: UserDetailsComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'users',
+        component: ListUsersComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'revoked',
+        component: RevokedComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'requests',
+        component: RequestsComponent,
+        canActivate: [adminGuard],
+      },
+      {
+        path: 'users-unverified',
+        component: ListUnverifiedUsersComponent,
+        canActivate: [adminGuard],
+      },
+    ],
+  },
   { path: '**', component: NotFoundComponent },
 ];

@@ -1,0 +1,249 @@
+<!-- Notifications -->
+@if (alert()) {
+  <app-alert
+    positionClass="right-12 top-12"
+    [type]="alert()!.type"
+    [message]="alert()!.message"
+    [dismissible]="true"
+    (dismissed)="alert.set(null)"
+  ></app-alert>
+}
+
+<div
+  class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
+>
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (error()) {
+    <div class="font-light text-red-500">{{ error() }}</div>
+  } @else if (user()) {
+    <div class="flex w-full max-w-5xl flex-1 flex-col gap-6">
+      <div class="flex items-center justify-between">
+        <a
+          routerLink="/users"
+          class="flex items-center gap-2 text-sm text-gray-600 transition-all duration-200 hover:text-gray-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-4"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+            />
+          </svg>
+          Back to Users
+        </a>
+
+        @if (!user()?.email_verified) {
+          <div class="relative">
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              (click)="toggleActionMenu()"
+              #actionMenuButton
+            >
+              Actions
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                />
+              </svg>
+            </button>
+
+            @if (actionMenuOpen()) {
+              <div
+                class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                role="menu"
+                aria-orientation="vertical"
+                tabindex="-1"
+                #actionMenu
+              >
+                <div role="none">
+                  <button
+                    (click)="resendVerificationEmail()"
+                    class="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    role="menuitem"
+                    tabindex="-1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="mr-2 size-4"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
+                      />
+                    </svg>
+
+                    Resend Verification Email
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="flex items-center gap-6">
+        <img
+          [src]="user()?.picture"
+          [alt]="user()?.name || 'User profile'"
+          class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+        />
+        <div class="space-y-2">
+          <div class="text-3xl font-semibold text-gray-900">
+            {{ user()?.name }}
+          </div>
+          <div class="text-sm font-light text-gray-500">
+            user_id:
+            <span
+              class="rounded bg-gray-100 px-1 py-1 font-mono text-xs text-gray-600"
+            >
+              {{ user()?.user_id }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grid - User Details Left, Memberships Right -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Left Column - User Details -->
+        <div class="space-y-6">
+          <div class="rounded-lg bg-white p-6 shadow">
+            <div class="mb-6 text-2xl font-semibold">User Details</div>
+            <div class="space-y-6">
+              <div>
+                <div class="text-sm font-light text-gray-500">Name</div>
+                <div>{{ user()?.name }}</div>
+              </div>
+              <div>
+                <div class="text-sm font-light text-gray-500">Username</div>
+                <div>{{ user()?.username }}</div>
+              </div>
+              <div>
+                <div class="text-sm font-light text-gray-500">Email</div>
+                <div class="flex items-center gap-2">
+                  <span>{{ user()?.email }}</span>
+                  <span
+                    class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                    [class]="
+                      user()?.email_verified
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    "
+                  >
+                    {{ user()?.email_verified ? "Verified" : "Unverified" }}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-light text-gray-500">Signed Up</div>
+                <div>{{ user()?.created_at | date: "medium" }}</div>
+              </div>
+              <div>
+                <div class="text-sm font-light text-gray-500">Latest Login</div>
+                <div>
+                  {{
+                    user()?.last_login
+                      ? (user()?.last_login | date: "medium")
+                      : "Never"
+                  }}
+                </div>
+              </div>
+              <div>
+                <div class="text-sm font-light text-gray-500">Last Updated</div>
+                <div>{{ user()?.updated_at | date: "medium" }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Memberships -->
+        <div class="space-y-6">
+          @if (
+            user()?.platform_memberships &&
+            user()!.platform_memberships.length > 0
+          ) {
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow">
+              <div class="text-2xl font-semibold">Platform Access</div>
+              <div class="space-y-4">
+                @for (
+                  membership of user()!.platform_memberships;
+                  track membership.id
+                ) {
+                  <div class="flex items-center justify-between">
+                    <div>
+                      {{ getPlatformName(membership.platform_id) }}
+                    </div>
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                      [class]="
+                        membership.approval_status === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : membership.approval_status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      "
+                    >
+                      {{ membership.approval_status }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (
+            user()?.group_memberships && user()!.group_memberships.length > 0
+          ) {
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow">
+              <div class="text-2xl font-semibold">Bundle Access</div>
+              <div class="space-y-4">
+                @for (
+                  membership of user()!.group_memberships;
+                  track membership.id
+                ) {
+                  <div class="flex items-center justify-between">
+                    <div>{{ membership.group_name }} Bundle</div>
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                      [class]="
+                        membership.approval_status === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : membership.approval_status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      "
+                    >
+                      {{ membership.approval_status }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,134 +1,35 @@
-@if (!accessSelected) {
-  <div class="relative flex h-full flex-1 grow flex-col">
-    <div class="bg-white p-6 text-2xl font-bold lg:px-48">Access requests</div>
-    <div
-      class="flex flex-col gap-6 p-6 font-light *:bg-white *:hover:cursor-pointer *:hover:bg-gray-50 lg:px-48"
-    >
-      <div
-        class="flex items-center justify-between rounded-md p-4"
-        (click)="selectAccess('GPGPU')"
-      >
-        <div class="text-sky-900">GPGPU</div>
-        <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
-          3
-        </div>
-      </div>
-      <div
-        class="flex items-center justify-between rounded-md p-4"
-        (click)="selectAccess('High mem')"
-      >
-        <div class="text-sky-900">High mem</div>
-        <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
-          5
-        </div>
+<div class="relative flex flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48">
+  <div class="flex flex-1 flex-col gap-6">
+    <div class="space-y-2">
+      <div class="text-3xl font-semibold text-gray-900">Pending Requests</div>
+      <div class="font-light text-gray-500">
+        Total: {{ users.length }} users
       </div>
     </div>
+    @if (loading) {
+      <div class="flex w-full flex-1 items-center justify-center">
+        <app-loading-spinner />
+      </div>
+    } @else {
+      <div class="flex flex-1 flex-col gap-6 font-light">
+        @if (users.length === 0) {
+          <div class="flex flex-1 items-center justify-center text-gray-900">
+            No users found
+          </div>
+        } @else {
+          @for (user of users; track user.id) {
+            <div
+              role="button"
+              tabindex="0"
+              class="flex items-center justify-between rounded-md bg-white p-4 shadow transition-all duration-200 hover:-translate-y-0.5 hover:cursor-pointer"
+            >
+              <div class="flex flex-col">
+                <div class="font-light">{{ user.email }}</div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
   </div>
-} @else {
-  <div
-    class="absolute top-0 left-0 flex min-h-screen w-screen flex-1 flex-col justify-between overflow-x-hidden bg-gray-100 p-6"
-  >
-    <div class="flex justify-end">
-      <button
-        class="top-6 right-6 text-sky-900 hover:cursor-pointer"
-        (click)="accessSelected = false"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-8"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M6 18 18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-    </div>
-
-    <div class="flex flex-1 flex-col gap-6 lg:px-48">
-      <div class="text-xl font-bold">{{ selectedAccessName }}</div>
-      @if (loading) {
-        <div class="flex h-full flex-1 flex-col items-center justify-center">
-          <app-loading-spinner />
-        </div>
-      } @else {
-        <div class="flex flex-1 flex-col gap-6">
-          <div>
-            <div
-              class="mb-2 flex justify-between text-sm font-medium text-gray-500"
-            >
-              <div>11 FEB 2025</div>
-              <div>14 DAYS AGO</div>
-            </div>
-
-            <div class="flex flex-col gap-2 rounded-md bg-white p-5">
-              <div>mary&#64;university.edu.au</div>
-              <div class="font-light text-gray-400">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis
-                provident aperiam sed eveniet. Ipsam similique eligendi, ea
-                explicabo consequuntur eum, dolore consequatur, laboriosam saepe
-                veniam temporibus repellendus sequi. Culpa, minima.
-              </div>
-              <div
-                class="flex items-end justify-end font-light text-sky-900 hover:cursor-pointer hover:text-sky-950"
-              >
-                Approve
-              </div>
-            </div>
-          </div>
-          <div>
-            <div
-              class="mb-2 flex justify-between text-sm font-medium text-gray-500"
-            >
-              <div>11 FEB 2025</div>
-              <div>14 DAYS AGO</div>
-            </div>
-
-            <div class="flex flex-col gap-2 rounded-md bg-white p-5">
-              <div>mary&#64;university.edu.au</div>
-              <div class="font-light text-gray-400">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis
-                provident aperiam sed eveniet. Ipsam similique eligendi, ea
-                explicabo consequuntur eum, dolore consequatur, laboriosam saepe
-                veniam temporibus repellendus sequi. Culpa, minima.
-              </div>
-              <div
-                class="flex items-end justify-end font-light text-sky-900 hover:cursor-pointer hover:text-sky-950"
-              >
-                Approve
-              </div>
-            </div>
-          </div>
-          <div>
-            <div
-              class="mb-2 flex justify-between text-sm font-medium text-gray-500"
-            >
-              <div>11 FEB 2025</div>
-              <div>14 DAYS AGO</div>
-            </div>
-
-            <div class="flex flex-col gap-2 rounded-md bg-white p-5">
-              <div>mary&#64;university.edu.au</div>
-              <div class="font-light text-gray-400">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis
-                provident aperiam sed eveniet. Ipsam similique eligendi, ea
-                explicabo consequuntur eum, dolore consequatur, laboriosam saepe
-                veniam temporibus repellendus sequi. Culpa, minima.
-              </div>
-              <div
-                class="flex items-end justify-end font-light text-sky-900 hover:cursor-pointer hover:text-sky-950"
-              >
-                Approve
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-  </div>
-}
+</div>

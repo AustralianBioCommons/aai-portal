@@ -1,0 +1,35 @@
+<div class="relative flex flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48">
+  <div class="flex flex-1 flex-col gap-6">
+    <div class="space-y-2">
+      <div class="text-3xl font-semibold text-gray-900">Unverified Users</div>
+      <div class="font-light text-gray-500">
+        Total: {{ users.length }} users
+      </div>
+    </div>
+    @if (loading) {
+      <div class="flex w-full flex-1 items-center justify-center">
+        <app-loading-spinner />
+      </div>
+    } @else {
+      <div class="flex flex-1 flex-col gap-6 font-light">
+        @if (users.length === 0) {
+          <div class="flex flex-1 items-center justify-center text-gray-900">
+            No users found
+          </div>
+        } @else {
+          @for (user of users; track user.id) {
+            <div
+              role="button"
+              tabindex="0"
+              class="flex items-center justify-between rounded-md bg-white p-4 shadow transition-all duration-200 hover:-translate-y-0.5 hover:cursor-pointer"
+            >
+              <div class="flex flex-col">
+                <div class="font-light">{{ user.email }}</div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>

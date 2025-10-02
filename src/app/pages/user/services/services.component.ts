@@ -1,8 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
+import {
+  ApiService,
+  PlatformUserResponse,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { systemsList } from '../../../core/constants/constants';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, switchMap } from 'rxjs/operators';
+import { PLATFORM_NAMES } from '../../../core/constants/constants';
 
 @Component({
   selector: 'app-services',
@@ -11,24 +18,34 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.css'],
 })
-export class ServicesComponent implements OnInit {
-  systemsList = systemsList;
-  user: any = {};
-  approvedSystems: string[] = [];
-  loading = true;
+export class ServicesComponent {
+  approvedPlatforms: PlatformUserResponse[] = [];
+  loading = signal(true);
+  error = signal<string | null>(null);
 
-  private auth = inject(AuthService);
+  private api = inject(ApiService);
+  private authService = inject(AuthService);
 
-  ngOnInit(): void {
-    this.auth.getUser().subscribe((user) => {
-      this.user = user;
-      if (this.user?.user_metadata?.systems) {
-        const approvedSystemIDs = this.user.user_metadata.systems.approved;
-        this.approvedSystems = this.systemsList
-          .filter((system) => approvedSystemIDs.includes(system.id))
-          .map((system) => system.name);
-      }
-      this.loading = false;
-    });
+  constructor() {
+    toObservable(this.authService.isAuthenticated)
+      .pipe(
+        takeUntilDestroyed(),
+        filter((isAuthenticated) => isAuthenticated),
+        switchMap(() => this.api.getUserApprovedPlatforms()),
+      )
+      .subscribe({
+        next: (res) => {
+          this.approvedPlatforms = res || [];
+          this.error.set(null);
+          this.loading.set(false);
+        },
+        error: (error) => {
+          console.error('Failed to retrieve approved platforms', error);
+          this.error.set('Failed to load approved platforms.');
+          this.loading.set(false);
+        },
+      });
   }
+
+  protected readonly PLATFORM_NAMES = PLATFORM_NAMES;
 }

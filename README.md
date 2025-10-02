@@ -1,8 +1,17 @@
 # AAI Portal
 
 ![Tests](https://github.com/AustralianBiocommons/aai-portal/actions/workflows/test.yml/badge.svg)
+![Coverage](https://github.com/AustralianBiocommons/aai-portal/actions/workflows/coverage.yml/badge.svg)
+![Code Style](https://github.com/AustralianBiocommons/aai-portal/actions/workflows/lint.yml/badge.svg)
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
+
+## Project Info
+
+- Default branch: `test`, deploys to: https://aaiportal.test.biocommons.org.au/
+  - Automated deployment will be added in [AAI-153](https://biocloud.atlassian.net/browse/AAI-153).
+- `main` branch is manually synced from `test` branch.
+  - Automated releases from `main` branch will be added in [AAI-154](https://biocloud.atlassian.net/browse/AAI-154).
 
 ## Development server
 

@@ -1,9 +1,9 @@
 <div
-  class="absolute top-0 left-0 flex min-h-screen w-screen flex-1 flex-col justify-between overflow-x-hidden bg-gray-100 p-6"
+  class="absolute left-0 top-0 flex min-h-screen w-screen flex-1 flex-col justify-between overflow-x-hidden bg-gray-100 p-6"
 >
   <div class="flex justify-end">
     <button
-      class="top-6 right-6 text-sky-900 hover:cursor-pointer"
+      class="right-6 top-6 text-sky-900 hover:cursor-pointer"
       routerLink="/services"
     >
       <svg
@@ -39,16 +39,19 @@
               <app-loading-spinner />
             </div>
           } @else {
-            <div formGroupName="systems" class="flex flex-1 flex-col gap-6">
-              @for (system of remainingSystems; track system.id) {
+            <div formGroupName="services" class="flex flex-1 flex-col gap-6">
+              @for (service of remainingServices; track service.id) {
                 <div
                   class="flex items-center justify-between gap-12 rounded-md bg-white p-5 font-light"
                 >
-                  <div class="text-gray-500">{{ system.name }}</div>
+                  <div class="text-gray-500" id="{{ service.id }}-label">
+                    {{ service.name }}
+                  </div>
                   <input
                     type="checkbox"
                     value=""
-                    [formControlName]="system.id"
+                    name="{{ service.id }}"
+                    [formControlName]="service.id"
                     class="h-6 w-6 shrink-0 rounded-md border border-sky-900"
                   />
                 </div>
@@ -60,24 +63,24 @@
         <div class="flex flex-1 flex-col gap-6">
           <div class="text-xl font-bold">Accept the terms and conditions</div>
           <div
-            formGroupName="selectedSystems"
+            formGroupName="selectedServices"
             class="flex flex-1 flex-col gap-6"
           >
-            @for (system of selectedSystems; track system.id) {
+            @for (service of selectedServices; track service.id) {
               <div
                 class="flex items-center justify-between gap-12 rounded-md bg-white p-5 font-light"
               >
                 <a
-                  href="{{ system.url }}"
+                  href="{{ service.url }}"
                   target="_blank"
                   class="text-sky-600 hover:text-sky-700 hover:underline"
                 >
-                  {{ system.name }}
+                  {{ service.name }}
                 </a>
                 <input
                   type="checkbox"
                   value=""
-                  [formControlName]="system.id"
+                  [formControlName]="service.id"
                   class="h-6 w-6 shrink-0 rounded-md border border-sky-900"
                 />
               </div>
@@ -98,15 +101,9 @@
             <div class="mb-6 text-xl font-bold">Your information</div>
             <div class="flex flex-col gap-6 font-light text-gray-500">
               <div>
-                <div>First name</div>
+                <div>Name</div>
                 <div class="rounded-md bg-white p-4 text-lg">
-                  {{ user?.user_metadata?.first_name }}
-                </div>
-              </div>
-              <div>
-                <div>Last name</div>
-                <div class="rounded-md bg-white p-4 text-lg">
-                  {{ user?.user_metadata?.last_name }}
+                  {{ user?.name }}
                 </div>
               </div>
               <div>
@@ -121,9 +118,9 @@
           <div>
             <div class="mb-6 text-xl font-bold">Service access request</div>
             <div class="flex flex-col gap-4 font-light text-gray-500">
-              @for (system of selectedSystems; track system.id) {
+              @for (service of selectedServices; track service.id) {
                 <div class="rounded-md bg-white p-4 text-lg">
-                  {{ system.name }}
+                  {{ service.name }}
                 </div>
               }
             </div>
@@ -144,7 +141,7 @@
           </button>
           <button
             type="button"
-            class="rounded-md border border-sky-900 bg-sky-900 px-6 py-2 text-white hover:bg-sky-950"
+            class="rounded-md border border-sky-900 bg-sky-900 text-white hover:bg-sky-950"
             (click)="nextStep()"
           >
             {{ setButtonText() }}

@@ -1,110 +1,138 @@
 import {
   Component,
   inject,
-  effect,
   Renderer2,
   ViewChild,
   ElementRef,
-  OnDestroy,
+  signal,
+  computed,
+  effect,
+  DestroyRef,
 } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
-import { LoginButtonComponent } from '../../shared/components/buttons/login-button/login-button.component';
-import { LogoutButtonComponent } from '../../shared/components/buttons/logout-button/logout-button.component';
-import { Router, RouterLink } from '@angular/router';
+import { ApiService } from '../../core/services/api.service';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-navbar',
-  imports: [
-    RouterLink,
-    LoginButtonComponent,
-    LogoutButtonComponent,
-    CommonModule,
-  ],
+  imports: [RouterLink, RouterLinkActive, CommonModule],
   standalone: true,
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
-export class NavbarComponent implements OnDestroy {
-  private auth = inject(AuthService);
+export class NavbarComponent {
+  private authService = inject(AuthService);
+  private api = inject(ApiService);
   private renderer = inject(Renderer2);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('menu', { read: ElementRef }) menu!: ElementRef;
   @ViewChild('userMenuButton', { read: ElementRef })
   userMenuButton!: ElementRef;
 
-  isAuthenticated = this.auth.isAuthenticated();
-  user!: any;
-  userType = 'admin';
-  userMenuOpen = false;
+  // Auth signals
+  isAuthenticated = this.authService.isAuthenticated;
+  user = this.authService.user;
+  isAdmin = this.authService.isAdmin;
+  isLoading = this.authService.isLoading;
 
-  userPages = [
-    {
-      label: 'Services',
-      route: '/services',
-    },
-    {
-      label: 'Access',
-      route: '/access',
-    },
-    {
-      label: 'Pending',
-      route: '/pending',
-    },
-  ];
+  // Component state
+  pendingCount = signal(0);
+  userMenuOpen = signal(false);
 
-  adminPages = [
-    {
-      label: 'All users',
-      route: '/all-users',
-    },
-    {
-      label: 'Revoked',
-      route: '/revoked',
-    },
-    {
-      label: 'Requests',
-      route: '/requests',
-    },
-  ];
+  // Computed properties
+  adminStatusLoading = computed(
+    () => this.isLoading() && this.isAuthenticated(),
+  );
 
-  private userSubscription!: Subscription;
+  navigationPages = computed(() =>
+    this.isAdmin()
+      ? [
+          { label: 'All', route: '/users' },
+          { label: 'Requests', route: '/requests' },
+          { label: 'Revoked', route: '/revoked' },
+          { label: 'Unverified', route: '/users-unverified' },
+        ]
+      : [
+          { label: 'Services', route: '/services' },
+          { label: 'Access', route: '/access' },
+          { label: 'Pending', route: '/pending' },
+        ],
+  );
 
   constructor() {
-    effect(() => {
-      this.isAuthenticated = this.auth.isAuthenticated();
-      this.userSubscription = this.auth.getUser().subscribe((user) => {
-        this.user = user;
-      });
-    });
+    this.setupPendingCountTracking();
+    this.setupClickOutsideMenuHandler();
+  }
 
-    this.renderer.listen('window', 'click', (e: Event) => {
-      if (
-        !this.userMenuButton?.nativeElement.contains(e.target) &&
-        !this.menu?.nativeElement.contains(e.target)
-      ) {
-        this.userMenuOpen = false;
+  private setupPendingCountTracking() {
+    effect(() => {
+      if (this.isAuthenticated() && !this.isLoading()) {
+        if (this.isAdmin()) {
+          // Admin: Get pending users
+          this.api
+            .getAdminPendingUsers()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (pendingUsers) => {
+                this.pendingCount.set(pendingUsers?.length || 0);
+              },
+              error: (error) => {
+                console.error('Failed to fetch pending users count:', error);
+                this.pendingCount.set(0);
+              },
+            });
+        } else {
+          // Non-admin: Get pending requests (platforms and groups)
+          this.api
+            .getUserAllPending()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (pendingData) => {
+                const totalPending =
+                  (pendingData?.platforms?.length || 0) +
+                  (pendingData?.groups?.length || 0);
+                this.pendingCount.set(totalPending);
+              },
+              error: (error) => {
+                console.error('Failed to fetch pending requests count:', error);
+                this.pendingCount.set(0);
+              },
+            });
+        }
       }
     });
   }
 
-  getUserType() {
-    return this.userType === 'admin' ? this.adminPages : this.userPages;
+  private setupClickOutsideMenuHandler() {
+    this.renderer.listen('window', 'click', (e: Event) => {
+      const target = e.target as Element;
+      if (
+        !this.userMenuButton?.nativeElement.contains(target) &&
+        !this.menu?.nativeElement.contains(target)
+      ) {
+        this.userMenuOpen.set(false);
+      }
+    });
   }
 
   toggleUserMenu() {
-    this.userMenuOpen = !this.userMenuOpen;
+    this.userMenuOpen.set(!this.userMenuOpen());
   }
 
   isActive(url: string): boolean {
     return this.router.url === url;
   }
 
-  ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
+  isNavigationPage(): boolean {
+    const currentUrl = this.router.url;
+    return this.navigationPages().some((page) => page.route === currentUrl);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

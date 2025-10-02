@@ -3,14 +3,14 @@
 
 module.exports = function (config) {
   config.set({
-    basePath: '',
-    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    basePath: "",
+    frameworks: ["jasmine", "@angular-devkit/build-angular"],
     plugins: [
-      require('karma-jasmine'),
-      require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage'),
-      require('@angular-devkit/build-angular/plugins/karma')
+      require("karma-jasmine"),
+      require("karma-chrome-launcher"),
+      require("karma-jasmine-html-reporter"),
+      require("karma-coverage"),
+      require("@angular-devkit/build-angular/plugins/karma"),
     ],
     client: {
       jasmine: {
@@ -21,19 +21,19 @@ module.exports = function (config) {
       },
     },
     jasmineHtmlReporter: {
-      suppressAll: true // removes the duplicated traces
+      suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage/aai-portal'),
-      subdir: '.',
+      dir: require("path").join(__dirname, "./coverage/aai-portal"),
+      subdir: ".",
       reporters: [
-        { type: 'html' },
-        { type: 'text-summary' },
-        { type: 'cobertura', subdir: '.', file: 'cobertura.txt' },
-      ]
+        { type: "html" },
+        { type: "text-summary" },
+        { type: "cobertura", subdir: ".", file: "cobertura.txt" },
+      ],
     },
-    reporters: ['progress', 'kjhtml', 'coverage'],
-    browsers: ['Chrome'],
-    restartOnFileChange: true
+    reporters: ["progress", "kjhtml", "coverage"],
+    browsers: ["Chrome"],
+    restartOnFileChange: true,
   });
 };

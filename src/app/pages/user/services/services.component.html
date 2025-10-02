@@ -1,43 +1,52 @@
 <div class="relative flex h-full flex-1 grow flex-col">
   <div class="bg-white p-6 text-2xl font-bold lg:px-48">Joined Services</div>
-  @if (loading) {
+  @if (loading()) {
     <div class="flex h-full flex-1 flex-col items-center justify-center">
       <app-loading-spinner />
     </div>
   } @else {
-    <div class="flex flex-col gap-6 p-6 font-light lg:px-48">
-      @for (system of approvedSystems; track system) {
-        <div
-          class="flex items-center justify-between gap-6 rounded-md bg-white p-4"
-        >
-          <div class="text-sky-900">{{ system }}</div>
-          <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
-            Active
+    @if (approvedPlatforms.length) {
+      <div class="flex flex-col gap-6 p-6 font-light lg:px-48">
+        @for (platform of approvedPlatforms; track platform.platform_id) {
+          <div
+            class="flex items-center justify-between gap-6 rounded-md bg-white p-4"
+          >
+            <div class="text-sky-900">
+              {{ PLATFORM_NAMES[platform.platform_id] }}
+            </div>
+            <div class="rounded-full bg-lime-600 px-4 py-2 text-sm text-white">
+              Active
+            </div>
           </div>
+        }
+      </div>
+    } @else {
+      <div class="flex h-full flex-1 items-center justify-center p-6 lg:px-48">
+        <div class="text-lg font-light text-gray-500">
+          You have no joined services
         </div>
-      }
-
-      <button
-        type="button"
-        class="absolute right-6 bottom-6 flex h-12 w-12 items-center justify-center rounded-full border border-sky-900 bg-white text-sky-900 hover:cursor-pointer lg:right-12"
-        routerLink="request"
+      </div>
+    }
+    <button
+      type="button"
+      class="absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-full border border-sky-900 bg-white text-sky-900 hover:cursor-pointer lg:right-12"
+      routerLink="request"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="size-8"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="size-8"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 4.5v15m7.5-7.5h-15"
-          />
-        </svg>
-      </button>
-    </div>
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 4.5v15m7.5-7.5h-15"
+        />
+      </svg>
+    </button>
   }
 </div>
 

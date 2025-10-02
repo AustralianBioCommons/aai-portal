@@ -1,0 +1,59 @@
+<div
+  class="flex h-full min-h-screen flex-1 flex-col items-center justify-center bg-gray-50 p-12"
+>
+  <div
+    class="flex min-h-96 min-w-96 max-w-lg flex-col items-center justify-center gap-10 rounded-md bg-white px-16 py-24 text-center shadow-lg"
+  >
+    @if (emailVerified()) {
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="0.5"
+        stroke="currentColor"
+        class="size-28 text-green-600"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+      </svg>
+      <h1 class="text-3xl font-medium text-gray-900">Email Verified</h1>
+      <p class="text text-gray-500">
+        Your email has been successfully verified.<br />
+        You can now log in.
+      </p>
+      <div
+        class="flex flex-1 flex-col gap-6 *:rounded-md *:bg-blue-800 *:px-6 *:py-3 *:text-white"
+      >
+        <a class="hover:bg-blue-900" [href]="appUrl()"> Continue </a>
+      </div>
+    } @else {
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="0.5"
+        stroke="currentColor"
+        class="size-28 text-red-600"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+      </svg>
+      <h1 class="text-3xl font-medium text-gray-900">
+        Email verification error
+      </h1>
+      <div class="text-gray-500">
+        Your email could not be verified.<br />
+        Please try again.<br /><br />
+        @if (errorMessage()) {
+          <span class="text-red-600">Error details: {{ errorMessage() }}</span>
+        }
+      </div>
+    }
+  </div>
+</div>

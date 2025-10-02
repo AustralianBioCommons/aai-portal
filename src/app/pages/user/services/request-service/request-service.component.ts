@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   FormControl,
@@ -6,9 +6,14 @@ import {
   ReactiveFormsModule,
   FormBuilder,
 } from '@angular/forms';
-import { systemsList } from '../../../../core/constants/constants';
-import { AuthService } from '../../../../core/services/auth.service';
+import { BiocommonsAuth0User } from '../../../../core/services/auth.service';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+
+interface ServiceOption {
+  id: string;
+  name: string;
+  url: string;
+}
 
 @Component({
   selector: 'app-request-service',
@@ -17,80 +22,49 @@ import { LoadingSpinnerComponent } from '../../../../shared/components/loading-s
   templateUrl: './request-service.component.html',
   styleUrls: ['./request-service.component.css'],
 })
-export class RequestServiceComponent implements OnInit {
+export class RequestServiceComponent {
   private router = inject(Router);
-  private auth = inject(AuthService);
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
 
   step = 0;
-  remainingSystems: any[] = [];
-  selectedSystems: any[] = [];
-  user: any = {};
+  remainingServices: ServiceOption[] = [];
+  selectedServices: ServiceOption[] = [];
+  user: BiocommonsAuth0User | null = null;
   loading = true;
   submitted = false;
 
-  requestForm = this.fb.group({
-    systems: this.fb.group({}),
-    selectedSystems: this.fb.group({}),
+  requestForm = this.formBuilder.group({
+    services: this.formBuilder.group({}),
+    selectedServices: this.formBuilder.group({}),
   });
-
-  ngOnInit(): void {
-    this.auth.getUser().subscribe((user) => {
-      this.user = user;
-      if (user?.user_metadata?.systems) {
-        const approvedSystemIDs = user.user_metadata.systems.approved || [];
-        const requestedSystemIDs = user.user_metadata.systems.requested || [];
-        const excludedSystemIDs = [...approvedSystemIDs, ...requestedSystemIDs];
-
-        this.remainingSystems = systemsList.filter(
-          (system: any) => !excludedSystemIDs.includes(system.id),
-        );
-
-        // Dynamically add form controls for each remaining system
-        const systemsGroup = this.requestForm.get('systems') as FormGroup;
-        this.remainingSystems.forEach((system) => {
-          systemsGroup.addControl(system.id, new FormControl(false));
-        });
-      } else {
-        this.remainingSystems = systemsList;
-
-        // Dynamically add form controls for each remaining system
-        const systemsGroup = this.requestForm.get('systems') as FormGroup;
-        this.remainingSystems.forEach((system) => {
-          systemsGroup.addControl(system.id, new FormControl(false));
-        });
-      }
-      this.loading = false;
-    });
-  }
 
   nextStep() {
     if (this.step === 0) {
-      this.selectedSystems = this.remainingSystems.filter(
-        (system) => this.requestForm.get('systems')?.get(system.id)?.value,
+      this.selectedServices = this.remainingServices.filter(
+        (service) => this.requestForm.get('services')?.get(service.id)?.value,
       );
 
-      if (this.selectedSystems.length === 0) {
-        alert('Please select at least one system.');
+      if (this.selectedServices.length === 0) {
+        alert('Please select at least one service.');
         return;
       }
 
-      // Dynamically add form controls for each selected system
-      const selectedSystemsGroup = this.requestForm.get(
-        'selectedSystems',
+      // Dynamically add form controls for each selected service
+      const selectedServicesGroup = this.requestForm.get(
+        'selectedServices',
       ) as FormGroup;
-      this.selectedSystems.forEach((system) => {
-        selectedSystemsGroup.addControl(system.id, new FormControl(false));
+      this.selectedServices.forEach((service) => {
+        selectedServicesGroup.addControl(service.id, new FormControl(false));
       });
     } else if (this.step === 1) {
-      const allChecked = this.selectedSystems.every(
-        (system) =>
-          this.requestForm.get('selectedSystems')?.get(system.id)?.value,
+      const allChecked = this.selectedServices.every(
+        (service) =>
+          this.requestForm.get('selectedServices')?.get(service.id)?.value,
       );
 
       if (!allChecked) {
         alert(
-          'Please accept the terms and conditions for all selected systems.',
+          'Please accept the terms and conditions for all selected services.',
         );
         return;
       }
@@ -123,26 +97,6 @@ export class RequestServiceComponent implements OnInit {
   }
 
   submitForm() {
-    const userId = this.user.user_id;
-    const selectedSystemIDs = this.selectedSystems.map((system) => system.id);
-
-    const updatePayload = {
-      systems: {
-        ...this.user.user_metadata.systems,
-        requested: [
-          ...(this.user.user_metadata.systems.requested || []),
-          ...selectedSystemIDs,
-        ],
-      },
-    };
-
-    this.auth.updateUserMetadata(userId, updatePayload).subscribe({
-      next: () => {},
-      error: (error: any) => {
-        console.error('Error updating user metadata', error);
-      },
-    });
-
     this.submitted = true;
   }
 }

@@ -1,0 +1,538 @@
+<div class="flex h-full w-full flex-col">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-6 py-6 sm:px-12">
+    <a href="https://aaiportal.test.biocommons.org.au/">
+      <img
+        src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
+        class="auto h-16 min-w-44"
+        alt="Australian Biocommons Logo"
+      />
+    </a>
+    <div
+      class="flex justify-between gap-6 font-light *:text-blue-900 sm:gap-12"
+    >
+      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/about">
+        About
+      </a>
+      <a class="hover:text-blue-950" href="https://www.biocommons.org.au/">
+        FAQ
+      </a>
+      <a
+        class="hover:text-blue-950"
+        href="https://www.biocommons.org.au/contact-form"
+      >
+        Contact us
+      </a>
+    </div>
+  </div>
+
+  @if (currentStep() < totalSteps && router.url === "/register") {
+    <div
+      class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
+    >
+      <div class="flex items-center justify-center gap-2">
+        <div class="font-light text-gray-500">Already have an account?</div>
+        <button
+          class="font-medium text-blue-600 hover:text-blue-700"
+          (click)="login()"
+        >
+          Log in
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Select bundle step -->
+  @if (currentStep() === 1) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="bundleForm"
+        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-center text-3xl font-semibold text-gray-900">
+          Access bundles
+        </h1>
+        <p class="text-center font-light text-gray-500">
+          Request access to a bundle you need for your research.
+        </p>
+        <div class="mt-6 flex flex-wrap items-stretch justify-center gap-6">
+          <!-- Bundle selection cards -->
+          @for (bundle of bundles; track bundle.id) {
+            <div
+              tabindex="0"
+              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all duration-200"
+              [ngClass]="{
+                'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
+                  !bundle.disabled,
+                'cursor-not-allowed opacity-50': bundle.disabled,
+                group: !bundle.disabled,
+                'ring-2 ring-red-500':
+                  bundleForm.get('selectedBundle')?.invalid &&
+                  bundleForm.get('selectedBundle')?.touched &&
+                  !bundleForm.get('selectedBundle')?.value &&
+                  !bundle.disabled,
+                'ring-2 ring-blue-500':
+                  bundleForm.get('selectedBundle')?.value === bundle.id,
+              }"
+              (click)="!bundle.disabled && selectBundle(bundle.id)"
+              (keyup.enter)="!bundle.disabled && selectBundle(bundle.id)"
+            >
+              <!-- Bundle content -->
+              <div class="flex flex-col gap-6">
+                <div class="flex gap-6">
+                  @for (logo of bundle.logoUrls; track logo) {
+                    <img
+                      [src]="logo"
+                      [alt]="bundle.name + ' logo'"
+                      class="h-16 w-auto"
+                    />
+                  }
+                </div>
+                <div class="text-2xl font-semibold">{{ bundle.name }}</div>
+                @if (bundle.listItems.length) {
+                  <div>
+                    @if (bundle.listItems.length > 0) {
+                      <div class="text-sm/6 font-light text-gray-500">
+                        @for (item of bundle.listItems; track item) {
+                          <div
+                            class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="2"
+                              stroke="currentColor"
+                              class="mt-1 size-5 min-h-5 min-w-5 text-blue-600"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="m4.5 12.75 6 6 9-13.5"
+                              />
+                            </svg>
+                            <div [innerHTML]="item"></div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <input
+                type="radio"
+                formControlName="selectedBundle"
+                [value]="bundle.id"
+                class="sr-only"
+              />
+              <button
+                type="button"
+                class="font-mdeium w-full rounded-md bg-blue-600 px-2 py-2.5 text-sm font-medium text-white group-hover:bg-blue-700"
+                [class.cursor-not-allowed]="bundle.disabled"
+              >
+                Select
+              </button>
+            </div>
+          }
+        </div>
+        @if (
+          bundleForm.get("selectedBundle")?.invalid &&
+          bundleForm.get("selectedBundle")?.touched
+        ) {
+          <div class="text-center text-sm text-red-500">
+            Please select a bundle to continue
+          </div>
+        }
+      </form>
+    </div>
+  }
+
+  <!-- Registration form step -->
+  @else if (currentStep() === 2) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="registrationForm"
+        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
+        <p class="font-light text-gray-500">
+          Australian BioCommons access enables a streamlined approach to
+          accessing the Bioplatforms Australia Data Portal and Galaxy Australia
+          research infrastructure bundles.
+        </p>
+
+        <!-- Registration form fields -->
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div class="relative">
+            <label
+              for="firstName"
+              class="block text-sm font-medium text-gray-900"
+            >
+              First Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              formControlName="firstName"
+              placeholder="John"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+              [class.border-red-500]="isFieldInvalid('firstName')"
+              [class.border-gray-300]="!isFieldInvalid('firstName')"
+            />
+            @if (isFieldInvalid("firstName")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (error of getErrorMessages("firstName"); track error) {
+                  {{ error }}<br />
+                }
+              </div>
+            }
+          </div>
+
+          <div class="relative">
+            <label
+              for="lastName"
+              class="block text-sm font-medium text-gray-900"
+            >
+              Last Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName"
+              placeholder="Doe"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+              [class.border-red-500]="isFieldInvalid('lastName')"
+              [class.border-gray-300]="!isFieldInvalid('lastName')"
+            />
+            @if (isFieldInvalid("lastName")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (error of getErrorMessages("lastName"); track error) {
+                  {{ error }}<br />
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="relative">
+          <label for="email" class="block text-sm font-medium text-gray-900">
+            Email Address <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="john.doe@example.com"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            [class.border-red-500]="isFieldInvalid('email')"
+            [class.border-gray-300]="!isFieldInvalid('email')"
+          />
+          @if (isFieldInvalid("email")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("email"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label for="username" class="block text-sm font-medium text-gray-900">
+            Username <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            placeholder="johndoe"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            [class.border-red-500]="isFieldInvalid('username')"
+            [class.border-gray-300]="!isFieldInvalid('username')"
+          />
+          @if (isFieldInvalid("username")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("username"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label for="password" class="block text-sm font-medium text-gray-900">
+            Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            [class.border-red-500]="isFieldInvalid('password')"
+            [class.border-gray-300]="!isFieldInvalid('password')"
+          />
+          @if (isFieldInvalid("password")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("password"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label
+            for="confirmPassword"
+            class="block text-sm font-medium text-gray-900"
+          >
+            Confirm Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            placeholder="••••••••"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            [class.border-red-500]="isFieldInvalid('confirmPassword')"
+            [class.border-gray-300]="!isFieldInvalid('confirmPassword')"
+          />
+          @if (isFieldInvalid("confirmPassword")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("confirmPassword"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mt-6 flex flex-col items-center gap-0.5">
+          <re-captcha
+            (resolved)="resolved($event)"
+            siteKey="{{ recaptchaSiteKeyV2 }}"
+          ></re-captcha>
+          @if (!recaptchaToken() && recaptchaAttempted()) {
+            <div class="text-xs text-red-500">
+              Please complete the reCAPTCHA verification
+            </div>
+          }
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Accept terms & conditions step -->
+  @else if (currentStep() === 3) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="termsForm"
+        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-3xl font-semibold text-gray-900">
+          Accept terms and conditions
+        </h1>
+        <p class="font-light text-gray-500">
+          Please review and accept the terms and conditions for each service in
+          your selected bundle.
+        </p>
+
+        @if (getSelectedBundle()) {
+          <div class="flex w-full flex-col gap-6">
+            <div class="text-xl font-medium text-gray-900">
+              {{ getSelectedBundle()?.name }} Bundle
+            </div>
+
+            @for (
+              service of getSelectedBundle()?.services || [];
+              track service.id
+            ) {
+              <div
+                tabindex="0"
+                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                [class.ring-transparent]="
+                  termsForm.get(service.id)?.value !== true &&
+                  (!termsForm.get(service.id)?.invalid ||
+                    !termsForm.get(service.id)?.touched)
+                "
+                [class.ring-red-500]="
+                  termsForm.get(service.id)?.value !== true &&
+                  termsForm.get(service.id)?.invalid &&
+                  termsForm.get(service.id)?.touched
+                "
+                [class.ring-blue-500]="
+                  termsForm.get(service.id)?.value === true
+                "
+                (click)="toggleTermsAcceptance(service.id)"
+                (keyup.enter)="toggleTermsAcceptance(service.id)"
+              >
+                <a
+                  [href]="service.termsUrl"
+                  target="_blank"
+                  class="flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                  (click)="$event.stopPropagation()"
+                >
+                  {{ service.name }}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-4 min-h-4 min-w-4"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                    />
+                  </svg>
+                </a>
+                <input
+                  type="checkbox"
+                  [formControlName]="service.id"
+                  class="pointer-events-none h-4 w-4 text-blue-900"
+                />
+              </div>
+            }
+
+            @if (termsForm.invalid && termsForm.touched) {
+              <div class="text-sm text-red-500">
+                Please accept all terms and conditions to continue
+              </div>
+            }
+          </div>
+        }
+      </form>
+    </div>
+  }
+
+  <!-- Review details step -->
+  @else if (currentStep() === 4) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      @if (errorAlert()) {
+        <app-alert
+          type="error"
+          positionClass="right-12 top-12"
+          [message]="errorAlert()!"
+          [dismissible]="true"
+          (dismissed)="errorAlert.set(null)"
+        >
+        </app-alert>
+      }
+      <div class="flex w-full max-w-6xl flex-1 flex-col gap-12">
+        <div class="flex flex-col gap-6">
+          <h1 class="text-3xl font-semibold text-gray-900">
+            Details confirmation
+          </h1>
+          <div class="font-light text-gray-500">
+            Please review your information and registration details below.
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-6 text-xl font-medium text-gray-900">
+            Your information
+          </div>
+          <div class="flex flex-col gap-6 font-light text-gray-900">
+            <div class="flex justify-between gap-6">
+              <div class="w-full">
+                <div class="mb-2 text-sm font-medium">First Name</div>
+                <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                  {{ registrationForm.get("firstName")?.value }}
+                </div>
+              </div>
+              <div class="w-full">
+                <div class="mb-2 text-sm font-medium">Last Name</div>
+                <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                  {{ registrationForm.get("lastName")?.value }}
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="mb-2 text-sm font-medium">Email Address</div>
+              <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                {{ registrationForm.get("email")?.value }}
+              </div>
+            </div>
+            <div>
+              <div class="mb-2 text-sm font-medium">Username</div>
+              <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                {{ registrationForm.get("username")?.value }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="mb-6 text-xl font-medium text-gray-900">
+            Access bundle requested
+          </div>
+          <div class="rounded-md bg-white p-3 font-light text-gray-900 shadow">
+            {{ getSelectedBundle()?.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Final step -->
+  @else {
+    <div
+      class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
+    >
+      <div class="text-4xl font-semibold sm:text-5xl lg:text-6xl">
+        Thank you
+      </div>
+      <div class="font-light text-gray-500">
+        You will receive an email notification once your access request has been
+        approved.
+      </div>
+      <div class="text-center">
+        <button
+          type="button"
+          class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          (click)="getFinalPageButton().action()"
+        >
+          {{ getFinalPageButton().text }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Shared navigation buttons -->
+  @if (currentStep() < totalSteps) {
+    <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
+      <div
+        class="flex w-full max-w-6xl justify-between text-sm font-medium *:w-32 *:rounded-md *:px-6 *:py-2.5 *:shadow-sm *:hover:cursor-pointer"
+      >
+        <button
+          type="button"
+          class="border bg-white text-blue-600 hover:bg-gray-100"
+          (click)="prevStep()"
+        >
+          Back
+        </button>
+        <button
+          type="button"
+          class="bg-blue-600 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          (click)="nextStep()"
+          [disabled]="isSubmitting()"
+        >
+          @if (currentStep() === 4 && isSubmitting()) {
+            Submitting
+          } @else {
+            {{ currentStep() === 4 ? "Submit" : "Next" }}
+          }
+        </button>
+      </div>
+    </div>
+  }
+</div>

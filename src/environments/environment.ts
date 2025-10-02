@@ -1,10 +1,29 @@
-export const environment = {
+import {
+  EnvironmentConfig,
+  RuntimeEnvironmentConfig,
+  mergeEnvironmentConfig,
+} from './runtime-config';
+
+const defaults: EnvironmentConfig = {
   production: false,
   auth0: {
-    domain: 'dev-bc.au.auth0.com',
+    domain: 'dev.login.aai.test.biocommons.org.au',
     clientId: 'oXjPRRuMIVrzpJY7Ku2ojs0gZNmPVKmS',
-    redirectUri: window.location.origin,
-    audience: 'https://dev-bc.au.auth0.com/api/v2/',
-    scope: 'read:current_user update:current_user_metadata',
+    redirectUri: '',
+    backend: 'http://localhost:8000',
+  },
+  recaptcha: {
+    siteKeyV2: '6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG',
   },
 };
+
+export const environment: EnvironmentConfig = mergeEnvironmentConfig(defaults);
+
+export function updateEnvironment(runtime?: RuntimeEnvironmentConfig): void {
+  const merged = mergeEnvironmentConfig(defaults, runtime);
+  environment.production = merged.production;
+  environment.auth0 = merged.auth0;
+  environment.recaptcha = merged.recaptcha;
+}
+
+export const environmentDefaults = defaults;
