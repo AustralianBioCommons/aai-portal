@@ -70,29 +70,27 @@
     <div
       class="mx-auto mb-8 flex flex-1 items-center justify-center overflow-hidden rounded-lg border bg-white"
     >
-      @if (!adminStatusLoading()) {
-        @for (page of navigationPages(); track page.route; let last = $last) {
-          <a
-            [routerLink]="page.route"
-            routerLinkActive="border-b-sky-500 text-gray-900"
-            class="flex min-w-40 items-center justify-center gap-2 border-y-4 border-y-transparent py-2 text-gray-600 transition-all hover:bg-gray-50"
-          >
-            {{ page.label }}
-            @if (
-              (!isAdmin() && page.label === "Pending" && pendingCount() > 0) ||
-              (isAdmin() && page.label === "Requests" && pendingCount() > 0)
-            ) {
-              <span
-                class="min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs font-medium text-white"
-              >
-                {{ pendingCount() }}
-              </span>
-            }
-          </a>
-
-          @if (!last) {
-            <div class="w-px flex-1 self-stretch bg-gray-200"></div>
+      @for (page of navigationPages(); track page.route; let last = $last) {
+        <a
+          [routerLink]="page.route"
+          routerLinkActive="border-b-sky-500 text-gray-900"
+          class="flex min-w-40 items-center justify-center gap-2 border-y-4 border-y-transparent py-2 text-gray-600 transition-all hover:bg-gray-50"
+        >
+          {{ page.label }}
+          @if (
+            (!isAdmin() && page.label === "Pending" && pendingCount() > 0) ||
+            (isAdmin() && page.label === "Requests" && pendingCount() > 0)
+          ) {
+            <span
+              class="min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs font-medium text-white"
+            >
+              {{ pendingCount() }}
+            </span>
           }
+        </a>
+
+        @if (!last) {
+          <div class="w-px flex-1 self-stretch bg-gray-200"></div>
         }
       }
     </div>

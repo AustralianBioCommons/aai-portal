@@ -9,8 +9,8 @@ import {
   effect,
   DestroyRef,
 } from '@angular/core';
-import { AuthService } from '../../core/services/auth.service';
-import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ApiService } from '../../../core/services/api.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -41,11 +41,6 @@ export class NavbarComponent {
   // Component state
   pendingCount = signal(0);
   userMenuOpen = signal(false);
-
-  // Computed properties
-  adminStatusLoading = computed(
-    () => this.isLoading() && this.isAuthenticated(),
-  );
 
   navigationPages = computed(() =>
     this.isAdmin()
