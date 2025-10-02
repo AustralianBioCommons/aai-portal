@@ -45,10 +45,10 @@ export class NavbarComponent {
   navigationPages = computed(() =>
     this.isAdmin()
       ? [
-          { label: 'All', route: '/users' },
-          { label: 'Requests', route: '/requests' },
-          { label: 'Revoked', route: '/revoked' },
-          { label: 'Unverified', route: '/users-unverified' },
+          { label: 'All', route: '/all-users' },
+          { label: 'Pending', route: '/pending-users' },
+          { label: 'Revoked', route: '/revoked-users' },
+          { label: 'Unverified', route: '/unverified-users' },
         ]
       : [
           { label: 'Services', route: '/services' },

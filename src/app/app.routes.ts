@@ -4,9 +4,9 @@ import { AccessComponent } from './pages/user/access/access.component';
 import { PendingComponent } from './pages/user/pending/pending.component';
 import { RequestServiceComponent } from './pages/user/services/request-service/request-service.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
-import { ListUsersComponent } from './pages/admin/list-users/list-users.component';
-import { RequestsComponent } from './pages/admin/requests/requests.component';
-import { RevokedComponent } from './pages/admin/revoked/revoked.component';
+import { AllUsersComponent } from './pages/admin/all-users/all-users.component';
+import { PendingUsersComponent } from './pages/admin/pending-users/pending-users.component';
+import { RevokedUsersComponent } from './pages/admin/revoked-users/revoked-users.component';
 import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
 import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
 import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
@@ -22,7 +22,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { RegisterComponent } from './pages/register/register.component';
 import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
-import { ListUnverifiedUsersComponent } from './pages/admin/list-unverified-users/list-unverified-users.component';
+import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
 import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.component';
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 
@@ -156,23 +156,23 @@ export const routes: Routes = [
         canActivate: [adminGuard],
       },
       {
-        path: 'users',
-        component: ListUsersComponent,
+        path: 'all-users',
+        component: AllUsersComponent,
         canActivate: [adminGuard],
       },
       {
-        path: 'revoked',
-        component: RevokedComponent,
+        path: 'revoked-users',
+        component: RevokedUsersComponent,
         canActivate: [adminGuard],
       },
       {
-        path: 'requests',
-        component: RequestsComponent,
+        path: 'pending-users',
+        component: PendingUsersComponent,
         canActivate: [adminGuard],
       },
       {
-        path: 'users-unverified',
-        component: ListUnverifiedUsersComponent,
+        path: 'unverified-users',
+        component: UnverifiedUsersComponent,
         canActivate: [adminGuard],
       },
     ],

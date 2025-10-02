@@ -6,8 +6,8 @@ import { NavbarComponent } from './navbar.component';
 import {
   AllPendingResponse,
   ApiService,
-} from '../../core/services/api.service';
-import { AuthService } from '../../core/services/auth.service';
+} from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -109,10 +109,10 @@ describe('NavbarComponent', () => {
 
     const pages = component.navigationPages();
     expect(pages).toEqual([
-      { label: 'All', route: '/users' },
-      { label: 'Requests', route: '/requests' },
-      { label: 'Revoked', route: '/revoked' },
-      { label: 'Unverified', route: '/users-unverified' },
+      { label: 'All', route: '/all-users' },
+      { label: 'Pending', route: '/pending-users' },
+      { label: 'Revoked', route: '/revoked-users' },
+      { label: 'Unverified', route: '/unverified-users' },
     ]);
   });
 

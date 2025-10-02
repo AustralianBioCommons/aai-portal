@@ -126,8 +126,16 @@ export class ApiService {
   getAdminUnverifiedUsers(
     page = 1,
     pageSize = 20,
+    filterBy?: string,
+    search?: string,
   ): Observable<BiocommonsUserResponse[]> {
-    const params = `?page=${page}&page_size=${pageSize}`;
+    let params = `?page=${page}&page_size=${pageSize}`;
+    if (filterBy) {
+      params += `&filter_by=${filterBy}`;
+    }
+    if (search && search.trim().length > 0) {
+      params += `&search=${encodeURIComponent(search.trim())}`;
+    }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users/unverified${params}`,
     );
@@ -136,8 +144,16 @@ export class ApiService {
   getAdminPendingUsers(
     page = 1,
     pageSize = 20,
+    filterBy?: string,
+    search?: string,
   ): Observable<BiocommonsUserResponse[]> {
-    const params = `?page=${page}&page_size=${pageSize}`;
+    let params = `?page=${page}&page_size=${pageSize}`;
+    if (filterBy) {
+      params += `&filter_by=${filterBy}`;
+    }
+    if (search && search.trim().length > 0) {
+      params += `&search=${encodeURIComponent(search.trim())}`;
+    }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users/pending${params}`,
     );
@@ -146,8 +162,16 @@ export class ApiService {
   getAdminRevokedUsers(
     page = 1,
     pageSize = 20,
+    filterBy?: string,
+    search?: string,
   ): Observable<BiocommonsUserResponse[]> {
-    const params = `?page=${page}&page_size=${pageSize}`;
+    let params = `?page=${page}&page_size=${pageSize}`;
+    if (filterBy) {
+      params += `&filter_by=${filterBy}`;
+    }
+    if (search && search.trim().length > 0) {
+      params += `&search=${encodeURIComponent(search.trim())}`;
+    }
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users/revoked${params}`,
     );
