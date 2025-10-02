@@ -16,10 +16,17 @@ import {
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { PLATFORM_NAMES } from '../../../core/constants/constants';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-user-details',
-  imports: [DatePipe, LoadingSpinnerComponent, RouterLink, AlertComponent],
+  imports: [
+    DatePipe,
+    LoadingSpinnerComponent,
+    RouterLink,
+    AlertComponent,
+    ButtonComponent,
+  ],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
 })

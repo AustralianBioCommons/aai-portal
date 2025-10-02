@@ -124,7 +124,7 @@
                 type="button"
                 variant="primary"
                 widthClass="w-full"
-                colorClasses="bg-biocommons-primary hover:bg-sky-900 group-hover:bg-sky-900"
+                colorClasses="bg-biocommons-primary hover:bg-sky-900 group-hover:bg-sky-900 focus-visible:ring-biocommons-primary"
                 [disabled]="bundle.disabled!"
               >
                 Select
@@ -406,7 +406,6 @@
       @if (errorAlert()) {
         <app-alert
           type="error"
-          positionClass="right-12 top-12"
           [message]="errorAlert()!"
           [dismissible]="true"
           (dismissed)="errorAlert.set(null)"

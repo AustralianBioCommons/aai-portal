@@ -1,8 +1,6 @@
 <div
   class="fixed z-50 flex max-w-md items-center gap-2 rounded-lg p-4 shadow"
-  [class]="
-    positionClass() + ' ' + (type() === 'success' ? 'bg-green-50' : 'bg-red-50')
-  "
+  [class]="type() === 'success' ? 'bg-green-50' : 'bg-red-50'"
   [class.pr-8]="!dismissible()"
 >
   <!-- Icon -->

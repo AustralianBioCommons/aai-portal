@@ -13,7 +13,6 @@ const DEFAULT_POSITION = 'right-6 top-6';
 })
 export class AlertComponent {
   type = input<AlertType>('error');
-  positionClass = input<string>(DEFAULT_POSITION);
   message = input<string>('');
   dismissible = input<boolean>(false);
 

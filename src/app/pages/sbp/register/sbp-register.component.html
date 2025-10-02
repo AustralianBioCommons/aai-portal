@@ -23,7 +23,6 @@
     @if (errorAlert()) {
       <app-alert
         type="error"
-        positionClass="right-12 top-12"
         [message]="errorAlert()!"
         [dismissible]="true"
         (dismissed)="errorAlert.set(null)"

@@ -1,7 +1,6 @@
 <!-- Notifications -->
 @if (alert()) {
   <app-alert
-    positionClass="right-12 top-12"
     [type]="alert()!.type"
     [message]="alert()!.message"
     [dismissible]="true"
@@ -42,28 +41,30 @@
 
         @if (!user()?.email_verified) {
           <div class="relative">
-            <button
+            <app-button
               type="button"
-              class="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              variant="primary"
               (click)="toggleActionMenu()"
               #actionMenuButton
             >
-              Actions
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-4"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                />
-              </svg>
-            </button>
+              <div class="flex items-center justify-center gap-2">
+                Actions
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </div>
+            </app-button>
 
             @if (actionMenuOpen()) {
               <div
