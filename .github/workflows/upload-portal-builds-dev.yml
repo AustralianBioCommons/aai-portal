@@ -88,6 +88,15 @@ jobs:
             --name "${DEV_FRONTEND_SSM_PREFIX}/distribution-id" \
             --query 'Parameter.Value' \
             --output text)
+          BACKEND_URL=""
+          if BACKEND_VALUE=$(aws ssm get-parameter \
+            --name "${DEV_FRONTEND_SSM_PREFIX}/backend-base-url" \
+            --query 'Parameter.Value' \
+            --output text 2>/dev/null); then
+            if [ -n "${BACKEND_VALUE}" ] && [ "${BACKEND_VALUE}" != "None" ]; then
+              BACKEND_URL="${BACKEND_VALUE}"
+            fi
+          fi
           if [ -z "${BUCKET}" ] || [ "${BUCKET}" = "None" ]; then
             echo "Failed to resolve dev frontend bucket from SSM" >&2
             exit 1
@@ -98,6 +107,7 @@ jobs:
           fi
           echo "bucket=${BUCKET}" >> "${GITHUB_OUTPUT}"
           echo "distribution_id=${DIST_ID}" >> "${GITHUB_OUTPUT}"
+          echo "backend_url=${BACKEND_URL}" >> "${GITHUB_OUTPUT}"
 
       - name: Prepare dev deployment assets
         run: |
@@ -118,10 +128,16 @@ jobs:
       - name: Render dev runtime config
         run: |
           set -euo pipefail
-          node tools/render-app-config.js \
-            --config dist/aai-portal-dev-deploy/browser/assets/config/app-config.json \
-            --secret-file dev-secret.json \
-            --set-production true
+          BACKEND_URL="${{ steps.devparams.outputs.backend_url }}"
+          ARGS=(
+            "--config" "dist/aai-portal-dev-deploy/browser/assets/config/app-config.json"
+            "--secret-file" "dev-secret.json"
+            "--set-production" "true"
+          )
+          if [ -n "${BACKEND_URL}" ]; then
+            ARGS+=("--backend-url" "${BACKEND_URL}")
+          fi
+          node tools/render-app-config.js "${ARGS[@]}"
 
       - name: Deploy dev portal bundle
         run: |
