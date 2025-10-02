@@ -132,7 +132,7 @@ jobs:
           ARGS=(
             "--config" "dist/aai-portal-dev-deploy/browser/assets/config/app-config.json"
             "--secret-file" "dev-secret.json"
-            "--set-production" "true"
+            "--set-production" "false"
           )
           if [ -n "${BACKEND_URL}" ]; then
             ARGS+=("--backend-url" "${BACKEND_URL}")
