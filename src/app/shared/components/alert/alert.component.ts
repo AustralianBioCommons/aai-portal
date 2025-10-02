@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 
 export type AlertType = 'success' | 'error';
 
-const DEFAULT_POSITION = 'right-6 top-6';
-
 @Component({
   selector: 'app-alert',
   imports: [CommonModule],
