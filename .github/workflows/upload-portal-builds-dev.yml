@@ -1,0 +1,157 @@
+name: Upload Portal Builds (Dev)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload-builds:
+    name: Build and Deploy Dev Portal
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate required secrets
+        env:
+          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
+          AWS_ROLE_FRONTEND: ${{ secrets.AWS_ROLE_FRONTEND }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_DEV_FRONTEND_SECRET_NAME: ${{ secrets.AWS_DEV_FRONTEND_SECRET_NAME }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AWS_PORTAL_BUILD_BUCKET}" ]; then
+            echo "Missing required secret AWS_PORTAL_BUILD_BUCKET" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_ROLE_FRONTEND}" ]; then
+            echo "Missing required secret AWS_ROLE_FRONTEND" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_REGION}" ]; then
+            echo "Missing required secret AWS_REGION" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_DEV_FRONTEND_SECRET_NAME}" ]; then
+            echo "Missing required secret AWS_DEV_FRONTEND_SECRET_NAME" >&2
+            exit 1
+          fi
+
+      - name: Build production bundle
+        run: npx ng build --configuration production --output-path dist/aai-portal-prod
+
+      - name: Build debug bundle
+        run: npx ng build --configuration debug --output-path dist/aai-portal-debug
+
+      - name: Determine release version
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
+          if [ -z "${VERSION}" ]; then
+            echo "Unable to read version from package.json" >&2
+            exit 1
+          fi
+          echo "Using release version ${VERSION}"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
+          role-session-name: portal-build-upload
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Fetch dev deployment parameters
+        id: devparams
+        env:
+          DEV_FRONTEND_SSM_PREFIX: ${{ secrets.AWS_DEV_FRONTEND_SSM_PREFIX || '/dev/frontend' }}
+        run: |
+          set -euo pipefail
+          BUCKET=$(aws ssm get-parameter \
+            --name "${DEV_FRONTEND_SSM_PREFIX}/bucket-name" \
+            --query 'Parameter.Value' \
+            --output text)
+          DIST_ID=$(aws ssm get-parameter \
+            --name "${DEV_FRONTEND_SSM_PREFIX}/distribution-id" \
+            --query 'Parameter.Value' \
+            --output text)
+          BACKEND_URL=""
+          if BACKEND_VALUE=$(aws ssm get-parameter \
+            --name "${DEV_FRONTEND_SSM_PREFIX}/backend-base-url" \
+            --query 'Parameter.Value' \
+            --output text 2>/dev/null); then
+            if [ -n "${BACKEND_VALUE}" ] && [ "${BACKEND_VALUE}" != "None" ]; then
+              BACKEND_URL="${BACKEND_VALUE}"
+            fi
+          fi
+          if [ -z "${BUCKET}" ] || [ "${BUCKET}" = "None" ]; then
+            echo "Failed to resolve dev frontend bucket from SSM" >&2
+            exit 1
+          fi
+          if [ -z "${DIST_ID}" ] || [ "${DIST_ID}" = "None" ]; then
+            echo "Failed to resolve dev CloudFront distribution id from SSM" >&2
+            exit 1
+          fi
+          echo "bucket=${BUCKET}" >> "${GITHUB_OUTPUT}"
+          echo "distribution_id=${DIST_ID}" >> "${GITHUB_OUTPUT}"
+          echo "backend_url=${BACKEND_URL}" >> "${GITHUB_OUTPUT}"
+
+      - name: Prepare dev deployment assets
+        run: |
+          set -euo pipefail
+          rm -rf dist/aai-portal-dev-deploy
+          cp -R dist/aai-portal-prod dist/aai-portal-dev-deploy
+
+      - name: Fetch dev frontend secret
+        env:
+          AWS_DEV_FRONTEND_SECRET_NAME: ${{ secrets.AWS_DEV_FRONTEND_SECRET_NAME }}
+        run: |
+          set -euo pipefail
+          aws secretsmanager get-secret-value \
+            --secret-id "${AWS_DEV_FRONTEND_SECRET_NAME}" \
+            --query SecretString \
+            --output text > dev-secret.json
+
+      - name: Render dev runtime config
+        run: |
+          set -euo pipefail
+          BACKEND_URL="${{ steps.devparams.outputs.backend_url }}"
+          ARGS=(
+            "--config" "dist/aai-portal-dev-deploy/browser/assets/config/app-config.json"
+            "--secret-file" "dev-secret.json"
+            "--set-production" "false"
+          )
+          if [ -n "${BACKEND_URL}" ]; then
+            ARGS+=("--backend-url" "${BACKEND_URL}")
+          fi
+          node tools/render-app-config.js "${ARGS[@]}"
+
+      - name: Deploy dev portal bundle
+        run: |
+          set -euo pipefail
+          aws s3 sync dist/aai-portal-dev-deploy/browser/ "s3://${{ steps.devparams.outputs.bucket }}/" --delete
+
+      - name: Invalidate dev CloudFront cache
+        run: |
+          set -euo pipefail
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ steps.devparams.outputs.distribution_id }}" \
+            --paths "/*"
+
+      - name: Clean up dev deployment secret
+        run: |
+          set -euo pipefail
+          rm -f dev-secret.json
