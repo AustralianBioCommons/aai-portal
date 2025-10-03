@@ -1,5 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { Injector, inject } from '@angular/core';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { switchMap, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
@@ -18,13 +18,14 @@ const BYPASS_URLS = [
  * HTTP interceptor that adds the Auth0 access token to requests sent to the AAI backend API
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth0Service = inject(Auth0Service);
+  const injector = inject(Injector);
 
   const isBackendRequest = req.url.includes(environment.auth0.backend);
   const isBypassUrl = BYPASS_URLS.some((path) => req.url.includes(path));
 
   // For requests to the AAI backend that's not a registration endpoint
   if (isBackendRequest && !isBypassUrl) {
+    const auth0Service = injector.get(Auth0Service);
     return auth0Service.getAccessTokenSilently().pipe(
       switchMap((token) => {
         const authReq = req.clone({
