@@ -16,6 +16,7 @@ import {
   BiocommonsUserResponse,
   FilterOption,
   ApiService,
+  AdminGetUsersApiParams,
 } from '../../../../core/services/api.service';
 
 @Component({
@@ -32,12 +33,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   title = input.required<string>();
   getUsers =
     input.required<
-      (
-        page?: number,
-        pageSize?: number,
-        filterBy?: string,
-        search?: string,
-      ) => Observable<BiocommonsUserResponse[]>
+      (params: AdminGetUsersApiParams) => Observable<BiocommonsUserResponse[]>
     >();
 
   private destroy$ = new Subject<void>();
@@ -83,12 +79,12 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   loadUsers(): void {
     this.loading.set(true);
-    this.getUsers()(
-      1,
-      50,
-      this.selectedFilter() || undefined,
-      this.searchTerm() || undefined,
-    ).subscribe({
+    this.getUsers()({
+      page: 1,
+      perPage: 50,
+      filterBy: this.selectedFilter(),
+      search: this.searchTerm(),
+    }).subscribe({
       next: (users: BiocommonsUserResponse[]) => {
         this.users.set(users);
         this.loading.set(false);

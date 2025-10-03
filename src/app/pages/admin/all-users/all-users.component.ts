@@ -12,5 +12,5 @@ export class AllUsersComponent {
   private apiService = inject(ApiService);
 
   title = 'All Users';
-  getUsers = this.apiService.getUsers.bind(this.apiService);
+  getUsers = this.apiService.getAdminAllUsers.bind(this.apiService);
 }

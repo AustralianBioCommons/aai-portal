@@ -27,7 +27,7 @@ import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.componen
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 
 export const routes: Routes = [
-  // Login & register routes - only accessible when not logged in
+  // Auth routes - only accessible when not logged in
   {
     path: 'login',
     component: LoginComponent,
@@ -39,6 +39,17 @@ export const routes: Routes = [
     component: RegisterComponent,
     canActivate: [loginGuard],
     data: { title: 'Register | AAI Portal' },
+  },
+  {
+    path: 'user',
+    canActivate: [loginGuard],
+    children: [
+      {
+        path: 'email-verified',
+        component: EmailVerifiedComponent,
+        data: { title: 'Email Verification' },
+      },
+    ],
   },
 
   // Standalone routes without DefaultLayoutComponent
@@ -100,17 +111,6 @@ export const routes: Routes = [
         component: RegisterComponent,
         canActivate: [loginGuard],
         data: { title: 'Register | Bioplatforms Australia Data Portal' },
-      },
-    ],
-  },
-  {
-    path: 'user',
-    canActivate: [loginGuard],
-    children: [
-      {
-        path: 'email-verified',
-        component: EmailVerifiedComponent,
-        data: { title: 'Email Verification' },
       },
     ],
   },

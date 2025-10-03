@@ -6,8 +6,6 @@ import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { Observable, map, catchError, of, switchMap, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-export type Status = 'approved' | 'revoked' | 'pending';
-
 export interface AuthError {
   error: string;
   error_description: string;
@@ -72,10 +70,6 @@ export class AuthService {
     { initialValue: null },
   );
 
-  constructor() {
-    this.checkForAuthErrors();
-  }
-
   // Observable that checks if the current user has admin privileges
   isAdmin$ = this.auth0Service.isAuthenticated$.pipe(
     switchMap((isAuth) =>
@@ -102,6 +96,10 @@ export class AuthService {
   );
 
   isAdmin = toSignal(this.isAdmin$, { initialValue: false });
+
+  constructor() {
+    this.checkForAuthErrors();
+  }
 
   /**
    * Check for Auth0 callback errors in URL parameters
