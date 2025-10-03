@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.2.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.1.0...v1.2.0) (2025-10-03)
+
+
+### Features
+
+* add auto deployment of frontend upon merge to main ([fadacd1](https://github.com/AustralianBioCommons/aai-portal/commit/fadacd1cb2886becadc80bb215e593bba135d3ca))
+* add focus-visible to buttons and remove positionClass input from alerts ([9dbe0d8](https://github.com/AustralianBioCommons/aai-portal/commit/9dbe0d83dc1b9e6620d6740d01af6ba669720b3c))
+
+
+### Bug Fixes
+
+* compatibility for Node18 ([c856850](https://github.com/AustralianBioCommons/aai-portal/commit/c8568502d4d3357afc5d4443379d4d256fe3874c))
+* configuration-injection ([aa34a0f](https://github.com/AustralianBioCommons/aai-portal/commit/aa34a0fe7916b92204a76e6eea6f1d5be4774918))
+* configuration-injection ([d46c4ca](https://github.com/AustralianBioCommons/aai-portal/commit/d46c4cab5fcdd73ace944a56ed8322756db85802))
+* set backend url on dev deployment ([37194ea](https://github.com/AustralianBioCommons/aai-portal/commit/37194eaed07d42c0ee2ca174c744dbc905764268))
+* set backend url on dev deployment ([bc876b2](https://github.com/AustralianBioCommons/aai-portal/commit/bc876b29f09ddfbe8b98481c83ee04adfb642f87))
+* set production to false on dev deployments ([3650eee](https://github.com/AustralianBioCommons/aai-portal/commit/3650eee49a14f2a483fa7a6eecea1ca8666f961f))
+* set production to false on dev deployments ([5b373c3](https://github.com/AustralianBioCommons/aai-portal/commit/5b373c37da5b0ae0ae061b6328b7f1b6e5bfe03c))
+
 ## [1.1.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.0.0...v1.1.0) (2025-10-02)
 
 
