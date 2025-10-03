@@ -17,10 +17,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideAppInitializer(() => inject(RuntimeConfigLoaderService).load()),
     provideAuth0({
-      domain: environment.auth0.domain,
-      clientId: environment.auth0.clientId,
+      domain: '',
+      clientId: '',
       authorizationParams: {
-        redirect_uri: environment.auth0.redirectUri,
+        redirect_uri: window.location.origin,
       },
       cacheLocation: 'localstorage',
     }),
