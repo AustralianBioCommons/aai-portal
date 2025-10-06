@@ -68,13 +68,19 @@
 
   @if (isNavigationPage()) {
     <div
-      class="mx-auto mb-8 flex flex-1 items-center justify-center overflow-hidden rounded-lg border bg-white"
+      class="mx-auto mb-8 flex flex-1 items-center justify-center gap-6 overflow-hidden bg-white"
     >
       @for (page of navigationPages(); track page.route; let last = $last) {
         <a
           [routerLink]="page.route"
-          routerLinkActive="border-b-sky-500 text-gray-900"
-          class="flex min-w-40 items-center justify-center gap-2 border-y-4 border-y-transparent py-2 text-gray-600 transition-all hover:bg-gray-50"
+          routerLinkActive
+          #routerLinkActive="routerLinkActive"
+          class="flex min-w-32 items-center justify-center gap-2 rounded-md py-2.5 text-sm font-medium transition-all"
+          [class]="
+            routerLinkActive.isActive
+              ? 'bg-biocommons-primary text-white hover:bg-sky-900'
+              : 'bg-sky-50 text-biocommons-primary hover:bg-sky-100'
+          "
         >
           {{ page.label }}
           @if (
@@ -88,10 +94,6 @@
             </span>
           }
         </a>
-
-        @if (!last) {
-          <div class="w-px flex-1 self-stretch bg-gray-200"></div>
-        }
       }
     </div>
   }
