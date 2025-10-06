@@ -51,21 +51,41 @@ jobs:
             exit 1
           fi
 
+      - name: Determine dev identifier
+        id: dev_version
+        run: |
+          set -euo pipefail
+          BASE_VERSION=$(node -p "require('./package.json').version")
+          if [ -z "${BASE_VERSION}" ]; then
+            echo "Unable to read version from package.json" >&2
+            exit 1
+          fi
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DEV_SUFFIX="dev_${SHORT_SHA}"
+          FULL_VERSION="${BASE_VERSION}-${DEV_SUFFIX}"
+          echo "Using dev release identifier ${FULL_VERSION}"
+          echo "suffix=${DEV_SUFFIX}" >> "${GITHUB_OUTPUT}"
+          echo "full_version=${FULL_VERSION}" >> "${GITHUB_OUTPUT}"
+
+      - name: Patch package.json version
+        run: |
+          set -euo pipefail
+          node <<'JS'
+          const fs = require('fs');
+          const path = require('path');
+          const pkgPath = path.resolve('package.json');
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+          pkg.version = `${pkg.version}-${process.env.DEV_SUFFIX}`;
+          fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
+          JS
+        env:
+          DEV_SUFFIX: ${{ steps.dev_version.outputs.suffix }}
+
       - name: Build production bundle
         run: npx ng build --configuration production --output-path dist/aai-portal-prod
 
       - name: Build debug bundle
         run: npx ng build --configuration debug --output-path dist/aai-portal-debug
-
-      - name: Determine release version
-        run: |
-          set -euo pipefail
-          VERSION=$(node -p "require('./package.json').version")
-          if [ -z "${VERSION}" ]; then
-            echo "Unable to read version from package.json" >&2
-            exit 1
-          fi
-          echo "Using release version ${VERSION}"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -73,6 +93,20 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
           role-session-name: portal-build-upload
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload dev production bundle to shared bucket
+        env:
+          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws s3 sync dist/aai-portal-prod/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/prod/dev/" --delete
+
+      - name: Upload dev debug bundle to shared bucket
+        env:
+          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/dev/" --delete
 
       - name: Fetch dev deployment parameters
         id: devparams
