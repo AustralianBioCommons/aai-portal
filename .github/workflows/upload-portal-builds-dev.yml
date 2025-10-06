@@ -87,6 +87,13 @@ jobs:
       - name: Build debug bundle
         run: npx ng build --configuration debug --output-path dist/aai-portal-debug
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
+          role-session-name: portal-build-upload
+          aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Upload dev production bundle to shared bucket
         env:
           AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
@@ -100,13 +107,6 @@ jobs:
         run: |
           set -euo pipefail
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/dev/" --delete
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
-          role-session-name: portal-build-upload
-          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Fetch dev deployment parameters
         id: devparams
