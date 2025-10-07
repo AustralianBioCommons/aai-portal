@@ -19,6 +19,16 @@ import {
   AdminGetUsersApiParams,
 } from '../../../../core/services/api.service';
 
+/**
+ * Reusable user list component with filtering and search.
+ *
+ * Required inputs:
+ * - title: Display heading for the list
+ * - getUsers: API method that fetches users. Must accept AdminGetUsersApiParams (page, perPage, filterBy, search, etc.)
+ *   and return Observable<BiocommonsUserResponse[]>. Pass a bound ApiService method like apiService.getAllUsers.bind(apiService)
+ *
+ * Example: <app-user-list [title]="'All Users'" [getUsers]="apiService.getAllUsers.bind(apiService)" />
+ */
 @Component({
   selector: 'app-user-list',
   standalone: true,
