@@ -70,7 +70,7 @@
     <div
       class="mx-auto mb-8 flex flex-1 items-center justify-center gap-6 overflow-hidden bg-white"
     >
-      @for (page of navigationPages(); track page.route; let last = $last) {
+      @for (page of navigationPages(); track page.route) {
         <a
           [routerLink]="page.route"
           routerLinkActive
