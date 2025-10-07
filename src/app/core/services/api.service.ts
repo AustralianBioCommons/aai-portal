@@ -5,6 +5,8 @@ import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
 import { PlatformId } from '../constants/constants';
 
+export type Status = 'approved' | 'revoked' | 'pending';
+
 /**
  * response for which platforms the admin can manage
  */
@@ -63,6 +65,18 @@ export interface BiocommonsUserDetails extends BiocommonsAuth0User {
   group_memberships: GroupMembership[];
 }
 
+export interface AdminGetUsersApiParams {
+  page?: number;
+  perPage?: number;
+  filterBy?: string;
+  search?: string;
+  emailVerified?: boolean;
+  platform?: string;
+  platformApprovalStatus?: Status;
+  group?: string;
+  groupApprovalStatus?: Status;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -99,57 +113,83 @@ export class ApiService {
     );
   }
 
-  getUsers(
-    page = 1,
-    pageSize = 20,
-    filterBy?: string,
-    search?: string,
+  getAdminAllUsers(
+    params: AdminGetUsersApiParams = {},
   ): Observable<BiocommonsUserResponse[]> {
-    let params = `?page=${page}&page_size=${pageSize}`;
+    const {
+      page = 1,
+      perPage = 50,
+      filterBy,
+      search,
+      emailVerified,
+      platform,
+      platformApprovalStatus,
+      group,
+      groupApprovalStatus,
+    } = params;
+
+    const urlParams = new URLSearchParams({
+      page: page.toString(),
+      per_page: perPage.toString(),
+    });
+
     if (filterBy) {
-      params += `&filter_by=${filterBy}`;
+      urlParams.append('filter_by', filterBy);
     }
-    if (search && search.trim().length > 0) {
-      params += `&search=${encodeURIComponent(search.trim())}`;
+    if (search?.trim()) {
+      urlParams.append('search', search.trim());
     }
+    if (emailVerified !== undefined) {
+      urlParams.append('email_verified', emailVerified.toString());
+    }
+    if (platform) {
+      urlParams.append('platform', platform);
+    }
+    if (platformApprovalStatus) {
+      urlParams.append('platform_approval_status', platformApprovalStatus);
+    }
+    if (group) {
+      urlParams.append('group', group);
+    }
+    if (groupApprovalStatus) {
+      urlParams.append('group_approval_status', groupApprovalStatus);
+    }
+
     return this.http.get<BiocommonsUserResponse[]>(
-      `${environment.auth0.backend}/admin/users${params}`,
+      `${environment.auth0.backend}/admin/users?${urlParams.toString()}`,
     );
+  }
+
+  getAdminPendingUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    return this.getAdminAllUsers({
+      ...params,
+      platformApprovalStatus: 'pending',
+    });
+  }
+
+  getAdminRevokedUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    return this.getAdminAllUsers({
+      ...params,
+      platformApprovalStatus: 'revoked',
+    });
+  }
+
+  getAdminUnverifiedUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    return this.getAdminAllUsers({
+      ...params,
+      emailVerified: false,
+    });
   }
 
   getUserDetails(userId: string): Observable<BiocommonsUserDetails> {
     return this.http.get<BiocommonsUserDetails>(
       `${environment.auth0.backend}/admin/users/${userId}/details`,
-    );
-  }
-
-  getAdminUnverifiedUsers(
-    page = 1,
-    pageSize = 20,
-  ): Observable<BiocommonsUserResponse[]> {
-    const params = `?page=${page}&page_size=${pageSize}`;
-    return this.http.get<BiocommonsUserResponse[]>(
-      `${environment.auth0.backend}/admin/users/unverified${params}`,
-    );
-  }
-
-  getAdminPendingUsers(
-    page = 1,
-    pageSize = 20,
-  ): Observable<BiocommonsUserResponse[]> {
-    const params = `?page=${page}&page_size=${pageSize}`;
-    return this.http.get<BiocommonsUserResponse[]>(
-      `${environment.auth0.backend}/admin/users/pending${params}`,
-    );
-  }
-
-  getAdminRevokedUsers(
-    page = 1,
-    pageSize = 20,
-  ): Observable<BiocommonsUserResponse[]> {
-    const params = `?page=${page}&page_size=${pageSize}`;
-    return this.http.get<BiocommonsUserResponse[]>(
-      `${environment.auth0.backend}/admin/users/revoked${params}`,
     );
   }
 

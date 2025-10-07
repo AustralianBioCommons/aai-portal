@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FooterComponent } from '../footer/footer.component';
-import { NavbarComponent } from '../navbar/navbar.component';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -59,7 +59,7 @@ export class DefaultLayoutComponent implements OnInit {
     return this.authService.isAuthenticated()
       ? this.authService.isAdmin$.pipe(
           take(1),
-          map((isAdmin) => (isAdmin ? '/users' : '/services')),
+          map((isAdmin) => (isAdmin ? '/all-users' : '/services')),
         )
       : of('/services');
   }

@@ -1,5 +1,5 @@
 // auth.interceptor.spec.ts
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -62,10 +62,17 @@ describe('authInterceptor (bypass URLs)', () => {
     });
   });
 
-  it('should attach token for other backend URLs (non-bypass control)', () => {
-    const url = `${backend}/users/me`;
+  it('should attach token for other backend URLs (non-bypass control)', fakeAsync(() => {
+    // Mock backend URL for this test to work consistenctly with differernt runtime environments configs
+    const testBackend = 'http://test-backend.example.com';
+    const originalBackend = environment.auth0.backend;
+    environment.auth0.backend = testBackend;
+
+    const url = `${testBackend}/users/me`;
 
     http.get(url).subscribe();
+    flush();
+
     const req = httpMock.expectOne(url);
 
     // For non-bypass backend, token should be requested and header set
@@ -74,10 +81,12 @@ describe('authInterceptor (bypass URLs)', () => {
     expect(req.request.headers.get('Content-Type')).toBe('application/json');
 
     req.flush({ ok: true });
-  });
+
+    environment.auth0.backend = originalBackend;
+  }));
 
   it('should leave non-backend URLs untouched (extra safety)', () => {
-    const url = `https://other.example.com/public`;
+    const url = 'https://other.example.com/public';
 
     http.get(url).subscribe();
     const req = httpMock.expectOne(url);
