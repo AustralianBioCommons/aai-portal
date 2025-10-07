@@ -62,14 +62,22 @@ describe('authInterceptor (bypass URLs)', () => {
     });
   });
 
-  it('should attach token for other backend URLs (non-bypass control)', () => {
+  it('should attach token for other backend URLs (non-bypass control)', (done) => {
     const url = `${backend}/users/me`;
 
-    http.get(url).subscribe();
-    const req = httpMock.expectOne(url);
+    http.get(url).subscribe({
+      next: () => {
+        // For non-bypass backend, token should be requested and header set
+        expect(auth0Mock.getAccessTokenSilently).toHaveBeenCalledTimes(1);
+        done();
+      },
+      error: (err) => {
+        fail(`Request failed: ${err}`);
+        done();
+      },
+    });
 
-    // For non-bypass backend, token should be requested and header set
-    expect(auth0Mock.getAccessTokenSilently).toHaveBeenCalledTimes(1);
+    const req = httpMock.expectOne(url);
     expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
     expect(req.request.headers.get('Content-Type')).toBe('application/json');
 
