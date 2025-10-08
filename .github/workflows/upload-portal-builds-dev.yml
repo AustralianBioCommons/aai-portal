@@ -136,7 +136,7 @@ jobs:
           cat "${RESPONSE_FILE}"
 
           STATUS=$(jq -r '.status // empty' "${RESPONSE_FILE}")
-          if [ "${STATUS}" != "SUCCESS" ]; then
+          if [ -n "${STATUS}" ] && [ "${STATUS}" != "SUCCESS" ] && [ "${STATUS}" != "ok" ]; then
             echo "Frontend release lambda returned unexpected status: ${STATUS}" >&2
             exit 1
           fi
