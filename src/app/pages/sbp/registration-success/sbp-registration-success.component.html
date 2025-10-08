@@ -1,39 +1,19 @@
-<div class="flex h-full w-full flex-col bg-gray-50">
-  <!-- Header -->
-  <div class="flex items-center justify-between bg-white px-6 py-6 sm:px-12">
-    <a href="https://aaiportal.test.biocommons.org.au/">
-      <img
-        src="/assets/sbp-logo.png"
-        class="auto h-16 min-w-44"
-        alt="Structural Biology Platform Logo"
-      />
-    </a>
-    <div
-      class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12 [&>a:hover]:text-sky-900"
-    >
-      <a href="https://www.biocommons.org.au/about"> About </a>
-      <a href="https://www.biocommons.org.au/"> FAQ </a>
-      <a href="https://www.biocommons.org.au/contact-form"> Contact us </a>
-    </div>
+<div
+  class="mx-auto flex h-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center sm:px-24"
+>
+  <div class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
+    Thank you for registering with the Structural Biology Platform
   </div>
-
-  <div
-    class="mx-auto flex h-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center sm:px-24"
+  <div class="font-light text-gray-500">
+    Please check your email and verify your email address. Your request has been
+    sent to an administrator for approval.
+  </div>
+  <app-button
+    type="button"
+    variant="primary"
+    widthClass="w-auto"
+    (click)="navigateToSBP()"
   >
-    <div class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
-      Thank you for registering with the Structural Biology Platform
-    </div>
-    <div class="font-light text-gray-500">
-      Please check your email and verify your email address. Your request has
-      been sent to an administrator for approval.
-    </div>
-    <app-button
-      type="button"
-      variant="primary"
-      widthClass="w-auto"
-      (click)="navigateToSBP()"
-    >
-      Return to Structural Biology Platform
-    </app-button>
-  </div>
+    Return to Structural Biology Platform
+  </app-button>
 </div>
