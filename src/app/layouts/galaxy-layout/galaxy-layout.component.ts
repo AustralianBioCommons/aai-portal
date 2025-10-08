@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -9,5 +9,5 @@ import { CommonModule } from '@angular/common';
   styleUrl: './galaxy-layout.component.css',
 })
 export class GalaxyLayoutComponent {
-  constructor(public router: Router) {}
+  router = inject(Router);
 }

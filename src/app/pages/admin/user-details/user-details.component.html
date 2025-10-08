@@ -14,7 +14,7 @@
   @if (loading()) {
     <app-loading-spinner />
   } @else if (error()) {
-    <div class="font-light text-red-500">{{ error() }}</div>
+    <div class="text-red-500">{{ error() }}</div>
   } @else if (user()) {
     <div class="flex w-full max-w-5xl flex-1 flex-col gap-6">
       <div class="flex items-center justify-between">

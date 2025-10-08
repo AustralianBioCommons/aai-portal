@@ -84,35 +84,6 @@ describe('BpaRegisterSelectionComponent', () => {
     );
   });
 
-  it('should display header logo with correct attributes', () => {
-    const headerLogo = fixture.debugElement.query(
-      By.css('.bg-bpa-primary img'),
-    );
-    expect(headerLogo.nativeElement.src).toContain(
-      'BIO-RGB_Full-NEG_Portal_TRANS2_small.webp',
-    );
-    expect(headerLogo.nativeElement.alt).toBe(
-      'Bioplatforms Australia Data Portal Logo',
-    );
-  });
-
-  it('should display footer logos with correct attributes', () => {
-    const footerLogos = fixture.debugElement.queryAll(
-      By.css('.bg-bpa-secondary img'),
-    );
-    expect(footerLogos.length).toBe(2);
-
-    expect(footerLogos[0].nativeElement.src).toContain(
-      'BIO-RGB_Large-NEGTRANS_small.webp',
-    );
-    expect(footerLogos[0].nativeElement.alt).toBe(
-      'Bioplatforms Australia Logo',
-    );
-
-    expect(footerLogos[1].nativeElement.src).toContain('ncris-footer.webp');
-    expect(footerLogos[1].nativeElement.alt).toBe('NCRIS Logo');
-  });
-
   it('should have correct button styling', () => {
     const buttons = fixture.debugElement.queryAll(By.css('button'));
 

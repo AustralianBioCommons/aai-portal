@@ -20,16 +20,6 @@ describe('BpaRegistrationSuccessComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the header logo with correct src', () => {
-    const logo = fixture.debugElement.query(
-      By.css('img[alt="Bioplatforms Australia Data Portal Logo"]'),
-    );
-    expect(logo).toBeTruthy();
-    expect(logo.nativeElement.src).toContain(
-      'BIO-RGB_Full-NEG_Portal_TRANS2_small.webp',
-    );
-  });
-
   it('should show the thank you message', () => {
     const message = fixture.nativeElement.textContent;
     expect(message).toContain(
@@ -51,36 +41,5 @@ describe('BpaRegistrationSuccessComponent', () => {
     expect(returnButton.nativeElement.textContent.trim()).toContain(
       'Return to Bioplatforms Australia Data Portal',
     );
-  });
-
-  it('should show footer logos with correct src and alt', () => {
-    const bpaFooterLogo = fixture.debugElement.query(
-      By.css('img[alt="Bioplatforms Australia Logo"]'),
-    );
-    const ncrisFooterLogo = fixture.debugElement.query(
-      By.css('img[alt="NCRIS Logo"]'),
-    );
-
-    expect(bpaFooterLogo).toBeTruthy();
-    expect(bpaFooterLogo.nativeElement.src).toContain(
-      'BIO-RGB_Large-NEGTRANS_small.webp',
-    );
-
-    expect(ncrisFooterLogo).toBeTruthy();
-    expect(ncrisFooterLogo.nativeElement.src).toContain('ncris-footer.webp');
-  });
-
-  it('should link to Bioplatforms and NCRIS in the footer', () => {
-    const bpaLink = fixture.debugElement.query(
-      By.css('a[href="https://www.bioplatforms.com/"]'),
-    );
-    const ncrisLink = fixture.debugElement.query(
-      By.css(
-        'a[href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"]',
-      ),
-    );
-
-    expect(bpaLink).toBeTruthy();
-    expect(ncrisLink).toBeTruthy();
   });
 });

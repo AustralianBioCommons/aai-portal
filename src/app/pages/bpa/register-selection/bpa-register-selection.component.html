@@ -1,95 +1,58 @@
-<div
-  class="flex min-h-full flex-col items-center justify-center bg-white md:bg-gray-50"
->
-  <!-- Header -->
-  <div class="flex w-full items-center justify-center bg-bpa-primary p-12">
-    <a href="https://aaidemo.bioplatforms.com/">
-      <img
-        src="https://data.bioplatforms.com/BIO-RGB_Full-NEG_Portal_TRANS2_small.webp"
-        class="h-16 w-auto min-w-64 md:h-20 md:min-w-80"
-        alt="Bioplatforms Australia Data Portal Logo"
-      />
-    </a>
-  </div>
-
-  <!-- Body -->
-  <div class="flex h-full flex-1 flex-col items-center justify-center gap-6">
-    <div
-      class="flex max-w-5xl flex-col rounded-md bg-white p-12 md:mx-12 md:shadow-xl lg:mx-24"
-    >
-      <div class="mb-12 text-center text-3xl font-semibold">Register</div>
-      <div class="flex flex-col md:flex-row">
-        <div
-          class="flex w-full flex-col justify-between gap-6 border-b pb-12 md:w-1/2 md:border-b-0 md:border-r md:pb-0 md:pr-12"
-        >
-          <div class="text-2xl font-medium text-gray-800">
-            Bioplatforms Australia Data Portal Access
-          </div>
-          <div class="mb-6 font-light text-gray-500">
-            Access the Bioplatforms Australia Data Portal's public and
-            restricted data.
-          </div>
-          <app-button
-            type="button"
-            variant="secondary"
-            colorClasses="text-blue-900 focus-visible:ring-blue-900"
-            [routerLink]="['standard-access']"
-          >
-            Continue
-          </app-button>
+<div class="flex flex-1 flex-col items-center justify-center gap-6">
+  <div
+    class="flex max-w-5xl flex-col rounded-md bg-white p-12 md:mx-12 md:shadow-xl lg:mx-24"
+  >
+    <div class="mb-12 text-center text-3xl font-semibold">Register</div>
+    <div class="flex flex-col md:flex-row">
+      <div
+        class="flex w-full flex-col justify-between gap-6 border-b pb-12 md:w-1/2 md:border-b-0 md:border-r md:pb-0 md:pr-12"
+      >
+        <div class="text-2xl font-medium text-gray-800">
+          Bioplatforms Australia Data Portal Access
         </div>
-        <div
-          class="flex w-full flex-col justify-between gap-6 pt-12 md:w-1/2 md:pl-12 md:pt-0"
-        >
-          <div class="text-2xl font-medium text-gray-800">
-            Bioplatforms Australia Data Portal Access + Bundles
-          </div>
-          <div class="mb-6 font-light text-gray-500">
-            Access the Bioplatforms Australia Data Portal's public and
-            restricted data, plus the Australian BioCommons service bundles.
-          </div>
-          <app-button
-            type="button"
-            variant="primary"
-            colorClasses="bg-blue-900 hover:bg-blue-950 focus-visible:ring-blue-900"
-            [routerLink]="['bundle-access']"
-          >
-            Continue
-          </app-button>
+        <div class="mb-6 font-light text-gray-500">
+          Access the Bioplatforms Australia Data Portal's public and restricted
+          data.
         </div>
+        <app-button
+          type="button"
+          variant="secondary"
+          colorClasses="text-blue-900 focus-visible:ring-blue-900"
+          [routerLink]="['standard-access']"
+        >
+          Continue
+        </app-button>
+      </div>
+      <div
+        class="flex w-full flex-col justify-between gap-6 pt-12 md:w-1/2 md:pl-12 md:pt-0"
+      >
+        <div class="text-2xl font-medium text-gray-800">
+          Bioplatforms Australia Data Portal Access + Bundles
+        </div>
+        <div class="mb-6 font-light text-gray-500">
+          Access the Bioplatforms Australia Data Portal's public and restricted
+          data, plus the Australian BioCommons service bundles.
+        </div>
+        <app-button
+          type="button"
+          variant="primary"
+          colorClasses="bg-blue-900 hover:bg-blue-950 focus-visible:ring-blue-900"
+          [routerLink]="['bundle-access']"
+        >
+          Continue
+        </app-button>
       </div>
     </div>
-    <div class="mx-12 mb-12 font-light text-gray-500 md:mb-0">
-      Already have an account?
-      <a
-        class="font-medium text-blue-600 hover:text-blue-700"
-        href="https://aaidemo.bioplatforms.com/"
-      >
-        Return to Bioplatforms Australia Data Portal
-      </a>
-      and log in
-    </div>
   </div>
 
-  <!-- Footer -->
-  <div
-    class="flex w-full items-center justify-center gap-12 bg-bpa-secondary p-12"
-  >
-    <a href="https://www.bioplatforms.com/">
-      <img
-        src="https://data.bioplatforms.com/BIO-RGB_Large-NEGTRANS_small.webp"
-        alt="Bioplatforms Australia Logo"
-        class="h-20 w-auto min-w-20"
-      />
-    </a>
+  <div class="mx-12 mb-12 font-light text-gray-500 md:mb-0">
+    Already have an account?
     <a
-      href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"
+      class="font-medium text-blue-600 hover:text-blue-700"
+      href="https://aaidemo.bioplatforms.com/"
     >
-      <img
-        src="https://data.bioplatforms.com/ncris-footer.webp"
-        alt="NCRIS Logo"
-        class="h-20 w-auto min-w-24"
-      />
+      Return to Bioplatforms Australia Data Portal
     </a>
+    and log in
   </div>
 </div>

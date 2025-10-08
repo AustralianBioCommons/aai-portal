@@ -1,6 +1,4 @@
-<div
-  class="flex min-h-full flex-col items-center justify-center bg-white md:bg-gray-50"
->
+<div class="flex flex-1 flex-col items-center justify-center">
   @if (errorAlert()) {
     <app-alert
       type="error"
@@ -10,18 +8,7 @@
     >
     </app-alert>
   }
-  <!-- Header -->
-  <div class="flex w-full items-center justify-center bg-bpa-primary p-12">
-    <a href="https://aaidemo.bioplatforms.com/">
-      <img
-        src="https://data.bioplatforms.com/BIO-RGB_Full-NEG_Portal_TRANS2_small.webp"
-        class="h-20 w-auto"
-        alt="Bioplatforms Australia Data Portal Logo"
-      />
-    </a>
-  </div>
 
-  <!-- Body -->
   <div
     class="mb-0 flex max-w-6xl flex-col rounded-md bg-white p-12 md:m-12 md:mb-12 md:flex-row md:shadow-xl lg:m-24"
   >
@@ -29,7 +16,7 @@
       class="w-full border-b pb-12 text-gray-500 md:w-2/5 md:border-b-0 md:border-r md:pb-0 md:pr-12"
     >
       Please register for the Bioplatforms Australia Data Portal by completing
-      the form to the right.<br /><br />
+      the form.<br /><br />
 
       Please provide your name, email, a username to use, a password, and the
       reason for your request.<br /><br />
@@ -237,7 +224,7 @@
   </div>
 
   <!-- Scroll to top button -->
-  <div class="pointer-events-none sticky bottom-0 z-10 w-full">
+  <div class="pointer-events-none sticky bottom-0 z-10 w-screen">
     <div class="flex w-full justify-end pb-6 pr-6 2xl:pb-12 2xl:pr-12">
       <button
         (click)="scrollToTop()"
@@ -259,27 +246,5 @@
         </svg>
       </button>
     </div>
-  </div>
-
-  <!-- Footer -->
-  <div
-    class="flex w-full items-center justify-center gap-12 bg-bpa-secondary p-12"
-  >
-    <a href="https://www.bioplatforms.com/">
-      <img
-        src="https://data.bioplatforms.com/BIO-RGB_Large-NEGTRANS_small.webp"
-        alt="Bioplatforms Australia Logo"
-        class="h-20 w-auto"
-      />
-    </a>
-    <a
-      href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"
-    >
-      <img
-        src="https://data.bioplatforms.com/ncris-footer.webp"
-        alt="NCRIS Logo"
-        class="h-20 w-auto"
-      />
-    </a>
   </div>
 </div>

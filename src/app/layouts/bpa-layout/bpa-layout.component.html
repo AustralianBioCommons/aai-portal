@@ -1,0 +1,36 @@
+@if (router.url.includes("bundle-access")) {
+  <router-outlet></router-outlet>
+} @else {
+  <div
+    class="flex min-h-screen flex-col items-center justify-center bg-white md:bg-gray-50"
+  >
+    <nav class="flex w-full items-center justify-center bg-bpa-primary p-12">
+      <a href="https://aaidemo.bioplatforms.com/">
+        <img
+          src="assets/bpa-logo-horizontal.webp"
+          class="h-20 w-auto"
+          alt="Bioplatforms Australia Data Portal Logo"
+        />
+      </a>
+    </nav>
+
+    <router-outlet></router-outlet>
+
+    <footer
+      class="flex w-full items-center justify-center gap-12 bg-bpa-secondary p-12"
+    >
+      <a href="https://www.bioplatforms.com/">
+        <img
+          src="assets/bpa-logo-vertical.webp"
+          alt="Bioplatforms Australia Logo"
+          class="h-20 w-auto"
+        />
+      </a>
+      <a
+        href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"
+      >
+        <img src="assets/ncris-logo.png" alt="NCRIS Logo" class="h-20 w-auto" />
+      </a>
+    </footer>
+  </div>
+}

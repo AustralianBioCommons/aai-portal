@@ -25,6 +25,8 @@ import { UserDetailsComponent } from './pages/admin/user-details/user-details.co
 import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
 import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.component';
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
+import { BpaLayoutComponent } from './layouts/bpa-layout/bpa-layout.component';
+import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -85,6 +87,7 @@ export const routes: Routes = [
   },
   {
     path: 'bpa',
+    component: BpaLayoutComponent,
     canActivate: [loginGuard],
     data: { favicon: '/assets/bpa-favicon.ico' },
     children: [
@@ -116,6 +119,7 @@ export const routes: Routes = [
   },
   {
     path: 'sbp',
+    component: SbpLayoutComponent,
     canActivate: [loginGuard],
     children: [
       { path: '', redirectTo: 'register', pathMatch: 'full' },
@@ -132,7 +136,7 @@ export const routes: Routes = [
     ],
   },
 
-  // All other routes that use DefaultLayoutComponent
+  // Authenticated routes that use DefaultLayoutComponent
   {
     path: '',
     component: DefaultLayoutComponent,
