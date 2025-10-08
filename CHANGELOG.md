@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.2.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.1.0...v1.2.0) (2025-10-08)
+
+
+### Features
+
+* add auto deployment of frontend upon merge to main ([fadacd1](https://github.com/AustralianBioCommons/aai-portal/commit/fadacd1cb2886becadc80bb215e593bba135d3ca))
+* add focus-visible to buttons and remove positionClass input from alerts ([9dbe0d8](https://github.com/AustralianBioCommons/aai-portal/commit/9dbe0d83dc1b9e6620d6740d01af6ba669720b3c))
+* add search & filter to all admin pages (AAI-416) ([88c3f2b](https://github.com/AustralianBioCommons/aai-portal/commit/88c3f2b3424d1ed9c5fc586af7bca27f0a942081))
+* add unit tests for admin pages & update nav ([7c52693](https://github.com/AustralianBioCommons/aai-portal/commit/7c526934aded87ed668c9a653cbe578cf53dbfb0))
+* add version descriptor to dev builds ([96e58ab](https://github.com/AustralianBioCommons/aai-portal/commit/96e58ab9e9b6195dc122ab7d7ec8056bba5b89b7))
+* moved footer & navbar to /shared/components ([f05fa2a](https://github.com/AustralianBioCommons/aai-portal/commit/f05fa2a5813f343dbf8287eeeea1c605aa19728c))
+* update api service for new admin functionalities ([87a847c](https://github.com/AustralianBioCommons/aai-portal/commit/87a847cd58aa6efbc793b0597ae80bce0db0e3ed))
+* version descriptor on console ([9d508cb](https://github.com/AustralianBioCommons/aai-portal/commit/9d508cb98b21711ab5553f49d0db3ab5fecd8499))
+
+
+### Bug Fixes
+
+* add gap between navbar items ([b648790](https://github.com/AustralianBioCommons/aai-portal/commit/b648790e488b7cc9e1e5f60bb486f68923eabfdb))
+* add version descriptor to dev builds ([51c51b1](https://github.com/AustralianBioCommons/aai-portal/commit/51c51b152fe064142c14b2bf59adac3dbdc3884c))
+* ci deploy lambda fix status code parsing ([a4668f8](https://github.com/AustralianBioCommons/aai-portal/commit/a4668f8700c01bf6a304fa5db62343cf1e5b50de))
+* compatibility for Node18 ([c856850](https://github.com/AustralianBioCommons/aai-portal/commit/c8568502d4d3357afc5d4443379d4d256fe3874c))
+* configuration-injection ([aa34a0f](https://github.com/AustralianBioCommons/aai-portal/commit/aa34a0fe7916b92204a76e6eea6f1d5be4774918))
+* configuration-injection ([d46c4ca](https://github.com/AustralianBioCommons/aai-portal/commit/d46c4cab5fcdd73ace944a56ed8322756db85802))
+* remove unused variable in navigation loop ([ae55de0](https://github.com/AustralianBioCommons/aai-portal/commit/ae55de08b547d97284b510a06fc0543aeca7b5d8))
+* set backend url on dev deployment ([37194ea](https://github.com/AustralianBioCommons/aai-portal/commit/37194eaed07d42c0ee2ca174c744dbc905764268))
+* set backend url on dev deployment ([bc876b2](https://github.com/AustralianBioCommons/aai-portal/commit/bc876b29f09ddfbe8b98481c83ee04adfb642f87))
+* set production to false on dev deployments ([3650eee](https://github.com/AustralianBioCommons/aai-portal/commit/3650eee49a14f2a483fa7a6eecea1ca8666f961f))
+* set production to false on dev deployments ([5b373c3](https://github.com/AustralianBioCommons/aai-portal/commit/5b373c37da5b0ae0ae061b6328b7f1b6e5bfe03c))
+
 ## [1.1.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.0.0...v1.1.0) (2025-10-02)
 
 
