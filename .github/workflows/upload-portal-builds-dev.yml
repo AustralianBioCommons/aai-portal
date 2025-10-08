@@ -108,84 +108,35 @@ jobs:
           set -euo pipefail
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/dev/" --delete
 
-      - name: Fetch dev deployment parameters
-        id: devparams
+      - name: Invoke dev frontend release Lambda
         env:
-          DEV_FRONTEND_SSM_PREFIX: ${{ secrets.AWS_DEV_FRONTEND_SSM_PREFIX || '/dev/frontend' }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DEV_RELEASE_FUNCTION: AaiFrontendDevReleaseDeployer
         run: |
           set -euo pipefail
-          BUCKET=$(aws ssm get-parameter \
-            --name "${DEV_FRONTEND_SSM_PREFIX}/bucket-name" \
-            --query 'Parameter.Value' \
-            --output text)
-          DIST_ID=$(aws ssm get-parameter \
-            --name "${DEV_FRONTEND_SSM_PREFIX}/distribution-id" \
-            --query 'Parameter.Value' \
-            --output text)
-          BACKEND_URL=""
-          if BACKEND_VALUE=$(aws ssm get-parameter \
-            --name "${DEV_FRONTEND_SSM_PREFIX}/backend-base-url" \
-            --query 'Parameter.Value' \
-            --output text 2>/dev/null); then
-            if [ -n "${BACKEND_VALUE}" ] && [ "${BACKEND_VALUE}" != "None" ]; then
-              BACKEND_URL="${BACKEND_VALUE}"
-            fi
-          fi
-          if [ -z "${BUCKET}" ] || [ "${BUCKET}" = "None" ]; then
-            echo "Failed to resolve dev frontend bucket from SSM" >&2
+          PAYLOAD=$(jq -n --arg version "dev" '{version: $version, keepExisting: false, setProduction: false}')
+          RESPONSE_FILE=$(mktemp)
+
+          INVOKE_METADATA=$(aws lambda invoke \
+            --function-name "${DEV_RELEASE_FUNCTION}" \
+            --payload "${PAYLOAD}" \
+            --cli-binary-format raw-in-base64-out \
+            --cli-read-timeout 0 \
+            "${RESPONSE_FILE}")
+
+          echo "${INVOKE_METADATA}"
+
+          FUNCTION_ERROR=$(echo "${INVOKE_METADATA}" | jq -r '.FunctionError // empty')
+          if [ -n "${FUNCTION_ERROR}" ]; then
+            echo "Frontend release lambda reported an error: ${FUNCTION_ERROR}" >&2
+            cat "${RESPONSE_FILE}" >&2 || true
             exit 1
           fi
-          if [ -z "${DIST_ID}" ] || [ "${DIST_ID}" = "None" ]; then
-            echo "Failed to resolve dev CloudFront distribution id from SSM" >&2
+
+          cat "${RESPONSE_FILE}"
+
+          STATUS=$(jq -r '.status // empty' "${RESPONSE_FILE}")
+          if [ "${STATUS}" != "SUCCESS" ]; then
+            echo "Frontend release lambda returned unexpected status: ${STATUS}" >&2
             exit 1
           fi
-          echo "bucket=${BUCKET}" >> "${GITHUB_OUTPUT}"
-          echo "distribution_id=${DIST_ID}" >> "${GITHUB_OUTPUT}"
-          echo "backend_url=${BACKEND_URL}" >> "${GITHUB_OUTPUT}"
-
-      - name: Prepare dev deployment assets
-        run: |
-          set -euo pipefail
-          rm -rf dist/aai-portal-dev-deploy
-          cp -R dist/aai-portal-prod dist/aai-portal-dev-deploy
-
-      - name: Fetch dev frontend secret
-        env:
-          AWS_DEV_FRONTEND_SECRET_NAME: ${{ secrets.AWS_DEV_FRONTEND_SECRET_NAME }}
-        run: |
-          set -euo pipefail
-          aws secretsmanager get-secret-value \
-            --secret-id "${AWS_DEV_FRONTEND_SECRET_NAME}" \
-            --query SecretString \
-            --output text > dev-secret.json
-
-      - name: Render dev runtime config
-        run: |
-          set -euo pipefail
-          BACKEND_URL="${{ steps.devparams.outputs.backend_url }}"
-          ARGS=(
-            "--config" "dist/aai-portal-dev-deploy/browser/assets/config/app-config.json"
-            "--secret-file" "dev-secret.json"
-            "--set-production" "false"
-          )
-          if [ -n "${BACKEND_URL}" ]; then
-            ARGS+=("--backend-url" "${BACKEND_URL}")
-          fi
-          node tools/render-app-config.js "${ARGS[@]}"
-
-      - name: Deploy dev portal bundle
-        run: |
-          set -euo pipefail
-          aws s3 sync dist/aai-portal-dev-deploy/browser/ "s3://${{ steps.devparams.outputs.bucket }}/" --delete
-
-      - name: Invalidate dev CloudFront cache
-        run: |
-          set -euo pipefail
-          aws cloudfront create-invalidation \
-            --distribution-id "${{ steps.devparams.outputs.distribution_id }}" \
-            --paths "/*"
-
-      - name: Clean up dev deployment secret
-        run: |
-          set -euo pipefail
-          rm -f dev-secret.json
