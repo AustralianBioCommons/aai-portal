@@ -46,6 +46,8 @@ describe('DefaultLayoutComponent', () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserAllPending',
       'getAdminPendingUsers',
+      'getAdminRevokedUsers',
+      'getAdminUnverifiedUsers',
     ]);
 
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
@@ -98,6 +100,8 @@ describe('DefaultLayoutComponent', () => {
       of({ platforms: [], groups: [] }),
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
   });
 
   it('should create', () => {
@@ -117,6 +121,8 @@ describe('DefaultLayoutComponent', () => {
       of({ platforms: [], groups: [] }),
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -141,6 +147,8 @@ describe('DefaultLayoutComponent', () => {
       of({ platforms: [], groups: [] }),
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -165,6 +173,8 @@ describe('DefaultLayoutComponent', () => {
       of({ platforms: [], groups: [] }),
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 
@@ -189,6 +199,8 @@ describe('DefaultLayoutComponent', () => {
       of({ platforms: [], groups: [] }),
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 

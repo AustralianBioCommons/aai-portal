@@ -22,6 +22,8 @@ describe('UserListComponent', () => {
       username: 'user1',
       email_verified: true,
       created_at: '2023-01-01T00:00:00Z',
+      platform_memberships: [],
+      group_memberships: [],
     },
     {
       id: '2',
@@ -29,6 +31,8 @@ describe('UserListComponent', () => {
       username: 'user2',
       email_verified: true,
       created_at: '2023-01-02T00:00:00Z',
+      platform_memberships: [],
+      group_memberships: [],
     },
   ];
 
@@ -93,7 +97,7 @@ describe('UserListComponent', () => {
     fixture.detectChanges();
     const countElement =
       fixture.debugElement.nativeElement.querySelector('.text-gray-500');
-    expect(countElement.textContent).toContain('Total: 2 users');
+    expect(countElement.textContent).toContain('2 users');
   });
 
   it('should set loading state while loading users', () => {

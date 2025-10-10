@@ -3,10 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError, EMPTY } from 'rxjs';
 import { signal } from '@angular/core';
 import { NavbarComponent } from './navbar.component';
-import {
-  AllPendingResponse,
-  ApiService,
-} from '../../../core/services/api.service';
+import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 describe('NavbarComponent', () => {
@@ -16,7 +13,12 @@ describe('NavbarComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getUserAllPending',
+      'getAdminPendingUsers',
+      'getAdminRevokedUsers',
+      'getAdminUnverifiedUsers',
+    ]);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
@@ -64,28 +66,78 @@ describe('NavbarComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should calculate pending count correctly', () => {
-    const mockPending: AllPendingResponse = {
-      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
-      groups: [
-        { group_id: 'tsi', group_name: 'TSI', approval_status: 'pending' },
+  it('should calculate pending count correctly', async () => {
+    const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
+      isAuthenticated: signal(true),
+      user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
+      isAdmin: signal(true),
+      isLoading: signal(false),
+    });
+
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['navigate', 'createUrlTree', 'serializeUrl'],
+      {
+        url: '/services',
+        events: EMPTY,
+        routerState: { root: {} },
+      },
+    );
+
+    routerSpy.createUrlTree.and.returnValue({});
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { params: {}, queryParams: {} },
+      params: of({}),
+      queryParams: of({}),
+    });
+
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [NavbarComponent],
+      providers: [
+        { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: adminAuthSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
       ],
-    };
-    mockApiService.getUserAllPending.and.returnValue(of(mockPending));
+    }).compileComponents();
 
-    fixture.detectChanges();
+    const adminFixture = TestBed.createComponent(NavbarComponent);
+    const adminComponent = adminFixture.componentInstance;
 
-    expect(component.pendingCount()).toBe(2);
+    const mockUsers = [
+      { id: '1', email: 'user1@test.com' },
+      { id: '2', email: 'user2@test.com' },
+    ];
+
+    mockApiService.getUserAllPending.and.returnValue(
+      of({ platforms: [], groups: [] }),
+    );
+    mockApiService.getAdminPendingUsers.and.returnValue(of(mockUsers as any));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+
+    adminFixture.detectChanges();
+
+    expect(adminComponent.pendingCount()).toBe(2);
   });
 
   it('should handle API error gracefully', () => {
     mockApiService.getUserAllPending.and.returnValue(
       throwError(() => new Error('API Error')),
     );
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
 

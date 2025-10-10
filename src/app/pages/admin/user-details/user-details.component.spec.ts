@@ -41,6 +41,7 @@ describe('UserDetailsComponent', () => {
       {
         id: 'pm1',
         platform_id: 'galaxy',
+        platform_name: 'Galaxy Australia',
         user_id: '123',
         approval_status: 'approved',
         updated_by: 'admin',
@@ -51,6 +52,7 @@ describe('UserDetailsComponent', () => {
         id: 'gm1',
         group_id: 'rg1',
         group_name: 'Research Group',
+        group_short_name: 'RG',
         approval_status: 'pending',
         updated_by: 'admin',
       },
