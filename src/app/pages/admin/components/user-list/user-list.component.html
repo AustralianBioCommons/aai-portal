@@ -1,3 +1,12 @@
+@if (alert()) {
+  <app-alert
+    [type]="alert()!.type"
+    [message]="alert()!.message"
+    [dismissible]="true"
+    (dismissed)="alert.set(null)"
+  ></app-alert>
+}
+
 <div class="relative flex flex-1 grow flex-col gap-12 p-6 lg:p-12 lg:px-48">
   <div
     class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
@@ -33,7 +42,7 @@
             viewBox="0 0 24 24"
             stroke-width="2"
             stroke="currentColor"
-            class="size-4"
+            class="size-4 text-biocommons-primary"
           >
             <path
               stroke-linecap="round"
@@ -68,31 +77,215 @@
     </div>
   </div>
 
-  <div class="flex flex-1 flex-col gap-6">
-    <div class="space-y-2">
-      <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
-      <div class="font-light text-gray-500">
-        Total: {{ users().length }} users
+  <div class="flex flex-1 flex-col">
+    <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
+    <div
+      class="mb-2 mt-6 flex items-center px-4 text-sm font-medium text-gray-900"
+    >
+      <div class="w-5/12 flex-1">
+        Total:
+        <span class="font-light text-gray-500">{{ users().length }} users</span>
       </div>
+      <div class="w-4/12">Bundles</div>
+      <div class="w-2/12">Platform Access</div>
+      <div class="w-1/12"></div>
     </div>
     @if (loading()) {
       <div class="flex w-full flex-1 items-center justify-center">
         <app-loading-spinner />
       </div>
     } @else {
-      <div class="flex flex-1 flex-col gap-6">
+      <div class="flex flex-1 flex-col gap-4">
         @if (users().length === 0) {
           <div class="flex flex-1 items-center justify-center text-gray-900">
             No users found
           </div>
         } @else {
           @for (user of users(); track user.id) {
-            <a
-              [routerLink]="['/user', user.id]"
-              class="flex items-center justify-between rounded-md bg-white p-4 font-normal shadow transition-all hover:-translate-y-0.5 hover:cursor-pointer"
+            <div
+              class="flex items-center rounded-md bg-white p-4 font-normal shadow"
             >
-              {{ user.email }}
-            </a>
+              <div class="w-5/12 flex-1 truncate">
+                {{ user.email }}
+              </div>
+              <div class="flex w-4/12 flex-wrap gap-2">
+                @if (user.group_memberships.length > 0) {
+                  @for (group of user.group_memberships; track group.id) {
+                    <span
+                      class="rounded px-2 py-0.5 text-sm font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800':
+                          group.approval_status === 'approved',
+                        'bg-yellow-100 text-yellow-800':
+                          group.approval_status === 'pending',
+                        'bg-red-100 text-red-800':
+                          group.approval_status === 'revoked',
+                      }"
+                    >
+                      {{ group.group_short_name }}
+                    </span>
+                  }
+                } @else {
+                  None
+                }
+              </div>
+              <div class="w-2/12">
+                <!-- TODO: Update this logic to only show platform specific access (BPA admin sees BPA platform access, etc.) once platform admins role handling is implemented -->
+                @if (user.platform_memberships.length > 0) {
+                  @for (
+                    platform of user.platform_memberships;
+                    track platform.id
+                  ) {
+                    <div
+                      class="flex items-center gap-2 text-sm font-medium"
+                      [ngClass]="{
+                        'text-green-500':
+                          platform.approval_status === 'approved',
+                        'text-yellow-500':
+                          platform.approval_status === 'pending',
+                        'text-red-500': platform.approval_status === 'revoked',
+                      }"
+                    >
+                      <span class="truncate">
+                        {{ platform.platform_name }}
+                      </span>
+                      @if (platform.approval_status === "revoked") {
+                        <span
+                          [title]="
+                            platform.revocation_reason ||
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+                          "
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="size-5 min-h-5 min-w-5 transition-all hover:cursor-pointer hover:text-red-600"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </span>
+                      }
+                    </div>
+                  }
+                } @else {
+                  None
+                }
+              </div>
+              <div class="relative flex w-1/12 justify-end">
+                <button
+                  type="button"
+                  class="user-menu-button rounded-full p-1 transition-all hover:bg-gray-200"
+                  (click)="toggleUserMenu(user.id, $event)"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                    />
+                  </svg>
+                </button>
+                @if (isMenuOpen(user.id)) {
+                  <div
+                    class="user-menu-dropdown absolute right-0 top-full z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                    role="menu"
+                    aria-orientation="vertical"
+                    tabindex="-1"
+                  >
+                    <div class="py-1">
+                      <button
+                        type="button"
+                        (click)="navigateToUserDetails(user.id)"
+                        class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                        role="menuitem"
+                        tabindex="-1"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-5"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                          />
+                        </svg>
+                        View User Details
+                      </button>
+                      <!-- TODO: Update this logic to only show platform specific access (BPA admin sees BPA platform access, etc.) once platform admins role handling is implemented -->
+                      @if (
+                        user.platform_memberships[0].approval_status ===
+                        "approved"
+                      ) {
+                        <button
+                          type="button"
+                          class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                          role="menuitem"
+                          tabindex="-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="size-5"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                            />
+                          </svg>
+                          Revoke Platform Access
+                        </button>
+                      }
+                      @if (!user.email_verified) {
+                        <button
+                          type="button"
+                          (click)="resendVerificationEmail(user.id)"
+                          class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                          role="menuitem"
+                          tabindex="-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="size-5"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
+                            />
+                          </svg>
+                          Resend Verification Email
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
           }
         }
       </div>

@@ -36,28 +36,33 @@ export interface FilterOption {
   name: string;
 }
 
-export interface BiocommonsUserResponse {
-  id: string;
-  email: string;
-  email_verified: boolean;
-  username: string;
-  created_at: string;
-}
-
 export interface PlatformMembership {
   id: string;
   platform_id: PlatformId;
+  platform_name: string;
   user_id: string;
   approval_status: string;
   updated_by: string;
+  revocation_reason?: string;
 }
 
 export interface GroupMembership {
   id: string;
   group_id: string;
   group_name: string;
+  group_short_name: string;
   approval_status: string;
   updated_by: string;
+}
+
+export interface BiocommonsUserResponse {
+  id: string;
+  email: string;
+  email_verified: boolean;
+  username: string;
+  created_at: string;
+  platform_memberships: PlatformMembership[];
+  group_memberships: GroupMembership[];
 }
 
 export interface BiocommonsUserDetails extends BiocommonsAuth0User {
