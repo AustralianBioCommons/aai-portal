@@ -7,7 +7,7 @@ import {
   ElementRef,
   Renderer2,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import {
   ApiService,
@@ -32,6 +32,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 })
 export class UserDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private apiService = inject(ApiService);
   private renderer = inject(Renderer2);
 
@@ -46,9 +47,20 @@ export class UserDetailsComponent implements OnInit {
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  returnUrl = signal<string>('/all-users');
 
   ngOnInit() {
     const userId = this.route.snapshot.paramMap.get('id');
+
+    // Get returnUrl from navigation state
+    const navigation = this.router.getCurrentNavigation();
+    const stateReturnUrl =
+      navigation?.extras?.state?.['returnUrl'] || history.state?.returnUrl;
+
+    if (stateReturnUrl) {
+      this.returnUrl.set(stateReturnUrl);
+    }
+
     if (userId) {
       this.apiService.getUserDetails(userId).subscribe({
         next: (user) => {

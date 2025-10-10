@@ -14,6 +14,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -40,6 +41,8 @@ export class NavbarComponent {
 
   // Component state
   pendingCount = signal(0);
+  revokedCount = signal(0);
+  unverifiedCount = signal(0);
   userMenuOpen = signal(false);
 
   navigationPages = computed(() =>
@@ -66,34 +69,24 @@ export class NavbarComponent {
     effect(() => {
       if (this.isAuthenticated() && !this.isLoading()) {
         if (this.isAdmin()) {
-          // Admin: Get pending users
-          this.api
-            .getAdminPendingUsers()
+          // Fetch all counts in parallel
+          forkJoin({
+            pending: this.api.getAdminPendingUsers(),
+            revoked: this.api.getAdminRevokedUsers(),
+            unverified: this.api.getAdminUnverifiedUsers(),
+          })
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-              next: (pendingUsers) => {
-                this.pendingCount.set(pendingUsers?.length || 0);
+              next: ({ pending, revoked, unverified }) => {
+                this.pendingCount.set(pending?.length || 0);
+                this.revokedCount.set(revoked?.length || 0);
+                this.unverifiedCount.set(unverified?.length || 0);
               },
               error: (error) => {
-                console.error('Failed to fetch pending users count:', error);
+                console.error('Failed to fetch user counts:', error);
                 this.pendingCount.set(0);
-              },
-            });
-        } else {
-          // Non-admin: Get pending requests (platforms and groups)
-          this.api
-            .getUserAllPending()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: (pendingData) => {
-                const totalPending =
-                  (pendingData?.platforms?.length || 0) +
-                  (pendingData?.groups?.length || 0);
-                this.pendingCount.set(totalPending);
-              },
-              error: (error) => {
-                console.error('Failed to fetch pending requests count:', error);
-                this.pendingCount.set(0);
+                this.revokedCount.set(0);
+                this.unverifiedCount.set(0);
               },
             });
         }
