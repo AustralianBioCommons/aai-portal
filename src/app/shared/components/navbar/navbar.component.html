@@ -101,14 +101,27 @@
           "
         >
           {{ page.label }}
-          @if (
-            (!isAdmin() && page.label === "Pending" && pendingCount() > 0) ||
-            (isAdmin() && page.label === "Requests" && pendingCount() > 0)
-          ) {
+          @if (isAdmin() && page.label === "Pending" && pendingCount() > 0) {
             <span
-              class="min-h-6 min-w-6 rounded-full bg-red-500 px-2 py-1 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
             >
               {{ pendingCount() }}
+            </span>
+          }
+          @if (isAdmin() && page.label === "Revoked" && revokedCount() > 0) {
+            <span
+              class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
+            >
+              {{ revokedCount() }}
+            </span>
+          }
+          @if (
+            isAdmin() && page.label === "Unverified" && unverifiedCount() > 0
+          ) {
+            <span
+              class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
+            >
+              {{ unverifiedCount() }}
             </span>
           }
         </a>
