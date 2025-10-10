@@ -3,7 +3,10 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError, EMPTY } from 'rxjs';
 import { signal } from '@angular/core';
 import { NavbarComponent } from './navbar.component';
-import { ApiService } from '../../../core/services/api.service';
+import {
+  ApiService,
+  BiocommonsUserResponse,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 describe('NavbarComponent', () => {
@@ -114,7 +117,7 @@ describe('NavbarComponent', () => {
     const adminFixture = TestBed.createComponent(NavbarComponent);
     const adminComponent = adminFixture.componentInstance;
 
-    const mockUsers = [
+    const mockUsers: Partial<BiocommonsUserResponse>[] = [
       { id: '1', email: 'user1@test.com' },
       { id: '2', email: 'user2@test.com' },
     ];
@@ -122,7 +125,9 @@ describe('NavbarComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of(mockUsers as any));
+    mockApiService.getAdminPendingUsers.and.returnValue(
+      of(mockUsers as BiocommonsUserResponse[]),
+    );
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
