@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { Renderer2 } from '@angular/core';
-import { of, throwError, Observable } from 'rxjs';
+import { of, throwError, Observable, EMPTY } from 'rxjs';
 import { By } from '@angular/platform-browser';
 
 import { UserDetailsComponent } from './user-details.component';
@@ -49,10 +49,10 @@ describe('UserDetailsComponent', () => {
     ],
     group_memberships: [
       {
-        id: 'gm1',
-        group_id: 'rg1',
-        group_name: 'Research Group',
-        group_short_name: 'RG',
+        id: 'pm2',
+        group_id: 'bpa',
+        group_name: 'Bioplatforms Australia',
+        group_short_name: 'BPA',
         approval_status: 'pending',
         updated_by: 'admin',
       },
@@ -68,6 +68,16 @@ describe('UserDetailsComponent', () => {
       'listen',
       'removeChild',
     ]);
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl'],
+      {
+        events: EMPTY,
+      },
+    );
+    routerSpy.getCurrentNavigation.and.returnValue(null);
+    routerSpy.createUrlTree.and.returnValue({} as UrlTree);
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
     mockActivatedRoute = {
       snapshot: {
@@ -86,6 +96,7 @@ describe('UserDetailsComponent', () => {
         { provide: ApiService, useValue: apiSpy },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: Renderer2, useValue: rendererSpy },
+        { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
 
@@ -311,5 +322,48 @@ describe('UserDetailsComponent', () => {
     expect(errorElement.nativeElement.textContent.trim()).toBe(
       'Test error message',
     );
+  });
+
+  it('should set returnUrl from navigation state', () => {
+    const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    mockRouter.getCurrentNavigation.and.returnValue({
+      id: 1,
+      initialUrl: {} as UrlTree,
+      extractedUrl: {} as UrlTree,
+      trigger: 'imperative',
+      previousNavigation: null,
+      extras: {
+        state: {
+          returnUrl: '/pending-users',
+        },
+      },
+    });
+
+    fixture = TestBed.createComponent(UserDetailsComponent);
+    component = fixture.componentInstance;
+    mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+
+    fixture.detectChanges();
+
+    expect(component.returnUrl()).toBe('/pending-users');
+  });
+
+  it('should set returnUrl from history state when navigation state is not available', () => {
+    const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    mockRouter.getCurrentNavigation.and.returnValue(null);
+
+    spyOnProperty(history, 'state', 'get').and.returnValue({
+      returnUrl: '/revoked-users',
+    });
+
+    fixture = TestBed.createComponent(UserDetailsComponent);
+    component = fixture.componentInstance;
+    mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+
+    fixture.detectChanges();
+
+    expect(component.returnUrl()).toBe('/revoked-users');
   });
 });

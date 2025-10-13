@@ -29,6 +29,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
  * - title: Display heading for the list
  * - getUsers: API method that fetches users. Must accept AdminGetUsersApiParams (page, perPage, filterBy, search, etc.)
  *   and return Observable<BiocommonsUserResponse[]>. Pass a bound ApiService method like apiService.getAllUsers.bind(apiService)
+ * - returnUrl: URL to navigate back to from user details page
  *
  * Example: <app-user-list [title]="'All Users'" [getUsers]="apiService.getAllUsers.bind(apiService)" />
  */
