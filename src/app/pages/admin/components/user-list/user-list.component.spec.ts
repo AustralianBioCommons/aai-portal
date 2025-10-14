@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError, Subject } from 'rxjs';
 
 import { UserListComponent } from './user-list.component';
@@ -22,6 +22,8 @@ describe('UserListComponent', () => {
       username: 'user1',
       email_verified: true,
       created_at: '2023-01-01T00:00:00Z',
+      platform_memberships: [],
+      group_memberships: [],
     },
     {
       id: '2',
@@ -29,6 +31,8 @@ describe('UserListComponent', () => {
       username: 'user2',
       email_verified: true,
       created_at: '2023-01-02T00:00:00Z',
+      platform_memberships: [],
+      group_memberships: [],
     },
   ];
 
@@ -42,8 +46,14 @@ describe('UserListComponent', () => {
     .and.returnValue(of(mockUsers));
 
   beforeEach(async () => {
-    mockApiService = jasmine.createSpyObj('ApiService', ['getFilterOptions']);
+    mockApiService = jasmine.createSpyObj('ApiService', [
+      'getFilterOptions',
+      'resendVerificationEmail',
+    ]);
     mockApiService.getFilterOptions.and.returnValue(of(mockFilterOptions));
+    mockApiService.resendVerificationEmail.and.returnValue(
+      of({ message: 'Email sent' }),
+    );
 
     await TestBed.configureTestingModule({
       imports: [UserListComponent, FormsModule],
@@ -93,7 +103,7 @@ describe('UserListComponent', () => {
     fixture.detectChanges();
     const countElement =
       fixture.debugElement.nativeElement.querySelector('.text-gray-500');
-    expect(countElement.textContent).toContain('Total: 2 users');
+    expect(countElement.textContent).toContain('2 users');
   });
 
   it('should set loading state while loading users', () => {
@@ -247,5 +257,75 @@ describe('UserListComponent', () => {
         done();
       }, 600);
     }, 600);
+  });
+
+  it('should navigate to user details with returnUrl state', () => {
+    const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    spyOn(mockRouter, 'navigate');
+
+    fixture.componentRef.setInput('returnUrl', '/pending-users');
+    fixture.detectChanges();
+
+    component.navigateToUserDetails('123');
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/user', '123'], {
+      state: { returnUrl: '/pending-users' },
+    });
+  });
+
+  it('should navigate to user details with empty returnUrl when not provided', () => {
+    const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    spyOn(mockRouter, 'navigate');
+
+    fixture.detectChanges();
+
+    component.navigateToUserDetails('123');
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/user', '123'], {
+      state: { returnUrl: '' },
+    });
+  });
+
+  it('should toggle user menu open and closed', () => {
+    fixture.detectChanges();
+    const mockEvent = {
+      stopPropagation: jasmine.createSpy(),
+    } as unknown as Event;
+
+    component.toggleUserMenu('user1', mockEvent);
+    expect(component.isMenuOpen('user1')).toBe(true);
+    expect(mockEvent.stopPropagation).toHaveBeenCalled();
+
+    component.toggleUserMenu('user1', mockEvent);
+    expect(component.isMenuOpen('user1')).toBe(false);
+  });
+
+  it('should resend verification email successfully', () => {
+    fixture.detectChanges();
+
+    component.resendVerificationEmail('123');
+
+    expect(mockApiService.resendVerificationEmail).toHaveBeenCalledWith('123');
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Verification email sent successfully',
+    });
+    expect(component.openMenuUserId()).toBeNull();
+  });
+
+  it('should handle resend verification email error', () => {
+    fixture.detectChanges();
+    mockApiService.resendVerificationEmail.and.returnValue(
+      throwError(() => new Error('Network error')),
+    );
+
+    component.resendVerificationEmail('123');
+
+    expect(mockApiService.resendVerificationEmail).toHaveBeenCalledWith('123');
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'Failed to resend verification email',
+    });
+    expect(component.openMenuUserId()).toBeNull();
   });
 });

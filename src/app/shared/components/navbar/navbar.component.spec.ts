@@ -4,8 +4,8 @@ import { of, throwError, EMPTY } from 'rxjs';
 import { signal } from '@angular/core';
 import { NavbarComponent } from './navbar.component';
 import {
-  AllPendingResponse,
   ApiService,
+  BiocommonsUserResponse,
 } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -16,7 +16,12 @@ describe('NavbarComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserAllPending']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getUserAllPending',
+      'getAdminPendingUsers',
+      'getAdminRevokedUsers',
+      'getAdminUnverifiedUsers',
+    ]);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
@@ -64,32 +69,140 @@ describe('NavbarComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
+    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should calculate pending count correctly', () => {
-    const mockPending: AllPendingResponse = {
-      platforms: [{ platform_id: 'galaxy', approval_status: 'pending' }],
-      groups: [
-        { group_id: 'tsi', group_name: 'TSI', approval_status: 'pending' },
+  it('should calculate all user counts (pending, revoked, unverified) for admin users', async () => {
+    const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
+      isAuthenticated: signal(true),
+      user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
+      isAdmin: signal(true),
+      isLoading: signal(false),
+    });
+
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['navigate', 'createUrlTree', 'serializeUrl'],
+      {
+        url: '/services',
+        events: EMPTY,
+        routerState: { root: {} },
+      },
+    );
+
+    routerSpy.createUrlTree.and.returnValue({});
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { params: {}, queryParams: {} },
+      params: of({}),
+      queryParams: of({}),
+    });
+
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [NavbarComponent],
+      providers: [
+        { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: adminAuthSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
       ],
-    };
-    mockApiService.getUserAllPending.and.returnValue(of(mockPending));
+    }).compileComponents();
 
-    fixture.detectChanges();
+    const adminFixture = TestBed.createComponent(NavbarComponent);
+    const adminComponent = adminFixture.componentInstance;
 
-    expect(component.pendingCount()).toBe(2);
+    const mockPendingUsers: Partial<BiocommonsUserResponse>[] = [
+      { id: '1', email: 'pending1@test.com' },
+      { id: '2', email: 'pending2@test.com' },
+    ];
+    const mockRevokedUsers: Partial<BiocommonsUserResponse>[] = [
+      { id: '3', email: 'revoked1@test.com' },
+      { id: '4', email: 'revoked2@test.com' },
+      { id: '5', email: 'revoked3@test.com' },
+    ];
+    const mockUnverifiedUsers: Partial<BiocommonsUserResponse>[] = [
+      { id: '6', email: 'unverified1@test.com' },
+    ];
+
+    mockApiService.getAdminPendingUsers.and.returnValue(
+      of(mockPendingUsers as BiocommonsUserResponse[]),
+    );
+    mockApiService.getAdminRevokedUsers.and.returnValue(
+      of(mockRevokedUsers as BiocommonsUserResponse[]),
+    );
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(
+      of(mockUnverifiedUsers as BiocommonsUserResponse[]),
+    );
+
+    adminFixture.detectChanges();
+
+    expect(adminComponent.pendingCount()).toBe(2);
+    expect(adminComponent.revokedCount()).toBe(3);
+    expect(adminComponent.unverifiedCount()).toBe(1);
   });
 
-  it('should handle API error gracefully', () => {
-    mockApiService.getUserAllPending.and.returnValue(
+  it('should handle API error gracefully and reset all counts', async () => {
+    const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
+      isAuthenticated: signal(true),
+      user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
+      isAdmin: signal(true),
+      isLoading: signal(false),
+    });
+
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['navigate', 'createUrlTree', 'serializeUrl'],
+      {
+        url: '/all-users',
+        events: EMPTY,
+        routerState: { root: {} },
+      },
+    );
+
+    routerSpy.createUrlTree.and.returnValue({});
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { params: {}, queryParams: {} },
+      params: of({}),
+      queryParams: of({}),
+    });
+
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [NavbarComponent],
+      providers: [
+        { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: adminAuthSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
+      ],
+    }).compileComponents();
+
+    const adminFixture = TestBed.createComponent(NavbarComponent);
+    const adminComponent = adminFixture.componentInstance;
+
+    mockApiService.getAdminPendingUsers.and.returnValue(
+      throwError(() => new Error('API Error')),
+    );
+    mockApiService.getAdminRevokedUsers.and.returnValue(
+      throwError(() => new Error('API Error')),
+    );
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
-    fixture.detectChanges();
+    adminFixture.detectChanges();
 
-    expect(component.pendingCount()).toBe(0);
+    expect(adminComponent.pendingCount()).toBe(0);
+    expect(adminComponent.revokedCount()).toBe(0);
+    expect(adminComponent.unverifiedCount()).toBe(0);
   });
 
   it('should return user navigation pages for non-admin', () => {
