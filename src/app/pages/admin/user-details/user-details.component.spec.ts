@@ -63,6 +63,8 @@ describe('UserDetailsComponent', () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserDetails',
       'resendVerificationEmail',
+      'approvePlatformAccess',
+      'revokePlatformAccess',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -354,5 +356,192 @@ describe('UserDetailsComponent', () => {
     fixture.detectChanges();
 
     expect(component.returnUrl()).toBe('/revoked-users');
+  });
+
+  describe('Platform Toggle and Revoke Modal', () => {
+    it('should toggle platform approval to approved', () => {
+      const pendingMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        platform_memberships: [
+          {
+            id: 'pm1',
+            platform_id: 'galaxy' as const,
+            platform_name: 'Galaxy Australia',
+            user_id: '123',
+            approval_status: 'pending',
+            updated_by: 'admin',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingMembership));
+      mockApiService.approvePlatformAccess.and.returnValue(
+        of({ updated: true }),
+      );
+
+      fixture.detectChanges();
+
+      component.togglePlatformApproval('galaxy', 'pending');
+
+      expect(mockApiService.approvePlatformAccess).toHaveBeenCalledWith(
+        '123',
+        'galaxy',
+      );
+    });
+
+    it('should open revoke modal when toggling approved platform', () => {
+      fixture.detectChanges();
+
+      component.togglePlatformApproval('galaxy', 'approved');
+
+      expect(component.showRevokeModal()).toBeTrue();
+      expect(component.selectedPlatformForRevoke()).toBe('galaxy');
+    });
+
+    it('should close revoke modal and reset form', () => {
+      component.showRevokeModal.set(true);
+      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeReasonControl.setValue('test reason');
+
+      component.closeRevokeModal();
+
+      expect(component.showRevokeModal()).toBeFalse();
+      expect(component.selectedPlatformForRevoke()).toBeNull();
+      expect(component.revokeReasonControl.value).toBe('');
+    });
+
+    it('should revoke platform access with reason', () => {
+      mockApiService.revokePlatformAccess.and.returnValue(
+        of({ updated: true }),
+      );
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeReasonControl.setValue('Security violation');
+
+      component.confirmRevokePlatformAccess();
+
+      expect(mockApiService.revokePlatformAccess).toHaveBeenCalledWith(
+        '123',
+        'galaxy',
+        'Security violation',
+      );
+      expect(component.showRevokeModal()).toBeFalse();
+    });
+
+    it('should not revoke without reason', () => {
+      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeReasonControl.setValue('');
+
+      component.confirmRevokePlatformAccess();
+
+      expect(mockApiService.revokePlatformAccess).not.toHaveBeenCalled();
+      expect(component.revokeReasonControl.touched).toBeTrue();
+    });
+
+    it('should handle approve platform error', () => {
+      const pendingMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        platform_memberships: [
+          {
+            id: 'pm1',
+            platform_id: 'galaxy' as const,
+            platform_name: 'Galaxy Australia',
+            user_id: '123',
+            approval_status: 'pending',
+            updated_by: 'admin',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingMembership));
+      mockApiService.approvePlatformAccess.and.returnValue(
+        throwError(() => new Error('Approval failed')),
+      );
+      spyOn(console, 'error');
+
+      fixture.detectChanges();
+
+      component.togglePlatformApproval('galaxy', 'pending');
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to approve platform access:',
+        jasmine.any(Error),
+      );
+      expect(component.alert()?.type).toBe('error');
+      expect(component.alert()?.message).toBe(
+        'Failed to approve platform access',
+      );
+    });
+
+    it('should handle revoke platform error', () => {
+      mockApiService.revokePlatformAccess.and.returnValue(
+        throwError(() => new Error('Revoke failed')),
+      );
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeReasonControl.setValue('Test reason');
+
+      component.confirmRevokePlatformAccess();
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to revoke platform access:',
+        jasmine.any(Error),
+      );
+      expect(component.alert()?.type).toBe('error');
+      expect(component.showRevokeModal()).toBeFalse();
+    });
+
+    it('should display toggle switch for platform memberships', () => {
+      fixture.detectChanges();
+
+      const toggleButton = fixture.debugElement.query(
+        By.css('button[role="switch"]'),
+      );
+      expect(toggleButton).toBeTruthy();
+      expect(toggleButton.nativeElement.getAttribute('aria-checked')).toBe(
+        'true',
+      );
+    });
+
+    it('should show revoke modal in DOM when open', () => {
+      component.showRevokeModal.set(true);
+      fixture.detectChanges();
+
+      const modal = fixture.debugElement.query(By.css('.fixed.inset-0'));
+      expect(modal).toBeTruthy();
+
+      const modalTitle = fixture.debugElement.query(
+        By.css('#revoke-modal-title'),
+      );
+      expect(modalTitle.nativeElement.textContent).toContain(
+        'Do you want to revoke',
+      );
+    });
+
+    it('should display revocation reason tooltip for revoked platforms', () => {
+      const revokedMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        platform_memberships: [
+          {
+            id: 'pm1',
+            platform_id: 'galaxy' as const,
+            platform_name: 'Galaxy Australia',
+            user_id: '123',
+            approval_status: 'revoked',
+            updated_by: 'admin',
+            revocation_reason: 'Access expired',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(revokedMembership));
+      fixture.detectChanges();
+
+      const tooltip = fixture.debugElement.query(
+        By.css('.group-hover\\:block'),
+      );
+      expect(tooltip).toBeTruthy();
+    });
   });
 });
