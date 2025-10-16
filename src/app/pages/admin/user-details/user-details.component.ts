@@ -9,13 +9,14 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ApiService,
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
-import { PLATFORM_NAMES } from '../../../core/constants/constants';
+import { PLATFORM_NAMES, PlatformId } from '../../../core/constants/constants';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 @Component({
@@ -26,6 +27,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
     RouterLink,
     AlertComponent,
     ButtonComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
@@ -42,12 +44,21 @@ export class UserDetailsComponent implements OnInit {
   @ViewChild('actionMenuButton', { read: ElementRef })
   actionMenuButton!: ElementRef;
 
+  // State signals
   user = signal<BiocommonsUserDetails | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
+  showRevokeModal = signal(false);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
+  selectedPlatformForRevoke = signal<PlatformId | null>(null);
+
+  // Form controls
+  revokeReasonControl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
 
   ngOnInit() {
     const userId = this.route.snapshot.paramMap.get('id');
@@ -81,20 +92,25 @@ export class UserDetailsComponent implements OnInit {
     this.setupClickOutsideMenuHandler();
   }
 
+  private setupClickOutsideMenuHandler() {
+    this.renderer.listen('window', 'click', (e: Event) => {
+      const target = e.target as Element;
+      if (
+        !this.actionMenuButton?.nativeElement.contains(target) &&
+        !this.actionMenu?.nativeElement.contains(target)
+      ) {
+        this.actionMenuOpen.set(false);
+      }
+    });
+  }
+
   toggleActionMenu() {
     this.actionMenuOpen.set(!this.actionMenuOpen());
   }
 
   resendVerificationEmail() {
-    const userId = this.user()?.user_id;
-    if (!userId) {
-      console.error('No user ID available');
-      this.alert.set({ type: 'error', message: 'No user ID available' });
-      return;
-    }
-
+    const userId = this.user()!.user_id;
     this.alert.set(null);
-
     this.apiService.resendVerificationEmail(userId).subscribe({
       next: () => {
         this.alert.set({
@@ -110,7 +126,6 @@ export class UserDetailsComponent implements OnInit {
         });
       },
     });
-
     this.actionMenuOpen.set(false);
   }
 
@@ -121,15 +136,88 @@ export class UserDetailsComponent implements OnInit {
     );
   }
 
-  private setupClickOutsideMenuHandler() {
-    this.renderer.listen('window', 'click', (e: Event) => {
-      const target = e.target as Element;
-      if (
-        !this.actionMenuButton?.nativeElement.contains(target) &&
-        !this.actionMenu?.nativeElement.contains(target)
-      ) {
-        this.actionMenuOpen.set(false);
-      }
+  togglePlatformApproval(platformId: PlatformId, currentStatus: string) {
+    if (currentStatus === 'approved') {
+      this.openRevokeModal(platformId);
+    } else {
+      this.approvePlatform(platformId);
+    }
+  }
+
+  openRevokeModal(platformId: PlatformId): void {
+    this.selectedPlatformForRevoke.set(platformId);
+    this.revokeReasonControl.reset();
+    this.showRevokeModal.set(true);
+  }
+
+  closeRevokeModal(): void {
+    this.showRevokeModal.set(false);
+    this.revokeReasonControl.reset();
+    this.selectedPlatformForRevoke.set(null);
+  }
+
+  confirmRevokePlatformAccess(): void {
+    const platformId = this.selectedPlatformForRevoke();
+    this.revokeReasonControl.markAsTouched();
+
+    if (!platformId || this.revokeReasonControl.invalid) {
+      return;
+    }
+
+    const userId = this.user()!.user_id;
+    const reason = this.revokeReasonControl.value.trim();
+    this.alert.set(null);
+
+    this.apiService.revokePlatformAccess(userId, platformId, reason).subscribe({
+      next: () => {
+        this.alert.set({
+          type: 'success',
+          message: 'Platform access revoked successfully',
+        });
+        this.closeRevokeModal();
+        this.refreshUserDetails(userId);
+      },
+      error: (error) => {
+        console.error('Failed to revoke platform access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to revoke platform access',
+        });
+        this.closeRevokeModal();
+      },
+    });
+  }
+
+  private approvePlatform(platformId: PlatformId) {
+    const userId = this.user()!.user_id;
+    this.alert.set(null);
+
+    this.apiService.approvePlatformAccess(userId, platformId).subscribe({
+      next: () => {
+        this.alert.set({
+          type: 'success',
+          message: 'Platform access approved successfully',
+        });
+        this.refreshUserDetails(userId);
+      },
+      error: (error) => {
+        console.error('Failed to approve platform access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to approve platform access',
+        });
+      },
+    });
+  }
+
+  private refreshUserDetails(userId: string) {
+    this.apiService.getUserDetails(userId).subscribe({
+      next: (user) => {
+        this.user.set(user);
+      },
+      error: (err) => {
+        console.error('Failed to refresh user details:', err);
+      },
     });
   }
 }

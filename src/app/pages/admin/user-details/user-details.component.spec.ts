@@ -193,7 +193,10 @@ describe('UserDetailsComponent', () => {
   it('should not show Actions button for verified users', () => {
     fixture.detectChanges();
 
-    const actionsButton = fixture.debugElement.query(By.css('button'));
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const actionsButton = buttons.find((btn) =>
+      btn.nativeElement.textContent?.includes('Actions'),
+    );
     expect(actionsButton).toBeFalsy();
   });
 
@@ -280,20 +283,6 @@ describe('UserDetailsComponent', () => {
     expect(component.alert()).toEqual({
       type: 'error',
       message: 'Failed to resend verification email',
-    });
-  });
-
-  it('should handle resend verification email with no user ID', () => {
-    spyOn(console, 'error');
-    component.user.set(null);
-
-    component.resendVerificationEmail();
-
-    expect(mockApiService.resendVerificationEmail).not.toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalledWith('No user ID available');
-    expect(component.alert()).toEqual({
-      type: 'error',
-      message: 'No user ID available',
     });
   });
 
