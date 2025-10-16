@@ -115,13 +115,13 @@
                 @if (user.group_memberships.length > 0) {
                   @for (group of user.group_memberships; track group.id) {
                     <span
-                      class="rounded px-2 py-0.5 text-sm font-medium"
+                      class="rounded-md border px-2 py-0.5 text-sm font-medium"
                       [ngClass]="{
-                        'bg-green-100 text-green-800':
+                        'border-green-600 bg-green-50 text-green-700':
                           group.approval_status === 'approved',
-                        'bg-yellow-100 text-yellow-800':
+                        'border-yellow-600 bg-yellow-50 text-yellow-800':
                           group.approval_status === 'pending',
-                        'bg-red-100 text-red-800':
+                        'border-red-600 bg-red-50 text-red-700':
                           group.approval_status === 'revoked',
                       }"
                     >
@@ -169,11 +169,11 @@
 
                           <!-- Tooltip -->
                           <div
-                            class="absolute right-full top-1/2 z-50 hidden max-w-80 -translate-x-2 -translate-y-1/2 rounded-md bg-gray-800 px-3 py-2 text-sm text-white opacity-0 shadow transition-all group-hover:block group-hover:opacity-90"
+                            class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-4 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90"
                           >
                             {{ platform.revocation_reason || "Revoked" }}
                             <div
-                              class="absolute right-0 top-1/2 h-2 w-2 -translate-y-1/2 translate-x-1 rotate-45 bg-gray-800 opacity-90"
+                              class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-800 placeholder-opacity-80"
                             ></div>
                           </div>
                         </div>
@@ -243,6 +243,13 @@
                       ) {
                         <button
                           type="button"
+                          (click)="
+                            openRevokeModal(
+                              user.id,
+                              user.email,
+                              user.platform_memberships[0].platform_id
+                            )
+                          "
                           class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                           role="menuitem"
                           tabindex="-1"
@@ -261,7 +268,7 @@
                               d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                             />
                           </svg>
-                          Revoke Platform Access
+                          Revoke
                         </button>
                       }
                       @if (!user.email_verified) {
@@ -300,3 +307,77 @@
     }
   </div>
 </div>
+
+<!-- Revoke Platform Access Modal -->
+@if (showRevokeModal()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+    tabindex="-1"
+    (click)="closeRevokeModal()"
+    (keydown.escape)="closeRevokeModal()"
+  >
+    <div
+      class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <h3
+        id="revoke-modal-title"
+        class="text-center text-2xl font-semibold text-gray-900"
+      >
+        Do you want to revoke {{ selectedUserForRevoke()?.email }}?
+      </h3>
+      <div>
+        <label
+          for="revoke-reason"
+          class="block text-sm font-medium text-gray-900"
+        >
+          Revocation reason *
+        </label>
+        <textarea
+          id="revoke-reason"
+          [formControl]="revokeReasonControl"
+          rows="4"
+          maxlength="1024"
+          class="mt-1 w-full rounded-md border px-3 py-2 font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
+          [class.border-red-500]="
+            revokeReasonControl.invalid && revokeReasonControl.touched
+          "
+        ></textarea>
+        <div
+          class="mt-1 flex text-xs"
+          [class]="
+            revokeReasonControl.invalid && revokeReasonControl.touched
+              ? 'justify-between'
+              : 'justify-end'
+          "
+        >
+          @if (revokeReasonControl.invalid && revokeReasonControl.touched) {
+            <div class="text-red-500">This field is required</div>
+          }
+          <div class="text-gray-500">
+            {{ revokeReasonControl.value.length }}/1024
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between gap-6">
+        <app-button
+          type="button"
+          variant="secondary"
+          (click)="closeRevokeModal()"
+        >
+          No
+        </app-button>
+        <app-button
+          type="button"
+          variant="primary"
+          (click)="confirmRevokePlatformAccess()"
+        >
+          Yes
+        </app-button>
+      </div>
+    </div>
+  </div>
+}

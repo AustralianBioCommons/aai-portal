@@ -17,22 +17,6 @@
     </div>
   </div>
 
-  @if (currentStep() < totalSteps && router.url === "/register") {
-    <div
-      class="flex w-full flex-col items-center justify-center gap-6 bg-gray-50 pt-12 text-center"
-    >
-      <div class="flex items-center justify-center gap-2">
-        <div class="font-light text-gray-500">Already have an account?</div>
-        <button
-          class="font-medium text-sky-500 hover:text-sky-600"
-          (click)="login()"
-        >
-          Log in
-        </button>
-      </div>
-    </div>
-  }
-
   <!-- Select bundle step -->
   @if (currentStep() === 1) {
     <div

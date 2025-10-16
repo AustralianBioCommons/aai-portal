@@ -15,6 +15,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
+import { DataRefreshService } from '../../../core/services/data-refresh.service';
 
 @Component({
   selector: 'app-navbar',
@@ -28,6 +29,7 @@ export class NavbarComponent {
   private renderer = inject(Renderer2);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private dataRefreshService = inject(DataRefreshService);
 
   @ViewChild('menu', { read: ElementRef }) menu!: ElementRef;
   @ViewChild('userMenuButton', { read: ElementRef })
@@ -61,36 +63,52 @@ export class NavbarComponent {
   );
 
   constructor() {
-    this.setupPendingCountTracking();
+    this.setupCountTracking();
+    this.setupDataRefreshListener();
     this.setupClickOutsideMenuHandler();
   }
 
-  private setupPendingCountTracking() {
+  /**
+   * Set up a listener for data refresh events.
+   */
+  private setupDataRefreshListener() {
+    this.dataRefreshService.refresh$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.refreshCounts();
+      });
+  }
+
+  private refreshCounts() {
+    if (!this.isAuthenticated() || this.isLoading() || !this.isAdmin()) {
+      return;
+    }
+
+    // Fetch all counts in parallel
+    forkJoin({
+      pending: this.api.getAdminPendingUsers(),
+      revoked: this.api.getAdminRevokedUsers(),
+      unverified: this.api.getAdminUnverifiedUsers(),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ pending, revoked, unverified }) => {
+          this.pendingCount.set(pending?.length || 0);
+          this.revokedCount.set(revoked?.length || 0);
+          this.unverifiedCount.set(unverified?.length || 0);
+        },
+        error: (error) => {
+          console.error('Failed to fetch user counts:', error);
+          this.pendingCount.set(0);
+          this.revokedCount.set(0);
+          this.unverifiedCount.set(0);
+        },
+      });
+  }
+
+  private setupCountTracking() {
     effect(() => {
-      if (this.isAuthenticated() && !this.isLoading()) {
-        if (this.isAdmin()) {
-          // Fetch all counts in parallel
-          forkJoin({
-            pending: this.api.getAdminPendingUsers(),
-            revoked: this.api.getAdminRevokedUsers(),
-            unverified: this.api.getAdminUnverifiedUsers(),
-          })
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: ({ pending, revoked, unverified }) => {
-                this.pendingCount.set(pending?.length || 0);
-                this.revokedCount.set(revoked?.length || 0);
-                this.unverifiedCount.set(unverified?.length || 0);
-              },
-              error: (error) => {
-                console.error('Failed to fetch user counts:', error);
-                this.pendingCount.set(0);
-                this.revokedCount.set(0);
-                this.unverifiedCount.set(0);
-              },
-            });
-        }
-      }
+      this.refreshCounts();
     });
   }
 

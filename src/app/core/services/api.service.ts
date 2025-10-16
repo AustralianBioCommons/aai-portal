@@ -53,6 +53,7 @@ export interface GroupMembership {
   group_short_name: string;
   approval_status: string;
   updated_by: string;
+  revocation_reason?: string;
 }
 
 export interface BiocommonsUserResponse {

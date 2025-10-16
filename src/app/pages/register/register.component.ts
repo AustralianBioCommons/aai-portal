@@ -10,7 +10,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
 import { biocommonsBundles, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
@@ -54,7 +53,6 @@ export class RegisterComponent {
   public router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
-  private authService = inject(AuthService);
   private validationService = inject(ValidationService);
   private http = inject(HttpClient);
 
@@ -104,10 +102,6 @@ export class RegisterComponent {
     );
 
     this.termsForm = this.formBuilder.nonNullable.group(termsControls);
-  }
-
-  login() {
-    this.authService.login();
   }
 
   resolved(captchaResponse: string | null): void {

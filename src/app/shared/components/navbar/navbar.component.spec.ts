@@ -8,6 +8,7 @@ import {
   BiocommonsUserResponse,
 } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DataRefreshService } from '../../../core/services/data-refresh.service';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -253,5 +254,77 @@ describe('NavbarComponent', () => {
     component.logout();
 
     expect(mockAuthService.logout).toHaveBeenCalled();
+  });
+
+  it('should refresh counts when data refresh is triggered', () => {
+    const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
+      isAuthenticated: signal(true),
+      user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
+      isAdmin: signal(true),
+      isLoading: signal(false),
+    });
+
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['navigate', 'createUrlTree', 'serializeUrl'],
+      {
+        url: '/services',
+        events: EMPTY,
+        routerState: { root: {} },
+      },
+    );
+
+    routerSpy.createUrlTree.and.returnValue({});
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { params: {}, queryParams: {} },
+      params: of({}),
+      queryParams: of({}),
+    });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [NavbarComponent],
+      providers: [
+        { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: adminAuthSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
+      ],
+    });
+
+    const adminFixture = TestBed.createComponent(NavbarComponent);
+    const dataRefreshService = TestBed.inject(DataRefreshService);
+
+    const mockPendingUsers: BiocommonsUserResponse[] = [
+      {
+        id: '1',
+        email: 'user1@example.com',
+        username: 'user1',
+        email_verified: true,
+        created_at: '2023-01-01',
+        platform_memberships: [],
+        group_memberships: [],
+      },
+    ];
+
+    mockApiService.getAdminPendingUsers.and.returnValue(of(mockPendingUsers));
+    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+
+    adminFixture.detectChanges();
+
+    // Reset calls from initialization
+    mockApiService.getAdminPendingUsers.calls.reset();
+    mockApiService.getAdminRevokedUsers.calls.reset();
+    mockApiService.getAdminUnverifiedUsers.calls.reset();
+
+    // Trigger refresh
+    dataRefreshService.triggerRefresh();
+
+    expect(mockApiService.getAdminPendingUsers).toHaveBeenCalled();
+    expect(mockApiService.getAdminRevokedUsers).toHaveBeenCalled();
+    expect(mockApiService.getAdminUnverifiedUsers).toHaveBeenCalled();
   });
 });

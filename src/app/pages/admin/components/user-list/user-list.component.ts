@@ -8,7 +8,12 @@ import {
   inject,
   Renderer2,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormControl,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { Subject, Observable } from 'rxjs';
@@ -21,6 +26,9 @@ import {
   AdminGetUsersApiParams,
 } from '../../../../core/services/api.service';
 import { AlertComponent } from '../../../../shared/components/alert/alert.component';
+import { PlatformId } from '../../../../core/constants/constants';
+import { DataRefreshService } from '../../../../core/services/data-refresh.service';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 /**
  * Reusable user list component with filtering and search.
@@ -36,14 +44,26 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [FormsModule, LoadingSpinnerComponent, AlertComponent, NgClass],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    LoadingSpinnerComponent,
+    AlertComponent,
+    NgClass,
+    ButtonComponent,
+  ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
 })
 export class UserListComponent implements OnInit, OnDestroy {
-  private apiService = inject(ApiService);
-  private renderer = inject(Renderer2);
   private router = inject(Router);
+  private renderer = inject(Renderer2);
+  private apiService = inject(ApiService);
+  private dataRefreshService = inject(DataRefreshService);
+
+  // Cleanup subjects
+  private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
 
   // Input signals
   title = input.required<string>();
@@ -53,17 +73,26 @@ export class UserListComponent implements OnInit, OnDestroy {
     >();
   returnUrl = input<string>(''); // Optional return URL for navigation back from user details
 
-  private destroy$ = new Subject<void>();
-  private searchSubject = new Subject<string>();
-
   // State signals
   loading = signal(false);
   openMenuUserId = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   users = signal<BiocommonsUserResponse[]>([]);
+  searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
-  searchTerm = model('');
+  showRevokeModal = signal(false);
+  selectedUserForRevoke = signal<{
+    userId: string;
+    email: string;
+    platformId: string;
+  } | null>(null);
+
+  // Form controls
+  revokeReasonControl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
 
   ngOnInit(): void {
     this.loadFilterOptions();
@@ -128,6 +157,57 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
 
     this.openMenuUserId.set(null);
+  }
+
+  openRevokeModal(userId: string, email: string, platformId: string): void {
+    this.selectedUserForRevoke.set({ userId, email, platformId });
+    this.revokeReasonControl.reset();
+    this.showRevokeModal.set(true);
+    this.openMenuUserId.set(null);
+  }
+
+  closeRevokeModal(): void {
+    this.showRevokeModal.set(false);
+    this.revokeReasonControl.reset();
+    this.selectedUserForRevoke.set(null);
+  }
+
+  confirmRevokePlatformAccess(): void {
+    const selectedUser = this.selectedUserForRevoke();
+    this.revokeReasonControl.markAsTouched();
+
+    if (!selectedUser || this.revokeReasonControl.invalid) {
+      return;
+    }
+
+    const reason = this.revokeReasonControl.value.trim();
+    this.alert.set(null);
+    this.apiService
+      .revokePlatformAccess(
+        selectedUser.userId,
+        selectedUser.platformId as PlatformId,
+        reason,
+      )
+      .subscribe({
+        next: () => {
+          this.alert.set({
+            type: 'success',
+            message: 'User revoked successfully',
+          });
+          this.closeRevokeModal();
+          this.loadUsers();
+          // Trigger refresh for navbar
+          this.dataRefreshService.triggerRefresh();
+        },
+        error: (error) => {
+          console.error('Failed to revoke user:', error);
+          this.alert.set({
+            type: 'error',
+            message: 'Failed to revoke user',
+          });
+          this.closeRevokeModal();
+        },
+      });
   }
 
   private setupSearchDebounce(): void {

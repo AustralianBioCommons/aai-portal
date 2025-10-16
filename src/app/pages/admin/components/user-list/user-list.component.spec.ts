@@ -9,6 +9,8 @@ import {
   BiocommonsUserResponse,
   FilterOption,
 } from '../../../../core/services/api.service';
+import { DataRefreshService } from '../../../../core/services/data-refresh.service';
+import { PlatformId } from '../../../../core/constants/constants';
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
@@ -49,11 +51,13 @@ describe('UserListComponent', () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
       'getFilterOptions',
       'resendVerificationEmail',
+      'revokePlatformAccess',
     ]);
     mockApiService.getFilterOptions.and.returnValue(of(mockFilterOptions));
     mockApiService.resendVerificationEmail.and.returnValue(
       of({ message: 'Email sent' }),
     );
+    mockApiService.revokePlatformAccess.and.returnValue(of({ updated: true }));
 
     await TestBed.configureTestingModule({
       imports: [UserListComponent, FormsModule],
@@ -327,5 +331,91 @@ describe('UserListComponent', () => {
       message: 'Failed to resend verification email',
     });
     expect(component.openMenuUserId()).toBeNull();
+  });
+
+  describe('Revoke Platform Access', () => {
+    it('should open revoke modal with correct user data', () => {
+      fixture.detectChanges();
+
+      component.openRevokeModal('user123', 'test@example.com', 'platform1');
+
+      expect(component.showRevokeModal()).toBe(true);
+      expect(component.selectedUserForRevoke()).toEqual({
+        userId: 'user123',
+        email: 'test@example.com',
+        platformId: 'platform1',
+      });
+      expect(component.revokeReasonControl.value).toBe('');
+      expect(component.openMenuUserId()).toBeNull();
+    });
+
+    it('should close revoke modal and reset form', () => {
+      fixture.detectChanges();
+
+      component.openRevokeModal('user123', 'test@example.com', 'platform1');
+      component.revokeReasonControl.setValue('Test reason');
+
+      component.closeRevokeModal();
+
+      expect(component.showRevokeModal()).toBe(false);
+      expect(component.selectedUserForRevoke()).toBeNull();
+      expect(component.revokeReasonControl.value).toBe('');
+    });
+
+    it('should not confirm revoke when form is invalid', () => {
+      fixture.detectChanges();
+
+      component.openRevokeModal('user123', 'test@example.com', 'platform1');
+
+      component.confirmRevokePlatformAccess();
+
+      expect(mockApiService.revokePlatformAccess).not.toHaveBeenCalled();
+      expect(component.revokeReasonControl.touched).toBe(true);
+    });
+
+    it('should successfully revoke platform access with valid reason', () => {
+      const mockDataRefreshService = TestBed.inject(
+        DataRefreshService,
+      ) as jasmine.SpyObj<DataRefreshService>;
+      spyOn(mockDataRefreshService, 'triggerRefresh');
+
+      fixture.detectChanges();
+
+      component.openRevokeModal('user123', 'test@example.com', 'bpa');
+      component.revokeReasonControl.setValue('Valid reason');
+
+      component.confirmRevokePlatformAccess();
+
+      expect(mockApiService.revokePlatformAccess).toHaveBeenCalledWith(
+        'user123',
+        'bpa' as PlatformId,
+        'Valid reason',
+      );
+      expect(component.alert()).toEqual({
+        type: 'success',
+        message: 'User revoked successfully',
+      });
+      expect(component.showRevokeModal()).toBe(false);
+      expect(mockDataRefreshService.triggerRefresh).toHaveBeenCalled();
+    });
+
+    it('should handle revoke platform access error', () => {
+      fixture.detectChanges();
+      mockApiService.revokePlatformAccess.and.returnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      component.openRevokeModal('user123', 'test@example.com', 'bpa');
+      component.revokeReasonControl.setValue('Valid reason');
+
+      component.confirmRevokePlatformAccess();
+
+      expect(mockApiService.revokePlatformAccess).toHaveBeenCalled();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to revoke user',
+      });
+      expect(component.showRevokeModal()).toBe(false);
+    });
   });
 });
