@@ -358,8 +358,25 @@ describe('RegisterComponent', () => {
       component['initializeTermsForm']();
 
       expect(component.termsForm.get('tsi')).toBeTruthy();
+      expect(component.termsForm.get('fgenesh')).toBeTruthy();
       expect(component.termsForm.get('bpa')).toBeTruthy();
       expect(component.termsForm.get('galaxy')).toBeTruthy();
+    });
+  });
+
+  describe('Bundles configuration', () => {
+    it('should include Fgenesh++ terms for the TSI bundle with the expected URL', () => {
+      const tsiBundle = component.bundles.find((bundle) => bundle.id === 'tsi');
+      const fgeneshService = tsiBundle?.services.find(
+        (service) => service.id === 'fgenesh',
+      );
+
+      expect(tsiBundle).toBeTruthy();
+      expect(fgeneshService).toBeTruthy();
+      expect(fgeneshService?.name).toBe('Fgenesh++ Terms and Conditions');
+      expect(fgeneshService?.termsUrl).toBe(
+        'https://site.usegalaxy.org.au/fgenesh-terms.html',
+      );
     });
   });
 
@@ -489,7 +506,7 @@ describe('RegisterComponent', () => {
       const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
 
       expect(dataPortalBundle?.services.length).toBe(2);
-      expect(tsiBundle?.services.length).toBe(3);
+      expect(tsiBundle?.services.length).toBe(4);
       expect(fungiBundle?.services.length).toBe(0);
     });
 
