@@ -34,9 +34,35 @@ describe('GalaxyRegisterSelectionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render register title', () => {
+  it('should render registration title', () => {
     const title = fixture.debugElement.query(By.css('.text-3xl'));
-    expect(title.nativeElement.textContent.trim()).toBe('Register');
+    expect(title.nativeElement.textContent.trim()).toBe(
+      'Registration options',
+    );
+  });
+
+  it('should render section headings', () => {
+    const headings = fixture.debugElement.queryAll(By.css('.text-2xl'));
+    expect(headings.length).toBe(2);
+    expect(headings[0].nativeElement.textContent.trim()).toBe(
+      '1. Galaxy Australia',
+    );
+    expect(headings[1].nativeElement.textContent.trim()).toBe(
+      '2. Galaxy Australia Service Bundles',
+    );
+  });
+
+  it('should display section descriptions', () => {
+    const descriptions = fixture.debugElement.queryAll(
+      By.css('.mb-6.font-light.text-gray-500'),
+    );
+    expect(descriptions.length).toBe(2);
+    expect(descriptions[0].nativeElement.textContent.trim()).toBe(
+      'Get free access to many free web-based bioinformatics tools and workflows.',
+    );
+    expect(descriptions[1].nativeElement.textContent.trim()).toBe(
+      'Request access to service bundles. These give you access to online bioinformatics data analysis services like Galaxy Australia, community-designed resources, and the Bioplatforms Australia Data Portal, all accessible via a single login.',
+    );
   });
 
   it('should have two continue buttons', () => {
