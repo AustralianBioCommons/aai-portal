@@ -34,24 +34,24 @@ describe('BpaRegisterSelectionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render register title', () => {
+  it('should render registration title', () => {
     const title = fixture.debugElement.query(By.css('.text-3xl'));
-    expect(title.nativeElement.textContent.trim()).toBe('Register');
+    expect(title.nativeElement.textContent.trim()).toBe('Registration options');
   });
 
-  it('should display Bioplatforms Australia Data Portal Access section', () => {
+  it('should display data portal access section', () => {
     const sectionTitles = fixture.debugElement.queryAll(By.css('.text-2xl'));
     expect(sectionTitles.length).toBe(2);
     expect(sectionTitles[0].nativeElement.textContent.trim()).toBe(
-      'Bioplatforms Australia Data Portal Access',
+      '1. Bioplatforms Australia Data Portal',
     );
   });
 
-  it('should display Data Portal Access + Bundles section', () => {
+  it('should display service bundles section', () => {
     const sectionTitles = fixture.debugElement.queryAll(By.css('.text-2xl'));
     expect(sectionTitles.length).toBe(2);
     expect(sectionTitles[1].nativeElement.textContent.trim()).toBe(
-      'Bioplatforms Australia Data Portal Access + Bundles',
+      '2. Bioplatforms Australia Data Portal Service Bundles',
     );
   });
 
@@ -61,10 +61,10 @@ describe('BpaRegisterSelectionComponent', () => {
     );
     expect(descriptions.length).toBe(2);
     expect(descriptions[0].nativeElement.textContent.trim()).toBe(
-      "Access the Bioplatforms Australia Data Portal's public and restricted data.",
+      "Request access to the Bioplatforms Australia Data Portal's public and restricted data.",
     );
     expect(descriptions[1].nativeElement.textContent.trim()).toBe(
-      "Access the Bioplatforms Australia Data Portal's public and restricted data, plus the Australian BioCommons service bundles.",
+      'Request access to service bundles. These give you access to online bioinformatics data analysis services, community-designed resources, and the Bioplatforms Australia Data Portal - all with a single login.',
     );
   });
 
