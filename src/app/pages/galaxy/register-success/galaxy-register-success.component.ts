@@ -9,6 +9,6 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 })
 export class GalaxyRegisterSuccessComponent {
   navigateToGalaxy(): void {
-    window.location.href = 'https://galaxy.test.biocommons.org.au';
+    window.location.href = 'http://dev.gvl.org.au/';
   }
 }

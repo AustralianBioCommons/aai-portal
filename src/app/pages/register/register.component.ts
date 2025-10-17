@@ -267,7 +267,7 @@ export class RegisterComponent {
       return {
         text: 'Return to Galaxy Australia',
         action: () =>
-          (window.location.href = 'https://galaxy.test.biocommons.org.au/'),
+          (window.location.href = 'http://dev.gvl.org.au/'),
       };
     } else {
       return {
