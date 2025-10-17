@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.3.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.2.0...v1.3.0) (2025-10-17)
+
+
+### Features
+
+* add revocation reason tooltip in admin user details ([bed71bc](https://github.com/AustralianBioCommons/aai-portal/commit/bed71bcdd669868d84285ded52e01b9e82dc28b8))
+* update user list & user details with revoke functionality ([5e9a9d9](https://github.com/AustralianBioCommons/aai-portal/commit/5e9a9d9fa8aa532cf8f164f649a1a13a3428bc61))
+* update user list & user details with revoke functionality & model ([2703ba0](https://github.com/AustralianBioCommons/aai-portal/commit/2703ba0cd3717165d0368b9cc8e5b2d53b761b2b))
+
+
+### Bug Fixes
+
+* make pretty prettier ([6df7c08](https://github.com/AustralianBioCommons/aai-portal/commit/6df7c0858636134b413f98e249721ae136fc9896))
+* make pretty prettier ([ca6eb50](https://github.com/AustralianBioCommons/aai-portal/commit/ca6eb5065d1746cdd8e3c0218947a873b0a2d9db))
+* update all links to galaxy to dev.gvl.org.au ([51c2566](https://github.com/AustralianBioCommons/aai-portal/commit/51c256623ee0ff3998501d356a6577a785ad4c21))
+* update all links to galaxy to dev.gvl.org.au ([b1927ef](https://github.com/AustralianBioCommons/aai-portal/commit/b1927ef51d0a93e50c751b1bffad3a6b674b3087))
+* update wording on registration pages ([3135c66](https://github.com/AustralianBioCommons/aai-portal/commit/3135c6658f48875764a4f34e3b312c2a9c730d9e))
+* update wording on registration pages ([1a380e6](https://github.com/AustralianBioCommons/aai-portal/commit/1a380e65ca28a1816711a44a4daea8f42ded8980))
+
 ## [1.2.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.1.0...v1.2.0) (2025-10-16)
 
 
