@@ -118,7 +118,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
   }
 
-  toggleUserMenu(userId: string, event: Event): void {
+  toggleUserMenu(userId: string): void {
     if (this.openMenuUserId() === userId) {
       this.openMenuUserId.set(null);
     } else {

@@ -292,15 +292,11 @@ describe('UserListComponent', () => {
 
   it('should toggle user menu open and closed', () => {
     fixture.detectChanges();
-    const mockEvent = {
-      stopPropagation: jasmine.createSpy(),
-    } as unknown as Event;
 
-    component.toggleUserMenu('user1', mockEvent);
+    component.toggleUserMenu('user1');
     expect(component.isMenuOpen('user1')).toBe(true);
-    expect(mockEvent.stopPropagation).toHaveBeenCalled();
 
-    component.toggleUserMenu('user1', mockEvent);
+    component.toggleUserMenu('user1');
     expect(component.isMenuOpen('user1')).toBe(false);
   });
 
