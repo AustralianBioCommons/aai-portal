@@ -7,6 +7,20 @@
   ></app-alert>
 }
 
+<!-- Revoke Modal -->
+@if (showRevokeModal()) {
+  <app-modal
+    [title]="'Do you want to revoke ' + selectedUserForRevoke()!.email + '?'"
+    type="revoke"
+    [textareaControl]="revokeReasonControl"
+    [textareaLabel]="'Revocation reason'"
+    primaryButtonText="Yes"
+    secondaryButtonText="No"
+    (primaryOutput)="confirmRevokePlatformAccess()"
+    (secondaryOutput)="closeRevokeModal()"
+  />
+}
+
 <div class="relative flex flex-1 grow flex-col gap-12 p-6 md:p-12 lg:px-48">
   <div
     class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
@@ -307,77 +321,3 @@
     }
   </div>
 </div>
-
-<!-- Revoke Platform Access Modal -->
-@if (showRevokeModal()) {
-  <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-    tabindex="-1"
-    (click)="closeRevokeModal()"
-    (keydown.escape)="closeRevokeModal()"
-  >
-    <div
-      class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
-      tabindex="-1"
-      (click)="$event.stopPropagation()"
-      (keydown)="$event.stopPropagation()"
-    >
-      <h3
-        id="revoke-modal-title"
-        class="text-center text-2xl font-semibold text-gray-900"
-      >
-        Do you want to revoke {{ selectedUserForRevoke()?.email }}?
-      </h3>
-      <div>
-        <label
-          for="revoke-reason"
-          class="block text-sm font-medium text-gray-900"
-        >
-          Revocation reason *
-        </label>
-        <textarea
-          id="revoke-reason"
-          [formControl]="revokeReasonControl"
-          rows="4"
-          maxlength="1024"
-          class="mt-1 w-full rounded-md border px-3 py-2 font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
-          [class.border-red-500]="
-            revokeReasonControl.invalid && revokeReasonControl.touched
-          "
-        ></textarea>
-        <div
-          class="mt-1 flex text-xs"
-          [class]="
-            revokeReasonControl.invalid && revokeReasonControl.touched
-              ? 'justify-between'
-              : 'justify-end'
-          "
-        >
-          @if (revokeReasonControl.invalid && revokeReasonControl.touched) {
-            <div class="text-red-500">This field is required</div>
-          }
-          <div class="text-gray-500">
-            {{ revokeReasonControl.value.length }}/1024
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-between gap-6">
-        <app-button
-          type="button"
-          variant="secondary"
-          (click)="closeRevokeModal()"
-        >
-          No
-        </app-button>
-        <app-button
-          type="button"
-          variant="primary"
-          (click)="confirmRevokePlatformAccess()"
-        >
-          Yes
-        </app-button>
-      </div>
-    </div>
-  </div>
-}

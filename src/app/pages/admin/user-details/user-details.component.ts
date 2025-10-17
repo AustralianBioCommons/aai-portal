@@ -18,6 +18,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { PLATFORM_NAMES, PlatformId } from '../../../core/constants/constants';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-user-details',
@@ -28,6 +29,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
     AlertComponent,
     ButtonComponent,
     ReactiveFormsModule,
+    ModalComponent,
   ],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
@@ -194,11 +196,11 @@ export class UserDetailsComponent implements OnInit {
 
     this.apiService.approvePlatformAccess(userId, platformId).subscribe({
       next: () => {
+        this.refreshUserDetails(userId);
         this.alert.set({
           type: 'success',
           message: 'Platform access approved successfully',
         });
-        this.refreshUserDetails(userId);
       },
       error: (error) => {
         console.error('Failed to approve platform access:', error);

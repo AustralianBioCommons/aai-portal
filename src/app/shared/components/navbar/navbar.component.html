@@ -84,11 +84,11 @@
     </div>
   </div>
 
-  @if (isNavigationPage()) {
+  @if (isNavigationPage() && isAdmin()) {
     <div
       class="mx-auto mb-8 flex flex-1 items-center justify-center gap-6 overflow-hidden bg-white"
     >
-      @for (page of navigationPages(); track page.route) {
+      @for (page of navigationPages; track page.route) {
         <a
           [routerLink]="page.route"
           routerLinkActive

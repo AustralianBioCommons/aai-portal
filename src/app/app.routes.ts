@@ -1,8 +1,4 @@
 import { Routes } from '@angular/router';
-import { ServicesComponent } from './pages/user/services/services.component';
-import { AccessComponent } from './pages/user/access/access.component';
-import { PendingComponent } from './pages/user/pending/pending.component';
-import { RequestServiceComponent } from './pages/user/services/request-service/request-service.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { AllUsersComponent } from './pages/admin/all-users/all-users.component';
 import { PendingUsersComponent } from './pages/admin/pending-users/pending-users.component';
@@ -142,18 +138,6 @@ export const routes: Routes = [
     component: DefaultLayoutComponent,
     canActivate: [authGuard],
     children: [
-      {
-        path: 'services',
-        component: ServicesComponent,
-        children: [
-          {
-            path: 'request',
-            component: RequestServiceComponent,
-          },
-        ],
-      },
-      { path: 'access', component: AccessComponent },
-      { path: 'pending', component: PendingComponent },
       {
         path: 'user/:id',
         component: UserDetailsComponent,

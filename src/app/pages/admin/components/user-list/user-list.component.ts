@@ -28,7 +28,7 @@ import {
 import { AlertComponent } from '../../../../shared/components/alert/alert.component';
 import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 /**
  * Reusable user list component with filtering and search.
@@ -50,7 +50,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
     LoadingSpinnerComponent,
     AlertComponent,
     NgClass,
-    ButtonComponent,
+    ModalComponent,
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',

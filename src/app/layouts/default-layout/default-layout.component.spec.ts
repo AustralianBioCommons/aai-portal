@@ -134,7 +134,7 @@ describe('DefaultLayoutComponent', () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/all-users']);
   });
 
-  it('should navigate to /services for authenticated non-admin users on root path', async () => {
+  it('should navigate to /profile for authenticated non-admin users on root path', async () => {
     const testBed = createTestBed(true, false, true, '/');
     await TestBed.compileComponents();
 
@@ -157,10 +157,10 @@ describe('DefaultLayoutComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/services']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/profile']);
   });
 
-  it('should navigate to /services for unauthenticated users on root path', async () => {
+  it('should navigate to /profile for unauthenticated users on root path', async () => {
     const testBed = createTestBed(false, false, true, '/');
     await TestBed.compileComponents();
 
@@ -183,7 +183,7 @@ describe('DefaultLayoutComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/services']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/profile']);
   });
 
   it('should not trigger navigation logic when not on root path', async () => {

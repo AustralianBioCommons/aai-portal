@@ -59,8 +59,8 @@ export class DefaultLayoutComponent implements OnInit {
     return this.authService.isAuthenticated()
       ? this.authService.isAdmin$.pipe(
           take(1),
-          map((isAdmin) => (isAdmin ? '/all-users' : '/services')),
+          map((isAdmin) => (isAdmin ? '/all-users' : '/profile')),
         )
-      : of('/services');
+      : of('/profile');
   }
 }
