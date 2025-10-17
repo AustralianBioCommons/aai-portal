@@ -23,6 +23,7 @@ import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.componen
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 import { BpaLayoutComponent } from './layouts/bpa-layout/bpa-layout.component';
 import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
+import { ProfileComponent } from './pages/user/profile/profile.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -138,6 +139,10 @@ export const routes: Routes = [
     component: DefaultLayoutComponent,
     canActivate: [authGuard],
     children: [
+      {
+        path: 'profile',
+        component: ProfileComponent,
+      },
       {
         path: 'user/:id',
         component: UserDetailsComponent,

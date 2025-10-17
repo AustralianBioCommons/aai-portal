@@ -119,7 +119,6 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   toggleUserMenu(userId: string, event: Event): void {
-    event.stopPropagation();
     if (this.openMenuUserId() === userId) {
       this.openMenuUserId.set(null);
     } else {
