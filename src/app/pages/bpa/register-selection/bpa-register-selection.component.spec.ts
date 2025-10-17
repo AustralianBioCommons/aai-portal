@@ -36,9 +36,7 @@ describe('BpaRegisterSelectionComponent', () => {
 
   it('should render registration title', () => {
     const title = fixture.debugElement.query(By.css('.text-3xl'));
-    expect(title.nativeElement.textContent.trim()).toBe(
-      'Registration options',
-    );
+    expect(title.nativeElement.textContent.trim()).toBe('Registration options');
   });
 
   it('should display data portal access section', () => {
