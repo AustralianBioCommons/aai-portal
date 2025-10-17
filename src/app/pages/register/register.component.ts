@@ -266,8 +266,7 @@ export class RegisterComponent {
     } else if (currentUrl.includes('/galaxy/register')) {
       return {
         text: 'Return to Galaxy Australia',
-        action: () =>
-          (window.location.href = 'http://dev.gvl.org.au/'),
+        action: () => (window.location.href = 'http://dev.gvl.org.au/'),
       };
     } else {
       return {
