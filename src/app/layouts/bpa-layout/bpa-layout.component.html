@@ -4,14 +4,16 @@
   <div
     class="flex min-h-screen flex-col items-center justify-center bg-white md:bg-gray-50"
   >
-    <nav class="flex w-full items-center justify-center bg-bpa-primary p-12">
-      <a [href]="bpaPortalUrl">
-        <img
-          src="assets/bpa-logo-horizontal.webp"
-          class="h-20 w-auto"
-          alt="Bioplatforms Australia Data Portal Logo"
-        />
-      </a>
+    <nav class="flex w-full justify-center bg-bpa-primary">
+      <div class="flex w-full max-w-6xl items-center px-12 py-8">
+        <a [href]="bpaPortalUrl" class="flex items-center">
+          <img
+            src="assets/bpa-logo-horizontal.webp"
+            class="h-20 w-auto"
+            alt="Bioplatforms Australia Data Portal Logo"
+          />
+        </a>
+      </div>
     </nav>
 
     <router-outlet></router-outlet>
