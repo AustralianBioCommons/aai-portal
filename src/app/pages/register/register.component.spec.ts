@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -28,6 +28,13 @@ describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let httpMock: HttpTestingController;
+  let originalPushState: History['pushState'];
+  let originalReplaceState: History['replaceState'];
+  let originalBack: History['back'];
+  let pushStateSpy: jasmine.Spy;
+  let replaceStateSpy: jasmine.Spy;
+  let backSpy: jasmine.Spy;
+  let originalScrollTo: typeof window.scrollTo;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,14 +50,29 @@ describe('RegisterComponent', () => {
       ],
     }).compileComponents();
 
+    originalPushState = window.history.pushState;
+    originalReplaceState = window.history.replaceState;
+    originalBack = window.history.back;
+    pushStateSpy = spyOn(window.history, 'pushState');
+    replaceStateSpy = spyOn(window.history, 'replaceState');
+    backSpy = spyOn(window.history, 'back');
+    originalScrollTo = window.scrollTo;
+    window.scrollTo = jasmine.createSpy('scrollTo') as typeof window.scrollTo;
+
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    pushStateSpy.calls.reset();
   });
 
   afterEach(() => {
     httpMock.verify();
+    fixture.destroy();
+    window.scrollTo = originalScrollTo;
+    window.history.pushState = originalPushState;
+    window.history.replaceState = originalReplaceState;
+    window.history.back = originalBack;
   });
 
   it('should create', () => {
@@ -132,7 +154,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should not proceed from step 2 with invalid registration form', () => {
-      component.currentStep.set(2);
+      component.selectBundle('bpa_galaxy');
       component.registrationForm.reset();
 
       component.nextStep();
@@ -141,7 +163,6 @@ describe('RegisterComponent', () => {
     });
 
     it('should proceed from step 2 with valid registration form', () => {
-      component.currentStep.set(2);
       component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
@@ -160,7 +181,6 @@ describe('RegisterComponent', () => {
     });
 
     it('should not proceed from step 2 without reCAPTCHA completion', () => {
-      component.currentStep.set(2);
       component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
@@ -180,9 +200,10 @@ describe('RegisterComponent', () => {
     });
 
     it('should go back from step 2 to step 1', () => {
-      component.currentStep.set(2);
+      component.selectBundle('bpa_galaxy');
       component.prevStep();
       expect(component.currentStep()).toBe(1);
+      expect(backSpy).toHaveBeenCalled();
     });
 
     it('should not proceed from step 3 with invalid terms form', () => {
@@ -382,6 +403,66 @@ describe('RegisterComponent', () => {
     });
   });
 
+  describe('History integration', () => {
+    it('should record initial step with replaceState', () => {
+      expect(replaceStateSpy).toHaveBeenCalled();
+      const [stateArg] = replaceStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(jasmine.objectContaining({ step: 1 }));
+    });
+
+    it('should push history when advancing to step 2', () => {
+      component.selectBundle('bpa_galaxy');
+      expect(pushStateSpy).toHaveBeenCalled();
+      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(jasmine.objectContaining({ step: 2 }));
+    });
+
+    it('should push history when advancing to step 3', () => {
+      component.selectBundle('bpa_galaxy');
+      component.registrationForm.patchValue({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane.doe@example.com',
+        username: 'janedoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component.recaptchaToken.set('token');
+      pushStateSpy.calls.reset();
+      component.nextStep();
+      expect(component.currentStep()).toBe(3);
+      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(jasmine.objectContaining({ step: 3 }));
+    });
+
+    it('should respond to browser popstate events', () => {
+      component.selectBundle('bpa_galaxy');
+      expect(component.currentStep()).toBe(2);
+      pushStateSpy.calls.reset();
+      window.dispatchEvent(
+        new PopStateEvent('popstate', { state: { step: 1 } }),
+      );
+      expect(component.currentStep()).toBe(1);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to parent route when going back from first step', () => {
+      const router = TestBed.inject(Router);
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      const navigateSpy = spyOn(router, 'navigate').and.stub();
+      component.prevStep();
+      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
+        relativeTo: activatedRoute,
+      });
+    });
+  });
+
   describe('Template Rendering', () => {
     it('should display step 1 bundle selection', () => {
       component.currentStep.set(1);
@@ -507,6 +588,47 @@ describe('RegisterComponent', () => {
       expect(component.currentStep()).toBe(4); // Should stay on step 4
       expect(component.errorAlert()).toBeDefined();
       expect(component.isSubmitting()).toBe(false);
+    });
+  });
+
+  describe('Registration failure handling', () => {
+    it('should surface backend errors without advancing steps', () => {
+      component.selectBundle('bpa_galaxy');
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component.recaptchaToken.set('token');
+      component.nextStep();
+
+      const services = component.getSelectedBundle()?.services ?? [];
+      const acceptedTerms = services.reduce<Record<string, boolean>>(
+        (result, service) => ({ ...result, [service.id]: true }),
+        {},
+      );
+      component.termsForm.patchValue(acceptedTerms);
+
+      component.nextStep();
+      expect(component.currentStep()).toBe(4);
+
+      pushStateSpy.calls.reset();
+      component.nextStep();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      req.flush(
+        { message: 'Failure' },
+        { status: 500, statusText: 'Server Error' },
+      );
+
+      expect(component.currentStep()).toBe(4);
+      expect(component.errorAlert()).toBe('Failure');
+      expect(pushStateSpy).not.toHaveBeenCalled();
     });
   });
 

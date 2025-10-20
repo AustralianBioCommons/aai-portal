@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   FormBuilder,
@@ -49,7 +49,7 @@ interface RegistrationRequest {
   ],
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, OnDestroy {
   public router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
@@ -88,10 +88,31 @@ export class RegisterComponent {
 
   termsForm: FormGroup = this.formBuilder.nonNullable.group({});
 
+  private readonly popStateHandler = (event: PopStateEvent) => {
+    const stepFromState = event.state?.step;
+    if (typeof stepFromState !== 'number') {
+      return;
+    }
+    this.transitionToStep(stepFromState, { fromHistory: true });
+  };
+
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
+  }
+
+  ngOnInit(): void {
+    if (typeof window !== 'undefined') {
+      this.updateHistoryState(this.currentStep(), true);
+      window.addEventListener('popstate', this.popStateHandler);
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('popstate', this.popStateHandler);
+    }
   }
 
   private initializeTermsForm() {
@@ -130,6 +151,66 @@ export class RegisterComponent {
     this.handleStepValidation(this.bundleForm);
   }
 
+  private updateHistoryState(step: number, replace: boolean): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const existingState = window.history.state ?? {};
+    const newState = { ...existingState, step };
+    const title = typeof document !== 'undefined' ? document.title : '';
+    if (replace) {
+      window.history.replaceState(newState, title);
+    } else {
+      window.history.pushState(newState, title);
+    }
+  }
+
+  private transitionToStep(
+    targetStep: number,
+    options: { fromHistory?: boolean } = {},
+  ): void {
+    const previousStep = this.currentStep();
+    if (targetStep === previousStep) {
+      return;
+    }
+
+    if (targetStep < 1) {
+      this.router.navigate(['../'], { relativeTo: this.route });
+      return;
+    }
+
+    let clampedStep = targetStep;
+    if (clampedStep > this.totalSteps) {
+      clampedStep = this.totalSteps;
+    }
+
+    const movingForward = clampedStep > previousStep;
+
+    if (clampedStep < previousStep) {
+      for (let step = previousStep; step > clampedStep; step--) {
+        this.resetStepValidation(step);
+      }
+    }
+
+    this.currentStep.set(clampedStep);
+
+    if (!options.fromHistory) {
+      this.updateHistoryState(clampedStep, false);
+    }
+
+    if (clampedStep === 3 && movingForward && this.getSelectedBundle()) {
+      this.initializeTermsForm();
+    }
+
+    if (
+      !options.fromHistory &&
+      typeof window !== 'undefined' &&
+      typeof window.scrollTo === 'function'
+    ) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   getSelectedBundle(): Bundle | undefined {
     const selectedId = this.bundleForm.get('selectedBundle')?.value;
     return this.bundles.find((bundle) => bundle.id === selectedId);
@@ -138,9 +219,12 @@ export class RegisterComponent {
   prevStep() {
     if (this.currentStep() === 1) {
       this.router.navigate(['../'], { relativeTo: this.route });
-    } else if (this.currentStep() > 1) {
-      this.resetStepValidation(this.currentStep());
-      this.currentStep.update((step) => step - 1);
+    } else {
+      const targetStep = this.currentStep() - 1;
+      this.transitionToStep(targetStep, { fromHistory: true });
+      if (typeof window !== 'undefined') {
+        window.history.back();
+      }
     }
   }
 
@@ -150,9 +234,7 @@ export class RegisterComponent {
         this.handleStepValidation(this.bundleForm);
         break;
       case 2:
-        this.handleStepValidation(this.registrationForm, () => {
-          this.initializeTermsForm();
-        });
+        this.handleStepValidation(this.registrationForm);
         break;
       case 3:
         this.handleStepValidation(this.termsForm);
@@ -162,18 +244,21 @@ export class RegisterComponent {
         break;
       default:
         if (this.currentStep() < this.totalSteps) {
-          this.currentStep.update((step) => step + 1);
+          this.transitionToStep(this.currentStep() + 1);
         }
         break;
     }
   }
 
-  private handleStepValidation(form: FormGroup, onSuccess?: () => void) {
+  private handleStepValidation(
+    form: FormGroup,
+    onSuccess?: () => void,
+  ): boolean {
     if (this.currentStep() === 2) {
       this.recaptchaAttempted.set(true);
       if (!this.recaptchaToken()) {
         form.markAllAsTouched();
-        return;
+        return false;
       }
     }
 
@@ -182,9 +267,11 @@ export class RegisterComponent {
       if (onSuccess) {
         onSuccess();
       }
-      this.currentStep.update((step) => step + 1);
+      this.transitionToStep(this.currentStep() + 1);
+      return true;
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return false;
     }
   }
 
@@ -264,7 +351,7 @@ export class RegisterComponent {
       .subscribe((result) => {
         this.isSubmitting.set(false);
         if (result) {
-          this.currentStep.update((step) => step + 1);
+          this.transitionToStep(this.currentStep() + 1);
         }
       });
   }

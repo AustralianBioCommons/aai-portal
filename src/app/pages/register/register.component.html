@@ -35,10 +35,10 @@
         [formGroup]="bundleForm"
         class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
-        <h1 class="text-center text-3xl font-semibold text-gray-900">
+        <h1 class="text-left text-3xl font-semibold text-gray-900">
           Select a bundle
         </h1>
-        <p class="text-center font-light text-gray-500">
+        <p class="text-left font-light text-gray-500">
           Request access to a bundle you need for your research.
         </p>
         <div class="mt-6 flex flex-wrap items-stretch justify-center gap-6">
@@ -82,6 +82,8 @@
                         @for (item of bundle.listItems; track item) {
                           <div
                             class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
+                            (click)="$event.stopPropagation()"
+                            (keyup.enter)="$event.stopPropagation()"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
