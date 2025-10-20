@@ -388,7 +388,7 @@ describe('RegisterComponent', () => {
         fixture.debugElement
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
-      ).toBe('Access bundles');
+      ).toBe('Select a bundle');
     });
 
     it('should display step 2 registration form when on step 2', () => {
