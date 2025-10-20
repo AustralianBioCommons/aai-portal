@@ -81,6 +81,7 @@
                       <div class="text-sm/6 font-light text-gray-500">
                         @for (item of bundle.listItems; track item) {
                           <div
+                            tabindex="0"
                             class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
                             (click)="$event.stopPropagation()"
                             (keyup.enter)="$event.stopPropagation()"
