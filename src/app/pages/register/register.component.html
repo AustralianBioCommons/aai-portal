@@ -489,18 +489,23 @@
   <!-- Shared navigation buttons -->
   @if (currentStep() < totalSteps) {
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
-      <div class="flex w-full max-w-6xl justify-between">
+      <div class="flex w-full max-w-6xl items-center">
         <app-button type="button" variant="secondary" (click)="prevStep()">
           Back
         </app-button>
-        <app-button
-          type="button"
-          variant="primary"
-          (click)="nextStep()"
-          [loading]="isSubmitting()"
-        >
-          {{ currentStep() === 4 ? "Submit" : "Next" }}
-        </app-button>
+        <div class="ml-auto">
+          @if (currentStep() > 1) {
+            <app-button
+              type="button"
+              variant="primary"
+              data-testid="registration-next-button"
+              (click)="nextStep()"
+              [loading]="isSubmitting()"
+            >
+              {{ currentStep() === 4 ? "Submit" : "Next" }}
+            </app-button>
+          }
+        </div>
       </div>
     </div>
   }

@@ -116,7 +116,18 @@ export class RegisterComponent {
     const bundle = this.bundles.find((bundle) => bundle.id === value);
     if (!bundle?.disabled) {
       this.bundleForm.patchValue({ selectedBundle: value });
+      this.bundleForm.get('selectedBundle')?.markAsDirty();
+      this.bundleForm.get('selectedBundle')?.markAsTouched();
+      this.bundleForm.updateValueAndValidity();
+
+      if (this.currentStep() === 1) {
+        this.advanceFromBundleSelection();
+      }
     }
+  }
+
+  private advanceFromBundleSelection(): void {
+    this.handleStepValidation(this.bundleForm);
   }
 
   getSelectedBundle(): Bundle | undefined {

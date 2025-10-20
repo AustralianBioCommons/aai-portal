@@ -89,6 +89,7 @@ describe('RegisterComponent', () => {
       expect(component.bundleForm.get('selectedBundle')?.value).toBe(
         'bpa_galaxy',
       );
+      expect(component.currentStep()).toBe(2);
     });
 
     it('should select TSI bundle', () => {
@@ -127,7 +128,6 @@ describe('RegisterComponent', () => {
 
     it('should proceed from step 1 with valid bundle selection', () => {
       component.selectBundle('bpa_galaxy');
-      component.nextStep();
       expect(component.currentStep()).toBe(2);
     });
 
@@ -332,6 +332,8 @@ describe('RegisterComponent', () => {
 
   describe('Terms Form', () => {
     beforeEach(() => {
+      component.currentStep.set(1);
+      component.bundleForm.reset();
       component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
     });
@@ -391,6 +393,15 @@ describe('RegisterComponent', () => {
       ).toBe('Select a bundle');
     });
 
+    it('should hide next button on step 1', () => {
+      component.currentStep.set(1);
+      fixture.detectChanges();
+      const nextButton = fixture.debugElement.query(
+        By.css('[data-testid="registration-next-button"]'),
+      );
+      expect(nextButton).toBeNull();
+    });
+
     it('should display step 2 registration form when on step 2', () => {
       component.currentStep.set(2);
       fixture.detectChanges();
@@ -399,6 +410,15 @@ describe('RegisterComponent', () => {
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
       ).toBe('Your details');
+    });
+
+    it('should show next button when beyond step 1', () => {
+      component.currentStep.set(2);
+      fixture.detectChanges();
+      const nextButton = fixture.debugElement.query(
+        By.css('[data-testid="registration-next-button"]'),
+      );
+      expect(nextButton).toBeTruthy();
     });
 
     it('should display step 3 terms acceptance when on step 3', () => {
