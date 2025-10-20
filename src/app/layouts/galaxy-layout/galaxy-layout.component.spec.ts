@@ -38,7 +38,7 @@ describe('GalaxyLayoutComponent', () => {
 
   it('should have navigation link to Galaxy portal', () => {
     const link = fixture.debugElement.query(
-      By.css('a[href="https://galaxy.test.biocommons.org.au"]'),
+      By.css('a[href="http://dev.gvl.org.au/"]'),
     );
     expect(link).toBeTruthy();
   });
