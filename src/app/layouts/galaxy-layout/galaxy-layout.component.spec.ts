@@ -22,7 +22,7 @@ describe('GalaxyLayoutComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display Galaxy logo with correct attributes when not on bundle-access route', () => {
+  it('should display Galaxy logo with correct attributes when not on bundles route', () => {
     const logo = fixture.debugElement.query(By.css('img[alt="Galaxy logo"]'));
     expect(logo).toBeTruthy();
     expect(logo.nativeElement.src).toContain('favicon.svg');

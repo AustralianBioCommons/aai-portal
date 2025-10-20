@@ -23,7 +23,7 @@ describe('BpaLayoutComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display header logo with correct attributes when not on bundle-access route', () => {
+  it('should display header logo with correct attributes when not on bundles route', () => {
     const headerLogo = fixture.debugElement.query(
       By.css('img[alt="Bioplatforms Australia Data Portal Logo"]'),
     );
@@ -37,7 +37,7 @@ describe('BpaLayoutComponent', () => {
     expect(headerLink.nativeElement.getAttribute('href')).toBe(expectedUrl);
   });
 
-  it('should display footer logos with correct attributes when not on bundle-access route', () => {
+  it('should display footer logos with correct attributes when not on bundles route', () => {
     const footerLogos = fixture.debugElement.queryAll(By.css('footer img'));
     expect(footerLogos.length).toBe(2);
 
