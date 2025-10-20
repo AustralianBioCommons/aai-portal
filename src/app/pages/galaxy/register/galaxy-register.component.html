@@ -2,7 +2,7 @@
   class="mx-auto flex max-w-6xl flex-col gap-8 p-6 sm:p-10 lg:flex-row lg:p-6"
 >
   <div
-    class="flex w-full flex-1 flex-col gap-6 rounded-md bg-white p-10 shadow-2xl lg:w-1/2"
+    class="flex w-full flex-1 flex-col gap-6 rounded-md bg-white p-10 shadow-xl lg:w-1/2"
   >
     <div class="rounded-md bg-sky-100 p-4 text-sm text-sky-900">
       Please register only one account to ensure fair sharing of computational
@@ -21,7 +21,7 @@
     <h1 class="text-2xl font-medium text-gray-800">Create a Galaxy account</h1>
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
       <div class="relative">
-        <label for="email" class="text-xs text-gray-600"> Email </label>
+        <label for="email" class="text-xs text-gray-600">Email Address</label>
         <input
           id="email"
           type="email"
