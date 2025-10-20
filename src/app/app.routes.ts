@@ -77,7 +77,6 @@ export const routes: Routes = [
       {
         path: 'register/bundle-access',
         component: RegisterComponent,
-        canActivate: [loginGuard],
         data: { title: 'Galaxy Australia - Register' },
       },
     ],
@@ -109,7 +108,6 @@ export const routes: Routes = [
       {
         path: 'register/bundle-access',
         component: RegisterComponent,
-        canActivate: [loginGuard],
         data: { title: 'Register | Bioplatforms Australia Data Portal' },
       },
     ],
