@@ -103,18 +103,7 @@ export class ProfileComponent implements OnInit {
       this.loading.set(false);
     }, 500);
 
-    // TODO: Replace with actual API call to get current user's profile
-    // this.apiService.getUserProfile().subscribe({
-    //   next: (user) => {
-    //     this.user.set(user);
-    //     this.loading.set(false);
-    //   },
-    //   error: (err) => {
-    //     console.error('Failed to load user profile:', err);
-    //     this.error.set('Failed to load user profile');
-    //     this.loading.set(false);
-    //   },
-    // });
+    // TODO: Make API call to get current user's profile
   }
 
   getPlatformName(platformId: string): string {
