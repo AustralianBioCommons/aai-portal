@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { BpaLayoutComponent } from './bpa-layout.component';
+import { environment } from '../../../environments/environment';
 
 describe('BpaLayoutComponent', () => {
   let component: BpaLayoutComponent;
@@ -28,6 +29,12 @@ describe('BpaLayoutComponent', () => {
     );
     expect(headerLogo).toBeTruthy();
     expect(headerLogo.nativeElement.src).toContain('bpa-logo-horizontal.webp');
+  });
+
+  it('should link the header logo to the configured BPA portal URL', () => {
+    const headerLink = fixture.debugElement.query(By.css('nav a'));
+    const expectedUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+    expect(headerLink.nativeElement.getAttribute('href')).toBe(expectedUrl);
   });
 
   it('should display footer logos with correct attributes when not on bundle-access route', () => {

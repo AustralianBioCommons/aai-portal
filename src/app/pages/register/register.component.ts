@@ -55,6 +55,10 @@ export class RegisterComponent {
   private formBuilder = inject(FormBuilder);
   private validationService = inject(ValidationService);
   private http = inject(HttpClient);
+  private readonly bpaPortalUrl = environment.portals.bpaPortal.replace(
+    /\/+$/,
+    '',
+  );
 
   currentStep = signal(1);
   totalSteps = 5;
@@ -260,8 +264,7 @@ export class RegisterComponent {
     if (currentUrl.includes('/bpa/register')) {
       return {
         text: 'Return to Bioplatforms Australia Data Portal',
-        action: () =>
-          (window.location.href = 'https://aaidemo.bioplatforms.com/'),
+        action: () => (window.location.href = this.bpaPortalUrl),
       };
     } else if (currentUrl.includes('/galaxy/register')) {
       return {

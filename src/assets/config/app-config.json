@@ -8,5 +8,8 @@
   },
   "recaptcha": {
     "siteKeyV2": "6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG"
+  },
+  "portals": {
+    "bpaPortal": "https://aaidemo.bioplatforms.com"
   }
 }
