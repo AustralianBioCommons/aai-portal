@@ -70,4 +70,17 @@ describe('BpaLayoutComponent', () => {
     const routerOutlet = fixture.debugElement.query(By.css('router-outlet'));
     expect(routerOutlet).toBeTruthy();
   });
+
+  it('should hide header and footer on bundles route', () => {
+    spyOnProperty(component.router, 'url', 'get').and.returnValue(
+      '/bpa/register/bundles',
+    );
+
+    fixture.detectChanges();
+
+    const nav = fixture.debugElement.query(By.css('nav'));
+    const footer = fixture.debugElement.query(By.css('footer'));
+    expect(nav).toBeNull();
+    expect(footer).toBeNull();
+  });
 });

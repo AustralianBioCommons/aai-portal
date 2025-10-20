@@ -24,6 +24,10 @@ class MockHomeComponent {}
 
 class MockAuthService {}
 
+interface RegisterComponentInternals {
+  transitionToStep(step: number, options?: { fromHistory?: boolean }): void;
+}
+
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
@@ -53,9 +57,13 @@ describe('RegisterComponent', () => {
     originalPushState = window.history.pushState;
     originalReplaceState = window.history.replaceState;
     originalBack = window.history.back;
-    pushStateSpy = spyOn(window.history, 'pushState');
-    replaceStateSpy = spyOn(window.history, 'replaceState');
-    backSpy = spyOn(window.history, 'back');
+    pushStateSpy = spyOn(window.history, 'pushState').and.callFake(
+      (): void => undefined,
+    );
+    replaceStateSpy = spyOn(window.history, 'replaceState').and.callFake(
+      (): void => undefined,
+    );
+    backSpy = spyOn(window.history, 'back').and.callFake((): void => undefined);
     originalScrollTo = window.scrollTo;
     window.scrollTo = jasmine.createSpy('scrollTo') as typeof window.scrollTo;
 
@@ -463,6 +471,86 @@ describe('RegisterComponent', () => {
     });
   });
 
+  describe('transitionToStep edge cases', () => {
+    const asInternals = (
+      instance: RegisterComponent,
+    ): RegisterComponentInternals =>
+      instance as unknown as RegisterComponentInternals;
+
+    it('should ignore transition when target step matches current step', () => {
+      component.selectBundle('bpa_galaxy');
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(2);
+      expect(component.currentStep()).toBe(2);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should clamp transition to the final step when target exceeds total', () => {
+      component.currentStep.set(4);
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(10);
+      expect(component.currentStep()).toBe(component.totalSteps);
+      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(
+        jasmine.objectContaining({ step: component.totalSteps }),
+      );
+    });
+
+    it('should skip history updates when sourced from history', () => {
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(2, { fromHistory: true });
+      expect(component.currentStep()).toBe(2);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to parent route when target step is below one', () => {
+      const router = TestBed.inject(Router);
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      const navigateSpy = spyOn(router, 'navigate').and.stub();
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(0);
+      expect(component.currentStep()).toBe(1);
+      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
+        relativeTo: activatedRoute,
+      });
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should re-initialize terms form when moving into step 3', () => {
+      component.selectBundle('bpa_galaxy');
+      const initSpy = spyOn(
+        component as unknown as { initializeTermsForm: () => void },
+        'initializeTermsForm',
+      ).and.callThrough();
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(3);
+      expect(initSpy).toHaveBeenCalled();
+      expect(component.currentStep()).toBe(3);
+    });
+
+    it('should ignore popstate events without a numeric step', () => {
+      component.selectBundle('bpa_galaxy');
+      const savedStep = component.currentStep();
+      pushStateSpy.calls.reset();
+      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+      expect(component.currentStep()).toBe(savedStep);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle transitions when scrollTo is unavailable', () => {
+      const savedScroll = window.scrollTo;
+      pushStateSpy.calls.reset();
+      // @ts-expect-error - intentionally removing scrollTo for coverage
+      window.scrollTo = undefined;
+      asInternals(component).transitionToStep(2);
+      expect(component.currentStep()).toBe(2);
+      expect(pushStateSpy).toHaveBeenCalled();
+      window.scrollTo = savedScroll;
+    });
+  });
+
   describe('Template Rendering', () => {
     it('should display step 1 bundle selection', () => {
       component.currentStep.set(1);
@@ -629,6 +717,35 @@ describe('RegisterComponent', () => {
       expect(component.currentStep()).toBe(4);
       expect(component.errorAlert()).toBe('Failure');
       expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getFinalPageButton', () => {
+    it('returns BPA redirect when on BPA route', () => {
+      spyOnProperty(component.router, 'url', 'get').and.returnValue(
+        '/bpa/register/standard-access/success',
+      );
+
+      const result = component.getFinalPageButton();
+      expect(result.text).toContain('Bioplatforms Australia Data Portal');
+    });
+
+    it('returns Galaxy redirect when on Galaxy route', () => {
+      spyOnProperty(component.router, 'url', 'get').and.returnValue(
+        '/galaxy/register/standard-access/success',
+      );
+
+      const result = component.getFinalPageButton();
+      expect(result.text).toContain('Galaxy Australia');
+    });
+
+    it('defaults to login for other routes', () => {
+      spyOnProperty(component.router, 'url', 'get').and.returnValue(
+        '/some/other/path',
+      );
+
+      const result = component.getFinalPageButton();
+      expect(result.text).toBe('Login');
     });
   });
 

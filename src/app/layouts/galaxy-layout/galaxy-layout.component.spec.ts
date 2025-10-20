@@ -47,4 +47,15 @@ describe('GalaxyLayoutComponent', () => {
     const routerOutlet = fixture.debugElement.query(By.css('router-outlet'));
     expect(routerOutlet).toBeTruthy();
   });
+
+  it('should hide navigation bar on bundles route', () => {
+    spyOnProperty(component.router, 'url', 'get').and.returnValue(
+      '/galaxy/register/bundles',
+    );
+
+    fixture.detectChanges();
+
+    const nav = fixture.debugElement.query(By.css('nav'));
+    expect(nav).toBeNull();
+  });
 });
