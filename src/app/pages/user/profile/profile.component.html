@@ -1,4 +1,4 @@
-<!-- Notifications -->
+<!-- Alerts -->
 @if (alert()) {
   <app-alert
     [type]="alert()!.type"
@@ -39,31 +39,59 @@
             <div class="space-y-6">
               <div>
                 <div class="text-sm font-light text-gray-500">Name</div>
-                <div>{{ user()?.name }}</div>
+                <div class="flex items-center justify-between gap-6">
+                  <div>{{ user()?.name }}</div>
+                  <button
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Username</div>
-                <div>{{ user()?.username }}</div>
+                <div class="flex items-center justify-between gap-6">
+                  <div>{{ user()?.username }}</div>
+                  <button
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Email</div>
-                <div class="flex items-center gap-2">
-                  <div>{{ user()?.email }}</div>
-                  <span
-                    class="rounded px-2 py-1 text-xs font-semibold uppercase"
-                    [class]="
-                      user()?.email_verified
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    "
+                <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center gap-2">
+                    <div>{{ user()?.email }}</div>
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                      [class]="
+                        user()?.email_verified
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      "
+                    >
+                      {{ user()?.email_verified ? "Verified" : "Unverified" }}
+                    </span>
+                  </div>
+                  <button
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                   >
-                    {{ user()?.email_verified ? "Verified" : "Unverified" }}
-                  </span>
+                    Edit
+                  </button>
                 </div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Password</div>
-                <span>••••••••••••</span>
+                <div class="flex items-center justify-between gap-6">
+                  <div>••••••••••••</div>
+                  <button
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
+                  >
+                    Change
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -83,10 +111,10 @@
                   track membership.id
                 ) {
                   <div class="flex items-center justify-between gap-6">
-                    <div>
-                      {{ getPlatformName(membership.platform_id) }}
-                    </div>
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2">
+                      <div>
+                        {{ getPlatformName(membership.platform_id) }}
+                      </div>
                       @if (membership.approval_status === "revoked") {
                         <div class="group relative inline-block">
                           <svg
@@ -126,6 +154,13 @@
                         {{ membership.approval_status }}
                       </span>
                     </div>
+                    <app-button
+                      type="button"
+                      variant="secondary"
+                      widthClass="w-auto"
+                    >
+                      Launch
+                    </app-button>
                   </div>
                 }
               </div>

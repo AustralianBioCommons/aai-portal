@@ -2,11 +2,12 @@ import { Component, signal, OnInit } from '@angular/core';
 import { BiocommonsUserDetails } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { PLATFORM_NAMES, PlatformId } from '../../../core/constants/constants';
 
 @Component({
   selector: 'app-profile',
-  imports: [LoadingSpinnerComponent, AlertComponent],
+  imports: [LoadingSpinnerComponent, AlertComponent, ButtonComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
