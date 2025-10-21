@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.3.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.2.0...v1.3.0) (2025-10-21)
+
+
+### Features
+
+* add revocation reason tooltip in admin user details ([bed71bc](https://github.com/AustralianBioCommons/aai-portal/commit/bed71bcdd669868d84285ded52e01b9e82dc28b8))
+* bpa-portal uri configurable + login fix ([fe1dbb9](https://github.com/AustralianBioCommons/aai-portal/commit/fe1dbb9c0e6fc5fb2e3665186aac8fc6e0239391))
+* bpa-portal uri configurable + login fix ([a56689a](https://github.com/AustralianBioCommons/aai-portal/commit/a56689a1892a221061b4b1653996636f5327597a))
+* update user list & user details with revoke functionality ([5e9a9d9](https://github.com/AustralianBioCommons/aai-portal/commit/5e9a9d9fa8aa532cf8f164f649a1a13a3428bc61))
+* update user list & user details with revoke functionality & model ([2703ba0](https://github.com/AustralianBioCommons/aai-portal/commit/2703ba0cd3717165d0368b9cc8e5b2d53b761b2b))
+
+
+### Bug Fixes
+
+* add "Create Account" title Change "Select Bundle" ([37e9a5a](https://github.com/AustralianBioCommons/aai-portal/commit/37e9a5ac9dbe016dcf21332cbddfe6b15df05771))
+* align BPA logo left, consistent with data.bioplatforms.com ([d72c6b6](https://github.com/AustralianBioCommons/aai-portal/commit/d72c6b60aed15a263ace7cf271e869784c3fc669))
+* compile node 22.x ([551ee64](https://github.com/AustralianBioCommons/aai-portal/commit/551ee6455647b75455bf84f28811cca60c0b37d7))
+* disable Edit for username in user profile ([78c2739](https://github.com/AustralianBioCommons/aai-portal/commit/78c273970e8f6ce07de58320e4f623d3aa70c49f))
+* disable Edit for username in user profile ([10300a1](https://github.com/AustralianBioCommons/aai-portal/commit/10300a154f6622a44875b3114e0474588435d2e7))
+* disable password change for users as admins ([cf861f8](https://github.com/AustralianBioCommons/aai-portal/commit/cf861f8379ada2440ce6edb98b97f4d66b6a9995))
+* disable user information modification for admins ([f269386](https://github.com/AustralianBioCommons/aai-portal/commit/f269386dd2f1cdddc0de312991083062d54753dd))
+* disable user information modification for admins ([1764a80](https://github.com/AustralianBioCommons/aai-portal/commit/1764a803d206313af6d7d57129ad49296c485a53))
+* fix galaxy layout logo test ([126d4a7](https://github.com/AustralianBioCommons/aai-portal/commit/126d4a76fb125b5466888b7004705d53544eee9a))
+* make browser back button work in registration ([9cc0fae](https://github.com/AustralianBioCommons/aai-portal/commit/9cc0fae079e4e1604fb743f76ed9e5bcb9b7869d))
+* make pretty prettier ([6df7c08](https://github.com/AustralianBioCommons/aai-portal/commit/6df7c0858636134b413f98e249721ae136fc9896))
+* make pretty prettier ([ca6eb50](https://github.com/AustralianBioCommons/aai-portal/commit/ca6eb5065d1746cdd8e3c0218947a873b0a2d9db))
+* remove next button on bundle selection ([f8f40b0](https://github.com/AustralianBioCommons/aai-portal/commit/f8f40b0cb6fb4f75e0ba6958157d1dcada74dd1c))
+* revert bpa registration footer ([1163de2](https://github.com/AustralianBioCommons/aai-portal/commit/1163de2c26b88dfc841b6d4859c39ea758af50b8))
+* update all links to galaxy to dev.gvl.org.au ([51c2566](https://github.com/AustralianBioCommons/aai-portal/commit/51c256623ee0ff3998501d356a6577a785ad4c21))
+* update all links to galaxy to dev.gvl.org.au ([b1927ef](https://github.com/AustralianBioCommons/aai-portal/commit/b1927ef51d0a93e50c751b1bffad3a6b674b3087))
+* update bundle register route to galaxy|bpa/register/bundles ([82c68db](https://github.com/AustralianBioCommons/aai-portal/commit/82c68dba83be575ec1555abba8f0ebd8fcb6530c))
+* update footer link to use dynamic bpaPortalUrl ([d91bc6c](https://github.com/AustralianBioCommons/aai-portal/commit/d91bc6c06068445ba14a25e9ce7ae1c287a618c0))
+* update footer links and improve layout styles for registration pages ([25eafa8](https://github.com/AustralianBioCommons/aai-portal/commit/25eafa8318975eda02d6ee97daddcad9f1022855))
+* update layout styles for registration pages ([46a30d0](https://github.com/AustralianBioCommons/aai-portal/commit/46a30d01d304b9c7f8b8cf24598430c73fb7cf1f))
+* update wording on registration pages ([3135c66](https://github.com/AustralianBioCommons/aai-portal/commit/3135c6658f48875764a4f34e3b312c2a9c730d9e))
+* update wording on registration pages ([1a380e6](https://github.com/AustralianBioCommons/aai-portal/commit/1a380e65ca28a1816711a44a4daea8f42ded8980))
+
 ## [1.2.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.1.0...v1.2.0) (2025-10-16)
 
 
