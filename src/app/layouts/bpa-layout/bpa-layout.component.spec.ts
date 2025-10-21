@@ -53,16 +53,19 @@ describe('BpaLayoutComponent', () => {
   });
 
   it('should have footer links to Bioplatforms and NCRIS', () => {
-    const bpaLink = fixture.debugElement.query(
-      By.css('a[href="https://www.bioplatforms.com/"]'),
+    const footerLinks = fixture.debugElement.queryAll(By.css('footer a'));
+    expect(footerLinks.length).toBe(2);
+
+    const expectedBpaUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+    expect(footerLinks[0].nativeElement.getAttribute('href')).toBe(
+      expectedBpaUrl,
     );
+
     const ncrisLink = fixture.debugElement.query(
       By.css(
         'a[href="https://www.education.gov.au/national-collaborative-research-infrastructure-strategy-ncris"]',
       ),
     );
-
-    expect(bpaLink).toBeTruthy();
     expect(ncrisLink).toBeTruthy();
   });
 
