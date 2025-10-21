@@ -12,16 +12,16 @@
         />
       </a>
       <div
-        class="flex flex-1 justify-center text-center text-2xl font-semibold text-gray-900"
+        class="flex flex-1 items-center justify-center text-2xl font-semibold text-gray-900"
       >
         Create an account
       </div>
       <div
-        class="flex flex-wrap justify-end gap-4 text-sm font-medium text-biocommons-primary sm:text-base [&>a:hover]:text-sky-900"
+        class="flex flex-wrap justify-end gap-6 text-sm text-biocommons-primary sm:gap-12 sm:text-base [&>a:hover]:text-sky-900"
       >
-        <a href="https://www.biocommons.org.au/about"> About </a>
-        <a href="https://www.biocommons.org.au/"> FAQ </a>
-        <a href="https://www.biocommons.org.au/contact-form"> Contact us </a>
+        <a href="https://www.biocommons.org.au/about">About</a>
+        <a href="https://www.biocommons.org.au/">FAQ</a>
+        <a href="https://www.biocommons.org.au/contact-form">Contact us</a>
       </div>
     </div>
   </div>
@@ -147,7 +147,7 @@
     >
       <form
         [formGroup]="registrationForm"
-        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
         <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
         <p class="font-light text-gray-500">
@@ -316,7 +316,7 @@
     >
       <form
         [formGroup]="termsForm"
-        class="flex w-full max-w-6xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
         <h1 class="text-3xl font-semibold text-gray-900">
           Accept terms and conditions
@@ -408,7 +408,7 @@
         >
         </app-alert>
       }
-      <div class="flex w-full max-w-6xl flex-1 flex-col gap-12">
+      <div class="flex w-full max-w-7xl flex-1 flex-col gap-12">
         <div class="flex flex-col gap-6">
           <h1 class="text-3xl font-semibold text-gray-900">
             Details confirmation
@@ -492,7 +492,7 @@
   <!-- Shared navigation buttons -->
   @if (currentStep() < totalSteps) {
     <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
-      <div class="flex w-full max-w-6xl items-center">
+      <div class="flex w-full max-w-7xl items-center">
         <app-button type="button" variant="secondary" (click)="prevStep()">
           Back
         </app-button>
