@@ -25,7 +25,7 @@ describe('GalaxyLayoutComponent', () => {
   it('should display Galaxy logo with correct attributes when not on bundles route', () => {
     const logo = fixture.debugElement.query(By.css('img[alt="Galaxy logo"]'));
     expect(logo).toBeTruthy();
-    expect(logo.nativeElement.src).toContain('favicon.svg');
+    expect(logo.nativeElement.src).toContain('galaxy-logo.svg');
   });
 
   it('should display Galaxy Australia branding', () => {
