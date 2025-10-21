@@ -85,7 +85,7 @@ export const biocommonsBundles: Bundle[] = [
   },
   {
     id: 'tsi',
-    name: 'Threatened Species Initiative',
+    name: 'Threatened Species Initiative (TSI)',
     logoUrls: ['/assets/tsi-logo.jpg'],
     listItems: [
       'The <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> and <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> data access',
