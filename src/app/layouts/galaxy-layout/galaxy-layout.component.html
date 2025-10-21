@@ -1,18 +1,20 @@
 <div class="flex h-full min-h-screen flex-col">
-  @if (!router.url.includes("bundle-access")) {
-    <nav class="items-center bg-galaxy-primary p-6 text-center">
+  @if (!router.url.includes("bundles")) {
+    <nav
+      class="flex items-center justify-start bg-galaxy-primary px-2 pb-0.5 pt-1"
+    >
       <a
         href="http://dev.gvl.org.au/"
-        class="flex items-center justify-center gap-2"
+        class="flex items-center justify-center gap-4"
       >
         <img
-          class="h-10"
-          src="https://usegalaxy.org.au/static/favicon.svg"
+          class="mt-0.5 h-8 w-auto"
+          src="/assets/galaxy-logo.svg"
           width="auto"
           alt="Galaxy logo"
           loading="lazy"
         />
-        <span class="mb-1 text-2xl font-bold text-white">Australia</span>
+        <span class="font-['Verdana'] font-bold text-white">Australia</span>
       </a>
     </nav>
   }

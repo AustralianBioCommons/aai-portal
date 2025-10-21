@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -24,10 +24,21 @@ class MockHomeComponent {}
 
 class MockAuthService {}
 
+interface RegisterComponentInternals {
+  transitionToStep(step: number, options?: { fromHistory?: boolean }): void;
+}
+
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let httpMock: HttpTestingController;
+  let originalPushState: History['pushState'];
+  let originalReplaceState: History['replaceState'];
+  let originalBack: History['back'];
+  let pushStateSpy: jasmine.Spy;
+  let replaceStateSpy: jasmine.Spy;
+  let backSpy: jasmine.Spy;
+  let originalScrollTo: typeof window.scrollTo;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,14 +54,33 @@ describe('RegisterComponent', () => {
       ],
     }).compileComponents();
 
+    originalPushState = window.history.pushState;
+    originalReplaceState = window.history.replaceState;
+    originalBack = window.history.back;
+    pushStateSpy = spyOn(window.history, 'pushState').and.callFake(
+      (): void => undefined,
+    );
+    replaceStateSpy = spyOn(window.history, 'replaceState').and.callFake(
+      (): void => undefined,
+    );
+    backSpy = spyOn(window.history, 'back').and.callFake((): void => undefined);
+    originalScrollTo = window.scrollTo;
+    window.scrollTo = jasmine.createSpy('scrollTo') as typeof window.scrollTo;
+
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    pushStateSpy.calls.reset();
   });
 
   afterEach(() => {
     httpMock.verify();
+    fixture.destroy();
+    window.scrollTo = originalScrollTo;
+    window.history.pushState = originalPushState;
+    window.history.replaceState = originalReplaceState;
+    window.history.back = originalBack;
   });
 
   it('should create', () => {
@@ -89,6 +119,7 @@ describe('RegisterComponent', () => {
       expect(component.bundleForm.get('selectedBundle')?.value).toBe(
         'bpa_galaxy',
       );
+      expect(component.currentStep()).toBe(2);
     });
 
     it('should select TSI bundle', () => {
@@ -127,12 +158,11 @@ describe('RegisterComponent', () => {
 
     it('should proceed from step 1 with valid bundle selection', () => {
       component.selectBundle('bpa_galaxy');
-      component.nextStep();
       expect(component.currentStep()).toBe(2);
     });
 
     it('should not proceed from step 2 with invalid registration form', () => {
-      component.currentStep.set(2);
+      component.selectBundle('bpa_galaxy');
       component.registrationForm.reset();
 
       component.nextStep();
@@ -141,7 +171,6 @@ describe('RegisterComponent', () => {
     });
 
     it('should proceed from step 2 with valid registration form', () => {
-      component.currentStep.set(2);
       component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
@@ -160,7 +189,6 @@ describe('RegisterComponent', () => {
     });
 
     it('should not proceed from step 2 without reCAPTCHA completion', () => {
-      component.currentStep.set(2);
       component.selectBundle('bpa_galaxy');
 
       component.registrationForm.patchValue({
@@ -180,9 +208,10 @@ describe('RegisterComponent', () => {
     });
 
     it('should go back from step 2 to step 1', () => {
-      component.currentStep.set(2);
+      component.selectBundle('bpa_galaxy');
       component.prevStep();
       expect(component.currentStep()).toBe(1);
+      expect(backSpy).toHaveBeenCalled();
     });
 
     it('should not proceed from step 3 with invalid terms form', () => {
@@ -332,6 +361,8 @@ describe('RegisterComponent', () => {
 
   describe('Terms Form', () => {
     beforeEach(() => {
+      component.currentStep.set(1);
+      component.bundleForm.reset();
       component.selectBundle('bpa_galaxy');
       component['initializeTermsForm']();
     });
@@ -380,6 +411,146 @@ describe('RegisterComponent', () => {
     });
   });
 
+  describe('History integration', () => {
+    it('should record initial step with replaceState', () => {
+      expect(replaceStateSpy).toHaveBeenCalled();
+      const [stateArg] = replaceStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(jasmine.objectContaining({ step: 1 }));
+    });
+
+    it('should push history when advancing to step 2', () => {
+      component.selectBundle('bpa_galaxy');
+      expect(pushStateSpy).toHaveBeenCalled();
+      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(jasmine.objectContaining({ step: 2 }));
+    });
+
+    it('should push history when advancing to step 3', () => {
+      component.selectBundle('bpa_galaxy');
+      component.registrationForm.patchValue({
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane.doe@example.com',
+        username: 'janedoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component.recaptchaToken.set('token');
+      pushStateSpy.calls.reset();
+      component.nextStep();
+      expect(component.currentStep()).toBe(3);
+      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(jasmine.objectContaining({ step: 3 }));
+    });
+
+    it('should respond to browser popstate events', () => {
+      component.selectBundle('bpa_galaxy');
+      expect(component.currentStep()).toBe(2);
+      pushStateSpy.calls.reset();
+      window.dispatchEvent(
+        new PopStateEvent('popstate', { state: { step: 1 } }),
+      );
+      expect(component.currentStep()).toBe(1);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to parent route when going back from first step', () => {
+      const router = TestBed.inject(Router);
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      const navigateSpy = spyOn(router, 'navigate').and.stub();
+      component.prevStep();
+      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
+        relativeTo: activatedRoute,
+      });
+    });
+  });
+
+  describe('transitionToStep edge cases', () => {
+    const asInternals = (
+      instance: RegisterComponent,
+    ): RegisterComponentInternals =>
+      instance as unknown as RegisterComponentInternals;
+
+    it('should ignore transition when target step matches current step', () => {
+      component.selectBundle('bpa_galaxy');
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(2);
+      expect(component.currentStep()).toBe(2);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should clamp transition to the final step when target exceeds total', () => {
+      component.currentStep.set(4);
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(10);
+      expect(component.currentStep()).toBe(component.totalSteps);
+      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
+        Record<string, unknown>,
+      ];
+      expect(stateArg).toEqual(
+        jasmine.objectContaining({ step: component.totalSteps }),
+      );
+    });
+
+    it('should skip history updates when sourced from history', () => {
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(2, { fromHistory: true });
+      expect(component.currentStep()).toBe(2);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should navigate to parent route when target step is below one', () => {
+      const router = TestBed.inject(Router);
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      const navigateSpy = spyOn(router, 'navigate').and.stub();
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(0);
+      expect(component.currentStep()).toBe(1);
+      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
+        relativeTo: activatedRoute,
+      });
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should re-initialize terms form when moving into step 3', () => {
+      component.selectBundle('bpa_galaxy');
+      const initSpy = spyOn(
+        component as unknown as { initializeTermsForm: () => void },
+        'initializeTermsForm',
+      ).and.callThrough();
+      pushStateSpy.calls.reset();
+      asInternals(component).transitionToStep(3);
+      expect(initSpy).toHaveBeenCalled();
+      expect(component.currentStep()).toBe(3);
+    });
+
+    it('should ignore popstate events without a numeric step', () => {
+      component.selectBundle('bpa_galaxy');
+      const savedStep = component.currentStep();
+      pushStateSpy.calls.reset();
+      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+      expect(component.currentStep()).toBe(savedStep);
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should handle transitions when scrollTo is unavailable', () => {
+      const savedScroll = window.scrollTo;
+      pushStateSpy.calls.reset();
+      // @ts-expect-error - intentionally removing scrollTo for coverage
+      window.scrollTo = undefined;
+      asInternals(component).transitionToStep(2);
+      expect(component.currentStep()).toBe(2);
+      expect(pushStateSpy).toHaveBeenCalled();
+      window.scrollTo = savedScroll;
+    });
+  });
+
   describe('Template Rendering', () => {
     it('should display step 1 bundle selection', () => {
       component.currentStep.set(1);
@@ -388,7 +559,16 @@ describe('RegisterComponent', () => {
         fixture.debugElement
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
-      ).toBe('Access bundles');
+      ).toBe('Select a bundle');
+    });
+
+    it('should hide next button on step 1', () => {
+      component.currentStep.set(1);
+      fixture.detectChanges();
+      const nextButton = fixture.debugElement.query(
+        By.css('[data-testid="registration-next-button"]'),
+      );
+      expect(nextButton).toBeNull();
     });
 
     it('should display step 2 registration form when on step 2', () => {
@@ -399,6 +579,15 @@ describe('RegisterComponent', () => {
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
       ).toBe('Your details');
+    });
+
+    it('should show next button when beyond step 1', () => {
+      component.currentStep.set(2);
+      fixture.detectChanges();
+      const nextButton = fixture.debugElement.query(
+        By.css('[data-testid="registration-next-button"]'),
+      );
+      expect(nextButton).toBeTruthy();
     });
 
     it('should display step 3 terms acceptance when on step 3', () => {
@@ -487,6 +676,76 @@ describe('RegisterComponent', () => {
       expect(component.currentStep()).toBe(4); // Should stay on step 4
       expect(component.errorAlert()).toBeDefined();
       expect(component.isSubmitting()).toBe(false);
+    });
+  });
+
+  describe('Registration failure handling', () => {
+    it('should surface backend errors without advancing steps', () => {
+      component.selectBundle('bpa_galaxy');
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component.recaptchaToken.set('token');
+      component.nextStep();
+
+      const services = component.getSelectedBundle()?.services ?? [];
+      const acceptedTerms = services.reduce<Record<string, boolean>>(
+        (result, service) => ({ ...result, [service.id]: true }),
+        {},
+      );
+      component.termsForm.patchValue(acceptedTerms);
+
+      component.nextStep();
+      expect(component.currentStep()).toBe(4);
+
+      pushStateSpy.calls.reset();
+      component.nextStep();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      req.flush(
+        { message: 'Failure' },
+        { status: 500, statusText: 'Server Error' },
+      );
+
+      expect(component.currentStep()).toBe(4);
+      expect(component.errorAlert()).toBe('Failure');
+      expect(pushStateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getFinalPageButton', () => {
+    it('returns BPA redirect when on BPA route', () => {
+      spyOnProperty(component.router, 'url', 'get').and.returnValue(
+        '/bpa/register/standard-access/success',
+      );
+
+      const result = component.getFinalPageButton();
+      expect(result.text).toContain('Bioplatforms Australia Data Portal');
+    });
+
+    it('returns Galaxy redirect when on Galaxy route', () => {
+      spyOnProperty(component.router, 'url', 'get').and.returnValue(
+        '/galaxy/register/standard-access/success',
+      );
+
+      const result = component.getFinalPageButton();
+      expect(result.text).toContain('Galaxy Australia');
+    });
+
+    it('defaults to login for other routes', () => {
+      spyOnProperty(component.router, 'url', 'get').and.returnValue(
+        '/some/other/path',
+      );
+
+      const result = component.getFinalPageButton();
+      expect(result.text).toBe('Login');
     });
   });
 

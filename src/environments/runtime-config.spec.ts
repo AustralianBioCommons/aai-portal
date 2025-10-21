@@ -16,6 +16,9 @@ describe('Runtime configuration Tests', () => {
     recaptcha: {
       siteKeyV2: 'default-key',
     },
+    portals: {
+      bpaPortal: 'https://default.bpa.portal',
+    },
   };
 
   it('returns defaults merged with redirect fallback when runtime config is absent', () => {
@@ -26,6 +29,7 @@ describe('Runtime configuration Tests', () => {
     expect(result.auth0.backend).toBe('http://localhost:8000');
     expect(result.recaptcha.siteKeyV2).toBe('default-key');
     expect(result.auth0.redirectUri).toBe(window.location.origin);
+    expect(result.portals.bpaPortal).toBe('https://default.bpa.portal');
 
     // defaults should remain untouched
     expect(defaults.auth0.redirectUri).toBe('');
@@ -41,6 +45,9 @@ describe('Runtime configuration Tests', () => {
       recaptcha: {
         siteKeyV2: 'override-key',
       },
+      portals: {
+        bpaPortal: 'https://override.bpa.portal',
+      },
     };
 
     const result = mergeEnvironmentConfig(defaults, runtime);
@@ -51,11 +58,13 @@ describe('Runtime configuration Tests', () => {
     expect(result.recaptcha.siteKeyV2).toBe('override-key');
     expect(result.auth0.clientId).toBe('default-client');
     expect(result.auth0.redirectUri).toBe(window.location.origin);
+    expect(result.portals.bpaPortal).toBe('https://override.bpa.portal');
 
     // Ensure defaults object was not mutated
     expect(defaults.production).toBe(false);
     expect(defaults.auth0.domain).toBe('default.domain');
     expect(defaults.recaptcha.siteKeyV2).toBe('default-key');
+    expect(defaults.portals.bpaPortal).toBe('https://default.bpa.portal');
   });
 
   it('honours runtime redirectUri when provided and falls back when empty', () => {
