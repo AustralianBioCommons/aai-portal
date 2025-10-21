@@ -79,9 +79,7 @@ describe('BpaRegisterSelectionComponent', () => {
     expect(buttons[0].attributes['ng-reflect-router-link']).toBe(
       'standard-access',
     );
-    expect(buttons[1].attributes['ng-reflect-router-link']).toBe(
-      'bundle-access',
-    );
+    expect(buttons[1].attributes['ng-reflect-router-link']).toBe('bundles');
   });
 
   it('should have correct button styling', () => {

@@ -75,7 +75,7 @@ export const routes: Routes = [
         data: { title: 'Galaxy Australia - Registration successful' },
       },
       {
-        path: 'register/bundle-access',
+        path: 'register/bundles',
         component: RegisterComponent,
         data: { title: 'Galaxy Australia - Register' },
       },
@@ -106,7 +106,7 @@ export const routes: Routes = [
         },
       },
       {
-        path: 'register/bundle-access',
+        path: 'register/bundles',
         component: RegisterComponent,
         data: { title: 'Register | Bioplatforms Australia Data Portal' },
       },

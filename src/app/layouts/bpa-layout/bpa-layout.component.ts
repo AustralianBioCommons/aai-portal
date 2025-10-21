@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-bpa-layout',
@@ -10,4 +11,5 @@ import { Router, RouterOutlet } from '@angular/router';
 })
 export class BpaLayoutComponent {
   router = inject(Router);
+  readonly bpaPortalUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
 }

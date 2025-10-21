@@ -9,16 +9,22 @@ export interface RecaptchaConfig {
   siteKeyV2: string;
 }
 
+export interface PortalLinksConfig {
+  bpaPortal: string;
+}
+
 export interface EnvironmentConfig {
   production: boolean;
   auth0: Auth0Config;
   recaptcha: RecaptchaConfig;
+  portals: PortalLinksConfig;
 }
 
 export interface RuntimeEnvironmentConfig {
   production?: boolean;
   auth0?: Partial<Auth0Config>;
   recaptcha?: Partial<RecaptchaConfig>;
+  portals?: Partial<PortalLinksConfig>;
 }
 
 function resolveRedirectUri(value: string | undefined): string {
@@ -43,6 +49,10 @@ export function mergeEnvironmentConfig(
     recaptcha: {
       ...defaults.recaptcha,
       ...(runtime?.recaptcha ?? {}),
+    },
+    portals: {
+      ...defaults.portals,
+      ...(runtime?.portals ?? {}),
     },
   };
 }

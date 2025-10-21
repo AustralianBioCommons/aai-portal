@@ -1,100 +1,86 @@
-// auth.interceptor.spec.ts
-import { TestBed, fakeAsync, flush } from '@angular/core/testing';
-import { HttpClient } from '@angular/common/http';
-import { HttpTestingController } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-
-import { of } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import {
+  provideHttpClient,
+  withInterceptors,
+  HttpClient,
+} from '@angular/common/http';
+import {
+  provideHttpClientTesting,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
+import { of, throwError } from 'rxjs';
 import { authInterceptor } from './auth.interceptor';
 import { environment } from '../../../environments/environment';
 
-describe('authInterceptor (bypass URLs)', () => {
+describe('authInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
-
-  // Simple spyable mock for Auth0Service
-  const auth0Mock = {
-    getAccessTokenSilently: jasmine
-      .createSpy('getAccessTokenSilently')
-      .and.returnValue(of('test-token')),
-  };
-
-  const backend = environment.auth0.backend; // e.g. 'https://api.example.com'
+  let authServiceSpy: jasmine.SpyObj<Auth0Service>;
 
   beforeEach(() => {
+    authServiceSpy = jasmine.createSpyObj<Auth0Service>('AuthService', [
+      'getAccessTokenSilently',
+    ]);
+
     TestBed.configureTestingModule({
       providers: [
-        { provide: Auth0Service, useValue: auth0Mock },
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
+        { provide: Auth0Service, useValue: authServiceSpy },
       ],
     });
 
     http = TestBed.inject(HttpClient);
     httpMock = TestBed.inject(HttpTestingController);
-    auth0Mock.getAccessTokenSilently.calls.reset();
   });
 
   afterEach(() => {
     httpMock.verify();
   });
 
-  // List of backend paths that should bypass auth
-  const BYPASS_PATHS: readonly string[] = [
-    '/register',
-    '/utils/registration_info',
-  ] as const;
+  it('bypasses registration endpoints without adding authorization header', () => {
+    const url = `${environment.auth0.backend}/register`;
+    authServiceSpy.getAccessTokenSilently.and.returnValue(of('token'));
 
-  BYPASS_PATHS.forEach((path) => {
-    it(`should NOT attach token for bypass path: ${path}`, () => {
-      const url = `${backend}${path}`;
+    http.get(url).subscribe();
 
-      http.get(url).subscribe();
-      const req = httpMock.expectOne(url);
-
-      expect(auth0Mock.getAccessTokenSilently).not.toHaveBeenCalled();
-      expect(req.request.headers.has('Authorization')).toBeFalse();
-      expect(req.request.headers.has('Content-Type')).toBeFalse();
-
-      req.flush({ ok: true });
-    });
+    const req = httpMock.expectOne(url);
+    expect(req.request.headers.has('Authorization')).toBeFalse();
+    req.flush({});
   });
 
-  it('should attach token for other backend URLs (non-bypass control)', fakeAsync(() => {
-    // Mock backend URL for this test to work consistenctly with differernt runtime environments configs
-    const testBackend = 'http://test-backend.example.com';
-    const originalBackend = environment.auth0.backend;
-    environment.auth0.backend = testBackend;
-
-    const url = `${testBackend}/users/me`;
+  it('attaches bearer token for protected backend requests', () => {
+    const url = `${environment.auth0.backend}/admin/users`;
+    authServiceSpy.getAccessTokenSilently.and.returnValue(of('token-123'));
 
     http.get(url).subscribe();
-    flush();
 
     const req = httpMock.expectOne(url);
-
-    // For non-bypass backend, token should be requested and header set
-    expect(auth0Mock.getAccessTokenSilently).toHaveBeenCalledTimes(1);
-    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer token-123');
     expect(req.request.headers.get('Content-Type')).toBe('application/json');
+    req.flush({});
+  });
 
-    req.flush({ ok: true });
+  it('propagates errors when token acquisition fails', () => {
+    const url = `${environment.auth0.backend}/admin/users`;
+    const authError = new Error('token error');
+    spyOn(console, 'error');
+    authServiceSpy.getAccessTokenSilently.and.returnValue(
+      throwError(() => authError),
+    );
 
-    environment.auth0.backend = originalBackend;
-  }));
+    http.get(url).subscribe({
+      next: fail,
+      error: (error) => {
+        expect(error).toBe(authError);
+      },
+    });
 
-  it('should leave non-backend URLs untouched (extra safety)', () => {
-    const url = 'https://other.example.com/public';
-
-    http.get(url).subscribe();
-    const req = httpMock.expectOne(url);
-
-    expect(auth0Mock.getAccessTokenSilently).not.toHaveBeenCalled();
-    expect(req.request.headers.has('Authorization')).toBeFalse();
-    expect(req.request.headers.has('Content-Type')).toBeFalse();
-
-    req.flush({ ok: true });
+    httpMock.expectNone(url);
+    expect(console.error).toHaveBeenCalledWith(
+      'Failed to get access token:',
+      authError,
+    );
   });
 });

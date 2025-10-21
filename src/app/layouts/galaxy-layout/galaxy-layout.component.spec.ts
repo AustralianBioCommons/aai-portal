@@ -22,7 +22,7 @@ describe('GalaxyLayoutComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display Galaxy logo with correct attributes when not on bundle-access route', () => {
+  it('should display Galaxy logo with correct attributes when not on bundles route', () => {
     const logo = fixture.debugElement.query(By.css('img[alt="Galaxy logo"]'));
     expect(logo).toBeTruthy();
     expect(logo.nativeElement.src).toContain('galaxy-logo.svg');
@@ -46,5 +46,16 @@ describe('GalaxyLayoutComponent', () => {
   it('should render router-outlet', () => {
     const routerOutlet = fixture.debugElement.query(By.css('router-outlet'));
     expect(routerOutlet).toBeTruthy();
+  });
+
+  it('should hide navigation bar on bundles route', () => {
+    spyOnProperty(component.router, 'url', 'get').and.returnValue(
+      '/galaxy/register/bundles',
+    );
+
+    fixture.detectChanges();
+
+    const nav = fixture.debugElement.query(By.css('nav'));
+    expect(nav).toBeNull();
   });
 });

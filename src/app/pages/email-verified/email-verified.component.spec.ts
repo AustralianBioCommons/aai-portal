@@ -80,7 +80,8 @@ describe('EmailVerifiedComponent', () => {
     });
 
     expect(component.appId()).toBe('bpa');
-    expect(component.appUrl()).toContain('aaidemo.bioplatforms.com');
+    const expectedUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+    expect(component.appUrl()).toBe(expectedUrl);
   });
 
   it('should use biocommons URL if app response is biocommons', async () => {

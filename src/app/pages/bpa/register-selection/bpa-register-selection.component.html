@@ -42,7 +42,7 @@
           type="button"
           variant="primary"
           colorClasses="bg-blue-900 hover:bg-blue-950 focus-visible:ring-blue-900"
-          [routerLink]="['bundle-access']"
+          [routerLink]="['bundles']"
         >
           Continue
         </app-button>
@@ -54,10 +54,9 @@
     Already have an account?
     <a
       class="font-medium text-blue-600 hover:text-blue-700"
-      href="https://aaidemo.bioplatforms.com/"
+      [href]="bpaLoginUrl"
     >
-      Return to Bioplatforms Australia Data Portal
+      Log in
     </a>
-    and log in
   </div>
 </div>

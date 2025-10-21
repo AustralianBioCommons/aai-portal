@@ -1,4 +1,4 @@
-@if (router.url.includes("bundle-access")) {
+@if (router.url.includes("bundles")) {
   <router-outlet></router-outlet>
 } @else {
   <div
@@ -8,7 +8,7 @@
       class="flex w-full items-center justify-center bg-bpa-primary px-12 pb-4 pt-16 lg:px-24"
     >
       <div class="w-full max-w-6xl">
-        <a href="https://aaidemo.bioplatforms.com/">
+        <a [href]="bpaPortalUrl">
           <img
             src="assets/bpa-logo-horizontal.webp"
             class="mt-2 h-20 w-auto"
