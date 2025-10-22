@@ -128,6 +128,18 @@ export class NavbarComponent {
     return this.navigationPages.some((page) => page.route === currentUrl);
   }
 
+  onNavigationChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedRoute = selectElement.value;
+    if (selectedRoute) {
+      this.router.navigate([selectedRoute]);
+    }
+  }
+
+  getCurrentRoute(): string {
+    return this.router.url;
+  }
+
   logout() {
     this.authService.logout();
   }
