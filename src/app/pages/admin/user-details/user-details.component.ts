@@ -16,7 +16,11 @@ import {
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
-import { PLATFORM_NAMES, PlatformId } from '../../../core/constants/constants';
+import {
+  PLATFORMS,
+  PlatformId,
+  biocommonsBundles,
+} from '../../../core/constants/constants';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 
@@ -40,7 +44,8 @@ export class UserDetailsComponent implements OnInit {
   private apiService = inject(ApiService);
   private renderer = inject(Renderer2);
 
-  protected readonly PLATFORM_NAMES = PLATFORM_NAMES;
+  protected readonly PLATFORMS = PLATFORMS;
+  protected readonly biocommonsBundles = biocommonsBundles;
 
   @ViewChild('actionMenu', { read: ElementRef }) actionMenu!: ElementRef;
   @ViewChild('actionMenuButton', { read: ElementRef })
@@ -132,10 +137,13 @@ export class UserDetailsComponent implements OnInit {
   }
 
   getPlatformName(platformId: string): string {
-    return (
-      this.PLATFORM_NAMES[platformId as keyof typeof PLATFORM_NAMES] ||
-      platformId
-    );
+    return this.PLATFORMS[platformId as PlatformId]?.name || platformId;
+  }
+
+  getBundleLogoUrls(groupId: string): string[] {
+    const bundleId = groupId.split('/').pop() || '';
+    const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
+    return bundle?.logoUrls || [];
   }
 
   togglePlatformApproval(platformId: PlatformId, currentStatus: string) {

@@ -30,7 +30,7 @@
   } @else if (error()) {
     <div class="text-red-500">{{ error() }}</div>
   } @else if (user()) {
-    <div class="flex w-full max-w-5xl flex-1 flex-col gap-6">
+    <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
       <div class="flex items-center justify-between">
         <a
           [routerLink]="returnUrl()"
@@ -206,8 +206,15 @@
                   track membership.id
                 ) {
                   <div class="flex items-center justify-between gap-6">
-                    <div>
-                      {{ getPlatformName(membership.platform_id) }}
+                    <div class="flex items-center gap-6">
+                      <img
+                        [src]="PLATFORMS[membership.platform_id].logoUrl"
+                        [alt]="getPlatformName(membership.platform_id)"
+                        class="h-16 w-16 object-contain"
+                      />
+                      <div class="font-medium">
+                        {{ getPlatformName(membership.platform_id) }}
+                      </div>
                     </div>
                     <div class="flex items-center gap-4">
                       <button
@@ -293,8 +300,26 @@
                   membership of user()!.group_memberships;
                   track membership.id
                 ) {
-                  <div class="flex items-center justify-between">
-                    <div>{{ membership.group_name }} Bundle</div>
+                  <div class="flex items-center justify-between gap-6">
+                    <div class="flex items-center gap-6">
+                      <div
+                        class="flex h-16 w-16 items-center justify-center gap-1"
+                      >
+                        @for (
+                          logoUrl of getBundleLogoUrls(membership.group_id);
+                          track logoUrl
+                        ) {
+                          <img
+                            [src]="logoUrl"
+                            [alt]="membership.group_name"
+                            class="h-full w-full object-contain"
+                          />
+                        }
+                      </div>
+                      <div class="font-medium">
+                        {{ membership.group_name }}
+                      </div>
+                    </div>
                     <div class="flex items-center gap-4">
                       @if (membership.approval_status === "revoked") {
                         <div class="group relative inline-block">

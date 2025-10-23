@@ -16,7 +16,7 @@
   } @else if (error()) {
     <div class="text-red-500">{{ error() }}</div>
   } @else if (user()) {
-    <div class="flex w-full max-w-5xl flex-1 flex-col gap-6">
+    <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
       <div class="flex items-center gap-6">
         <img
           [src]="user()?.picture"
@@ -111,48 +111,55 @@
                   track membership.id
                 ) {
                   <div class="flex items-center justify-between gap-6">
-                    <div class="flex items-center gap-2">
-                      <div>
-                        {{ getPlatformName(membership.platform_id) }}
-                      </div>
-                      @if (membership.approval_status === "revoked") {
-                        <div class="group relative inline-block">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-5 min-h-5 min-w-5 text-red-500 transition-all hover:cursor-pointer hover:text-red-600"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-
-                          <!-- Tooltip -->
-                          <div
-                            class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 lg:max-w-64"
-                          >
-                            {{ membership.revocation_reason || "Revoked" }}
-                            <div
-                              class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
-                            ></div>
-                          </div>
+                    <div class="flex items-center gap-6">
+                      <img
+                        [src]="PLATFORMS[membership.platform_id].logoUrl"
+                        [alt]="getPlatformName(membership.platform_id)"
+                        class="h-16 w-16 object-contain"
+                      />
+                      <div class="flex items-center gap-2">
+                        <div class="font-medium">
+                          {{ getPlatformName(membership.platform_id) }}
                         </div>
-                      }
-                      <span
-                        class="rounded px-2 py-1 text-xs font-semibold uppercase"
-                        [class]="
-                          membership.approval_status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : membership.approval_status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                        "
-                      >
-                        {{ membership.approval_status }}
-                      </span>
+                        @if (membership.approval_status === "revoked") {
+                          <div class="group relative inline-block">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="size-5 min-h-5 min-w-5 text-red-500 transition-all hover:cursor-pointer hover:text-red-600"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+
+                            <!-- Tooltip -->
+                            <div
+                              class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 lg:max-w-64"
+                            >
+                              {{ membership.revocation_reason || "Revoked" }}
+                              <div
+                                class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
+                              ></div>
+                            </div>
+                          </div>
+                        }
+                        <span
+                          class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                          [class]="
+                            membership.approval_status === 'approved'
+                              ? 'bg-green-100 text-green-800'
+                              : membership.approval_status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          "
+                        >
+                          {{ membership.approval_status }}
+                        </span>
+                      </div>
                     </div>
                     <app-button
                       type="button"
@@ -177,8 +184,26 @@
                   membership of user()!.group_memberships;
                   track membership.id
                 ) {
-                  <div class="flex items-center justify-between">
-                    <div>{{ membership.group_name }} Bundle</div>
+                  <div class="flex items-center justify-between gap-6">
+                    <div class="flex items-center gap-6">
+                      <div
+                        class="flex h-16 w-16 items-center justify-center gap-1"
+                      >
+                        @for (
+                          logoUrl of getBundleLogoUrls(membership.group_id);
+                          track logoUrl
+                        ) {
+                          <img
+                            [src]="logoUrl"
+                            [alt]="membership.group_name"
+                            class="h-full w-full object-contain"
+                          />
+                        }
+                      </div>
+                      <div class="font-medium">
+                        {{ membership.group_name }}
+                      </div>
+                    </div>
                     <div class="flex items-center gap-4">
                       @if (membership.approval_status === "revoked") {
                         <div class="group relative inline-block">

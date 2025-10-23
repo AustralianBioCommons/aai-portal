@@ -3,7 +3,11 @@ import { BiocommonsUserDetails } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { PLATFORM_NAMES, PlatformId } from '../../../core/constants/constants';
+import {
+  PLATFORMS,
+  PlatformId,
+  biocommonsBundles,
+} from '../../../core/constants/constants';
 
 @Component({
   selector: 'app-profile',
@@ -12,7 +16,8 @@ import { PLATFORM_NAMES, PlatformId } from '../../../core/constants/constants';
   styleUrl: './profile.component.css',
 })
 export class ProfileComponent implements OnInit {
-  protected readonly PLATFORM_NAMES = PLATFORM_NAMES;
+  protected readonly PLATFORMS = PLATFORMS;
+  protected readonly biocommonsBundles = biocommonsBundles;
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
@@ -107,6 +112,12 @@ export class ProfileComponent implements OnInit {
   }
 
   getPlatformName(platformId: string): string {
-    return PLATFORM_NAMES[platformId as PlatformId] || platformId;
+    return PLATFORMS[platformId as PlatformId]?.name || platformId;
+  }
+
+  getBundleLogoUrls(groupId: string): string[] {
+    const bundleId = groupId.split('/').pop() || '';
+    const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
+    return bundle?.logoUrls || [];
   }
 }

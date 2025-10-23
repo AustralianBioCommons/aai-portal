@@ -404,7 +404,7 @@ describe('RegisterComponent', () => {
 
       expect(tsiBundle).toBeTruthy();
       expect(fgeneshService).toBeTruthy();
-      expect(fgeneshService?.name).toBe('Fgenesh++ Terms and Conditions');
+      expect(fgeneshService?.termsTitle).toBe('Fgenesh++ Terms and Conditions');
       expect(fgeneshService?.termsUrl).toBe(
         'https://site.usegalaxy.org.au/fgenesh-terms.html',
       );
