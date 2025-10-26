@@ -69,7 +69,9 @@ describe('AuthService', () => {
     const { httpMock } = createService();
     expect(service).toBeTruthy();
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.flush({ is_admin: false });
   });
 
@@ -78,7 +80,9 @@ describe('AuthService', () => {
     service.login();
     expect(mockAuth0Service.loginWithRedirect).toHaveBeenCalled();
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.flush({ is_admin: false });
   });
 
@@ -94,7 +98,9 @@ describe('AuthService', () => {
       }),
     );
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.flush({ is_admin: false });
   });
 
@@ -102,7 +108,9 @@ describe('AuthService', () => {
     const { httpMock } = createService();
     expect(service.isAuthenticated()).toBe(true);
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.flush({ is_admin: false });
   });
 
@@ -110,7 +118,9 @@ describe('AuthService', () => {
     const { httpMock } = createService();
     expect(service.user()).toEqual(mockUser);
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.flush({ is_admin: false });
   });
 
@@ -121,7 +131,9 @@ describe('AuthService', () => {
       done();
     });
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     expect(req.request.method).toBe('GET');
     expect(req.request.headers.get('Authorization')).toBe(
       'Bearer default.token.signature',
@@ -137,7 +149,9 @@ describe('AuthService', () => {
       done();
     });
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.flush({ is_admin: false });
   });
 
@@ -152,7 +166,7 @@ describe('AuthService', () => {
       done();
     });
 
-    httpMock.expectNone(`${environment.auth0.backend}/me/is-admin`);
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
   });
 
   it('should return false for admin when not authenticated', (done) => {
@@ -163,7 +177,7 @@ describe('AuthService', () => {
       done();
     });
 
-    httpMock.expectNone(`${environment.auth0.backend}/me/is-admin`);
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
   });
 
   it('should handle HTTP error gracefully', (done) => {
@@ -174,7 +188,9 @@ describe('AuthService', () => {
       done();
     });
 
-    const req = httpMock.expectOne(`${environment.auth0.backend}/me/is-admin`);
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
     req.error(new ProgressEvent('error'), {
       status: 500,
       statusText: 'Internal Server Error',
