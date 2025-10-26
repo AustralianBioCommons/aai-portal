@@ -116,7 +116,7 @@ describe('AuthService', () => {
 
   it('should detect admin role correctly', (done) => {
     const { httpMock } = createService();
-    service.isAdmin$.subscribe((isAdmin) => {
+    service.isGeneralAdmin$.subscribe((isAdmin) => {
       expect(isAdmin).toBe(true);
       done();
     });
@@ -132,7 +132,7 @@ describe('AuthService', () => {
   it('should detect non-admin user correctly', (done) => {
     const { httpMock } = createService();
 
-    service.isAdmin$.subscribe((isAdmin) => {
+    service.isGeneralAdmin$.subscribe((isAdmin) => {
       expect(isAdmin).toBe(false);
       done();
     });
@@ -147,7 +147,7 @@ describe('AuthService', () => {
       throwError(() => new Error('Token error')),
     );
 
-    service.isAdmin$.subscribe((isAdmin) => {
+    service.isGeneralAdmin$.subscribe((isAdmin) => {
       expect(isAdmin).toBe(false);
       done();
     });
@@ -158,7 +158,7 @@ describe('AuthService', () => {
   it('should return false for admin when not authenticated', (done) => {
     createService(false);
 
-    service.isAdmin$.subscribe((isAdmin) => {
+    service.isGeneralAdmin$.subscribe((isAdmin) => {
       expect(isAdmin).toBe(false);
       done();
     });
@@ -169,7 +169,7 @@ describe('AuthService', () => {
   it('should handle HTTP error gracefully', (done) => {
     const { httpMock } = createService();
 
-    service.isAdmin$.subscribe((isAdmin) => {
+    service.isGeneralAdmin$.subscribe((isAdmin) => {
       expect(isAdmin).toBe(false);
       done();
     });
