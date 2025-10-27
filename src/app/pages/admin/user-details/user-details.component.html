@@ -289,9 +289,38 @@
                   membership of user()!.group_memberships;
                   track membership.id
                 ) {
-                  <div class="flex items-center justify-between">
+                  <div class="flex items-center justify-between gap-6">
                     <div>{{ membership.group_name }} Bundle</div>
                     <div class="flex items-center gap-4">
+                      <button
+                        type="button"
+                        role="switch"
+                        [attr.aria-checked]="
+                          membership.approval_status === 'approved'
+                        "
+                        (click)="
+                          toggleGroupApproval(
+                            membership.group_id,
+                            membership.approval_status,
+                            membership.group_name
+                          )
+                        "
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-biocommons-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        [class]="
+                          membership.approval_status === 'approved'
+                            ? 'bg-green-600'
+                            : 'bg-gray-200'
+                        "
+                      >
+                        <span
+                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                          [class]="
+                            membership.approval_status === 'approved'
+                              ? 'translate-x-5'
+                              : 'translate-x-0'
+                          "
+                        ></span>
+                      </button>
                       @if (membership.approval_status === "revoked") {
                         <div class="group relative inline-block">
                           <svg
@@ -408,6 +437,84 @@
           type="button"
           variant="primary"
           (click)="confirmRevokePlatformAccess()"
+        >
+          Yes
+        </app-button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Revoke Group Access Modal -->
+@if (showGroupRevokeModal()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+    tabindex="-1"
+    (click)="closeGroupRevokeModal()"
+    (keydown.escape)="closeGroupRevokeModal()"
+  >
+    <div
+      class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <h3
+        id="group-revoke-modal-title"
+        class="text-center text-2xl font-semibold text-gray-900"
+      >
+        Do you want to revoke
+        {{ selectedGroupForRevoke()?.name || 'this bundle' }} for
+        {{ user()?.email }}?
+      </h3>
+      <div>
+        <label
+          for="group-revoke-reason"
+          class="block text-sm font-medium text-gray-900"
+        >
+          Revocation reason *
+        </label>
+        <textarea
+          id="group-revoke-reason"
+          [formControl]="groupRevokeReasonControl"
+          rows="4"
+          maxlength="1024"
+          class="mt-1 w-full rounded-md border px-3 py-2 font-light focus:outline-none focus:ring-2 focus:ring-blue-100"
+          [class.border-red-500]="
+            groupRevokeReasonControl.invalid && groupRevokeReasonControl.touched
+          "
+        ></textarea>
+        <div
+          class="mt-1 flex text-xs"
+          [class]="
+            groupRevokeReasonControl.invalid && groupRevokeReasonControl.touched
+              ? 'justify-between'
+              : 'justify-end'
+          "
+        >
+          @if (
+            groupRevokeReasonControl.invalid && groupRevokeReasonControl.touched
+          ) {
+            <div class="text-red-500">This field is required</div>
+          }
+          <div class="text-gray-500">
+            {{ groupRevokeReasonControl.value.length }}/1024
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between gap-6">
+        <app-button
+          type="button"
+          variant="secondary"
+          (click)="closeGroupRevokeModal()"
+        >
+          No
+        </app-button>
+        <app-button
+          type="button"
+          variant="primary"
+          (click)="confirmRevokeGroupAccess()"
         >
           Yes
         </app-button>

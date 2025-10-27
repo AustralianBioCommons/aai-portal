@@ -50,12 +50,18 @@ export class UserDetailsComponent implements OnInit {
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
   showRevokeModal = signal(false);
+  showGroupRevokeModal = signal(false);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
   selectedPlatformForRevoke = signal<PlatformId | null>(null);
+  selectedGroupForRevoke = signal<{ id: string; name: string } | null>(null);
 
   // Form controls
   revokeReasonControl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
+  groupRevokeReasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required],
   });
@@ -144,16 +150,36 @@ export class UserDetailsComponent implements OnInit {
     }
   }
 
+  toggleGroupApproval(groupId: string, currentStatus: string, groupName: string) {
+    if (currentStatus === 'approved') {
+      this.openGroupRevokeModal(groupId, groupName);
+    } else {
+      this.approveGroup(groupId, groupName);
+    }
+  }
+
   openRevokeModal(platformId: PlatformId): void {
     this.selectedPlatformForRevoke.set(platformId);
     this.revokeReasonControl.reset();
     this.showRevokeModal.set(true);
   }
 
+  openGroupRevokeModal(groupId: string, groupName: string): void {
+    this.selectedGroupForRevoke.set({ id: groupId, name: groupName });
+    this.groupRevokeReasonControl.reset();
+    this.showGroupRevokeModal.set(true);
+  }
+
   closeRevokeModal(): void {
     this.showRevokeModal.set(false);
     this.revokeReasonControl.reset();
     this.selectedPlatformForRevoke.set(null);
+  }
+
+  closeGroupRevokeModal(): void {
+    this.showGroupRevokeModal.set(false);
+    this.groupRevokeReasonControl.reset();
+    this.selectedGroupForRevoke.set(null);
   }
 
   confirmRevokePlatformAccess(): void {
@@ -188,6 +214,40 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
+  confirmRevokeGroupAccess(): void {
+    const target = this.selectedGroupForRevoke();
+    this.groupRevokeReasonControl.markAsTouched();
+
+    if (!target || this.groupRevokeReasonControl.invalid) {
+      return;
+    }
+
+    const userId = this.user()!.user_id;
+    const reason = this.groupRevokeReasonControl.value.trim();
+    this.alert.set(null);
+
+    this.apiService
+      .revokeGroupAccess(userId, target.id, reason)
+      .subscribe({
+        next: () => {
+          this.alert.set({
+            type: 'success',
+            message: `${target.name} access revoked successfully`,
+          });
+          this.closeGroupRevokeModal();
+          this.refreshUserDetails(userId);
+        },
+        error: (error) => {
+          console.error('Failed to revoke bundle access:', error);
+          this.alert.set({
+            type: 'error',
+            message: 'Failed to revoke bundle access',
+          });
+          this.closeGroupRevokeModal();
+        },
+      });
+  }
+
   private approvePlatform(platformId: PlatformId) {
     const userId = this.user()!.user_id;
     this.alert.set(null);
@@ -205,6 +265,28 @@ export class UserDetailsComponent implements OnInit {
         this.alert.set({
           type: 'error',
           message: 'Failed to approve platform access',
+        });
+      },
+    });
+  }
+
+  private approveGroup(groupId: string, groupName: string) {
+    const userId = this.user()!.user_id;
+    this.alert.set(null);
+
+    this.apiService.approveGroupAccess(userId, groupId).subscribe({
+      next: () => {
+        this.alert.set({
+          type: 'success',
+          message: `${groupName} access approved successfully`,
+        });
+        this.refreshUserDetails(userId);
+      },
+      error: (error) => {
+        console.error('Failed to approve bundle access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to approve bundle access',
         });
       },
     });

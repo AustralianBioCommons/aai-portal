@@ -65,6 +65,8 @@ describe('UserDetailsComponent', () => {
       'resendVerificationEmail',
       'approvePlatformAccess',
       'revokePlatformAccess',
+      'approveGroupAccess',
+      'revokeGroupAccess',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -542,6 +544,139 @@ describe('UserDetailsComponent', () => {
         By.css('.group-hover\\:block'),
       );
       expect(tooltip).toBeTruthy();
+    });
+  });
+
+  describe('Group Toggle and Revoke Modal', () => {
+    it('should approve group when toggling pending membership', () => {
+      const pendingGroup: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        group_memberships: [
+          {
+            id: 'pm2',
+            group_id: 'bpa',
+            group_name: 'Bioplatforms Australia',
+            group_short_name: 'BPA',
+            approval_status: 'pending',
+            updated_by: 'admin',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingGroup));
+      mockApiService.approveGroupAccess.and.returnValue(of({ updated: true }));
+
+      fixture.detectChanges();
+
+      component.toggleGroupApproval('bpa', 'pending', 'Bioplatforms Australia');
+
+      expect(mockApiService.approveGroupAccess).toHaveBeenCalledWith(
+        '123',
+        'bpa',
+      );
+    });
+
+    it('should open group revoke modal when toggling approved group', () => {
+      fixture.detectChanges();
+
+      component.toggleGroupApproval('bpa', 'approved', 'Bioplatforms Australia');
+
+      expect(component.showGroupRevokeModal()).toBeTrue();
+      expect(component.selectedGroupForRevoke()).toEqual({
+        id: 'bpa',
+        name: 'Bioplatforms Australia',
+      });
+    });
+
+    it('should revoke group access with reason', () => {
+      mockApiService.revokeGroupAccess.and.returnValue(of({ updated: true }));
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.selectedGroupForRevoke.set({
+        id: 'bpa',
+        name: 'Bioplatforms Australia',
+      });
+      component.groupRevokeReasonControl.setValue('Policy change');
+
+      component.confirmRevokeGroupAccess();
+
+      expect(mockApiService.revokeGroupAccess).toHaveBeenCalledWith(
+        '123',
+        'bpa',
+        'Policy change',
+      );
+      expect(component.showGroupRevokeModal()).toBeFalse();
+    });
+
+    it('should not revoke group access without reason', () => {
+      fixture.detectChanges();
+      component.selectedGroupForRevoke.set({
+        id: 'bpa',
+        name: 'Bioplatforms Australia',
+      });
+      component.groupRevokeReasonControl.setValue('');
+
+      component.confirmRevokeGroupAccess();
+
+      expect(mockApiService.revokeGroupAccess).not.toHaveBeenCalled();
+      expect(component.groupRevokeReasonControl.touched).toBeTrue();
+    });
+
+    it('should handle approve group error', () => {
+      const pendingGroup: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        group_memberships: [
+          {
+            id: 'pm2',
+            group_id: 'bpa',
+            group_name: 'Bioplatforms Australia',
+            group_short_name: 'BPA',
+            approval_status: 'pending',
+            updated_by: 'admin',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingGroup));
+      mockApiService.approveGroupAccess.and.returnValue(
+        throwError(() => new Error('Approval failed')),
+      );
+      spyOn(console, 'error');
+
+      fixture.detectChanges();
+
+      component.toggleGroupApproval('bpa', 'pending', 'Bioplatforms Australia');
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to approve bundle access:',
+        jasmine.any(Error),
+      );
+      expect(component.alert()?.type).toBe('error');
+      expect(component.alert()?.message).toBe(
+        'Failed to approve bundle access',
+      );
+    });
+
+    it('should handle revoke group error', () => {
+      fixture.detectChanges();
+      mockApiService.revokeGroupAccess.and.returnValue(
+        throwError(() => new Error('Revoke failed')),
+      );
+      spyOn(console, 'error');
+
+      component.selectedGroupForRevoke.set({
+        id: 'bpa',
+        name: 'Bioplatforms Australia',
+      });
+      component.groupRevokeReasonControl.setValue('Policy update');
+
+      component.confirmRevokeGroupAccess();
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to revoke bundle access:',
+        jasmine.any(Error),
+      );
+      expect(component.alert()?.type).toBe('error');
+      expect(component.showGroupRevokeModal()).toBeFalse();
     });
   });
 });
