@@ -18,7 +18,7 @@ export const adminGuard: CanActivateFn = () => {
         return of(false);
       }
 
-      return authService.isAdmin$.pipe(
+      return authService.isGeneralAdmin$.pipe(
         take(1),
         map((isAdmin) => {
           if (isAdmin) {

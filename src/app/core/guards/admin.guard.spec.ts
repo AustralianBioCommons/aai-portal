@@ -16,7 +16,7 @@ describe('adminGuard', () => {
   beforeEach(() => {
     const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated'], {
       isLoading: signal(false),
-      isAdmin$: of(false),
+      isGeneralAdmin$: of(false),
     });
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
@@ -40,7 +40,7 @@ describe('adminGuard', () => {
 
   it('should return true when user is authenticated and is admin', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(true);
-    Object.defineProperty(mockAuthService, 'isAdmin$', {
+    Object.defineProperty(mockAuthService, 'isGeneralAdmin$', {
       value: of(true),
       writable: true,
     });
@@ -58,7 +58,7 @@ describe('adminGuard', () => {
 
   it('should return false and navigate to home when user is not admin', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(true);
-    Object.defineProperty(mockAuthService, 'isAdmin$', {
+    Object.defineProperty(mockAuthService, 'isGeneralAdmin$', {
       value: of(false),
       writable: true,
     });

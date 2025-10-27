@@ -70,14 +70,16 @@ export class AuthService {
     { initialValue: null },
   );
 
-  // Observable that checks if the current user has admin privileges
-  isAdmin$ = this.auth0Service.isAuthenticated$.pipe(
+  // Observable that checks if the current user has general admin privileges
+  // (BioCommons admin, platform admin, or group admin) - this is used to
+  // determine whether to show admin-only features in the UI
+  isGeneralAdmin$ = this.auth0Service.isAuthenticated$.pipe(
     switchMap((isAuth) =>
       isAuth
         ? this.auth0Service.getAccessTokenSilently().pipe(
             switchMap((token) =>
               this.http.get<{ is_admin: boolean }>(
-                `${environment.auth0.backend}/me/is-admin`,
+                `${environment.auth0.backend}/me/is-general-admin`,
                 { headers: { Authorization: `Bearer ${token}` } },
               ),
             ),
@@ -95,7 +97,7 @@ export class AuthService {
     shareReplay(1),
   );
 
-  isAdmin = toSignal(this.isAdmin$, { initialValue: false });
+  isGeneralAdmin = toSignal(this.isGeneralAdmin$, { initialValue: false });
 
   constructor() {
     this.checkForAuthErrors();

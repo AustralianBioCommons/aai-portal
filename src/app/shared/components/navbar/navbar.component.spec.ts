@@ -26,7 +26,7 @@ describe('NavbarComponent', () => {
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
-      isAdmin: signal(false),
+      isGeneralAdmin: signal(false),
       isLoading: signal(false),
     });
     const routerSpy = jasmine.createSpyObj(
@@ -81,7 +81,7 @@ describe('NavbarComponent', () => {
     const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
-      isAdmin: signal(true),
+      isGeneralAdmin: signal(true),
       isLoading: signal(false),
     });
 
@@ -152,7 +152,7 @@ describe('NavbarComponent', () => {
     const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
-      isAdmin: signal(true),
+      isGeneralAdmin: signal(true),
       isLoading: signal(false),
     });
 
@@ -216,10 +216,10 @@ describe('NavbarComponent', () => {
   });
 
   it('should return admin navigation pages for admin', () => {
-    Object.defineProperty(mockAuthService, 'isAdmin', {
+    Object.defineProperty(mockAuthService, 'isGeneralAdmin', {
       value: signal(true),
     });
-    component.isAdmin = mockAuthService.isAdmin;
+    component.isAdmin = mockAuthService.isGeneralAdmin;
 
     const pages = component.navigationPages();
     expect(pages).toEqual([
@@ -260,7 +260,7 @@ describe('NavbarComponent', () => {
     const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
-      isAdmin: signal(true),
+      isGeneralAdmin: signal(true),
       isLoading: signal(false),
     });
 
