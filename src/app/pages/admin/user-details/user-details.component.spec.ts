@@ -512,9 +512,7 @@ describe('UserDetailsComponent', () => {
       const modal = fixture.debugElement.query(By.css('.fixed.inset-0'));
       expect(modal).toBeTruthy();
 
-      const modalTitle = fixture.debugElement.query(
-        By.css('#modal-title'),
-      );
+      const modalTitle = fixture.debugElement.query(By.css('#modal-title'));
       expect(modalTitle).toBeTruthy();
       expect(modalTitle.nativeElement.textContent).toContain(
         'Do you want to revoke',
