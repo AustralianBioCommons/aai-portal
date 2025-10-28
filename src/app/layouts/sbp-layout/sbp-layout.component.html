@@ -6,7 +6,7 @@
     <a href="https://aaiportal.test.biocommons.org.au/">
       <img
         src="/assets/sbp-logo.png"
-        class="auto h-16 min-w-44"
+        class="h-16 min-w-44"
         alt="Structural Biology Platform Logo"
       />
     </a>
@@ -19,7 +19,10 @@
     </div>
   </nav>
 
-  <div class="flex flex-1 flex-col" [ngClass]="{ 'bg-gray-50': !isRegisterPage() }">
+  <div
+    class="flex flex-1 flex-col"
+    [ngClass]="{ 'bg-gray-50': !isRegisterPage() }"
+  >
     <router-outlet></router-outlet>
   </div>
 </div>
