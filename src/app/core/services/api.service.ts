@@ -7,22 +7,27 @@ import { PlatformId } from '../constants/constants';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
+//Platform membership data for user profile: shouldn't include
+// revoked platforms
 export interface UserProfilePlatformData {
   platform_id: PlatformId;
   platform_name: string;
-  approval_status: Status;
+  approval_status: Omit<Status, 'revoked'>;
 }
 
+//Group membership data for user profile: shouldn't include
+// revoked platforms
 export interface UserProfileGroupData {
   group_id: string;
   group_name: string;
   group_short_name: string;
-  approval_status: Status;
+  approval_status: Omit<Status, 'revoked'>;
 }
 
 // Data returned from the API for the user's profile -
 // only includes required information for the UI,
-// omits information on who approves platforms and groups
+// omits information on who approves platforms and groups,
+// as well as revoked platforms and groups.
 export interface UserProfileData {
   user_id: string;
   name: string;
