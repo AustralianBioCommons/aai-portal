@@ -1,5 +1,8 @@
 <div class="flex h-full min-h-screen flex-col">
-  <nav class="flex items-center justify-between px-6 py-6 sm:px-12">
+  <nav
+    *ngIf="!isRegisterPage()"
+    class="flex items-center justify-between px-6 py-6 sm:px-12"
+  >
     <a href="https://aaiportal.test.biocommons.org.au/">
       <img
         src="/assets/sbp-logo.png"
@@ -16,7 +19,7 @@
     </div>
   </nav>
 
-  <div class="flex flex-1 flex-col bg-gray-50">
+  <div class="flex flex-1 flex-col" [ngClass]="{ 'bg-gray-50': !isRegisterPage() }">
     <router-outlet></router-outlet>
   </div>
 </div>

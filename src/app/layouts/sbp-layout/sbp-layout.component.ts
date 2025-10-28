@@ -10,4 +10,8 @@ import { Router, RouterOutlet } from '@angular/router';
 })
 export class SbpLayoutComponent {
   router = inject(Router);
+
+  isRegisterPage(): boolean {
+    return this.router.url.startsWith('/sbp/register');
+  }
 }
