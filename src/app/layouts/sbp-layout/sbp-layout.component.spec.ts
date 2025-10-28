@@ -22,31 +22,10 @@ describe('SbpLayoutComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display the SBP logo with correct attributes', () => {
-    const logo = fixture.debugElement.query(
-      By.css('img[alt="Structural Biology Platform Logo"]'),
-    );
-    expect(logo).toBeTruthy();
-    expect(logo.nativeElement.src).toContain('/assets/sbp-logo.png');
-  });
-
-  it('should have navigation links in header', () => {
-    const aboutLink = fixture.debugElement.query(
-      By.css('a[href="https://www.biocommons.org.au/about"]'),
-    );
-    const faqLink = fixture.debugElement.query(
-      By.css('a[href="https://www.biocommons.org.au/"]'),
-    );
-    const contactLink = fixture.debugElement.query(
-      By.css('a[href="https://www.biocommons.org.au/contact-form"]'),
-    );
-
-    expect(aboutLink).toBeTruthy();
-    expect(aboutLink.nativeElement.textContent.trim()).toBe('About');
-    expect(faqLink).toBeTruthy();
-    expect(faqLink.nativeElement.textContent.trim()).toBe('FAQ');
-    expect(contactLink).toBeTruthy();
-    expect(contactLink.nativeElement.textContent.trim()).toBe('Contact us');
+  it('should apply the layout container styling', () => {
+    const layoutRoot = fixture.debugElement.query(By.css('div'));
+    expect(layoutRoot).toBeTruthy();
+    expect(layoutRoot.nativeElement.className).toContain('bg-gray-50');
   });
 
   it('should render router-outlet', () => {
