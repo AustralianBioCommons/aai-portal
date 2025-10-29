@@ -24,7 +24,7 @@ describe('SbpRegistrationSuccessComponent', () => {
     const heading = fixture.debugElement.query(By.css('.text-4xl'));
     expect(heading).toBeTruthy();
     expect(heading.nativeElement.textContent.trim()).toBe(
-      'Thank you for registering with the Structural Biology Platform',
+      'Thank you',
     );
   });
 
@@ -32,7 +32,7 @@ describe('SbpRegistrationSuccessComponent', () => {
     const message = fixture.debugElement.query(By.css('.font-light'));
     expect(message).toBeTruthy();
     expect(message.nativeElement.textContent.trim()).toBe(
-      'Please check your email and verify your email address. Your request has been sent to an administrator for approval.',
+      'You will receive an email notification once your access request has been approved.',
     );
   });
 
