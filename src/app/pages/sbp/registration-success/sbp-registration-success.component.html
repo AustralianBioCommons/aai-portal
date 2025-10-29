@@ -26,22 +26,22 @@
   </div>
 
   <div
-    class="mx-auto flex h-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center sm:px-24"
+    class="flex flex-1 flex-col justify-center gap-12 bg-gray-100 text-center"
   >
-    <div class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
-      Thank you for registering with the Structural Biology Platform
+    <div class="text-4xl font-semibold sm:text-5xl lg:text-6xl">Thank you</div>
+    <div class="font-light text-gray-900">
+      You will receive an email notification once your access request has been
+      approved.
     </div>
-    <div class="font-light text-gray-500">
-      Please check your email and verify your email address. Your request has
-      been sent to an administrator for approval.
+    <div class="text-center">
+      <app-button
+        type="button"
+        variant="primary"
+        widthClass="w-auto"
+        (click)="navigateToSBP()"
+      >
+        Return to Structural Biology Platform
+      </app-button>
     </div>
-    <app-button
-      type="button"
-      variant="primary"
-      widthClass="w-auto"
-      (click)="navigateToSBP()"
-    >
-      Return to Structural Biology Platform
-    </app-button>
   </div>
 </div>
