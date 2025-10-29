@@ -20,6 +20,11 @@ import { environment } from '../../../../environments/environment';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import {
+  emailLengthValidator,
+  internationalEmailValidator,
+  toAsciiEmail,
+} from '../../../shared/validators/emails';
 
 interface GalaxyRegistrationForm {
   email: FormControl<string>;
@@ -60,9 +65,16 @@ export class GalaxyRegisterComponent {
 
   registerForm: FormGroup<GalaxyRegistrationForm> =
     this.formBuilder.nonNullable.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: [
+        '',
+        [
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ],
+      ],
       password: ['', passwordRequirements],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
       username: ['', usernameRequirements],
     });
 
@@ -70,9 +82,9 @@ export class GalaxyRegisterComponent {
     this.validationService.addFieldErrorMessages('username', {
       required: 'Please enter a public name that will be used to identify you',
       minlength: 'Your public name needs at least 3 characters',
-      maxlength: 'Your public name cannot be longer than 100 characters',
+      maxlength: 'Your public name cannot be longer than 128 characters',
       pattern:
-        'Your public name should contain only lower-case letters, numbers, dots, underscores and dashes',
+        'Your public name must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
     });
 
     this.validationService.setupPasswordConfirmationValidation(
@@ -88,6 +100,11 @@ export class GalaxyRegisterComponent {
     }
 
     const formData = this.registerForm.value;
+    const normalizedEmail = toAsciiEmail(formData.email!);
+    const payload = {
+      ...formData,
+      email: normalizedEmail,
+    };
     this.http
       .get<GalaxyRegistrationToken>(
         `${environment.auth0.backend}/galaxy/register/get-registration-token`,
@@ -100,7 +117,7 @@ export class GalaxyRegisterComponent {
           const headers = new HttpHeaders().set('registration-token', token);
           return this.http.post(
             `${environment.auth0.backend}/galaxy/register`,
-            formData,
+            payload,
             {
               headers,
             },

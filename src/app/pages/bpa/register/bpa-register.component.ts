@@ -16,6 +16,11 @@ import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import {
+  emailLengthValidator,
+  internationalEmailValidator,
+  toAsciiEmail,
+} from '../../../shared/validators/emails';
 
 export interface RegistrationForm {
   username: FormControl<string>;
@@ -67,16 +72,24 @@ export class BpaRegisterComponent {
     this.formBuilder.nonNullable.group({
       username: ['', usernameRequirements],
       fullname: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      reason: ['', Validators.required],
+      email: [
+        '',
+        [
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ],
+      ],
+      reason: ['', [Validators.required, Validators.maxLength(255)]],
       password: ['', passwordRequirements],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
     });
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
+    this.applyFullNameLengthValidation();
   }
 
   onSubmit(): void {
@@ -87,7 +100,7 @@ export class BpaRegisterComponent {
       const requestBody: RegistrationRequest = {
         username: formValue.username!,
         fullname: formValue.fullname!,
-        email: formValue.email!,
+        email: toAsciiEmail(formValue.email!),
         reason: formValue.reason!,
         password: formValue.password!,
       };
@@ -115,6 +128,37 @@ export class BpaRegisterComponent {
         }
       }
     }
+  }
+
+  private applyFullNameLengthValidation(): void {
+    const fullNameControl = this.registrationForm.get('fullname');
+    if (!fullNameControl) {
+      return;
+    }
+
+    const enforce = () => {
+      const value = (fullNameControl.value ?? '').trim();
+      const exceedsLimit = value.length > 255;
+      const existingErrors = fullNameControl.errors ?? {};
+
+      if (exceedsLimit) {
+        if (!existingErrors['fullNameTooLong']) {
+          fullNameControl.setErrors({
+            ...existingErrors,
+            fullNameTooLong: true,
+          });
+        }
+      } else if (existingErrors['fullNameTooLong']) {
+        const remaining = { ...existingErrors };
+        delete remaining['fullNameTooLong'];
+        fullNameControl.setErrors(
+          Object.keys(remaining).length > 0 ? remaining : null,
+        );
+      }
+    };
+
+    fullNameControl.valueChanges.subscribe(() => enforce());
+    enforce();
   }
 
   resolved(captchaResponse: string | null): void {

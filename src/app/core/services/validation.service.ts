@@ -26,7 +26,7 @@ export class ValidationService {
   private fieldSpecificErrorMessages: Record<string, Record<string, string>> = {
     password: {
       minlength: 'Password must be at least 8 characters',
-      maxlength: 'Password cannot be longer than 128 characters',
+      maxlength: 'Password cannot be longer than 72 characters',
       lowercaseRequired: 'Password must contain at least one lowercase letter',
       uppercaseRequired: 'Password must contain at least one uppercase letter',
       digitRequired: 'Password must contain at least one digit',
@@ -34,13 +34,36 @@ export class ValidationService {
     },
     username: {
       minlength: 'Your username needs at least 3 characters',
-      maxlength: 'Your username cannot be longer than 100 characters',
+      maxlength: 'Your username cannot be longer than 128 characters',
       pattern:
-        'Your username should contain only lower-case letters, numbers, dots, underscores and dashes',
+        'Your username must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
     },
     email: {
       invalidSbpEmailDomain:
         'Email must be from an authorized institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
+      localPartTooLong: 'Email local part cannot exceed 64 characters',
+      domainPartTooLong: 'Email domain cannot exceed 254 characters',
+    },
+    firstName: {
+      maxlength: 'First name cannot be longer than 255 characters',
+      fullNameTooLong: 'Full name cannot be longer than 255 characters',
+    },
+    lastName: {
+      maxlength: 'Last name cannot be longer than 255 characters',
+      fullNameTooLong: 'Full name cannot be longer than 255 characters',
+    },
+    fullname: {
+      maxlength: 'Full name cannot be longer than 255 characters',
+      fullNameTooLong: 'Full name cannot be longer than 255 characters',
+    },
+    reason: {
+      maxlength: 'Reason for request cannot be longer than 255 characters',
+    },
+    confirmPassword: {
+      maxlength: 'Confirm password cannot be longer than 72 characters',
+    },
+    projectOfInterest: {
+      maxlength: 'Project of interest cannot be longer than 255 characters',
     },
   };
 
