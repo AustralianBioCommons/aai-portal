@@ -144,7 +144,7 @@
         <!-- Left Column - User Details -->
         <div class="space-y-6">
           <div class="rounded-md bg-white p-6 shadow">
-            <div class="mb-6 text-2xl font-semibold">User Details</div>
+            <div class="mb-6 text-2xl font-semibold">User details</div>
             <div class="space-y-6">
               <div>
                 <div class="text-sm font-light text-gray-500">Name</div>
@@ -199,7 +199,7 @@
             user()!.platform_memberships.length > 0
           ) {
             <div class="space-y-6 rounded-md bg-white p-6 shadow">
-              <div class="text-2xl font-semibold">Platform Access</div>
+              <div class="text-2xl font-semibold">Services</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.platform_memberships;
@@ -294,7 +294,7 @@
             user()?.group_memberships && user()!.group_memberships.length > 0
           ) {
             <div class="space-y-6 rounded-md bg-white p-6 shadow">
-              <div class="text-2xl font-semibold">Bundle Access</div>
+              <div class="text-2xl font-semibold">Bundles</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.group_memberships;
