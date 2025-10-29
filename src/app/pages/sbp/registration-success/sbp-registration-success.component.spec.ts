@@ -29,7 +29,7 @@ describe('SbpRegistrationSuccessComponent', () => {
   });
 
   it('should display email verification message', () => {
-    const message = fixture.debugElement.query(By.css('.text-gray-500'));
+    const message = fixture.debugElement.query(By.css('.font-light'));
     expect(message).toBeTruthy();
     expect(message.nativeElement.textContent.trim()).toBe(
       'Please check your email and verify your email address. Your request has been sent to an administrator for approval.',

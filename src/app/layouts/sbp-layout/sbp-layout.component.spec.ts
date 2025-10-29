@@ -25,7 +25,11 @@ describe('SbpLayoutComponent', () => {
   it('should apply the layout container styling', () => {
     const layoutRoot = fixture.debugElement.query(By.css('div'));
     expect(layoutRoot).toBeTruthy();
-    expect(layoutRoot.nativeElement.className).toContain('bg-gray-50');
+    const classList = layoutRoot.nativeElement.classList;
+    expect(classList).toContain('flex');
+    expect(classList).toContain('h-full');
+    expect(classList).toContain('min-h-screen');
+    expect(classList).toContain('flex-col');
   });
 
   it('should render router-outlet', () => {
