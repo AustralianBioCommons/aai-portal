@@ -37,21 +37,21 @@
           <div class="rounded-lg bg-white p-6 shadow-md">
             <div class="mb-6 text-2xl font-semibold">User details</div>
             <div class="space-y-6">
-              <div>
+              <div id="user-name">
                 <div class="text-sm font-light text-gray-500">Name</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>{{ user()?.name }}</div>
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div>
+              <div id="user-username">
                 <div class="text-sm font-light text-gray-500">Username</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>{{ user()?.username }}</div>
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div>
+              <div id="user-email">
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-2">
@@ -70,7 +70,7 @@
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div>
+              <div id="user-password">
                 <div class="text-sm font-light text-gray-500">Password</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>••••••••••••</div>
