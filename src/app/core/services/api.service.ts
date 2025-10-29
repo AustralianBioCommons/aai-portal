@@ -7,7 +7,7 @@ import { PlatformId } from '../constants/constants';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
-//Platform membership data for user profile: shouldn't include
+// Platform membership data for user profile: shouldn't include
 // revoked platforms
 export interface UserProfilePlatformData {
   platform_id: PlatformId;
