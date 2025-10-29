@@ -2,6 +2,12 @@ import { AbstractControl, ValidationErrors, Validators } from '@angular/forms';
 import { SBP_ALLOWED_EMAIL_DOMAINS } from '../../core/constants/constants';
 import { toASCII } from 'punycode';
 
+// https://biocloud.atlassian.net/browse/AAI-345
+// email needs to conform to:
+//  - username part <= 64 chars
+//  - domain part <= 254 chars
+// Angular's built in email validator cannot handle internationalized domain names and doesnt enforce the username/domain lenghts
+// therefore we need custom validators here
 const EMAIL_LOCAL_PART_MAX_LENGTH = 64;
 const EMAIL_DOMAIN_MAX_LENGTH = 254;
 const ASCII_EMAIL_REGEXP =
