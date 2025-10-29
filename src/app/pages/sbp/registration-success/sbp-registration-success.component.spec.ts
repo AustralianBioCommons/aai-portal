@@ -23,9 +23,7 @@ describe('SbpRegistrationSuccessComponent', () => {
   it('should display the success message', () => {
     const heading = fixture.debugElement.query(By.css('.text-4xl'));
     expect(heading).toBeTruthy();
-    expect(heading.nativeElement.textContent.trim()).toBe(
-      'Thank you',
-    );
+    expect(heading.nativeElement.textContent.trim()).toBe('Thank you');
   });
 
   it('should display email verification message', () => {
