@@ -15,8 +15,8 @@ export interface UserProfilePlatformData {
   approval_status: Omit<Status, 'revoked'>;
 }
 
-//Group membership data for user profile: shouldn't include
-// revoked platforms
+// Group membership data for user profile: shouldn't include
+// revoked groups
 export interface UserProfileGroupData {
   group_id: string;
   group_name: string;
