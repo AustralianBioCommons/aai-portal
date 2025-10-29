@@ -222,7 +222,7 @@ describe('UserDetailsComponent', () => {
 
     const allElements = fixture.debugElement.queryAll(By.css('div'));
     const platformSection = allElements.find((el) =>
-      el.nativeElement.textContent?.includes('Platform Access'),
+      el.nativeElement.textContent?.includes('Services'),
     );
     expect(platformSection).toBeTruthy();
 
@@ -238,7 +238,7 @@ describe('UserDetailsComponent', () => {
 
     const allElements = fixture.debugElement.queryAll(By.css('div'));
     const groupSection = allElements.find((el) =>
-      el.nativeElement.textContent?.includes('Bundle Access'),
+      el.nativeElement.textContent?.includes('Bundles'),
     );
     expect(groupSection).toBeTruthy();
 
