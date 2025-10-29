@@ -26,7 +26,7 @@
   </div>
 
   <div
-    class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
   >
     @if (errorAlert()) {
       <app-alert
@@ -43,6 +43,11 @@
       class="flex w-full max-w-7xl flex-1 flex-col gap-6"
     >
       <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
+      <p class="font-light text-gray-900">
+        Australian BioCommons access enables a streamlined approach to accessing
+        the Structural Biology Platform and other Australian Biocommons
+        services.
+      </p>
 
       <!-- Registration form fields -->
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -58,7 +63,7 @@
             id="firstName"
             formControlName="firstName"
             placeholder="John"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             [class.border-red-500]="isFieldInvalid('firstName')"
           />
           @if (isFieldInvalid("firstName")) {
@@ -79,7 +84,7 @@
             id="lastName"
             formControlName="lastName"
             placeholder="Doe"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             [class.border-red-500]="isFieldInvalid('lastName')"
           />
           @if (isFieldInvalid("lastName")) {
@@ -101,7 +106,7 @@
           id="email"
           formControlName="email"
           placeholder="john.doe@example.com"
-          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
           [class.border-red-500]="isFieldInvalid('email')"
         />
         @if (isFieldInvalid("email")) {
@@ -122,7 +127,7 @@
           id="username"
           formControlName="username"
           placeholder="johndoe"
-          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
           [class.border-red-500]="isFieldInvalid('username')"
         />
         @if (isFieldInvalid("username")) {
@@ -143,7 +148,7 @@
           formControlName="reason"
           rows="4"
           placeholder="Please provide a brief outline of your interest in accessing the Structural Biology Platform"
-          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
           [class.border-red-500]="isFieldInvalid('reason')"
         ></textarea>
         @if (isFieldInvalid("reason")) {
@@ -164,7 +169,7 @@
           id="password"
           formControlName="password"
           placeholder="••••••••"
-          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
           [class.border-red-500]="isFieldInvalid('password')"
         />
         @if (isFieldInvalid("password")) {
@@ -188,7 +193,7 @@
           id="confirmPassword"
           formControlName="confirmPassword"
           placeholder="••••••••"
-          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+          class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
           [class.border-red-500]="isFieldInvalid('confirmPassword')"
         />
         @if (isFieldInvalid("confirmPassword")) {
@@ -200,7 +205,7 @@
         }
       </div>
 
-      <div class="my-6 flex flex-col items-center gap-0.5">
+      <div class="mt-6 flex flex-col items-center gap-0.5">
         <re-captcha
           (resolved)="resolved($event)"
           siteKey="{{ recaptchaSiteKeyV2 }}"
@@ -212,7 +217,7 @@
         }
       </div>
 
-      <div class="flex justify-center">
+      <div class="text-center">
         <app-button type="submit" variant="primary" [loading]="isSubmitting()">
           Register
         </app-button>

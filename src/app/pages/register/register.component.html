@@ -29,7 +29,7 @@
   <!-- Select bundle step -->
   @if (currentStep() === 1) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
     >
       <form
         [formGroup]="bundleForm"
@@ -38,7 +38,7 @@
         <h1 class="text-left text-3xl font-semibold text-gray-900">
           Select a bundle
         </h1>
-        <p class="text-left font-light text-gray-500">
+        <p class="text-left font-light text-gray-900">
           Request access to a bundle you need for your research.
         </p>
         <div class="mt-6 flex flex-wrap items-stretch justify-center gap-6">
@@ -46,7 +46,7 @@
           @for (bundle of bundles; track bundle.id) {
             <div
               tabindex="0"
-              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
+              class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border border-neutral-300 bg-white p-12 shadow-md transition-all"
               [ngClass]="{
                 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
                   !bundle.disabled,
@@ -78,7 +78,7 @@
                 @if (bundle.listItems.length) {
                   <div>
                     @if (bundle.listItems.length > 0) {
-                      <div class="text-sm/6 font-light text-gray-500">
+                      <div class="text-sm/6 font-light text-gray-900">
                         @for (item of bundle.listItems; track item) {
                           <div
                             tabindex="0"
@@ -118,9 +118,9 @@
 
               <app-button
                 type="button"
-                variant="primary"
+                variant="secondary"
                 widthClass="w-full"
-                colorClasses="bg-biocommons-primary hover:bg-sky-900 group-hover:bg-sky-900 focus-visible:ring-biocommons-primary"
+                colorClasses="bg-biocommons-primary hover:bg-sky-900 group-hover:bg-sky-900 hover:text-white group-hover:text-white focus-visible:ring-biocommons-primary"
                 [disabled]="bundle.disabled!"
               >
                 Select
@@ -143,17 +143,17 @@
   <!-- Registration form step -->
   @else if (currentStep() === 2) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
     >
       <form
         [formGroup]="registrationForm"
         class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
         <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
-        <p class="font-light text-gray-500">
+        <p class="font-light text-gray-900">
           Australian BioCommons access enables a streamlined approach to
-          accessing the Bioplatforms Australia Data Portal and Galaxy Australia
-          research infrastructure bundles.
+          accessing the Bioplatforms Data Portal and Galaxy Australia research
+          infrastructure bundles.
         </p>
 
         <!-- Registration form fields -->
@@ -170,7 +170,7 @@
               id="firstName"
               formControlName="firstName"
               placeholder="John"
-              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               [class.border-red-500]="isFieldInvalid('firstName')"
             />
             @if (isFieldInvalid("firstName")) {
@@ -194,7 +194,7 @@
               id="lastName"
               formControlName="lastName"
               placeholder="Doe"
-              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               [class.border-red-500]="isFieldInvalid('lastName')"
             />
             @if (isFieldInvalid("lastName")) {
@@ -216,7 +216,7 @@
             id="email"
             formControlName="email"
             placeholder="john.doe@example.com"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             [class.border-red-500]="isFieldInvalid('email')"
           />
           @if (isFieldInvalid("email")) {
@@ -237,7 +237,7 @@
             id="username"
             formControlName="username"
             placeholder="johndoe"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             [class.border-red-500]="isFieldInvalid('username')"
           />
           @if (isFieldInvalid("username")) {
@@ -258,7 +258,7 @@
             id="password"
             formControlName="password"
             placeholder="••••••••"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             [class.border-red-500]="isFieldInvalid('password')"
           />
           @if (isFieldInvalid("password")) {
@@ -282,7 +282,7 @@
             id="confirmPassword"
             formControlName="confirmPassword"
             placeholder="••••••••"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             [class.border-red-500]="isFieldInvalid('confirmPassword')"
           />
           @if (isFieldInvalid("confirmPassword")) {
@@ -312,7 +312,7 @@
   <!-- Accept terms & conditions step -->
   @else if (currentStep() === 3) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
     >
       <form
         [formGroup]="termsForm"
@@ -321,7 +321,7 @@
         <h1 class="text-3xl font-semibold text-gray-900">
           Accept terms and conditions
         </h1>
-        <p class="font-light text-gray-500">
+        <p class="font-light text-gray-900">
           Please review and accept the terms and conditions for each service in
           your selected bundle.
         </p>
@@ -397,7 +397,7 @@
   <!-- Review details step -->
   @else if (currentStep() === 4) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
     >
       @if (errorAlert()) {
         <app-alert
@@ -413,7 +413,7 @@
           <h1 class="text-3xl font-semibold text-gray-900">
             Details confirmation
           </h1>
-          <div class="font-light text-gray-500">
+          <div class="font-light text-gray-900">
             Please review your information and registration details below.
           </div>
         </div>
@@ -467,12 +467,12 @@
   <!-- Final step -->
   @else {
     <div
-      class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
+      class="flex flex-1 flex-col justify-center gap-12 bg-gray-100 text-center"
     >
       <div class="text-4xl font-semibold sm:text-5xl lg:text-6xl">
         Thank you
       </div>
-      <div class="font-light text-gray-500">
+      <div class="font-light text-gray-900">
         You will receive an email notification once your access request has been
         approved.
       </div>
@@ -491,7 +491,7 @@
 
   <!-- Shared navigation buttons -->
   @if (currentStep() < totalSteps) {
-    <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
+    <div class="flex w-full items-center justify-center bg-gray-100 p-12 pt-0">
       <div class="flex w-full max-w-7xl items-center">
         <app-button type="button" variant="secondary" (click)="prevStep()">
           Back
