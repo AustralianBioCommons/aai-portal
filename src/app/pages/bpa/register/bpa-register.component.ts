@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -157,7 +158,9 @@ export class BpaRegisterComponent {
       }
     };
 
-    fullNameControl.valueChanges.subscribe(() => enforce());
+    fullNameControl.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => enforce());
     enforce();
   }
 

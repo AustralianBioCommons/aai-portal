@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
   AbstractControl,
@@ -182,7 +183,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
       updateControlError(lastControl, exceedsLimit);
     };
 
-    this.registrationForm.valueChanges.subscribe(() => enforce());
+    this.registrationForm.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => enforce());
     enforce();
   }
 

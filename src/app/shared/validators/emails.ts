@@ -32,14 +32,7 @@ function normalizeEmailParts(
 
   const localPart = parts.shift() ?? '';
   const domain = parts.join('@');
-  const asciiDomain = (() => {
-    try {
-      const ascii = toASCII(domain.trim());
-      return ascii ? ascii.toLowerCase() : null;
-    } catch {
-      return null;
-    }
-  })();
+  const asciiDomain = convertDomainToAscii(domain);
   return { localPart, domain, asciiDomain };
 }
 
