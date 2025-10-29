@@ -10,10 +10,16 @@ import {
   PLATFORMS,
   biocommonsBundles,
 } from '../../../core/constants/constants';
+import { EditButtonComponent } from './edit-button/edit-button.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [LoadingSpinnerComponent, AlertComponent, ButtonComponent],
+  imports: [
+    LoadingSpinnerComponent,
+    AlertComponent,
+    ButtonComponent,
+    EditButtonComponent,
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
