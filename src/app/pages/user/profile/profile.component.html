@@ -34,29 +34,21 @@
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Left Column - User Details -->
         <div class="space-y-6">
-          <div class="rounded-md bg-white p-6 shadow">
-            <div class="mb-6 text-2xl font-semibold">User Details</div>
+          <div class="rounded-lg bg-white p-6 shadow-md">
+            <div class="mb-6 text-2xl font-semibold">User details</div>
             <div class="space-y-6">
               <div>
                 <div class="text-sm font-light text-gray-500">Name</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>{{ user()?.name }}</div>
-                  <button
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                  >
-                    Edit
-                  </button>
+                  <app-edit-button></app-edit-button>
                 </div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Username</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>{{ user()?.username }}</div>
-                  <button
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                  >
-                    Edit
-                  </button>
+                  <app-edit-button></app-edit-button>
                 </div>
               </div>
               <div>
@@ -75,22 +67,13 @@
                       {{ user()?.email_verified ? "Verified" : "Unverified" }}
                     </span>
                   </div>
-                  <button
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                  >
-                    Edit
-                  </button>
-                </div>
+                  <app-edit-button></app-edit-button>                </div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Password</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>••••••••••••</div>
-                  <button
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                  >
-                    Change
-                  </button>
+                  <app-edit-button text="Change"></app-edit-button>
                 </div>
               </div>
             </div>
@@ -103,8 +86,8 @@
             user()?.platform_memberships &&
             user()!.platform_memberships.length > 0
           ) {
-            <div class="space-y-6 rounded-md bg-white p-6 shadow">
-              <div class="text-2xl font-semibold">Platform Access</div>
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
+              <div class="text-2xl font-semibold">Services</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.platform_memberships;
@@ -151,8 +134,8 @@
           @if (
             user()?.group_memberships && user()!.group_memberships.length > 0
           ) {
-            <div class="space-y-6 rounded-md bg-white p-6 shadow">
-              <div class="text-2xl font-semibold">Bundle Access</div>
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
+              <div class="text-2xl font-semibold">Bundles</div>
               <div class="space-y-4">
                 @for (
                   membership of user()!.group_memberships;
