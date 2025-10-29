@@ -1,19 +1,47 @@
-<div
-  class="mx-auto flex h-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center sm:px-24"
->
-  <div class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
-    Thank you for registering with the Structural Biology Platform
+<div class="flex h-full w-full flex-col">
+  <div class="border-b border-gray-100 px-6 py-6 sm:px-12">
+    <div
+      class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+    >
+      <a href="https://aaiportal.test.biocommons.org.au/">
+        <img
+          src="https://images.squarespace-cdn.com/content/5d3a4213cf4f5b00014ea1db/1689141619044-F67XDPQLP4PG6KY862VA/Australian-Biocommons-Logo-Horizontal-RGB.png?format=1500w&content-type=image%2Fpng"
+          class="auto h-16 min-w-44"
+          alt="Australian Biocommons Logo"
+        />
+      </a>
+      <div
+        class="flex flex-1 items-center justify-center text-2xl font-semibold text-gray-900"
+      >
+        Create an account
+      </div>
+      <div
+        class="flex flex-wrap justify-end gap-6 text-sm text-biocommons-primary sm:gap-12 sm:text-base [&>a:hover]:text-sky-900"
+      >
+        <a href="https://www.biocommons.org.au/about">About</a>
+        <a href="https://www.biocommons.org.au/">FAQ</a>
+        <a href="https://www.biocommons.org.au/contact-form">Contact us</a>
+      </div>
+    </div>
   </div>
-  <div class="font-light text-gray-500">
-    Please check your email and verify your email address. Your request has been
-    sent to an administrator for approval.
-  </div>
-  <app-button
-    type="button"
-    variant="primary"
-    widthClass="w-auto"
-    (click)="navigateToSBP()"
+
+  <div
+    class="flex flex-1 flex-col justify-center gap-12 bg-gray-100 text-center"
   >
-    Return to Structural Biology Platform
-  </app-button>
+    <div class="text-4xl font-semibold sm:text-5xl lg:text-6xl">Thank you</div>
+    <div class="font-light text-gray-900">
+      You will receive an email notification once your access request has been
+      approved.
+    </div>
+    <div class="text-center">
+      <app-button
+        type="button"
+        variant="primary"
+        widthClass="w-auto"
+        (click)="navigateToSBP()"
+      >
+        Return to Structural Biology Platform
+      </app-button>
+    </div>
+  </div>
 </div>

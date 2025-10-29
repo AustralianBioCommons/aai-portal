@@ -1,22 +1,3 @@
 <div class="flex h-full min-h-screen flex-col">
-  <nav class="flex items-center justify-between px-6 py-6 sm:px-12">
-    <a href="https://aaiportal.test.biocommons.org.au/">
-      <img
-        src="/assets/sbp-logo.png"
-        class="auto h-16 min-w-44"
-        alt="Structural Biology Platform Logo"
-      />
-    </a>
-    <div
-      class="flex justify-between gap-6 *:text-biocommons-primary sm:gap-12 [&>a:hover]:text-sky-900"
-    >
-      <a href="https://www.biocommons.org.au/about"> About </a>
-      <a href="https://www.biocommons.org.au/"> FAQ </a>
-      <a href="https://www.biocommons.org.au/contact-form"> Contact us </a>
-    </div>
-  </nav>
-
-  <div class="flex flex-1 flex-col bg-gray-50">
-    <router-outlet></router-outlet>
-  </div>
+  <router-outlet></router-outlet>
 </div>

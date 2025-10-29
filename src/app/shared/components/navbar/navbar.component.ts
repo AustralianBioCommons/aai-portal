@@ -37,7 +37,7 @@ export class NavbarComponent {
   // Auth signals
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
-  isAdmin = this.authService.isAdmin;
+  isAdmin = this.authService.isGeneralAdmin;
   isLoading = this.authService.isLoading;
 
   // Component state

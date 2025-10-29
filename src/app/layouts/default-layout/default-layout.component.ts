@@ -57,7 +57,7 @@ export class DefaultLayoutComponent implements OnInit {
 
   private getNavigationRoute() {
     return this.authService.isAuthenticated()
-      ? this.authService.isAdmin$.pipe(
+      ? this.authService.isGeneralAdmin$.pipe(
           take(1),
           map((isAdmin) => (isAdmin ? '/all-users' : '/profile')),
         )

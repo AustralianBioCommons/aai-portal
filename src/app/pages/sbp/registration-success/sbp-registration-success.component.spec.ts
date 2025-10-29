@@ -23,16 +23,14 @@ describe('SbpRegistrationSuccessComponent', () => {
   it('should display the success message', () => {
     const heading = fixture.debugElement.query(By.css('.text-4xl'));
     expect(heading).toBeTruthy();
-    expect(heading.nativeElement.textContent.trim()).toBe(
-      'Thank you for registering with the Structural Biology Platform',
-    );
+    expect(heading.nativeElement.textContent.trim()).toBe('Thank you');
   });
 
   it('should display email verification message', () => {
-    const message = fixture.debugElement.query(By.css('.text-gray-500'));
+    const message = fixture.debugElement.query(By.css('.font-light'));
     expect(message).toBeTruthy();
     expect(message.nativeElement.textContent.trim()).toBe(
-      'Please check your email and verify your email address. Your request has been sent to an administrator for approval.',
+      'You will receive an email notification once your access request has been approved.',
     );
   });
 

@@ -24,8 +24,8 @@ describe('DefaultLayoutComponent', () => {
     const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated'], {
       isLoading: isLoadingSignal,
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
-      isAdmin: signal(isAdmin),
-      isAdmin$: isAdminSubject.asObservable(),
+      isGeneralAdmin: signal(isAdmin),
+      isGeneralAdmin$: isAdminSubject.asObservable(),
     });
 
     authSpy.isAuthenticated.and.returnValue(isAuthenticated);
