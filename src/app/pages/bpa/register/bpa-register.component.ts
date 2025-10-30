@@ -13,9 +13,15 @@ import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
 import { passwordRequirements } from '../../../shared/validators/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
+import { fullNameLengthValidator } from '../../../shared/validators/full-name';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import {
+  emailLengthValidator,
+  internationalEmailValidator,
+  toAsciiEmail,
+} from '../../../shared/validators/emails';
 
 export interface RegistrationForm {
   username: FormControl<string>;
@@ -66,11 +72,18 @@ export class BpaRegisterComponent {
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
       username: ['', usernameRequirements],
-      fullname: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      reason: ['', Validators.required],
+      fullname: ['', [Validators.required, fullNameLengthValidator(255)]],
+      email: [
+        '',
+        [
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ],
+      ],
+      reason: ['', [Validators.required, Validators.maxLength(255)]],
       password: ['', passwordRequirements],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
     });
 
   constructor() {
@@ -87,7 +100,7 @@ export class BpaRegisterComponent {
       const requestBody: RegistrationRequest = {
         username: formValue.username!,
         fullname: formValue.fullname!,
-        email: formValue.email!,
+        email: toAsciiEmail(formValue.email!),
         reason: formValue.reason!,
         password: formValue.password!,
       };

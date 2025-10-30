@@ -109,7 +109,9 @@ describe('GalaxyRegisterComponent', () => {
     const patternError = Array.from(
       errorElements as NodeListOf<HTMLElement>,
     ).find((e: HTMLElement) => {
-      return e.textContent?.includes('Your public name should contain only');
+      return e.textContent?.includes(
+        'Your public name must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
+      );
     });
     expect(patternError).toBeTruthy();
   });

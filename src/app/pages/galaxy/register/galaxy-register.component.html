@@ -26,6 +26,7 @@
           id="email"
           type="email"
           formControlName="email"
+          maxlength="320"
           class="w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-100"
           [class.border-red-500]="isFieldInvalid('email')"
         />
@@ -49,9 +50,9 @@
           [class.border-red-500]="isFieldInvalid('password')"
         />
         <div class="mb-2 mt-1 text-xs text-gray-500">
-          Passwords must be at least 8 characters in length and contain at least
-          one uppercase letter, one lowercase letter, one number, and one
-          special character.
+          Passwords must be 8 to 72 characters long, contain at least one
+          uppercase letter, one lowercase letter, one number, one special
+          character.
         </div>
         @if (isFieldInvalid("password")) {
           <div class="mt-0.5 text-xs text-red-500">

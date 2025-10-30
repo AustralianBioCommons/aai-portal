@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   Validators,
@@ -18,6 +20,11 @@ import { environment } from '../../../environments/environment';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import {
+  internationalEmailValidator,
+  toAsciiEmail,
+} from '../../shared/validators/emails';
+import { emailLengthValidator } from '../../shared/validators/emails';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -78,12 +85,19 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      firstName: ['', [Validators.required, Validators.maxLength(255)]],
+      lastName: ['', [Validators.required, Validators.maxLength(255)]],
+      email: [
+        '',
+        [
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ],
+      ],
       username: ['', usernameRequirements],
       password: ['', passwordRequirements],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
     });
 
   termsForm: FormGroup = this.formBuilder.nonNullable.group({});
@@ -100,6 +114,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
+    this.applyFullNameLengthValidation();
   }
 
   ngOnInit(): void {
@@ -127,6 +142,51 @@ export class RegisterComponent implements OnInit, OnDestroy {
     );
 
     this.termsForm = this.formBuilder.nonNullable.group(termsControls);
+  }
+
+  private applyFullNameLengthValidation(): void {
+    const enforce = () => {
+      const firstControl = this.registrationForm.get('firstName');
+      const lastControl = this.registrationForm.get('lastName');
+
+      if (!firstControl || !lastControl) {
+        return;
+      }
+
+      const sanitize = (value: string | null | undefined): string =>
+        (value ?? '').trim();
+
+      const firstName = sanitize(firstControl.value);
+      const lastName = sanitize(lastControl.value);
+      const combined = [firstName, lastName].filter(Boolean).join(' ');
+      const exceedsLimit = combined.length > 255;
+
+      const updateControlError = (
+        control: AbstractControl<string>,
+        hasError: boolean,
+      ) => {
+        const existingErrors = control.errors ?? {};
+        if (hasError) {
+          if (!existingErrors['fullNameTooLong']) {
+            control.setErrors({ ...existingErrors, fullNameTooLong: true });
+          }
+        } else if (existingErrors['fullNameTooLong']) {
+          const remaining = { ...existingErrors };
+          delete remaining['fullNameTooLong'];
+          const nextErrors =
+            Object.keys(remaining).length > 0 ? remaining : null;
+          control.setErrors(nextErrors);
+        }
+      };
+
+      updateControlError(firstControl, exceedsLimit);
+      updateControlError(lastControl, exceedsLimit);
+    };
+
+    this.registrationForm.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => enforce());
+    enforce();
   }
 
   resolved(captchaResponse: string | null): void {
@@ -328,7 +388,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const requestBody: RegistrationRequest = {
       first_name: formValue.firstName!,
       last_name: formValue.lastName!,
-      email: formValue.email!,
+      email: toAsciiEmail(formValue.email!),
       username: formValue.username!,
       password: formValue.password!,
       bundle: this.bundleForm.get('selectedBundle')!.value,

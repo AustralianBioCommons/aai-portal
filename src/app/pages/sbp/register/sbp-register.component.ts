@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
+  AbstractControl,
   ReactiveFormsModule,
   FormBuilder,
   Validators,
@@ -12,7 +14,10 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
 import { passwordRequirements } from '../../../shared/validators/passwords';
-import { sbpEmailRequirements } from '../../../shared/validators/emails';
+import {
+  sbpEmailRequirements,
+  toAsciiEmail,
+} from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
@@ -66,19 +71,20 @@ export class SbpRegisterComponent {
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      firstName: ['', [Validators.required, Validators.maxLength(255)]],
+      lastName: ['', [Validators.required, Validators.maxLength(255)]],
       email: ['', sbpEmailRequirements],
       username: ['', usernameRequirements],
-      reason: ['', Validators.required],
+      reason: ['', [Validators.required, Validators.maxLength(255)]],
       password: ['', passwordRequirements],
-      confirmPassword: ['', Validators.required],
+      confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
     });
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
+    this.applyFullNameLengthValidation();
   }
 
   onSubmit(): void {
@@ -89,7 +95,7 @@ export class SbpRegisterComponent {
       const requestBody: RegistrationRequest = {
         first_name: formValue.firstName!,
         last_name: formValue.lastName!,
-        email: formValue.email!,
+        email: toAsciiEmail(formValue.email!),
         username: formValue.username!,
         reason: formValue.reason!,
         password: formValue.password!,
@@ -118,6 +124,51 @@ export class SbpRegisterComponent {
         }
       }
     }
+  }
+
+  private applyFullNameLengthValidation(): void {
+    const enforce = () => {
+      const firstControl = this.registrationForm.get('firstName');
+      const lastControl = this.registrationForm.get('lastName');
+
+      if (!firstControl || !lastControl) {
+        return;
+      }
+
+      const sanitize = (value: string | null | undefined): string =>
+        (value ?? '').trim();
+
+      const firstName = sanitize(firstControl.value);
+      const lastName = sanitize(lastControl.value);
+      const combined = [firstName, lastName].filter(Boolean).join(' ');
+      const exceedsLimit = combined.length > 255;
+
+      const updateControlError = (
+        control: AbstractControl<string>,
+        hasError: boolean,
+      ) => {
+        const existingErrors = control.errors ?? {};
+        if (hasError) {
+          if (!existingErrors['fullNameTooLong']) {
+            control.setErrors({ ...existingErrors, fullNameTooLong: true });
+          }
+        } else if (existingErrors['fullNameTooLong']) {
+          const remaining = { ...existingErrors };
+          delete remaining['fullNameTooLong'];
+          const nextErrors =
+            Object.keys(remaining).length > 0 ? remaining : null;
+          control.setErrors(nextErrors);
+        }
+      };
+
+      updateControlError(firstControl, exceedsLimit);
+      updateControlError(lastControl, exceedsLimit);
+    };
+
+    this.registrationForm.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => enforce());
+    enforce();
   }
 
   resolved(captchaResponse: string | null): void {

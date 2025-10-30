@@ -47,7 +47,7 @@ export function passwordRequirements(
   const combined_validator = Validators.compose([
     Validators.required,
     Validators.minLength(8),
-    Validators.maxLength(128),
+    Validators.maxLength(72),
     lowercaseRequired,
     uppercaseRequired,
     digitRequired,
