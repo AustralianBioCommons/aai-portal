@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import {
   ReactiveFormsModule,
@@ -14,6 +13,7 @@ import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
 import { passwordRequirements } from '../../../shared/validators/passwords';
 import { ValidationService } from '../../../core/services/validation.service';
+import { fullNameLengthValidator } from '../../../shared/validators/full-name';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -72,7 +72,7 @@ export class BpaRegisterComponent {
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group({
       username: ['', usernameRequirements],
-      fullname: ['', Validators.required],
+      fullname: ['', [Validators.required, fullNameLengthValidator(255)]],
       email: [
         '',
         [
@@ -90,7 +90,6 @@ export class BpaRegisterComponent {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
-    this.applyFullNameLengthValidation();
   }
 
   onSubmit(): void {
@@ -129,39 +128,6 @@ export class BpaRegisterComponent {
         }
       }
     }
-  }
-
-  private applyFullNameLengthValidation(): void {
-    const fullNameControl = this.registrationForm.get('fullname');
-    if (!fullNameControl) {
-      return;
-    }
-
-    const enforce = () => {
-      const value = (fullNameControl.value ?? '').trim();
-      const exceedsLimit = value.length > 255;
-      const existingErrors = fullNameControl.errors ?? {};
-
-      if (exceedsLimit) {
-        if (!existingErrors['fullNameTooLong']) {
-          fullNameControl.setErrors({
-            ...existingErrors,
-            fullNameTooLong: true,
-          });
-        }
-      } else if (existingErrors['fullNameTooLong']) {
-        const remaining = { ...existingErrors };
-        delete remaining['fullNameTooLong'];
-        fullNameControl.setErrors(
-          Object.keys(remaining).length > 0 ? remaining : null,
-        );
-      }
-    };
-
-    fullNameControl.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => enforce());
-    enforce();
   }
 
   resolved(captchaResponse: string | null): void {

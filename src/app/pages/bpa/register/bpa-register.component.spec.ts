@@ -143,6 +143,14 @@ describe('BpaRegisterComponent', () => {
       emailControl?.setValue('valid@email.com');
       expect(emailControl?.errors).toBeNull();
     });
+
+    it('should surface error when full name exceeds 255 characters', () => {
+      const fullNameControl = component.registrationForm.get('fullname');
+      fullNameControl?.setValue('a'.repeat(256));
+      expect(fullNameControl?.errors?.['fullNameTooLong']).toBeTrue();
+      fullNameControl?.setValue('a'.repeat(255));
+      expect(fullNameControl?.errors?.['fullNameTooLong']).toBeUndefined();
+    });
   });
 
   describe('Form Submission', () => {
