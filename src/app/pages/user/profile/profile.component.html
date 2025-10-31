@@ -1,0 +1,188 @@
+<!-- Alerts -->
+@if (alert()) {
+  <app-alert
+    [type]="alert()!.type"
+    [message]="alert()!.message"
+    [dismissible]="true"
+    (dismissed)="alert.set(null)"
+  ></app-alert>
+}
+
+<div
+  class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
+>
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else if (error()) {
+    <div class="text-red-500">{{ error() }}</div>
+  } @else if (user()) {
+    <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
+      <div class="flex items-center gap-6">
+        <img
+          [src]="user()?.picture"
+          [alt]="user()?.name || 'User profile'"
+          class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+        />
+        <div class="space-y-2">
+          <div class="text-3xl font-semibold text-gray-900">
+            {{ user()?.name }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Grid - User Details Left, Memberships Right -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Left Column - User Details -->
+        <div class="space-y-6">
+          <div class="rounded-lg bg-white p-6 shadow-md">
+            <div class="mb-6 text-2xl font-semibold">User details</div>
+            <div class="space-y-6">
+              <div id="user-name">
+                <div class="text-sm font-light text-gray-500">Name</div>
+                <div class="flex items-center justify-between gap-6">
+                  <div>{{ user()?.name }}</div>
+                  <app-edit-button></app-edit-button>
+                </div>
+              </div>
+              <div id="user-username">
+                <div class="text-sm font-light text-gray-500">Username</div>
+                <div class="flex items-center justify-between gap-6">
+                  <div>{{ user()?.username }}</div>
+                  <app-edit-button></app-edit-button>
+                </div>
+              </div>
+              <div id="user-email">
+                <div class="text-sm font-light text-gray-500">Email</div>
+                <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center gap-2">
+                    <div>{{ user()?.email }}</div>
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                      [class]="
+                        user()?.email_verified
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      "
+                    >
+                      {{ user()?.email_verified ? "Verified" : "Unverified" }}
+                    </span>
+                  </div>
+                  <app-edit-button></app-edit-button>
+                </div>
+              </div>
+              <div id="user-password">
+                <div class="text-sm font-light text-gray-500">Password</div>
+                <div class="flex items-center justify-between gap-6">
+                  <div>••••••••••••</div>
+                  <app-edit-button text="Change"></app-edit-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Memberships -->
+        <div class="space-y-6">
+          @if (
+            user()?.platform_memberships &&
+            user()!.platform_memberships.length > 0
+          ) {
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
+              <div class="text-2xl font-semibold">Services</div>
+              <div class="space-y-4">
+                @for (
+                  membership of user()!.platform_memberships;
+                  track membership.platform_id
+                ) {
+                  <div class="flex items-center justify-between gap-6">
+                    <div class="flex items-center gap-6">
+                      <img
+                        [src]="PLATFORMS[membership.platform_id].logoUrl"
+                        [alt]="membership.platform_name"
+                        class="h-16 w-16 object-contain"
+                      />
+                      <div class="flex items-center gap-2">
+                        <div class="font-medium">
+                          {{ membership.platform_name }}
+                        </div>
+                        <span
+                          class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                          [class]="
+                            membership.approval_status === 'approved'
+                              ? 'bg-green-100 text-green-800'
+                              : membership.approval_status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                          "
+                        >
+                          {{ membership.approval_status }}
+                        </span>
+                      </div>
+                    </div>
+                    <app-button
+                      type="button"
+                      variant="secondary"
+                      widthClass="w-auto"
+                    >
+                      Launch
+                    </app-button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (
+            user()?.group_memberships && user()!.group_memberships.length > 0
+          ) {
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
+              <div class="text-2xl font-semibold">Bundles</div>
+              <div class="space-y-4">
+                @for (
+                  membership of user()!.group_memberships;
+                  track membership.group_id
+                ) {
+                  <div class="flex items-center justify-between gap-6">
+                    <div class="flex items-center gap-6">
+                      <div
+                        class="flex h-16 w-16 items-center justify-center gap-1"
+                      >
+                        @for (
+                          logoUrl of getBundleLogoUrls(membership.group_id);
+                          track logoUrl
+                        ) {
+                          <img
+                            [src]="logoUrl"
+                            [alt]="membership.group_name"
+                            class="h-full w-full object-contain"
+                          />
+                        }
+                      </div>
+                      <div class="font-medium">
+                        {{ membership.group_name }}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <span
+                        class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                        [class]="
+                          membership.approval_status === 'approved'
+                            ? 'bg-green-100 text-green-800'
+                            : membership.approval_status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                        "
+                      >
+                        {{ membership.approval_status }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

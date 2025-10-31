@@ -206,22 +206,13 @@ describe('NavbarComponent', () => {
     expect(adminComponent.unverifiedCount()).toBe(0);
   });
 
-  it('should return user navigation pages for non-admin', () => {
-    const pages = component.navigationPages();
-    expect(pages).toEqual([
-      { label: 'Services', route: '/services' },
-      { label: 'Access', route: '/access' },
-      { label: 'Pending', route: '/pending' },
-    ]);
-  });
-
   it('should return admin navigation pages for admin', () => {
     Object.defineProperty(mockAuthService, 'isGeneralAdmin', {
       value: signal(true),
     });
     component.isAdmin = mockAuthService.isGeneralAdmin;
 
-    const pages = component.navigationPages();
+    const pages = component.navigationPages;
     expect(pages).toEqual([
       { label: 'All', route: '/all-users' },
       { label: 'Pending', route: '/pending-users' },

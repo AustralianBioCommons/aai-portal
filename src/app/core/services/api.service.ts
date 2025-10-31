@@ -7,6 +7,38 @@ import { PlatformId } from '../constants/constants';
 
 export type Status = 'approved' | 'revoked' | 'pending';
 
+// Platform membership data for user profile: shouldn't include
+// revoked platforms
+export interface UserProfilePlatformData {
+  platform_id: PlatformId;
+  platform_name: string;
+  approval_status: Omit<Status, 'revoked'>;
+}
+
+// Group membership data for user profile: shouldn't include
+// revoked groups
+export interface UserProfileGroupData {
+  group_id: string;
+  group_name: string;
+  group_short_name: string;
+  approval_status: Omit<Status, 'revoked'>;
+}
+
+// Data returned from the API for the user's profile -
+// only includes required information for the UI,
+// omits information on who approves platforms and groups,
+// as well as revoked platforms and groups.
+export interface UserProfileData {
+  user_id: string;
+  name: string;
+  email: string;
+  email_verified: boolean;
+  username: string;
+  picture: string;
+  platform_memberships: UserProfilePlatformData[];
+  group_memberships: UserProfileGroupData[];
+}
+
 /**
  * response for which platforms the admin can manage
  */
@@ -88,6 +120,12 @@ export interface AdminGetUsersApiParams {
 })
 export class ApiService {
   private http = inject(HttpClient);
+
+  getUserProfile(): Observable<UserProfileData> {
+    return this.http.get<UserProfileData>(
+      `${environment.auth0.backend}/me/profile`,
+    );
+  }
 
   getUserApprovedPlatforms(): Observable<PlatformUserResponse[]> {
     return this.http.get<PlatformUserResponse[]>(

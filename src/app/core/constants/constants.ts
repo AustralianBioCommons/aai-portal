@@ -1,6 +1,6 @@
 export interface BundleService {
   id: string;
-  name: string;
+  termsTitle: string;
   termsUrl: string;
 }
 
@@ -15,10 +15,32 @@ export interface Bundle {
 
 export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';
 
-export const PLATFORM_NAMES = {
-  galaxy: 'Galaxy Australia',
-  bpa_data_portal: 'Bioplatforms Australia Data Portal',
-  sbp: 'Structural Biology Platform',
+export interface Platform {
+  id: PlatformId;
+  name: string;
+  logoUrl: string;
+  url: string;
+}
+
+export const PLATFORMS: Record<PlatformId, Platform> = {
+  galaxy: {
+    id: 'galaxy',
+    name: 'Galaxy Australia',
+    logoUrl: '/assets/galaxy-logo.png',
+    url: 'https://site.usegalaxy.org.au/',
+  },
+  bpa_data_portal: {
+    id: 'bpa_data_portal',
+    name: 'Bioplatforms Australia Data Portal',
+    logoUrl: '/assets/bpa-logo.png',
+    url: 'https://data.bioplatforms.com/',
+  },
+  sbp: {
+    id: 'sbp',
+    name: 'Structural Biology Platform',
+    logoUrl: '/assets/sbp-logo.png',
+    url: 'https://sbp.biocommons.org.au/',
+  },
 } as const;
 
 /**
@@ -49,25 +71,25 @@ export const SBP_ALLOWED_EMAIL_DOMAINS = [
 
 const bpaBundleService: BundleService = {
   id: 'bpa',
-  name: 'Bioplatforms Australia Data Portal Terms and Conditions',
+  termsTitle: 'Bioplatforms Australia Data Portal Terms and Conditions',
   termsUrl: 'https://data.bioplatforms.com/',
 };
 
 const galaxyBundleService: BundleService = {
   id: 'galaxy',
-  name: 'Galaxy Australia Terms of Service',
+  termsTitle: 'Galaxy Australia Terms of Service',
   termsUrl: 'https://site.usegalaxy.org.au/about#terms-of-service',
 };
 
 const tsiBundleService: BundleService = {
   id: 'tsi',
-  name: 'TSI Terms and Conditions',
+  termsTitle: 'TSI Terms and Conditions',
   termsUrl: 'https://threatenedspeciesinitiative.com/',
 };
 
 const fgeneshBundleService: BundleService = {
   id: 'fgenesh',
-  name: 'Fgenesh++ Terms and Conditions',
+  termsTitle: 'Fgenesh++ Terms and Conditions',
   termsUrl: 'https://site.usegalaxy.org.au/fgenesh-terms.html',
 };
 

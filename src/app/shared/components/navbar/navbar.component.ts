@@ -5,7 +5,6 @@ import {
   ViewChild,
   ElementRef,
   signal,
-  computed,
   effect,
   DestroyRef,
 } from '@angular/core';
@@ -47,20 +46,12 @@ export class NavbarComponent {
   unverifiedCount = signal(0);
   userMenuOpen = signal(false);
 
-  navigationPages = computed(() =>
-    this.isAdmin()
-      ? [
-          { label: 'All', route: '/all-users' },
-          { label: 'Pending', route: '/pending-users' },
-          { label: 'Revoked', route: '/revoked-users' },
-          { label: 'Unverified', route: '/unverified-users' },
-        ]
-      : [
-          { label: 'Services', route: '/services' },
-          { label: 'Access', route: '/access' },
-          { label: 'Pending', route: '/pending' },
-        ],
-  );
+  navigationPages = [
+    { label: 'All', route: '/all-users' },
+    { label: 'Pending', route: '/pending-users' },
+    { label: 'Revoked', route: '/revoked-users' },
+    { label: 'Unverified', route: '/unverified-users' },
+  ];
 
   constructor() {
     this.setupCountTracking();
@@ -134,7 +125,19 @@ export class NavbarComponent {
 
   isNavigationPage(): boolean {
     const currentUrl = this.router.url;
-    return this.navigationPages().some((page) => page.route === currentUrl);
+    return this.navigationPages.some((page) => page.route === currentUrl);
+  }
+
+  onNavigationChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedRoute = selectElement.value;
+    if (selectedRoute) {
+      this.router.navigate([selectedRoute]);
+    }
+  }
+
+  getCurrentRoute(): string {
+    return this.router.url;
   }
 
   logout() {

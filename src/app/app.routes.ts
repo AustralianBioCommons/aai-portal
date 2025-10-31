@@ -1,8 +1,4 @@
 import { Routes } from '@angular/router';
-import { ServicesComponent } from './pages/user/services/services.component';
-import { AccessComponent } from './pages/user/access/access.component';
-import { PendingComponent } from './pages/user/pending/pending.component';
-import { RequestServiceComponent } from './pages/user/services/request-service/request-service.component';
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { AllUsersComponent } from './pages/admin/all-users/all-users.component';
 import { PendingUsersComponent } from './pages/admin/pending-users/pending-users.component';
@@ -27,6 +23,7 @@ import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.componen
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 import { BpaLayoutComponent } from './layouts/bpa-layout/bpa-layout.component';
 import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
+import { ProfileComponent } from './pages/user/profile/profile.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -80,7 +77,6 @@ export const routes: Routes = [
       {
         path: 'register/bundles',
         component: RegisterComponent,
-        canActivate: [loginGuard],
         data: { title: 'Galaxy Australia - Register' },
       },
     ],
@@ -112,7 +108,6 @@ export const routes: Routes = [
       {
         path: 'register/bundles',
         component: RegisterComponent,
-        canActivate: [loginGuard],
         data: { title: 'Register | Bioplatforms Australia Data Portal' },
       },
     ],
@@ -143,17 +138,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'services',
-        component: ServicesComponent,
-        children: [
-          {
-            path: 'request',
-            component: RequestServiceComponent,
-          },
-        ],
+        path: 'profile',
+        component: ProfileComponent,
       },
-      { path: 'access', component: AccessComponent },
-      { path: 'pending', component: PendingComponent },
       {
         path: 'user/:id',
         component: UserDetailsComponent,
