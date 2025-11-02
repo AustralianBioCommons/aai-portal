@@ -122,7 +122,7 @@
                     <div class="flex items-center gap-3">
                       @if (
                         membership.platform_name ===
-                        'Bioplatforms Australia Data Portal'
+                        "Bioplatforms Australia Data Portal"
                       ) {
                         <a
                           href="https://aaidemo.bioplatforms.com/"
@@ -137,7 +137,9 @@
                             Launch
                           </app-button>
                         </a>
-                      } @else if (membership.platform_name === 'Galaxy Australia') {
+                      } @else if (
+                        membership.platform_name === "Galaxy Australia"
+                      ) {
                         <a
                           href="https://dev.gvl.org.au/"
                           target="_blank"
