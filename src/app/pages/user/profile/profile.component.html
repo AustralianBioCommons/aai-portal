@@ -119,13 +119,48 @@
                         </span>
                       </div>
                     </div>
-                    <app-button
-                      type="button"
-                      variant="secondary"
-                      widthClass="w-auto"
-                    >
-                      Launch
-                    </app-button>
+                    <div class="flex items-center gap-3">
+                      @if (
+                        membership.platform_name ===
+                        'Bioplatforms Australia Data Portal'
+                      ) {
+                        <a
+                          href="https://aaidemo.bioplatforms.com/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <app-button
+                            type="button"
+                            variant="secondary"
+                            widthClass="w-auto"
+                          >
+                            Launch
+                          </app-button>
+                        </a>
+                      } @else if (membership.platform_name === 'Galaxy Australia') {
+                        <a
+                          href="https://dev.gvl.org.au/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <app-button
+                            type="button"
+                            variant="secondary"
+                            widthClass="w-auto"
+                          >
+                            Launch
+                          </app-button>
+                        </a>
+                      } @else {
+                        <app-button
+                          type="button"
+                          variant="secondary"
+                          widthClass="w-auto"
+                        >
+                          Launch
+                        </app-button>
+                      }
+                    </div>
                   </div>
                 }
               </div>
