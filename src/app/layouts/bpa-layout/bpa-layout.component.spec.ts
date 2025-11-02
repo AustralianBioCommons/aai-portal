@@ -33,7 +33,10 @@ describe('BpaLayoutComponent', () => {
 
   it('should link the header logo to the configured BPA portal URL', () => {
     const headerLink = fixture.debugElement.query(By.css('nav a'));
-    const expectedUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+    const expectedUrl = environment.platformUrls.bpaPlatform.replace(
+      /\/+$/,
+      '',
+    );
     expect(headerLink.nativeElement.getAttribute('href')).toBe(expectedUrl);
   });
 
@@ -56,7 +59,10 @@ describe('BpaLayoutComponent', () => {
     const footerLinks = fixture.debugElement.queryAll(By.css('footer a'));
     expect(footerLinks.length).toBe(2);
 
-    const expectedBpaUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+    const expectedBpaUrl = environment.platformUrls.bpaPlatform.replace(
+      /\/+$/,
+      '',
+    );
     expect(footerLinks[0].nativeElement.getAttribute('href')).toBe(
       expectedBpaUrl,
     );

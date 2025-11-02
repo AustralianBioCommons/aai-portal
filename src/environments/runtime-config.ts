@@ -9,22 +9,24 @@ export interface RecaptchaConfig {
   siteKeyV2: string;
 }
 
-export interface PortalLinksConfig {
-  bpaPortal: string;
+export interface PlatformUrlsConfig {
+  bpaPlatform: string;
+  galaxyPlatform: string;
+  sbpPlatform?: string;
 }
 
 export interface EnvironmentConfig {
   production: boolean;
   auth0: Auth0Config;
   recaptcha: RecaptchaConfig;
-  portals: PortalLinksConfig;
+  platformUrls: PlatformUrlsConfig;
 }
 
 export interface RuntimeEnvironmentConfig {
   production?: boolean;
   auth0?: Partial<Auth0Config>;
   recaptcha?: Partial<RecaptchaConfig>;
-  portals?: Partial<PortalLinksConfig>;
+  platformUrls?: Partial<PlatformUrlsConfig>;
 }
 
 function resolveRedirectUri(value: string | undefined): string {
@@ -50,9 +52,9 @@ export function mergeEnvironmentConfig(
       ...defaults.recaptcha,
       ...(runtime?.recaptcha ?? {}),
     },
-    portals: {
-      ...defaults.portals,
-      ...(runtime?.portals ?? {}),
+    platformUrls: {
+      ...defaults.platformUrls,
+      ...(runtime?.platformUrls ?? {}),
     },
   };
 }

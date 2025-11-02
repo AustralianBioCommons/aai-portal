@@ -94,6 +94,7 @@
                   membership of user()!.platform_memberships;
                   track membership.platform_id
                 ) {
+                  @let launchUrl = platformLaunchUrls[membership.platform_id];
                   <div class="flex items-center justify-between gap-6">
                     <div class="flex items-center gap-6">
                       <img
@@ -120,28 +121,9 @@
                       </div>
                     </div>
                     <div class="flex items-center gap-3">
-                      @if (
-                        membership.platform_name ===
-                        "Bioplatforms Australia Data Portal"
-                      ) {
+                      @if (launchUrl) {
                         <a
-                          href="https://aaidemo.bioplatforms.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <app-button
-                            type="button"
-                            variant="secondary"
-                            widthClass="w-auto"
-                          >
-                            Launch
-                          </app-button>
-                        </a>
-                      } @else if (
-                        membership.platform_name === "Galaxy Australia"
-                      ) {
-                        <a
-                          href="https://dev.gvl.org.au/"
+                          [href]="launchUrl"
                           target="_blank"
                           rel="noopener noreferrer"
                         >

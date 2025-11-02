@@ -16,8 +16,9 @@ describe('Runtime configuration Tests', () => {
     recaptcha: {
       siteKeyV2: 'default-key',
     },
-    portals: {
-      bpaPortal: 'https://default.bpa.portal',
+    platformUrls: {
+      bpaPlatform: 'https://default.bpa.portal',
+      galaxyPlatform: 'https://default.galaxy.portal',
     },
   };
 
@@ -29,7 +30,10 @@ describe('Runtime configuration Tests', () => {
     expect(result.auth0.backend).toBe('http://localhost:8000');
     expect(result.recaptcha.siteKeyV2).toBe('default-key');
     expect(result.auth0.redirectUri).toBe(window.location.origin);
-    expect(result.portals.bpaPortal).toBe('https://default.bpa.portal');
+    expect(result.platformUrls.bpaPlatform).toBe('https://default.bpa.portal');
+    expect(result.platformUrls.galaxyPlatform).toBe(
+      'https://default.galaxy.portal',
+    );
 
     // defaults should remain untouched
     expect(defaults.auth0.redirectUri).toBe('');
@@ -45,8 +49,9 @@ describe('Runtime configuration Tests', () => {
       recaptcha: {
         siteKeyV2: 'override-key',
       },
-      portals: {
-        bpaPortal: 'https://override.bpa.portal',
+      platformUrls: {
+        bpaPlatform: 'https://override.bpa.portal',
+        galaxyPlatform: 'https://override.galaxy.portal',
       },
     };
 
@@ -58,13 +63,21 @@ describe('Runtime configuration Tests', () => {
     expect(result.recaptcha.siteKeyV2).toBe('override-key');
     expect(result.auth0.clientId).toBe('default-client');
     expect(result.auth0.redirectUri).toBe(window.location.origin);
-    expect(result.portals.bpaPortal).toBe('https://override.bpa.portal');
+    expect(result.platformUrls.bpaPlatform).toBe('https://override.bpa.portal');
+    expect(result.platformUrls.galaxyPlatform).toBe(
+      'https://override.galaxy.portal',
+    );
 
     // Ensure defaults object was not mutated
     expect(defaults.production).toBe(false);
     expect(defaults.auth0.domain).toBe('default.domain');
     expect(defaults.recaptcha.siteKeyV2).toBe('default-key');
-    expect(defaults.portals.bpaPortal).toBe('https://default.bpa.portal');
+    expect(defaults.platformUrls.bpaPlatform).toBe(
+      'https://default.bpa.portal',
+    );
+    expect(defaults.platformUrls.galaxyPlatform).toBe(
+      'https://default.galaxy.portal',
+    );
   });
 
   it('honours runtime redirectUri when provided and falls back when empty', () => {

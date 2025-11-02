@@ -62,10 +62,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private formBuilder = inject(FormBuilder);
   private validationService = inject(ValidationService);
   private http = inject(HttpClient);
-  private readonly bpaPortalUrl = environment.portals.bpaPortal.replace(
-    /\/+$/,
-    '',
-  );
+  private readonly bpaPlatformUrl =
+    environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
 
   currentStep = signal(1);
   totalSteps = 5;
@@ -422,7 +420,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     if (currentUrl.includes('/bpa/register')) {
       return {
         text: 'Return to Bioplatforms Australia Data Portal',
-        action: () => (window.location.href = this.bpaPortalUrl),
+        action: () => (window.location.href = this.bpaPlatformUrl),
       };
     } else if (currentUrl.includes('/galaxy/register')) {
       return {

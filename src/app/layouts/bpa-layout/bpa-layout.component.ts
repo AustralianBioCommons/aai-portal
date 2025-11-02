@@ -11,5 +11,8 @@ import { environment } from '../../../environments/environment';
 })
 export class BpaLayoutComponent {
   router = inject(Router);
-  readonly bpaPortalUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+  readonly bpaPlatformUrl = environment.platformUrls.bpaPlatform.replace(
+    /\/+$/,
+    '',
+  );
 }

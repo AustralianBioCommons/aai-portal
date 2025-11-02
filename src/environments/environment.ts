@@ -15,8 +15,10 @@ const defaults: EnvironmentConfig = {
   recaptcha: {
     siteKeyV2: '6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG',
   },
-  portals: {
-    bpaPortal: 'https://aaidemo.bioplatforms.com',
+  platformUrls: {
+    bpaPlatform: 'https://aaidemo.bioplatforms.com',
+    galaxyPlatform: 'https://dev.gvl.org.au',
+    sbpPlatform: 'https://sbp.biocommons.org.au',
   },
 };
 
@@ -27,7 +29,7 @@ export function updateEnvironment(runtime?: RuntimeEnvironmentConfig): void {
   environment.production = merged.production;
   environment.auth0 = merged.auth0;
   environment.recaptcha = merged.recaptcha;
-  environment.portals = merged.portals;
+  environment.platformUrls = merged.platformUrls;
 }
 
 export const environmentDefaults = defaults;

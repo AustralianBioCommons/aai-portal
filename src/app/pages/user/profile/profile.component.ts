@@ -8,9 +8,47 @@ import { AlertComponent } from '../../../shared/components/alert/alert.component
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   PLATFORMS,
+  PlatformId,
   biocommonsBundles,
 } from '../../../core/constants/constants';
 import { EditButtonComponent } from './edit-button/edit-button.component';
+import { environment } from '../../../../environments/environment';
+
+const MOCK_USER_PROFILE: UserProfileData = {
+  user_id: 'mock-user-id',
+  name: 'Amanda Zhu',
+  email: 'amanda@biocommons.org.au',
+  email_verified: true,
+  username: 'amanda-admin',
+  picture:
+    'https://avatars.dicebear.com/api/initials/AZ.svg?background=%23e8f4ff',
+  platform_memberships: [
+    {
+      platform_id: 'bpa_data_portal',
+      platform_name: 'Bioplatforms Australia Data Portal',
+      approval_status: 'pending',
+    },
+    {
+      platform_id: 'galaxy',
+      platform_name: 'Galaxy Australia',
+      approval_status: 'approved',
+    },
+  ],
+  group_memberships: [
+    {
+      group_id: 'bundle/bpa_galaxy',
+      group_name: 'Bioplatforms & Galaxy Bundle',
+      group_short_name: 'BPA Galaxy',
+      approval_status: 'approved',
+    },
+    {
+      group_id: 'bundle/tsi',
+      group_name: 'Threatened Species Initiative',
+      group_short_name: 'TSI',
+      approval_status: 'pending',
+    },
+  ],
+};
 
 @Component({
   selector: 'app-profile',
@@ -27,6 +65,11 @@ export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
+  protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
+    bpa_data_portal: environment.platformUrls.bpaPlatform.replace(/\/+$/, ''),
+    galaxy: environment.platformUrls.galaxyPlatform.replace(/\/+$/, ''),
+    sbp: environment.platformUrls.sbpPlatform?.replace(/\/+$/, ''),
+  };
 
   // State signals
   user = signal<UserProfileData | null>(null);
@@ -48,6 +91,16 @@ export class ProfileComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
+        if (!environment.production) {
+          console.warn(
+            'Failed to load user profile, falling back to mock data in development mode:',
+            err,
+          );
+          this.user.set(MOCK_USER_PROFILE);
+          this.loading.set(false);
+          return;
+        }
+
         console.error('Failed to load user profile:', err);
         this.error.set('Failed to load user profile');
         this.loading.set(false);

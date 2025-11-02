@@ -23,14 +23,14 @@ export class EmailVerifiedComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   private readonly brandingService = inject(BrandingService);
-  private readonly bpaPortalUrl = environment.portals.bpaPortal.replace(
-    /\/+$/,
-    '',
-  );
+  private readonly bpaPlatformUrl =
+    environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
+  private readonly galaxyPlatformUrl =
+    environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
 
   readonly appUrls: Record<AppId, string> = {
-    bpa: this.bpaPortalUrl,
-    galaxy: 'https://galaxy.test.biocommons.org.au',
+    bpa: this.bpaPlatformUrl,
+    galaxy: this.galaxyPlatformUrl,
     biocommons: 'https://login.test.biocommons.org.au',
   } as const;
 
