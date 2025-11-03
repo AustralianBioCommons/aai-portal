@@ -7,16 +7,20 @@ import {
 import { authGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
 import { signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 describe('authGuard', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['isAuthenticated'], {
-      isLoading: signal(false),
-    });
+    const authSpy = jasmine.createSpyObj(
+      'AuthService',
+      ['ensureAuthenticated'],
+      {
+        isLoading: signal(false),
+      },
+    );
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
@@ -38,7 +42,7 @@ describe('authGuard', () => {
   });
 
   it('should return true when user is authenticated', (done) => {
-    mockAuthService.isAuthenticated.and.returnValue(true);
+    mockAuthService.ensureAuthenticated.and.returnValue(of(true));
 
     const result = TestBed.runInInjectionContext(() =>
       authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
@@ -52,7 +56,7 @@ describe('authGuard', () => {
   });
 
   it('should return false and navigate to login when user is not authenticated', (done) => {
-    mockAuthService.isAuthenticated.and.returnValue(false);
+    mockAuthService.ensureAuthenticated.and.returnValue(of(false));
 
     const result = TestBed.runInInjectionContext(() =>
       authGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
