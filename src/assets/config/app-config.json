@@ -9,7 +9,9 @@
   "recaptcha": {
     "siteKeyV2": "6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG"
   },
-  "portals": {
-    "bpaPortal": "https://aaidemo.bioplatforms.com"
+  "platformUrls": {
+    "bpaPlatform": "https://aaidemo.bioplatforms.com",
+    "galaxyPlatform": "'https://dev.gvl.org.au",
+    "sbpPlatform": "https://dev.sbp.test.biocommons.org.au"
   }
 }

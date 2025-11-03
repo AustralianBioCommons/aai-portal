@@ -134,4 +134,21 @@ describe('ProfileComponent', () => {
       'Failed to load user profile',
     );
   });
+
+  it('shows a message when a launch URL is unavailable', () => {
+    (
+      component as unknown as {
+        platformLaunchUrls: Record<string, string | undefined>;
+      }
+    ).platformLaunchUrls['galaxy'] = undefined;
+
+    fixture.detectChanges();
+
+    const fallback = fixture.debugElement.query(
+      By.css('.text-sm.font-medium.text-red-500'),
+    );
+    expect(fallback.nativeElement.textContent.trim()).toBe(
+      'Launch link unavailable',
+    );
+  });
 });

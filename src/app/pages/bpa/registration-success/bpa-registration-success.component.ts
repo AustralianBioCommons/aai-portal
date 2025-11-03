@@ -9,12 +9,10 @@ import { environment } from '../../../../environments/environment';
   styleUrl: './bpa-registration-success.component.css',
 })
 export class BpaRegistrationSuccessComponent {
-  private readonly bpaPortalUrl = environment.portals.bpaPortal.replace(
-    /\/+$/,
-    '',
-  );
+  private readonly bpaPlatformUrl =
+    environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
 
   navigateToBPA(): void {
-    window.location.href = this.bpaPortalUrl;
+    window.location.href = this.bpaPlatformUrl;
   }
 }

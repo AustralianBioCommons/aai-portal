@@ -68,7 +68,11 @@ describe('EmailVerifiedComponent', () => {
       `${environment.auth0.backend}/utils/registration_info?user_email=galaxy%40example.com`,
     );
     expect(component.appId()).toBe('galaxy');
-    expect(component.appUrl()).toContain('galaxy.test.biocommons.org.au');
+    const expectedUrl = environment.platformUrls.galaxyPlatform.replace(
+      /\/+$/,
+      '',
+    );
+    expect(component.appUrl()).toBe(expectedUrl);
   });
 
   it('should use bpa URL if app response is bpa', async () => {
@@ -80,7 +84,10 @@ describe('EmailVerifiedComponent', () => {
     });
 
     expect(component.appId()).toBe('bpa');
-    const expectedUrl = environment.portals.bpaPortal.replace(/\/+$/, '');
+    const expectedUrl = environment.platformUrls.bpaPlatform.replace(
+      /\/+$/,
+      '',
+    );
     expect(component.appUrl()).toBe(expectedUrl);
   });
 

@@ -10,10 +10,8 @@ import { environment } from '../../../../environments/environment';
   styleUrl: './bpa-register-selection.component.css',
 })
 export class BpaRegisterSelectionComponent {
-  private readonly bpaPortalBaseUrl = environment.portals.bpaPortal.replace(
-    /\/+$/,
-    '',
-  );
+  private readonly bpaPlatformBaseUrl =
+    environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
 
-  readonly bpaLoginUrl = `${this.bpaPortalBaseUrl}/user/login/oidc-pkce`;
+  readonly bpaLoginUrl = `${this.bpaPlatformBaseUrl}/user/login/oidc-pkce`;
 }

@@ -8,9 +8,11 @@ import { AlertComponent } from '../../../shared/components/alert/alert.component
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   PLATFORMS,
+  PlatformId,
   biocommonsBundles,
 } from '../../../core/constants/constants';
 import { EditButtonComponent } from './edit-button/edit-button.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-profile',
@@ -27,6 +29,11 @@ export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
+  protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
+    bpa_data_portal: environment.platformUrls.bpaPlatform,
+    galaxy: environment.platformUrls.galaxyPlatform,
+    sbp: environment.platformUrls.sbpPlatform,
+  };
 
   // State signals
   user = signal<UserProfileData | null>(null);
