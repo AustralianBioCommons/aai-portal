@@ -140,7 +140,7 @@ describe('ProfileComponent', () => {
       component as unknown as {
         platformLaunchUrls: Record<string, string | undefined>;
       }
-    ).platformLaunchUrls.galaxy = undefined;
+    ).platformLaunchUrls['galaxy'] = undefined;
 
     fixture.detectChanges();
 
