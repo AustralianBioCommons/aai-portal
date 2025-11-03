@@ -1,12 +1,11 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
-  const router = inject(Router);
 
   return toObservable(authService.isLoading).pipe(
     filter((isLoading) => !isLoading),
@@ -16,7 +15,7 @@ export const authGuard: CanActivateFn = () => {
       if (isAuthenticated) {
         return true;
       }
-      router.navigate(['/login']);
+      authService.login();
       return false;
     }),
   );
