@@ -30,9 +30,9 @@ export class ProfileComponent implements OnInit {
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
-    bpa_data_portal: environment.platformUrls.bpaPlatform.replace(/\/+$/, ''),
-    galaxy: environment.platformUrls.galaxyPlatform.replace(/\/+$/, ''),
-    sbp: environment.platformUrls.sbpPlatform?.replace(/\/+$/, ''),
+    bpa_data_portal: environment.platformUrls.bpaPlatform,
+    galaxy: environment.platformUrls.galaxyPlatform,
+    sbp: environment.platformUrls.sbpPlatform,
   };
 
   // State signals
