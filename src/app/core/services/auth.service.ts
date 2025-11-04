@@ -3,7 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { Observable, map, catchError, of, switchMap, shareReplay } from 'rxjs';
+import {
+  Observable,
+  map,
+  catchError,
+  of,
+  switchMap,
+  shareReplay,
+  take,
+} from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface AuthError {
@@ -131,5 +139,37 @@ export class AuthService {
         returnTo: this.document.location.origin,
       },
     });
+  }
+
+  /**
+   * Attempt a silent authentication with Auth0, allowing SSO sessions from
+   * other applications to flow through without user interaction.
+   */
+  ensureAuthenticated(): Observable<boolean> {
+    return this.auth0Service.isAuthenticated$.pipe(
+      take(1),
+      switchMap((isAuth) => {
+        if (isAuth) {
+          return of(true);
+        }
+
+        return this.auth0Service.getAccessTokenSilently().pipe(
+          map(() => true),
+          catchError((error) => {
+            const benignErrors = new Set([
+              'login_required',
+              'consent_required',
+              'interaction_required',
+            ]);
+
+            if (!benignErrors.has(error?.error)) {
+              console.error('Silent authentication failed:', error);
+            }
+
+            return of(false);
+          }),
+        );
+      }),
+    );
   }
 }

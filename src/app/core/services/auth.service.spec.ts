@@ -196,4 +196,46 @@ describe('AuthService', () => {
       statusText: 'Internal Server Error',
     });
   });
+
+  it('should resolve ensureAuthenticated immediately when already authenticated', (done) => {
+    const { httpMock } = createService(true);
+
+    service.ensureAuthenticated().subscribe((isAuth) => {
+      expect(isAuth).toBe(true);
+      done();
+    });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
+    req.flush({ is_admin: false });
+  });
+
+  it('should perform silent login when user is not authenticated', (done) => {
+    const result = createService(false);
+
+    service.ensureAuthenticated().subscribe((isAuth) => {
+      expect(isAuth).toBe(true);
+      expect(result.mockAuth0Service.getAccessTokenSilently).toHaveBeenCalled();
+      done();
+    });
+
+    result.httpMock.expectNone(
+      `${environment.auth0.backend}/me/is-general-admin`,
+    );
+  });
+
+  it('should return false when silent login indicates login_required', (done) => {
+    createService(
+      false,
+      throwError(() => ({ error: 'login_required' })),
+    );
+
+    service.ensureAuthenticated().subscribe((isAuth) => {
+      expect(isAuth).toBe(false);
+      done();
+    });
+
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
+  });
 });
