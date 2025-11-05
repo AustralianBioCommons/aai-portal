@@ -72,7 +72,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/is-general-admin`,
     );
-    req.flush({ is_admin: false });
+    req.flush(false);
   });
 
   it('should call loginWithRedirect when login is called', () => {
@@ -83,7 +83,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/is-general-admin`,
     );
-    req.flush({ is_admin: false });
+    req.flush(false);
   });
 
   it('should call logout with returnTo parameter', () => {
@@ -101,7 +101,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/is-general-admin`,
     );
-    req.flush({ is_admin: false });
+    req.flush(false);
   });
 
   it('should return authentication state', () => {
@@ -111,7 +111,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/is-general-admin`,
     );
-    req.flush({ is_admin: false });
+    req.flush(false);
   });
 
   it('should return user data', () => {
@@ -121,7 +121,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/is-general-admin`,
     );
-    req.flush({ is_admin: false });
+    req.flush(false);
   });
 
   it('should detect admin role correctly', (done) => {
@@ -138,7 +138,7 @@ describe('AuthService', () => {
     expect(req.request.headers.get('Authorization')).toBe(
       'Bearer default.token.signature',
     );
-    req.flush({ is_admin: true });
+    req.flush(true);
   });
 
   it('should detect non-admin user correctly', (done) => {
@@ -152,7 +152,7 @@ describe('AuthService', () => {
     const req = httpMock.expectOne(
       `${environment.auth0.backend}/me/is-general-admin`,
     );
-    req.flush({ is_admin: false });
+    req.flush(false);
   });
 
   it('should handle token error gracefully', (done) => {

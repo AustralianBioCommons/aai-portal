@@ -86,12 +86,11 @@ export class AuthService {
       isAuth
         ? this.auth0Service.getAccessTokenSilently().pipe(
             switchMap((token) =>
-              this.http.get<{ is_admin: boolean }>(
+              this.http.get<boolean>(
                 `${environment.auth0.backend}/me/is-general-admin`,
                 { headers: { Authorization: `Bearer ${token}` } },
               ),
             ),
-            map((response) => response.is_admin),
             catchError((error) => {
               console.error('Failed to check admin status:', error);
               return of(false);
