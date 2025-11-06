@@ -25,6 +25,7 @@ import {
   toAsciiEmail,
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
+import { BiocommonsNavbarComponent } from '../../shared/components/biocommons-navbar/biocommons-navbar.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -53,6 +54,7 @@ interface RegistrationRequest {
     RecaptchaModule,
     AlertComponent,
     ButtonComponent,
+    BiocommonsNavbarComponent,
   ],
   styleUrl: './register.component.css',
 })

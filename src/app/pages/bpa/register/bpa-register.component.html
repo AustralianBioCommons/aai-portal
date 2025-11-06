@@ -58,7 +58,7 @@
             id="username"
             formControlName="username"
             placeholder="username"
-            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('username')"
           />
           @if (isFieldInvalid("username")) {
@@ -79,7 +79,7 @@
             id="fullname"
             formControlName="fullname"
             placeholder="Joe Bloggs"
-            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('fullname')"
           />
           @if (isFieldInvalid("fullname")) {
@@ -102,7 +102,7 @@
             formControlName="email"
             placeholder="joe@example.com"
             maxlength="320"
-            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('email')"
           />
           @if (isFieldInvalid("email")) {
@@ -123,7 +123,7 @@
             formControlName="reason"
             rows="4"
             placeholder="Please provide a brief outline of your interest in the project data"
-            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('reason')"
           ></textarea>
           @if (isFieldInvalid("reason")) {
@@ -145,7 +145,7 @@
             id="password"
             formControlName="password"
             placeholder="Password"
-            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('password')"
           />
           <div class="mb-2 mt-1 text-xs text-gray-500">
@@ -172,7 +172,7 @@
             id="confirm-password"
             formControlName="confirmPassword"
             placeholder="Password"
-            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+            class="mt-1 block w-full rounded-md border bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
             [class.border-red-500]="isFieldInvalid('confirmPassword')"
           />
           @if (isFieldInvalid("confirmPassword")) {
@@ -205,7 +205,7 @@
             <app-button
               type="button"
               variant="secondary"
-              colorClasses="text-blue-900 focus-visible:ring-blue-900"
+              colorClasses="text-blue-900 focus-visible:ring-blue-900 border-blue-900"
               [routerLink]="['../']"
             >
               Back

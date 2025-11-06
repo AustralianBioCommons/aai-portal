@@ -38,7 +38,7 @@ export const PLATFORMS: Record<PlatformId, Platform> = {
   sbp: {
     id: 'sbp',
     name: 'Structural Biology Platform',
-    logoUrl: '/assets/sbp-logo.png',
+    logoUrl: '/assets/biocommons-logo.png',
     url: 'https://sbp.biocommons.org.au/',
   },
 } as const;

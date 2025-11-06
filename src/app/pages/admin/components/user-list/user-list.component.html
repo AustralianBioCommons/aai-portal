@@ -36,7 +36,7 @@
         Search
       </label>
       <div
-        class="flex h-12 w-full flex-1 items-center justify-between rounded-md bg-white py-2 pl-4 pr-2 font-light shadow focus-within:ring-2 focus-within:ring-blue-100"
+        class="flex h-12 w-full flex-1 items-center justify-between rounded-md bg-white py-2 pl-4 pr-2 font-light shadow focus-within:ring-2 focus-within:ring-sky-100"
       >
         <input
           id="search-input"
@@ -80,7 +80,7 @@
       </label>
       <select
         id="filter-select"
-        class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light shadow outline-gray-200 focus-within:ring-2 focus-within:ring-blue-100 hover:cursor-pointer"
+        class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light shadow outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
         [(ngModel)]="selectedFilter"
         (change)="onFilterChange()"
         [disabled]="loading()"
