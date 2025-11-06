@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { environment, environmentDefaults } from '../../../../environments/environment';
+import {
+  environment,
+  environmentDefaults,
+} from '../../../../environments/environment';
 
 @Component({
   selector: 'app-registration-success',
