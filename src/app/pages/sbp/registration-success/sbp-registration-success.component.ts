@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { environment, environmentDefaults } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-registration-success',
@@ -9,6 +10,12 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 })
 export class SbpRegistrationSuccessComponent {
   navigateToSBP(): void {
-    window.location.href = 'https://dev.sbp.test.biocommons.org.au/';
+    const sbpUrl =
+      environment.platformUrls.sbpPlatform ??
+      environmentDefaults.platformUrls.sbpPlatform;
+
+    if (sbpUrl) {
+      window.location.href = sbpUrl;
+    }
   }
 }
