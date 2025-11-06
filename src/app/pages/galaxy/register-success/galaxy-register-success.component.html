@@ -1,23 +1,21 @@
-<div class="flex min-h-full flex-col items-center justify-center">
-  <div
-    class="flex h-full max-w-5xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center sm:px-24"
-  >
-    <div class="text-4xl font-semibold text-gray-800 sm:text-5xl lg:text-6xl">
-      Thank you for registering with Galaxy Australia
-    </div>
-    <div class="text-gray-500">
-      Registration successful. Please check your email and
-      <span class="font-medium text-gray-800">verify your email address</span>
-      before logging in.
-    </div>
-    <app-button
-      type="button"
-      variant="primary"
-      widthClass="w-auto"
-      colorClasses="bg-blue-800 hover:bg-blue-900 focus-visible:ring-blue-800"
-      (click)="navigateToGalaxy()"
-    >
-      Return to Galaxy Australia
-    </app-button>
+<div
+  class="mx-auto flex h-full min-h-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center"
+>
+  <div class="text-4xl font-semibold text-gray-800 sm:text-5xl lg:text-6xl">
+    Thank you for registering with Galaxy Australia
   </div>
+  <div class="text-gray-500">
+    Registration successful. Please check your email and
+    <span class="font-medium text-gray-800">verify your email address</span>
+    before logging in.
+  </div>
+  <app-button
+    type="button"
+    variant="primary"
+    widthClass="w-auto"
+    colorClasses="bg-blue-800 hover:bg-blue-900 focus-visible:ring-blue-800"
+    (click)="navigateToGalaxy()"
+  >
+    Return to Galaxy Australia
+  </app-button>
 </div>
