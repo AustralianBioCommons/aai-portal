@@ -4,8 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-biocommons-navbar',
   imports: [],
   templateUrl: './biocommons-navbar.component.html',
-  styleUrl: './biocommons-navbar.component.css'
+  styleUrl: './biocommons-navbar.component.css',
 })
-export class BiocommonsNavbarComponent {
-
-}
+export class BiocommonsNavbarComponent {}
