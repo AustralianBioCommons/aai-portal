@@ -9,6 +9,6 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 })
 export class SbpRegistrationSuccessComponent {
   navigateToSBP(): void {
-    window.location.href = 'https://www.biocommons.org.au/';
+    window.location.href = 'https://dev.sbp.test.biocommons.org.au/';
   }
 }
