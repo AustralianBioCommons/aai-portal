@@ -104,7 +104,10 @@ export class SbpRegisterComponent {
       this.http.post(this.backendURL, requestBody).subscribe({
         next: () => {
           this.isSubmitting.set(false);
-          this.router.navigate(['success'], { relativeTo: this.route });
+          this.router.navigate(['success'], {
+            relativeTo: this.route,
+            state: { email: requestBody.email },
+          });
         },
         error: (error: HttpErrorResponse) => {
           this.isSubmitting.set(false);

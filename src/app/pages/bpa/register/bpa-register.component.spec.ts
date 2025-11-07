@@ -177,9 +177,13 @@ describe('BpaRegisterComponent', () => {
       req.flush({});
 
       tick();
-      expect(router.navigate).toHaveBeenCalledWith(['success'], {
-        relativeTo: jasmine.any(Object),
-      });
+      expect(router.navigate).toHaveBeenCalledWith(
+        ['success'],
+        jasmine.objectContaining({
+          relativeTo: jasmine.any(Object),
+          state: { email: 'test@example.com' },
+        }),
+      );
     }));
 
     it('should handle form submission error', fakeAsync(() => {
