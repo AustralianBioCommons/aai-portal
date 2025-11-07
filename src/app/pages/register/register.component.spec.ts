@@ -624,7 +624,7 @@ describe('RegisterComponent', () => {
         .replace(/\s+/g, ' ')
         .trim();
       expect(normalizedText).toContain(
-        `Thank you! We've sent a verification email to the email address you provided.`,
+        `We've sent a verification email to the email address you provided.`,
       );
       expect(normalizedText).toContain(
         'Please open that email and click the link inside to finish setting up your account and log in.',

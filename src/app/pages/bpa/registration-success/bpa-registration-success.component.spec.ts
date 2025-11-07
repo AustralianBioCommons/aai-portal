@@ -41,7 +41,7 @@ describe('BpaRegistrationSuccessComponent', () => {
       .replace(/\s+/g, ' ')
       .trim();
     expect(normalizedText).toContain(
-      `Thank you! We've sent a verification email to researcher@example.com. Please open that email and click the link inside to finish setting up your account and log in.`,
+      `We've sent a verification email to researcher@example.com. Please open that email and click the link inside to finish setting up your account and log in.`,
     );
   });
 

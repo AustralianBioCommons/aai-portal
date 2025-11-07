@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { environment } from '../../../../environments/environment';
 import { Router } from '@angular/router';
+import { resolveRegistrationEmail } from '../../../shared/utils/registration-email';
 
 @Component({
   selector: 'app-bpa-registration-success',
@@ -11,26 +12,11 @@ import { Router } from '@angular/router';
 })
 export class BpaRegistrationSuccessComponent {
   private router = inject(Router);
-  protected readonly registrationEmail = this.resolveRegistrationEmail();
+  protected readonly registrationEmail = resolveRegistrationEmail(this.router);
   private readonly bpaPlatformUrl =
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
 
   navigateToBPA(): void {
     window.location.href = this.bpaPlatformUrl;
-  }
-
-  private resolveRegistrationEmail(): string | null {
-    const navEmail =
-      this.router.getCurrentNavigation()?.extras.state?.['email'];
-    if (typeof navEmail === 'string') {
-      return navEmail;
-    }
-    if (typeof window !== 'undefined') {
-      const historyEmail = window.history?.state?.email;
-      if (typeof historyEmail === 'string') {
-        return historyEmail;
-      }
-    }
-    return null;
   }
 }

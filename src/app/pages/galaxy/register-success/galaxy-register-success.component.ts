@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { Router } from '@angular/router';
+import { resolveRegistrationEmail } from '../../../shared/utils/registration-email';
 
 @Component({
   selector: 'app-register-success',
@@ -10,24 +11,9 @@ import { Router } from '@angular/router';
 })
 export class GalaxyRegisterSuccessComponent {
   private router = inject(Router);
-  protected readonly registrationEmail = this.resolveRegistrationEmail();
+  protected readonly registrationEmail = resolveRegistrationEmail(this.router);
 
   navigateToGalaxy(): void {
     window.location.href = 'http://dev.gvl.org.au/';
-  }
-
-  private resolveRegistrationEmail(): string | null {
-    const navEmail =
-      this.router.getCurrentNavigation()?.extras.state?.['email'];
-    if (typeof navEmail === 'string') {
-      return navEmail;
-    }
-    if (typeof window !== 'undefined') {
-      const historyEmail = window.history?.state?.email;
-      if (typeof historyEmail === 'string') {
-        return historyEmail;
-      }
-    }
-    return null;
   }
 }
