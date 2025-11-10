@@ -69,18 +69,6 @@ export const SBP_ALLOWED_EMAIL_DOMAINS = [
   'student.unimelb.edu.au',
 ] as const;
 
-const bpaBundleService: BundleService = {
-  id: 'bpa',
-  termsTitle: 'Bioplatforms Australia Data Portal Terms and Conditions',
-  termsUrl: 'https://data.bioplatforms.com/',
-};
-
-const galaxyBundleService: BundleService = {
-  id: 'galaxy',
-  termsTitle: 'Galaxy Australia Terms of Service',
-  termsUrl: 'https://site.usegalaxy.org.au/about#terms-of-service',
-};
-
 const tsiBundleService: BundleService = {
   id: 'tsi',
   termsTitle: 'TSI Terms and Conditions',

@@ -135,7 +135,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const selectedBundle = this.getSelectedBundle();
 
     // Always include BioCommons Access terms
-    const termsControls: { [key: string]: FormControl<boolean> } = {
+    const termsControls: Record<string, FormControl<boolean>> = {
       biocommonsAccess: this.formBuilder.nonNullable.control(
         false,
         Validators.requiredTrue,
