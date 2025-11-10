@@ -172,9 +172,13 @@ describe('SbpRegisterComponent', () => {
       req.flush({});
 
       tick();
-      expect(router.navigate).toHaveBeenCalledWith(['success'], {
-        relativeTo: jasmine.any(Object),
-      });
+      expect(router.navigate).toHaveBeenCalledWith(
+        ['success'],
+        jasmine.objectContaining({
+          relativeTo: jasmine.any(Object),
+          state: { email: 'test@sydney.edu.au' },
+        }),
+      );
     }));
 
     it('should handle form submission error', fakeAsync(() => {
