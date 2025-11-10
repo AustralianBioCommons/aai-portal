@@ -181,9 +181,13 @@ describe('GalaxyRegisterComponent submission', () => {
     tick();
     fixture.detectChanges();
 
-    expect(router.navigate).toHaveBeenCalledWith(['success'], {
-      relativeTo: component.route,
-    });
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['success'],
+      jasmine.objectContaining({
+        relativeTo: component.route,
+        state: { email: 'test@example.com' },
+      }),
+    );
     expect(component.errorMessage()).toBeNull();
   }));
 

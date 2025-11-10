@@ -616,6 +616,19 @@ describe('RegisterComponent', () => {
 
       const thankYouText = fixture.debugElement.query(By.css('.text-4xl'));
       expect(thankYouText.nativeElement.textContent.trim()).toBe('Thank you');
+
+      const verificationMessage = fixture.debugElement.query(
+        By.css('.verification-message'),
+      );
+      const normalizedText = verificationMessage.nativeElement.textContent
+        .replace(/\s+/g, ' ')
+        .trim();
+      expect(normalizedText).toContain(
+        `We've sent a verification email to the email address you provided.`,
+      );
+      expect(normalizedText).toContain(
+        'Please open that email and click the link inside to finish setting up your account and log in.',
+      );
     });
   });
 

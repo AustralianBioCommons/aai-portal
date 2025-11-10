@@ -101,6 +101,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     });
 
   termsForm: FormGroup = this.formBuilder.nonNullable.group({});
+  protected readonly registrationEmail = signal<string | null>(null);
 
   private readonly popStateHandler = (event: PopStateEvent) => {
     const stepFromState = event.state?.step;
@@ -411,6 +412,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       .subscribe((result) => {
         this.isSubmitting.set(false);
         if (result) {
+          this.registrationEmail.set(requestBody.email);
           this.transitionToStep(this.currentStep() + 1);
         }
       });

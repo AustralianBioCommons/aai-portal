@@ -1,15 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { SbpRegistrationSuccessComponent } from './sbp-registration-success.component';
+import { Router } from '@angular/router';
 
 describe('SbpRegistrationSuccessComponent', () => {
   let component: SbpRegistrationSuccessComponent;
   let fixture: ComponentFixture<SbpRegistrationSuccessComponent>;
+  const routerStub = {
+    getCurrentNavigation: () => ({
+      extras: { state: { email: 'sbp.user@example.com' } },
+    }),
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SbpRegistrationSuccessComponent],
-    }).compileComponents();
+    })
+      .overrideProvider(Router, {
+        useValue: routerStub,
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(SbpRegistrationSuccessComponent);
     component = fixture.componentInstance;
@@ -26,11 +36,14 @@ describe('SbpRegistrationSuccessComponent', () => {
     expect(heading.nativeElement.textContent.trim()).toBe('Thank you');
   });
 
-  it('should display email verification message', () => {
-    const message = fixture.debugElement.query(By.css('.font-light'));
+  it('should display email verification message with the user email', () => {
+    const message = fixture.debugElement.query(By.css('.verification-message'));
     expect(message).toBeTruthy();
-    expect(message.nativeElement.textContent.trim()).toBe(
-      'You will receive an email notification once your access request has been approved.',
+    const normalizedText = message.nativeElement.textContent
+      .replace(/\s+/g, ' ')
+      .trim();
+    expect(normalizedText).toContain(
+      `We've sent a verification email to sbp.user@example.com. Please open that email and click the link inside to finish setting up your account and log in.`,
     );
   });
 

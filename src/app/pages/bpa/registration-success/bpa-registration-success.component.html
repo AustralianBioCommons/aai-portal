@@ -2,11 +2,23 @@
   class="mx-auto flex h-full min-h-full max-w-6xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center"
 >
   <div class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
-    Thank you for registering with the Bioplatforms Australia Data Portal
+    Thank you
   </div>
-  <div class="text-gray-500">
-    Registration successful. Please check your email and verify your email
-    address.
+  <div class="verification-message text-gray-700">
+    @if (registrationEmail) {
+      <ng-container>
+        We've sent a verification email to
+        <span class="font-semibold text-gray-900">{{ registrationEmail }}</span
+        >. Please open that email and click the link inside to finish setting up
+        your account and log in.
+      </ng-container>
+    } @else {
+      <ng-container>
+        We've sent a verification email to the email address you provided.
+        Please open that email and click the link inside to finish setting up
+        your account and log in.
+      </ng-container>
+    }
   </div>
   <app-button
     type="button"

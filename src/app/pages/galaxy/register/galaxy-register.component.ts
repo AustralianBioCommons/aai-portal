@@ -138,7 +138,10 @@ export class GalaxyRegisterComponent {
           this.errorMessage.set(null);
           this.validationService.reset();
           this.registerForm.reset();
-          this.router.navigate(['success'], { relativeTo: this.route });
+          this.router.navigate(['success'], {
+            relativeTo: this.route,
+            state: { email: normalizedEmail },
+          });
         }
       });
   }

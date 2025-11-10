@@ -453,9 +453,23 @@
       <div class="text-4xl font-semibold sm:text-5xl lg:text-7xl">
         Thank you
       </div>
-      <div class="font-light text-gray-900">
-        You will receive an email notification once your access request has been
-        approved.
+      <div class="verification-message font-light text-gray-900">
+        @if (registrationEmail()) {
+          <ng-container>
+            We've sent a verification email to
+            <span class="font-semibold text-gray-950">{{
+              registrationEmail()
+            }}</span
+            >. Please open that email and click the link inside to finish
+            setting up your account and log in.
+          </ng-container>
+        } @else {
+          <ng-container>
+            We've sent a verification email to the email address you provided.
+            Please open that email and click the link inside to finish setting
+            up your account and log in.
+          </ng-container>
+        }
       </div>
       <div class="text-center">
         <app-button
