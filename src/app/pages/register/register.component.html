@@ -313,20 +313,75 @@
     >
       <form
         [formGroup]="termsForm"
-        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
+        class="flex w-full max-w-7xl flex-1 flex-col gap-12"
       >
-        <h1 class="text-3xl font-semibold text-gray-900">
-          BioCommons Access Terms and Conditions
-        </h1>
-        <p class="font-light text-gray-900">
-          You must accept the terms and conditions before you proceed
-        </p>
+        <!-- BioCommons Access T&Cs -->
+        <div class="space-y-6">
+          <h1 class="text-3xl font-semibold text-gray-900">
+            BioCommons Access terms & conditions
+          </h1>
+          <p class="font-light text-gray-600">
+            You must accept the terms & conditions before you proceed.
+          </p>
+          <div
+            tabindex="0"
+            class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+            [class.ring-transparent]="
+              termsForm.get('biocommonsAccess')?.value !== true &&
+              (!termsForm.get('biocommonsAccess')?.invalid ||
+                !termsForm.get('biocommonsAccess')?.touched)
+            "
+            [class.ring-red-500]="
+              termsForm.get('biocommonsAccess')?.value !== true &&
+              termsForm.get('biocommonsAccess')?.invalid &&
+              termsForm.get('biocommonsAccess')?.touched
+            "
+            [class.ring-sky-400]="
+              termsForm.get('biocommonsAccess')?.value === true
+            "
+            (click)="toggleTermsAcceptance('biocommonsAccess')"
+            (keyup.enter)="toggleTermsAcceptance('biocommonsAccess')"
+          >
+            <a
+              href="https://site.usegalaxy.org.au/galaxy-terms"
+              target="_blank"
+              class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
+              (click)="$event.stopPropagation()"
+            >
+              BioCommons Access terms & conditions
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="size-4 min-h-4 min-w-4"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                />
+              </svg>
+            </a>
+            <input
+              type="checkbox"
+              formControlName="biocommonsAccess"
+              class="pointer-events-none h-4 w-4 text-sky-900"
+            />
+          </div>
+        </div>
 
+        <!-- Bundle T&Cs -->
         @if (getSelectedBundle()) {
-          <div class="flex w-full flex-col gap-6">
-            <div class="text-xl font-medium text-gray-900">
-              {{ getSelectedBundle()?.name }} Bundle
-            </div>
+          <div class="space-y-6">
+            <h1 class="text-3xl font-semibold text-gray-900">
+              {{ getSelectedBundle()?.name }} Bundle terms & conditions
+            </h1>
+            <p class="font-light text-gray-600">
+              Please review the terms & conditions for each associated service
+              and tick all boxes below to accept the complete bundle agreement.
+            </p>
 
             @for (
               service of getSelectedBundle()?.services || [];
@@ -345,7 +400,7 @@
                   termsForm.get(service.id)?.invalid &&
                   termsForm.get(service.id)?.touched
                 "
-                [class.ring-sky-100]="termsForm.get(service.id)?.value === true"
+                [class.ring-sky-400]="termsForm.get(service.id)?.value === true"
                 (click)="toggleTermsAcceptance(service.id)"
                 (keyup.enter)="toggleTermsAcceptance(service.id)"
               >
@@ -378,12 +433,12 @@
                 />
               </div>
             }
+          </div>
+        }
 
-            @if (termsForm.invalid && termsForm.touched) {
-              <div class="text-sm text-red-500">
-                Please accept all terms and conditions to continue
-              </div>
-            }
+        @if (termsForm.invalid && termsForm.touched) {
+          <div class="text-sm text-red-500">
+            Please accept all terms & conditions to continue
           </div>
         }
       </form>
@@ -409,7 +464,7 @@
           <h1 class="text-3xl font-semibold text-gray-900">
             Details confirmation
           </h1>
-          <div class="font-light text-gray-900">
+          <div class="font-light text-gray-600">
             Please review your information and registration details below.
           </div>
         </div>
@@ -510,11 +565,11 @@
           } @else {
             <app-button
               type="button"
-              [variant]="getSelectedBundle() ? 'primary' : 'secondary'"
+              variant="secondary"
               (click)="nextStep()"
               [loading]="isSubmitting()"
             >
-              {{ getSelectedBundle() ? "Next" : "Skip" }}
+              Skip
             </app-button>
           }
         </div>

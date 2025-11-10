@@ -132,14 +132,24 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   private initializeTermsForm() {
     const selectedBundle = this.getSelectedBundle();
-    if (!selectedBundle) return;
 
-    const termsControls = Object.fromEntries(
-      selectedBundle.services.map((service) => [
-        service.id,
-        this.formBuilder.nonNullable.control(false, Validators.requiredTrue),
-      ]),
-    );
+    // Always include BioCommons Access terms
+    const termsControls: { [key: string]: FormControl<boolean> } = {
+      biocommonsAccess: this.formBuilder.nonNullable.control(
+        false,
+        Validators.requiredTrue,
+      ),
+    };
+
+    // Add bundle-specific terms if a bundle is selected
+    if (selectedBundle) {
+      selectedBundle.services.forEach((service) => {
+        termsControls[service.id] = this.formBuilder.nonNullable.control(
+          false,
+          Validators.requiredTrue,
+        );
+      });
+    }
 
     this.termsForm = this.formBuilder.nonNullable.group(termsControls);
   }
@@ -197,6 +207,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const bundle = this.bundles.find((bundle) => bundle.id === value);
     if (!bundle?.disabled) {
       this.bundleForm.patchValue({ selectedBundle: value });
+      this.transitionToStep(this.currentStep() + 1);
     }
   }
 
@@ -247,7 +258,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.updateHistoryState(clampedStep, false);
     }
 
-    if (clampedStep === 4 && movingForward && this.getSelectedBundle()) {
+    if (clampedStep === 4 && movingForward) {
       this.initializeTermsForm();
     }
 

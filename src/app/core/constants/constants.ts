@@ -104,12 +104,7 @@ export const biocommonsBundles: Bundle[] = [
       '<a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> 2TB storage space, high memory nodes, workflows and tools',
       'Easily import data into <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
     ],
-    services: [
-      tsiBundleService,
-      fgeneshBundleService,
-      bpaBundleService,
-      galaxyBundleService,
-    ],
+    services: [tsiBundleService, fgeneshBundleService],
   },
   {
     id: 'fungi',
