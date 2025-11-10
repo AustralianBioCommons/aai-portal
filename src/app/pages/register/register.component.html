@@ -1,11 +1,214 @@
 <div class="flex h-full w-full flex-col">
   <!-- Navbar -->
-  <app-biocommons-navbar></app-biocommons-navbar>
+  <app-registration-navbar></app-registration-navbar>
 
-  <!-- Select bundle step -->
+  <!-- General information step -->
   @if (currentStep() === 1) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
+        <h1 class="text-left text-3xl font-semibold text-gray-900">
+          My BioCommons Access
+        </h1>
+        <p class="text-left font-light text-gray-600">
+          My BioCommons Access The BioCommons Access account provides
+          researchers with a single, secure login to use national life science
+          platforms such as Galaxy Australia and the Bioplatforms Data Portal.
+          <br /><br />
+          With this account, you can instantly access open data, tools, and
+          workflows that support bioinformatics research across Australia. It
+          simplifies access by connecting multiple services under one trusted
+          identity, making it easier to move between platforms and collaborate
+          with others in the research community. <br /><br />
+          The BioCommons Access account is designed to give researchers seamless
+          entry to shared digital resources, helping you focus on your science
+          rather than managing multiple logins or registrations.
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- Registration form step -->
+  @else if (currentStep() === 2) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
+    >
+      <form
+        [formGroup]="registrationForm"
+        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
+      >
+        <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
+        <p class="font-light text-gray-600">
+          To create your BioCommons Access account, simply provide your full
+          name, email address, and password. This single account enables you to
+          securely log in to both Galaxy Australia and the Bioplatforms Data
+          Portal, granting you immediate access to open data and research tools
+          across these interconnected platforms.
+        </p>
+
+        <!-- Registration form fields -->
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div class="relative">
+            <label
+              for="firstName"
+              class="block text-sm font-medium text-gray-900"
+            >
+              First Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              formControlName="firstName"
+              placeholder="John"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              [class.border-red-500]="isFieldInvalid('firstName')"
+            />
+            @if (isFieldInvalid("firstName")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (error of getErrorMessages("firstName"); track error) {
+                  {{ error }}<br />
+                }
+              </div>
+            }
+          </div>
+
+          <div class="relative">
+            <label
+              for="lastName"
+              class="block text-sm font-medium text-gray-900"
+            >
+              Last Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName"
+              placeholder="Doe"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              [class.border-red-500]="isFieldInvalid('lastName')"
+            />
+            @if (isFieldInvalid("lastName")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (error of getErrorMessages("lastName"); track error) {
+                  {{ error }}<br />
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="relative">
+          <label for="email" class="block text-sm font-medium text-gray-900">
+            Email Address <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            placeholder="john.doe@example.com"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('email')"
+          />
+          @if (isFieldInvalid("email")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("email"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label for="username" class="block text-sm font-medium text-gray-900">
+            Username <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            formControlName="username"
+            placeholder="johndoe"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('username')"
+          />
+          @if (isFieldInvalid("username")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("username"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label for="password" class="block text-sm font-medium text-gray-900">
+            Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('password')"
+          />
+          <div class="mt-1 text-xs text-gray-500">
+            Passwords must be 8 to 72 characters long, contain at least one
+            uppercase letter, one lowercase letter, one number, one special
+            character.
+          </div>
+          @if (isFieldInvalid("password")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("password"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="relative">
+          <label
+            for="confirmPassword"
+            class="block text-sm font-medium text-gray-900"
+          >
+            Confirm Password <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="password"
+            id="confirmPassword"
+            formControlName="confirmPassword"
+            placeholder="••••••••"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid('confirmPassword')"
+          />
+          @if (isFieldInvalid("confirmPassword")) {
+            <div class="mt-0.5 text-xs text-red-500">
+              @for (error of getErrorMessages("confirmPassword"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
+        </div>
+
+        <div class="mt-6 flex flex-col items-center gap-0.5">
+          <re-captcha
+            (resolved)="resolved($event)"
+            siteKey="{{ recaptchaSiteKeyV2 }}"
+          ></re-captcha>
+          @if (!recaptchaToken() && recaptchaAttempted()) {
+            <div class="text-xs text-red-500">
+              Please complete the reCAPTCHA verification
+            </div>
+          }
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Select bundle step -->
+  @else if (currentStep() === 3) {
+    <div
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
       <form
         [formGroup]="bundleForm"
@@ -14,8 +217,8 @@
         <h1 class="text-left text-3xl font-semibold text-gray-900">
           Select a bundle
         </h1>
-        <p class="text-left font-light text-gray-900">
-          Request access to a bundle you need for your research.
+        <p class="text-left font-light text-gray-600">
+          Request access to a bundle you need for your research
         </p>
         <div class="mt-6 flex flex-wrap items-stretch justify-center gap-6">
           <!-- Bundle selection cards -->
@@ -28,11 +231,6 @@
                   !bundle.disabled,
                 'cursor-not-allowed opacity-50': bundle.disabled,
                 group: !bundle.disabled,
-                'ring-2 ring-red-500':
-                  bundleForm.get('selectedBundle')?.invalid &&
-                  bundleForm.get('selectedBundle')?.touched &&
-                  !bundleForm.get('selectedBundle')?.value &&
-                  !bundle.disabled,
                 'ring-2 ring-sky-400':
                   bundleForm.get('selectedBundle')?.value === bundle.id,
               }"
@@ -104,207 +302,24 @@
             </div>
           }
         </div>
-        @if (
-          bundleForm.get("selectedBundle")?.invalid &&
-          bundleForm.get("selectedBundle")?.touched
-        ) {
-          <div class="text-center text-sm text-red-500">
-            Please select a bundle to continue
-          </div>
-        }
-      </form>
-    </div>
-  }
-
-  <!-- Registration form step -->
-  @else if (currentStep() === 2) {
-    <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
-    >
-      <form
-        [formGroup]="registrationForm"
-        class="flex w-full max-w-7xl flex-1 flex-col gap-6"
-      >
-        <h1 class="text-3xl font-semibold text-gray-900">Your details</h1>
-        <p class="font-light text-gray-900">
-          Australian BioCommons access enables a streamlined approach to
-          accessing the Bioplatforms Data Portal and Galaxy Australia research
-          infrastructure bundles.
-        </p>
-
-        <!-- Registration form fields -->
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div class="relative">
-            <label
-              for="firstName"
-              class="block text-sm font-medium text-gray-900"
-            >
-              First Name <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              formControlName="firstName"
-              placeholder="John"
-              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-              [class.border-red-500]="isFieldInvalid('firstName')"
-            />
-            @if (isFieldInvalid("firstName")) {
-              <div class="mt-0.5 text-xs text-red-500">
-                @for (error of getErrorMessages("firstName"); track error) {
-                  {{ error }}<br />
-                }
-              </div>
-            }
-          </div>
-
-          <div class="relative">
-            <label
-              for="lastName"
-              class="block text-sm font-medium text-gray-900"
-            >
-              Last Name <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              formControlName="lastName"
-              placeholder="Doe"
-              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-              [class.border-red-500]="isFieldInvalid('lastName')"
-            />
-            @if (isFieldInvalid("lastName")) {
-              <div class="mt-0.5 text-xs text-red-500">
-                @for (error of getErrorMessages("lastName"); track error) {
-                  {{ error }}<br />
-                }
-              </div>
-            }
-          </div>
-        </div>
-
-        <div class="relative">
-          <label for="email" class="block text-sm font-medium text-gray-900">
-            Email Address <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="email"
-            id="email"
-            formControlName="email"
-            placeholder="john.doe@example.com"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-            [class.border-red-500]="isFieldInvalid('email')"
-          />
-          @if (isFieldInvalid("email")) {
-            <div class="mt-0.5 text-xs text-red-500">
-              @for (error of getErrorMessages("email"); track error) {
-                {{ error }}<br />
-              }
-            </div>
-          }
-        </div>
-
-        <div class="relative">
-          <label for="username" class="block text-sm font-medium text-gray-900">
-            Username <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="username"
-            formControlName="username"
-            placeholder="johndoe"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-            [class.border-red-500]="isFieldInvalid('username')"
-          />
-          @if (isFieldInvalid("username")) {
-            <div class="mt-0.5 text-xs text-red-500">
-              @for (error of getErrorMessages("username"); track error) {
-                {{ error }}<br />
-              }
-            </div>
-          }
-        </div>
-
-        <div class="relative">
-          <label for="password" class="block text-sm font-medium text-gray-900">
-            Password <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="password"
-            id="password"
-            formControlName="password"
-            placeholder="••••••••"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-            [class.border-red-500]="isFieldInvalid('password')"
-          />
-          <div class="mt-1 text-xs text-gray-500">
-            Passwords must be 8 to 72 characters long, contain at least one
-            uppercase letter, one lowercase letter, one number, one special
-            character.
-          </div>
-          @if (isFieldInvalid("password")) {
-            <div class="mt-0.5 text-xs text-red-500">
-              @for (error of getErrorMessages("password"); track error) {
-                {{ error }}<br />
-              }
-            </div>
-          }
-        </div>
-
-        <div class="relative">
-          <label
-            for="confirmPassword"
-            class="block text-sm font-medium text-gray-900"
-          >
-            Confirm Password <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            formControlName="confirmPassword"
-            placeholder="••••••••"
-            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-            [class.border-red-500]="isFieldInvalid('confirmPassword')"
-          />
-          @if (isFieldInvalid("confirmPassword")) {
-            <div class="mt-0.5 text-xs text-red-500">
-              @for (error of getErrorMessages("confirmPassword"); track error) {
-                {{ error }}<br />
-              }
-            </div>
-          }
-        </div>
-
-        <div class="mt-6 flex flex-col items-center gap-0.5">
-          <re-captcha
-            (resolved)="resolved($event)"
-            siteKey="{{ recaptchaSiteKeyV2 }}"
-          ></re-captcha>
-          @if (!recaptchaToken() && recaptchaAttempted()) {
-            <div class="text-xs text-red-500">
-              Please complete the reCAPTCHA verification
-            </div>
-          }
-        </div>
       </form>
     </div>
   }
 
   <!-- Accept terms & conditions step -->
-  @else if (currentStep() === 3) {
+  @else if (currentStep() === 4) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
       <form
         [formGroup]="termsForm"
         class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
         <h1 class="text-3xl font-semibold text-gray-900">
-          Accept terms and conditions
+          BioCommons Access Terms and Conditions
         </h1>
         <p class="font-light text-gray-900">
-          Please review and accept the terms and conditions for each service in
-          your selected bundle.
+          You must accept the terms and conditions before you proceed
         </p>
 
         @if (getSelectedBundle()) {
@@ -330,7 +345,7 @@
                   termsForm.get(service.id)?.invalid &&
                   termsForm.get(service.id)?.touched
                 "
-                [class.ring-sky-400]="termsForm.get(service.id)?.value === true"
+                [class.ring-sky-100]="termsForm.get(service.id)?.value === true"
                 (click)="toggleTermsAcceptance(service.id)"
                 (keyup.enter)="toggleTermsAcceptance(service.id)"
               >
@@ -376,9 +391,9 @@
   }
 
   <!-- Review details step -->
-  @else if (currentStep() === 4) {
+  @else if (currentStep() === 5) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-100 p-12"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
     >
       @if (errorAlert()) {
         <app-alert
@@ -433,14 +448,18 @@
           </div>
         </div>
 
-        <div>
-          <div class="mb-6 text-xl font-medium text-gray-900">
-            Access bundle requested
+        @if (getSelectedBundle()) {
+          <div>
+            <div class="mb-6 text-xl font-medium text-gray-900">
+              Access bundle requested
+            </div>
+            <div
+              class="rounded-md bg-white p-3 font-light text-gray-900 shadow"
+            >
+              {{ getSelectedBundle()?.name }}
+            </div>
           </div>
-          <div class="rounded-md bg-white p-3 font-light text-gray-900 shadow">
-            {{ getSelectedBundle()?.name }}
-          </div>
-        </div>
+        }
       </div>
     </div>
   }
@@ -448,7 +467,7 @@
   <!-- Final step -->
   @else {
     <div
-      class="flex flex-1 flex-col justify-center gap-12 bg-gray-100 text-center"
+      class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
     >
       <div class="text-4xl font-semibold sm:text-5xl lg:text-7xl">
         Thank you
@@ -472,13 +491,13 @@
 
   <!-- Shared navigation buttons -->
   @if (currentStep() < totalSteps) {
-    <div class="flex w-full items-center justify-center bg-gray-100 p-12 pt-0">
+    <div class="flex w-full items-center justify-center bg-gray-50 p-12 pt-0">
       <div class="flex w-full max-w-7xl items-center">
         <app-button type="button" variant="secondary" (click)="prevStep()">
           Back
         </app-button>
         <div class="ml-auto">
-          @if (currentStep() > 1) {
+          @if (currentStep() !== 3) {
             <app-button
               type="button"
               variant="primary"
@@ -486,7 +505,16 @@
               (click)="nextStep()"
               [loading]="isSubmitting()"
             >
-              {{ currentStep() === 4 ? "Submit" : "Next" }}
+              {{ currentStep() === 5 ? "Submit" : "Next" }}
+            </app-button>
+          } @else {
+            <app-button
+              type="button"
+              [variant]="getSelectedBundle() ? 'primary' : 'secondary'"
+              (click)="nextStep()"
+              [loading]="isSubmitting()"
+            >
+              {{ getSelectedBundle() ? "Next" : "Skip" }}
             </app-button>
           }
         </div>

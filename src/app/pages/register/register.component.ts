@@ -25,7 +25,7 @@ import {
   toAsciiEmail,
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
-import { BiocommonsNavbarComponent } from '../../shared/components/biocommons-navbar/biocommons-navbar.component';
+import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -42,7 +42,7 @@ interface RegistrationRequest {
   email: string;
   username: string;
   password: string;
-  bundle: string;
+  bundle?: string;
 }
 
 @Component({
@@ -54,7 +54,7 @@ interface RegistrationRequest {
     RecaptchaModule,
     AlertComponent,
     ButtonComponent,
-    BiocommonsNavbarComponent,
+    RegistrationNavbarComponent,
   ],
   styleUrl: './register.component.css',
 })
@@ -68,7 +68,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
 
   currentStep = signal(1);
-  totalSteps = 5;
+  totalSteps = 6;
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken = signal<string | null>(null);
@@ -80,7 +80,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   bundles: Bundle[] = biocommonsBundles;
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
-    selectedBundle: ['', Validators.required],
+    selectedBundle: [''],
   });
 
   registrationForm: FormGroup<RegistrationForm> =
@@ -197,18 +197,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const bundle = this.bundles.find((bundle) => bundle.id === value);
     if (!bundle?.disabled) {
       this.bundleForm.patchValue({ selectedBundle: value });
-      this.bundleForm.get('selectedBundle')?.markAsDirty();
-      this.bundleForm.get('selectedBundle')?.markAsTouched();
-      this.bundleForm.updateValueAndValidity();
-
-      if (this.currentStep() === 1) {
-        this.advanceFromBundleSelection();
-      }
     }
-  }
-
-  private advanceFromBundleSelection(): void {
-    this.handleStepValidation(this.bundleForm);
   }
 
   private updateHistoryState(step: number, replace: boolean): void {
@@ -258,7 +247,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.updateHistoryState(clampedStep, false);
     }
 
-    if (clampedStep === 3 && movingForward && this.getSelectedBundle()) {
+    if (clampedStep === 4 && movingForward && this.getSelectedBundle()) {
       this.initializeTermsForm();
     }
 
@@ -291,15 +280,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
   nextStep() {
     switch (this.currentStep()) {
       case 1:
-        this.handleStepValidation(this.bundleForm);
+        this.transitionToStep(this.currentStep() + 1);
         break;
       case 2:
         this.handleStepValidation(this.registrationForm);
         break;
       case 3:
-        this.handleStepValidation(this.termsForm);
+        this.transitionToStep(this.currentStep() + 1);
         break;
       case 4:
+        this.handleStepValidation(this.termsForm);
+        break;
+      case 5:
         this.completeRegistration();
         break;
       default:
@@ -339,8 +331,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.errorAlert.set(null);
     switch (step) {
       case 1:
-        this.bundleForm.markAsUntouched();
-        this.bundleForm.markAsPristine();
         break;
       case 2:
         this.registrationForm.markAsUntouched();
@@ -350,12 +340,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.recaptchaAttempted.set(false);
         break;
       case 3:
+        break;
+      case 4:
         this.termsForm.markAsUntouched();
         this.termsForm.markAsPristine();
         this.recaptchaToken.set(null);
         this.recaptchaAttempted.set(false);
         break;
-      case 4:
+      case 5:
         this.isSubmitting.set(false);
         break;
     }
@@ -385,14 +377,19 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.errorAlert.set(null);
 
     const formValue = this.registrationForm.value;
+    const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
+
     const requestBody: RegistrationRequest = {
       first_name: formValue.firstName!,
       last_name: formValue.lastName!,
       email: toAsciiEmail(formValue.email!),
       username: formValue.username!,
       password: formValue.password!,
-      bundle: this.bundleForm.get('selectedBundle')!.value,
     };
+
+    if (selectedBundle) {
+      requestBody.bundle = selectedBundle;
+    }
 
     this.http
       .post(`${environment.auth0.backend}/biocommons/register`, requestBody)
