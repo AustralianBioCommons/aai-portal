@@ -218,7 +218,7 @@ describe('RegisterComponent', () => {
       component.nextStep();
       expect(component.currentStep()).toBe(4);
       expect(component.termsForm.get('biocommonsAccess')?.touched).toBe(true);
-      
+
       // Verify no HTTP requests were made
       httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
     });
@@ -245,7 +245,7 @@ describe('RegisterComponent', () => {
 
       component.nextStep();
       expect(component.currentStep()).toBe(5);
-      
+
       // Verify no HTTP requests were made yet (only when we advance from step 5)
       httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
     });
