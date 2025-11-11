@@ -3,15 +3,8 @@ import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { AllUsersComponent } from './pages/admin/all-users/all-users.component';
 import { PendingUsersComponent } from './pages/admin/pending-users/pending-users.component';
 import { RevokedUsersComponent } from './pages/admin/revoked-users/revoked-users.component';
-import { GalaxyRegisterComponent } from './pages/galaxy/register/galaxy-register.component';
 import { DefaultLayoutComponent } from './layouts/default-layout/default-layout.component';
-import { GalaxyLayoutComponent } from './layouts/galaxy-layout/galaxy-layout.component';
-import { GalaxyRegisterSuccessComponent } from './pages/galaxy/register-success/galaxy-register-success.component';
-import { BpaRegisterComponent } from './pages/bpa/register/bpa-register.component';
-import { BpaRegistrationSuccessComponent } from './pages/bpa/registration-success/bpa-registration-success.component';
 import { EmailVerifiedComponent } from './pages/email-verified/email-verified.component';
-import { BpaRegisterSelectionComponent } from './pages/bpa/register-selection/bpa-register-selection.component';
-import { GalaxyRegisterSelectionComponent } from './pages/galaxy/register-selection/galaxy-register-selection.component';
 import { LoginComponent } from './pages/login/login.component';
 import { loginGuard } from './core/guards/login.guard';
 import { authGuard } from './core/guards/auth.guard';
@@ -21,7 +14,6 @@ import { UserDetailsComponent } from './pages/admin/user-details/user-details.co
 import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
 import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.component';
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
-import { BpaLayoutComponent } from './layouts/bpa-layout/bpa-layout.component';
 import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 
@@ -52,66 +44,6 @@ export const routes: Routes = [
   },
 
   // Standalone routes without DefaultLayoutComponent
-  {
-    path: 'galaxy',
-    component: GalaxyLayoutComponent,
-    canActivate: [loginGuard],
-    data: { favicon: '/assets/galaxy-favicon.ico' },
-    children: [
-      { path: '', redirectTo: 'register', pathMatch: 'full' },
-      {
-        path: 'register',
-        component: GalaxyRegisterSelectionComponent,
-        data: { title: 'Galaxy Australia - Register' },
-      },
-      {
-        path: 'register/standard-access',
-        component: GalaxyRegisterComponent,
-        data: { title: 'Galaxy Australia - Register' },
-      },
-      {
-        path: 'register/standard-access/success',
-        component: GalaxyRegisterSuccessComponent,
-        data: { title: 'Galaxy Australia - Registration successful' },
-      },
-      {
-        path: 'register/bundles',
-        component: RegisterComponent,
-        data: { title: 'Galaxy Australia - Register' },
-      },
-    ],
-  },
-  {
-    path: 'bpa',
-    component: BpaLayoutComponent,
-    canActivate: [loginGuard],
-    data: { favicon: '/assets/bpa-favicon.ico' },
-    children: [
-      { path: '', redirectTo: 'register', pathMatch: 'full' },
-      {
-        path: 'register',
-        component: BpaRegisterSelectionComponent,
-        data: { title: 'Register | Bioplatforms Australia Data Portal' },
-      },
-      {
-        path: 'register/standard-access',
-        component: BpaRegisterComponent,
-        data: { title: 'Register | Bioplatforms Australia Data Portal' },
-      },
-      {
-        path: 'register/standard-access/success',
-        component: BpaRegistrationSuccessComponent,
-        data: {
-          title: 'Registration Successful | Bioplatforms Australia Data Portal',
-        },
-      },
-      {
-        path: 'register/bundles',
-        component: RegisterComponent,
-        data: { title: 'Register | Bioplatforms Australia Data Portal' },
-      },
-    ],
-  },
   {
     path: 'sbp',
     component: SbpLayoutComponent,

@@ -92,8 +92,8 @@ describe('RegisterComponent', () => {
       expect(component.currentStep()).toBe(1);
     });
 
-    it('should have 5 total steps', () => {
-      expect(component.totalSteps).toBe(5);
+    it('should have 6 total steps', () => {
+      expect(component.totalSteps).toBe(6);
     });
 
     it('should initialize bundle form with empty selection', () => {
@@ -115,10 +115,8 @@ describe('RegisterComponent', () => {
     });
 
     it('should select data portal galaxy bundle', () => {
-      component.selectBundle('bpa_galaxy');
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe(
-        'bpa_galaxy',
-      );
+      component.selectBundle('tsi');
+      expect(component.bundleForm.get('selectedBundle')?.value).toBe('tsi');
       expect(component.currentStep()).toBe(2);
     });
 
@@ -128,12 +126,10 @@ describe('RegisterComponent', () => {
     });
 
     it('should return selected bundle object', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       const selectedBundle = component.getSelectedBundle();
-      expect(selectedBundle?.id).toBe('bpa_galaxy');
-      expect(selectedBundle?.name).toBe(
-        'Bioplatforms Australia Data Portal and Galaxy',
-      );
+      expect(selectedBundle?.id).toBe('tsi');
+      expect(selectedBundle?.name).toBe('Threatened Species Initiative (TSI)');
     });
 
     it('should return undefined for no selection', () => {
@@ -152,17 +148,17 @@ describe('RegisterComponent', () => {
 
     it('should not proceed from step 1 without bundle selection', () => {
       component.nextStep();
-      expect(component.currentStep()).toBe(1);
-      expect(component.bundleForm.get('selectedBundle')?.touched).toBe(true);
+      expect(component.currentStep()).toBe(2);
+      expect(component.bundleForm.get('selectedBundle')?.touched).toBe(false);
     });
 
     it('should proceed from step 1 with valid bundle selection', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       expect(component.currentStep()).toBe(2);
     });
 
     it('should not proceed from step 2 with invalid registration form', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       component.registrationForm.reset();
 
       component.nextStep();
@@ -171,7 +167,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should proceed from step 2 with valid registration form', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
 
       component.registrationForm.patchValue({
         firstName: 'John',
@@ -189,7 +185,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should not proceed from step 2 without reCAPTCHA completion', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
 
       component.registrationForm.patchValue({
         firstName: 'John',
@@ -208,39 +204,55 @@ describe('RegisterComponent', () => {
     });
 
     it('should go back from step 2 to step 1', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       component.prevStep();
       expect(component.currentStep()).toBe(1);
       expect(backSpy).toHaveBeenCalled();
     });
 
     it('should not proceed from step 3 with invalid terms form', () => {
-      component.currentStep.set(3);
-      component.selectBundle('bpa_galaxy');
+      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
+      component.currentStep.set(4);
       component['initializeTermsForm']();
-
-      component.nextStep();
-      expect(component.currentStep()).toBe(3);
-      expect(component.termsForm.get('bpa')?.touched).toBe(true);
-    });
-
-    it('should proceed from step 3 with accepted terms', () => {
-      component.currentStep.set(3);
-      component.selectBundle('bpa_galaxy');
-      component['initializeTermsForm']();
-
-      component.termsForm.patchValue({
-        bpa: true,
-        galaxy: true,
-      });
 
       component.nextStep();
       expect(component.currentStep()).toBe(4);
+      expect(component.termsForm.get('biocommonsAccess')?.touched).toBe(true);
+
+      // Verify no HTTP requests were made
+      httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
+    });
+
+    it('should proceed from step 3 with accepted terms', () => {
+      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
+      component.currentStep.set(4);
+      // Setup valid registration form so we can complete all steps
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component['initializeTermsForm']();
+
+      component.termsForm.patchValue({
+        biocommonsAccess: true,
+        tsi: true,
+        fgenesh: true,
+      });
+
+      component.nextStep();
+      expect(component.currentStep()).toBe(5);
+
+      // Verify no HTTP requests were made yet (only when we advance from step 5)
+      httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
     });
 
     it('should complete registration and advance to final step', () => {
       // Setup valid forms
-      component.bundleForm.patchValue({ selectedBundle: 'bpa_galaxy' });
+      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -250,7 +262,7 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.currentStep.set(4);
+      component.currentStep.set(5);
       component.nextStep();
 
       // Expect HTTP request to be made
@@ -264,13 +276,13 @@ describe('RegisterComponent', () => {
         email: 'john@example.com',
         username: 'johndoe',
         password: 'Password123!',
-        bundle: 'bpa_galaxy',
+        bundle: 'tsi',
       });
 
       // Simulate successful response
       req.flush({ success: true });
 
-      expect(component.currentStep()).toBe(5);
+      expect(component.currentStep()).toBe(6);
       expect(component.isSubmitting()).toBe(false);
     });
   });
@@ -363,35 +375,34 @@ describe('RegisterComponent', () => {
     beforeEach(() => {
       component.currentStep.set(1);
       component.bundleForm.reset();
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       component['initializeTermsForm']();
     });
 
     it('should initialize terms form based on selected bundle', () => {
-      expect(component.termsForm.get('bpa')).toBeTruthy();
-      expect(component.termsForm.get('galaxy')).toBeTruthy();
+      expect(component.termsForm.get('biocommonsAccess')).toBeTruthy();
+      expect(component.termsForm.get('tsi')).toBeTruthy();
     });
 
     it('should toggle terms acceptance', () => {
-      expect(component.termsForm.get('bpa')?.value).toBe(false);
-      component.toggleTermsAcceptance('bpa');
-      expect(component.termsForm.get('bpa')?.value).toBe(true);
+      expect(component.termsForm.get('biocommonsAccess')?.value).toBe(false);
+      component.toggleTermsAcceptance('biocommonsAccess');
+      expect(component.termsForm.get('biocommonsAccess')?.value).toBe(true);
     });
 
     it('should toggle terms acceptance back to false', () => {
-      component.termsForm.get('bpa')?.setValue(true);
-      component.toggleTermsAcceptance('bpa');
-      expect(component.termsForm.get('bpa')?.value).toBe(false);
+      component.termsForm.get('biocommonsAccess')?.setValue(true);
+      component.toggleTermsAcceptance('biocommonsAccess');
+      expect(component.termsForm.get('biocommonsAccess')?.value).toBe(false);
     });
 
     it('should initialize TSI terms form correctly', () => {
       component.selectBundle('tsi');
       component['initializeTermsForm']();
 
+      expect(component.termsForm.get('biocommonsAccess')).toBeTruthy();
       expect(component.termsForm.get('tsi')).toBeTruthy();
       expect(component.termsForm.get('fgenesh')).toBeTruthy();
-      expect(component.termsForm.get('bpa')).toBeTruthy();
-      expect(component.termsForm.get('galaxy')).toBeTruthy();
     });
   });
 
@@ -421,7 +432,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should push history when advancing to step 2', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       expect(pushStateSpy).toHaveBeenCalled();
       const [stateArg] = pushStateSpy.calls.mostRecent().args as [
         Record<string, unknown>,
@@ -430,7 +441,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should push history when advancing to step 3', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       component.registrationForm.patchValue({
         firstName: 'Jane',
         lastName: 'Doe',
@@ -450,7 +461,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should respond to browser popstate events', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       expect(component.currentStep()).toBe(2);
       pushStateSpy.calls.reset();
       window.dispatchEvent(
@@ -519,15 +530,15 @@ describe('RegisterComponent', () => {
     });
 
     it('should re-initialize terms form when moving into step 3', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       const initSpy = spyOn(
         component as unknown as { initializeTermsForm: () => void },
         'initializeTermsForm',
       ).and.callThrough();
       pushStateSpy.calls.reset();
-      asInternals(component).transitionToStep(3);
+      asInternals(component).transitionToStep(4);
       expect(initSpy).toHaveBeenCalled();
-      expect(component.currentStep()).toBe(3);
+      expect(component.currentStep()).toBe(4);
     });
 
     it('should ignore popstate events without a numeric step', () => {
@@ -559,7 +570,7 @@ describe('RegisterComponent', () => {
         fixture.debugElement
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
-      ).toBe('Select a bundle');
+      ).toBe('My BioCommons Access');
     });
 
     it('should hide next button on step 1', () => {
@@ -568,7 +579,7 @@ describe('RegisterComponent', () => {
       const nextButton = fixture.debugElement.query(
         By.css('[data-testid="registration-next-button"]'),
       );
-      expect(nextButton).toBeNull();
+      expect(nextButton).toBeTruthy();
     });
 
     it('should display step 2 registration form when on step 2', () => {
@@ -597,11 +608,11 @@ describe('RegisterComponent', () => {
         fixture.debugElement
           .query(By.css('h1'))
           .nativeElement.textContent.trim(),
-      ).toBe('Accept terms and conditions');
+      ).toBe('Select a bundle');
     });
 
     it('should display step 4 confirmation when on step 4', () => {
-      component.currentStep.set(4);
+      component.currentStep.set(5);
       fixture.detectChanges();
       expect(
         fixture.debugElement
@@ -611,7 +622,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should display thank you message on final step', () => {
-      component.currentStep.set(5);
+      component.currentStep.set(6);
       fixture.detectChanges();
 
       const thankYouText = fixture.debugElement.query(By.css('.text-4xl'));
@@ -635,7 +646,7 @@ describe('RegisterComponent', () => {
   describe('Complete Registration', () => {
     it('should make HTTP request when completing registration', () => {
       // Setup valid forms
-      component.bundleForm.patchValue({ selectedBundle: 'bpa_galaxy' });
+      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -645,7 +656,7 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.currentStep.set(4);
+      component.currentStep.set(5);
       component.nextStep();
 
       // Expect HTTP request
@@ -657,12 +668,12 @@ describe('RegisterComponent', () => {
       // Simulate successful response
       req.flush({ success: true });
 
-      expect(component.currentStep()).toBe(5);
+      expect(component.currentStep()).toBe(6);
     });
 
     it('should handle registration error and display error message', () => {
       // Setup valid forms
-      component.bundleForm.patchValue({ selectedBundle: 'bpa_galaxy' });
+      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -672,7 +683,7 @@ describe('RegisterComponent', () => {
         confirmPassword: 'Password123!',
       });
 
-      component.currentStep.set(4);
+      component.currentStep.set(5);
       component.nextStep();
 
       // Expect HTTP request
@@ -686,7 +697,7 @@ describe('RegisterComponent', () => {
         { status: 400, statusText: 'Bad Request' },
       );
 
-      expect(component.currentStep()).toBe(4); // Should stay on step 4
+      expect(component.currentStep()).toBe(5); // Should stay on step 5
       expect(component.errorAlert()).toBeDefined();
       expect(component.isSubmitting()).toBe(false);
     });
@@ -694,7 +705,7 @@ describe('RegisterComponent', () => {
 
   describe('Registration failure handling', () => {
     it('should surface backend errors without advancing steps', () => {
-      component.selectBundle('bpa_galaxy');
+      component.selectBundle('tsi');
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -706,15 +717,17 @@ describe('RegisterComponent', () => {
       component.recaptchaToken.set('token');
       component.nextStep();
 
+      component.currentStep.set(4);
+      component['initializeTermsForm']();
       const services = component.getSelectedBundle()?.services ?? [];
       const acceptedTerms = services.reduce<Record<string, boolean>>(
         (result, service) => ({ ...result, [service.id]: true }),
-        {},
+        { biocommonsAccess: true },
       );
       component.termsForm.patchValue(acceptedTerms);
 
       component.nextStep();
-      expect(component.currentStep()).toBe(4);
+      expect(component.currentStep()).toBe(5);
 
       pushStateSpy.calls.reset();
       component.nextStep();
@@ -727,7 +740,7 @@ describe('RegisterComponent', () => {
         { status: 500, statusText: 'Server Error' },
       );
 
-      expect(component.currentStep()).toBe(4);
+      expect(component.currentStep()).toBe(5);
       expect(component.errorAlert()).toBe('Failure');
       expect(pushStateSpy).not.toHaveBeenCalled();
     });
@@ -735,8 +748,9 @@ describe('RegisterComponent', () => {
 
   describe('getFinalPageButton', () => {
     it('returns BPA redirect when on BPA route', () => {
-      spyOnProperty(component.router, 'url', 'get').and.returnValue(
-        '/bpa/register/standard-access/success',
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      spyOn(activatedRoute.snapshot.queryParamMap, 'get').and.returnValue(
+        'bpa',
       );
 
       const result = component.getFinalPageButton();
@@ -744,8 +758,9 @@ describe('RegisterComponent', () => {
     });
 
     it('returns Galaxy redirect when on Galaxy route', () => {
-      spyOnProperty(component.router, 'url', 'get').and.returnValue(
-        '/galaxy/register/standard-access/success',
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      spyOn(activatedRoute.snapshot.queryParamMap, 'get').and.returnValue(
+        'galaxy',
       );
 
       const result = component.getFinalPageButton();
@@ -753,9 +768,8 @@ describe('RegisterComponent', () => {
     });
 
     it('defaults to login for other routes', () => {
-      spyOnProperty(component.router, 'url', 'get').and.returnValue(
-        '/some/other/path',
-      );
+      const activatedRoute = TestBed.inject(ActivatedRoute);
+      spyOn(activatedRoute.snapshot.queryParamMap, 'get').and.returnValue(null);
 
       const result = component.getFinalPageButton();
       expect(result.text).toBe('Login');
@@ -764,32 +778,23 @@ describe('RegisterComponent', () => {
 
   describe('Bundle Data', () => {
     it('should have correct bundle data structure', () => {
-      expect(component.bundles.length).toBe(3);
-      expect(component.bundles[0].id).toBe('bpa_galaxy');
-      expect(component.bundles[1].id).toBe('tsi');
-      expect(component.bundles[2].id).toBe('fungi');
+      expect(component.bundles.length).toBe(2);
+      expect(component.bundles[0].id).toBe('tsi');
+      expect(component.bundles[1].id).toBe('fungi');
     });
 
     it('should have services for each bundle', () => {
-      const dataPortalBundle = component.bundles.find(
-        (b) => b.id === 'bpa_galaxy',
-      );
       const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
       const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
 
-      expect(dataPortalBundle?.services.length).toBe(2);
-      expect(tsiBundle?.services.length).toBe(4);
+      expect(tsiBundle?.services.length).toBe(2);
       expect(fungiBundle?.services.length).toBe(0);
     });
 
     it('should have logoUrls for each bundle', () => {
-      const dataPortalBundle = component.bundles.find(
-        (b) => b.id === 'bpa_galaxy',
-      );
       const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
       const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
 
-      expect(dataPortalBundle?.logoUrls.length).toBe(2);
       expect(tsiBundle?.logoUrls.length).toBe(1);
       expect(fungiBundle?.logoUrls.length).toBe(1);
     });

@@ -25,7 +25,7 @@ import {
   toAsciiEmail,
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
-import { BiocommonsNavbarComponent } from '../../shared/components/biocommons-navbar/biocommons-navbar.component';
+import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -42,7 +42,7 @@ interface RegistrationRequest {
   email: string;
   username: string;
   password: string;
-  bundle: string;
+  bundle?: string;
 }
 
 @Component({
@@ -54,7 +54,7 @@ interface RegistrationRequest {
     RecaptchaModule,
     AlertComponent,
     ButtonComponent,
-    BiocommonsNavbarComponent,
+    RegistrationNavbarComponent,
   ],
   styleUrl: './register.component.css',
 })
@@ -66,9 +66,11 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private readonly bpaPlatformUrl =
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
+  private readonly galaxyPlatformUrl =
+    environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
 
   currentStep = signal(1);
-  totalSteps = 5;
+  totalSteps = 6;
 
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken = signal<string | null>(null);
@@ -80,7 +82,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   bundles: Bundle[] = biocommonsBundles;
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
-    selectedBundle: ['', Validators.required],
+    selectedBundle: [''],
   });
 
   registrationForm: FormGroup<RegistrationForm> =
@@ -133,14 +135,24 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   private initializeTermsForm() {
     const selectedBundle = this.getSelectedBundle();
-    if (!selectedBundle) return;
 
-    const termsControls = Object.fromEntries(
-      selectedBundle.services.map((service) => [
-        service.id,
-        this.formBuilder.nonNullable.control(false, Validators.requiredTrue),
-      ]),
-    );
+    // Always include BioCommons Access terms
+    const termsControls: Record<string, FormControl<boolean>> = {
+      biocommonsAccess: this.formBuilder.nonNullable.control(
+        false,
+        Validators.requiredTrue,
+      ),
+    };
+
+    // Add bundle-specific terms if a bundle is selected
+    if (selectedBundle) {
+      selectedBundle.services.forEach((service) => {
+        termsControls[service.id] = this.formBuilder.nonNullable.control(
+          false,
+          Validators.requiredTrue,
+        );
+      });
+    }
 
     this.termsForm = this.formBuilder.nonNullable.group(termsControls);
   }
@@ -198,18 +210,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
     const bundle = this.bundles.find((bundle) => bundle.id === value);
     if (!bundle?.disabled) {
       this.bundleForm.patchValue({ selectedBundle: value });
-      this.bundleForm.get('selectedBundle')?.markAsDirty();
-      this.bundleForm.get('selectedBundle')?.markAsTouched();
-      this.bundleForm.updateValueAndValidity();
-
-      if (this.currentStep() === 1) {
-        this.advanceFromBundleSelection();
-      }
+      this.transitionToStep(this.currentStep() + 1);
     }
-  }
-
-  private advanceFromBundleSelection(): void {
-    this.handleStepValidation(this.bundleForm);
   }
 
   private updateHistoryState(step: number, replace: boolean): void {
@@ -259,7 +261,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.updateHistoryState(clampedStep, false);
     }
 
-    if (clampedStep === 3 && movingForward && this.getSelectedBundle()) {
+    if (clampedStep === 4 && movingForward) {
       this.initializeTermsForm();
     }
 
@@ -282,6 +284,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.router.navigate(['../'], { relativeTo: this.route });
     } else {
       const targetStep = this.currentStep() - 1;
+
+      if (this.currentStep() === 4 && targetStep === 3) {
+        this.bundleForm.reset();
+        this.bundleForm.markAsUntouched();
+        this.bundleForm.markAsPristine();
+      }
+
       this.transitionToStep(targetStep, { fromHistory: true });
       if (typeof window !== 'undefined') {
         window.history.back();
@@ -292,15 +301,18 @@ export class RegisterComponent implements OnInit, OnDestroy {
   nextStep() {
     switch (this.currentStep()) {
       case 1:
-        this.handleStepValidation(this.bundleForm);
+        this.transitionToStep(this.currentStep() + 1);
         break;
       case 2:
         this.handleStepValidation(this.registrationForm);
         break;
       case 3:
-        this.handleStepValidation(this.termsForm);
+        this.transitionToStep(this.currentStep() + 1);
         break;
       case 4:
+        this.handleStepValidation(this.termsForm);
+        break;
+      case 5:
         this.completeRegistration();
         break;
       default:
@@ -340,8 +352,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.errorAlert.set(null);
     switch (step) {
       case 1:
-        this.bundleForm.markAsUntouched();
-        this.bundleForm.markAsPristine();
         break;
       case 2:
         this.registrationForm.markAsUntouched();
@@ -351,12 +361,17 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.recaptchaAttempted.set(false);
         break;
       case 3:
+        this.bundleForm.reset();
+        this.bundleForm.markAsUntouched();
+        this.bundleForm.markAsPristine();
+        break;
+      case 4:
         this.termsForm.markAsUntouched();
         this.termsForm.markAsPristine();
         this.recaptchaToken.set(null);
         this.recaptchaAttempted.set(false);
         break;
-      case 4:
+      case 5:
         this.isSubmitting.set(false);
         break;
     }
@@ -386,14 +401,19 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.errorAlert.set(null);
 
     const formValue = this.registrationForm.value;
+    const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
+
     const requestBody: RegistrationRequest = {
       first_name: formValue.firstName!,
       last_name: formValue.lastName!,
       email: toAsciiEmail(formValue.email!),
       username: formValue.username!,
       password: formValue.password!,
-      bundle: this.bundleForm.get('selectedBundle')!.value,
     };
+
+    if (selectedBundle) {
+      requestBody.bundle = selectedBundle;
+    }
 
     this.http
       .post(`${environment.auth0.backend}/biocommons/register`, requestBody)
@@ -419,17 +439,17 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   getFinalPageButton(): { text: string; action: () => void } {
-    const currentUrl = this.router.url;
+    const serviceParam = this.route.snapshot.queryParamMap.get('service');
 
-    if (currentUrl.includes('/bpa/register')) {
+    if (serviceParam === 'bpa') {
       return {
         text: 'Return to Bioplatforms Australia Data Portal',
         action: () => (window.location.href = this.bpaPlatformUrl),
       };
-    } else if (currentUrl.includes('/galaxy/register')) {
+    } else if (serviceParam === 'galaxy') {
       return {
         text: 'Return to Galaxy Australia',
-        action: () => (window.location.href = 'http://dev.gvl.org.au/'),
+        action: () => (window.location.href = this.galaxyPlatformUrl),
       };
     } else {
       return {

@@ -69,18 +69,6 @@ export const SBP_ALLOWED_EMAIL_DOMAINS = [
   'student.unimelb.edu.au',
 ] as const;
 
-const bpaBundleService: BundleService = {
-  id: 'bpa',
-  termsTitle: 'Bioplatforms Australia Data Portal Terms and Conditions',
-  termsUrl: 'https://data.bioplatforms.com/',
-};
-
-const galaxyBundleService: BundleService = {
-  id: 'galaxy',
-  termsTitle: 'Galaxy Australia Terms of Service',
-  termsUrl: 'https://site.usegalaxy.org.au/about#terms-of-service',
-};
-
 const tsiBundleService: BundleService = {
   id: 'tsi',
   termsTitle: 'TSI Terms and Conditions',
@@ -95,17 +83,6 @@ const fgeneshBundleService: BundleService = {
 
 export const biocommonsBundles: Bundle[] = [
   {
-    id: 'bpa_galaxy',
-    name: 'Bioplatforms Australia Data Portal and Galaxy',
-    logoUrls: ['/assets/bpa-logo.png', '/assets/galaxy-logo.png'],
-    listItems: [
-      'The <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> public data access',
-      'The <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> data access',
-      'Easily import data into <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
-    ],
-    services: [bpaBundleService, galaxyBundleService],
-  },
-  {
     id: 'tsi',
     name: 'Threatened Species Initiative (TSI)',
     logoUrls: ['/assets/tsi-logo.jpg'],
@@ -115,12 +92,7 @@ export const biocommonsBundles: Bundle[] = [
       '<a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> 2TB storage space, high memory nodes, workflows and tools',
       'Easily import data into <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
     ],
-    services: [
-      tsiBundleService,
-      fgeneshBundleService,
-      bpaBundleService,
-      galaxyBundleService,
-    ],
+    services: [tsiBundleService, fgeneshBundleService],
   },
   {
     id: 'fungi',
