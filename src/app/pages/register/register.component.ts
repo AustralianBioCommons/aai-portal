@@ -206,11 +206,21 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.recaptchaToken.set(captchaResponse);
   }
 
-  selectBundle(value: string) {
+  toggleBundle(value: string) {
     const bundle = this.bundles.find((bundle) => bundle.id === value);
     if (!bundle?.disabled) {
-      this.bundleForm.patchValue({ selectedBundle: value });
-      this.transitionToStep(this.currentStep() + 1);
+      const currentValue = this.bundleForm.get('selectedBundle')?.value;
+      if (currentValue === value) {
+        this.bundleForm.patchValue({ selectedBundle: '' });
+      } else {
+        this.bundleForm.patchValue({ selectedBundle: value });
+      }
+    }
+  }
+
+  onBundleItemClick(event: Event) {
+    if (event.target instanceof HTMLAnchorElement) {
+      event.stopPropagation();
     }
   }
 
@@ -285,12 +295,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     } else {
       const targetStep = this.currentStep() - 1;
 
-      if (this.currentStep() === 4 && targetStep === 3) {
-        this.bundleForm.reset();
-        this.bundleForm.markAsUntouched();
-        this.bundleForm.markAsPristine();
-      }
-
       this.transitionToStep(targetStep, { fromHistory: true });
       if (typeof window !== 'undefined') {
         window.history.back();
@@ -361,9 +365,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.recaptchaAttempted.set(false);
         break;
       case 3:
-        this.bundleForm.reset();
-        this.bundleForm.markAsUntouched();
-        this.bundleForm.markAsPristine();
         break;
       case 4:
         this.termsForm.markAsUntouched();

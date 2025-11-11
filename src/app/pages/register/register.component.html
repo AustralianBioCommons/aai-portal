@@ -2,7 +2,7 @@
   <!-- Navbar -->
   <app-registration-navbar></app-registration-navbar>
 
-  <!-- General information step -->
+  <!-- Step 1: General information -->
   @if (currentStep() === 1) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
@@ -29,7 +29,7 @@
     </div>
   }
 
-  <!-- Registration form step -->
+  <!-- Step 2: Registration form -->
   @else if (currentStep() === 2) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
@@ -205,7 +205,7 @@
     </div>
   }
 
-  <!-- Select bundle step -->
+  <!-- Step 3: Add bundle -->
   @else if (currentStep() === 3) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
@@ -215,7 +215,7 @@
         class="flex w-full max-w-7xl flex-1 flex-col gap-6"
       >
         <h1 class="text-left text-3xl font-semibold text-gray-900">
-          Select a bundle
+          Add a bundle
         </h1>
         <p class="text-left font-light text-gray-600">
           Request access to a bundle you need for your research
@@ -234,47 +234,80 @@
                 'ring-2 ring-sky-400':
                   bundleForm.get('selectedBundle')?.value === bundle.id,
               }"
-              (click)="!bundle.disabled && selectBundle(bundle.id)"
-              (keyup.enter)="!bundle.disabled && selectBundle(bundle.id)"
+              (click)="!bundle.disabled && toggleBundle(bundle.id)"
+              (keyup.enter)="!bundle.disabled && toggleBundle(bundle.id)"
             >
               <!-- Bundle content -->
               <div class="flex flex-col gap-6">
-                <div class="flex gap-6">
-                  @for (logo of bundle.logoUrls; track logo) {
-                    <img
-                      [src]="logo"
-                      [alt]="bundle.name + ' logo'"
-                      class="h-16 w-auto"
-                    />
-                  }
+                <div class="flex items-start justify-between">
+                  <div class="flex gap-6">
+                    @for (logo of bundle.logoUrls; track logo) {
+                      <img
+                        [src]="logo"
+                        [alt]="bundle.name + ' logo'"
+                        class="h-16 w-auto"
+                      />
+                    }
+                  </div>
+                  <div
+                    class="flex h-7 w-7 items-center justify-center rounded-full border p-1 transition-all"
+                    [ngClass]="
+                      bundleForm.get('selectedBundle')?.value === bundle.id
+                        ? 'border-biocommons-primary bg-biocommons-primary'
+                        : 'border-gray-400'
+                    "
+                  >
+                    @if (
+                      bundleForm.get("selectedBundle")?.value === bundle.id
+                    ) {
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        class="size-6 text-white"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="m4.5 12.75 6 6 9-13.5"
+                        />
+                      </svg>
+                    }
+                  </div>
+                  <input
+                    type="checkbox"
+                    [checked]="
+                      bundleForm.get('selectedBundle')?.value === bundle.id
+                    "
+                    class="sr-only"
+                  />
                 </div>
                 <div class="text-2xl font-semibold">{{ bundle.name }}</div>
                 @if (bundle.listItems.length) {
                   <div>
                     @if (bundle.listItems.length > 0) {
-                      <div class="text-sm/6 font-light text-gray-900">
+                      <div class="text-sm/6 font-light text-gray-600">
                         @for (item of bundle.listItems; track item) {
                           <div
-                            tabindex="0"
                             class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
-                            (click)="$event.stopPropagation()"
-                            (keyup.enter)="$event.stopPropagation()"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="2"
-                              stroke="currentColor"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
                               class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
                             >
                               <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="m4.5 12.75 6 6 9-13.5"
+                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
                               />
                             </svg>
-                            <div [innerHTML]="item"></div>
+                            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+                            <div
+                              [innerHTML]="item"
+                              (click)="onBundleItemClick($event)"
+                            ></div>
                           </div>
                         }
                       </div>
@@ -282,23 +315,6 @@
                   </div>
                 }
               </div>
-
-              <input
-                type="radio"
-                formControlName="selectedBundle"
-                [value]="bundle.id"
-                class="sr-only"
-              />
-
-              <app-button
-                type="button"
-                variant="secondary"
-                widthClass="w-full"
-                colorClasses="bg-biocommons-primary hover:bg-sky-900 group-hover:bg-sky-900 hover:text-white group-hover:text-white focus-visible:ring-biocommons-primary"
-                [disabled]="bundle.disabled!"
-              >
-                Select
-              </app-button>
             </div>
           }
         </div>
@@ -306,7 +322,7 @@
     </div>
   }
 
-  <!-- Accept terms & conditions step -->
+  <!-- Step 4: Accept terms & conditions -->
   @else if (currentStep() === 4) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
@@ -445,7 +461,7 @@
     </div>
   }
 
-  <!-- Review details step -->
+  <!-- Step 5: Review details -->
   @else if (currentStep() === 5) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12"
@@ -519,7 +535,7 @@
     </div>
   }
 
-  <!-- Final step -->
+  <!-- Step 6: Success -->
   @else {
     <div
       class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
@@ -579,11 +595,11 @@
           } @else {
             <app-button
               type="button"
-              variant="secondary"
+              [variant]="getSelectedBundle() ? 'primary' : 'secondary'"
               (click)="nextStep()"
               [loading]="isSubmitting()"
             >
-              Skip
+              {{ getSelectedBundle() ? "Next" : "Skip" }}
             </app-button>
           }
         </div>
