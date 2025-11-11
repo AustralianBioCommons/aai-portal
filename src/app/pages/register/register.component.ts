@@ -66,6 +66,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private readonly bpaPlatformUrl =
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
+  private readonly galaxyPlatformUrl =
+    environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
 
   currentStep = signal(1);
   totalSteps = 6;
@@ -447,7 +449,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     } else if (serviceParam === 'galaxy') {
       return {
         text: 'Return to Galaxy Australia',
-        action: () => (window.location.href = 'http://dev.gvl.org.au/'),
+        action: () => (window.location.href = this.galaxyPlatformUrl),
       };
     } else {
       return {
