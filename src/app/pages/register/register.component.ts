@@ -282,6 +282,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
       this.router.navigate(['../'], { relativeTo: this.route });
     } else {
       const targetStep = this.currentStep() - 1;
+
+      if (this.currentStep() === 4 && targetStep === 3) {
+        this.bundleForm.reset();
+        this.bundleForm.markAsUntouched();
+        this.bundleForm.markAsPristine();
+      }
+
       this.transitionToStep(targetStep, { fromHistory: true });
       if (typeof window !== 'undefined') {
         window.history.back();
@@ -352,6 +359,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.recaptchaAttempted.set(false);
         break;
       case 3:
+        this.bundleForm.reset();
+        this.bundleForm.markAsUntouched();
+        this.bundleForm.markAsPristine();
         break;
       case 4:
         this.termsForm.markAsUntouched();
