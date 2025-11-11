@@ -473,30 +473,32 @@
           <div class="mb-6 text-xl font-medium text-gray-900">
             Your information
           </div>
-          <div class="flex flex-col gap-6 font-light text-gray-900">
+          <div
+            class="flex flex-col gap-6 rounded-md bg-white p-6 text-gray-900 shadow"
+          >
             <div class="flex justify-between gap-6">
               <div class="w-full">
-                <div class="mb-2 text-sm font-medium">First Name</div>
-                <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                <div class="mb-1 text-sm font-medium">First Name</div>
+                <div class="text-gray-600">
                   {{ registrationForm.get("firstName")?.value }}
                 </div>
               </div>
               <div class="w-full">
-                <div class="mb-2 text-sm font-medium">Last Name</div>
-                <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+                <div class="mb-1 text-sm font-medium">Last Name</div>
+                <div class="text-gray-600">
                   {{ registrationForm.get("lastName")?.value }}
                 </div>
               </div>
             </div>
             <div>
-              <div class="mb-2 text-sm font-medium">Email Address</div>
-              <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+              <div class="mb-1 text-sm font-medium">Email Address</div>
+              <div class="text-gray-600">
                 {{ registrationForm.get("email")?.value }}
               </div>
             </div>
             <div>
-              <div class="mb-2 text-sm font-medium">Username</div>
-              <div class="rounded-md bg-white p-3 text-gray-900 shadow">
+              <div class="mb-1 text-sm font-medium">Username</div>
+              <div class="text-gray-600">
                 {{ registrationForm.get("username")?.value }}
               </div>
             </div>
@@ -508,10 +510,8 @@
             <div class="mb-6 text-xl font-medium text-gray-900">
               Access bundle requested
             </div>
-            <div
-              class="rounded-md bg-white p-3 font-light text-gray-900 shadow"
-            >
-              {{ getSelectedBundle()?.name }}
+            <div class="rounded-md bg-white p-6 text-gray-900 shadow">
+              {{ getSelectedBundle()?.name }} Bundle
             </div>
           </div>
         }

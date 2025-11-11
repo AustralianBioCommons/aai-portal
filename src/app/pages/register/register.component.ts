@@ -427,14 +427,14 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   getFinalPageButton(): { text: string; action: () => void } {
-    const fromParam = this.route.snapshot.queryParamMap.get('from');
+    const serviceParam = this.route.snapshot.queryParamMap.get('service');
 
-    if (fromParam === 'bpa') {
+    if (serviceParam === 'bpa') {
       return {
         text: 'Return to Bioplatforms Australia Data Portal',
         action: () => (window.location.href = this.bpaPlatformUrl),
       };
-    } else if (fromParam === 'galaxy') {
+    } else if (serviceParam === 'galaxy') {
       return {
         text: 'Return to Galaxy Australia',
         action: () => (window.location.href = 'http://dev.gvl.org.au/'),
