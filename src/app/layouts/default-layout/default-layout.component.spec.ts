@@ -26,6 +26,7 @@ describe('DefaultLayoutComponent', () => {
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
       isGeneralAdmin: signal(isAdmin),
       isGeneralAdmin$: isAdminSubject.asObservable(),
+      adminPlatforms: signal([]),
     });
 
     authSpy.isAuthenticated.and.returnValue(isAuthenticated);

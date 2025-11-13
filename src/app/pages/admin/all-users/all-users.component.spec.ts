@@ -1,14 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { AllUsersComponent } from './all-users.component';
 import { ApiService } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 describe('AllUsersComponent', () => {
   let component: AllUsersComponent;
   let fixture: ComponentFixture<AllUsersComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
@@ -18,10 +21,15 @@ describe('AllUsersComponent', () => {
     mockApiService.getAdminAllUsers.and.returnValue(of([]));
     mockApiService.getFilterOptions.and.returnValue(of([]));
 
+    mockAuthService = jasmine.createSpyObj('AuthService', [], {
+      adminPlatforms: signal([]),
+    });
+
     await TestBed.configureTestingModule({
       imports: [AllUsersComponent],
       providers: [
         { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: mockAuthService },
         provideRouter([]),
       ],
     }).compileComponents();

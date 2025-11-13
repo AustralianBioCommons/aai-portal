@@ -3,12 +3,14 @@ import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { Renderer2 } from '@angular/core';
 import { of, throwError, Observable, EMPTY } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { signal } from '@angular/core';
 
 import { UserDetailsComponent } from './user-details.component';
 import {
   ApiService,
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 describe('UserDetailsComponent', () => {
   let component: UserDetailsComponent;
@@ -92,10 +94,15 @@ describe('UserDetailsComponent', () => {
       queryParams: of({}),
     };
 
+    const authSpy = jasmine.createSpyObj('AuthService', [], {
+      adminPlatforms: signal([]),
+    });
+
     await TestBed.configureTestingModule({
       imports: [UserDetailsComponent],
       providers: [
         { provide: ApiService, useValue: apiSpy },
+        { provide: AuthService, useValue: authSpy },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: Renderer2, useValue: rendererSpy },
         { provide: Router, useValue: routerSpy },
