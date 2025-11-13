@@ -36,7 +36,7 @@
         Search
       </label>
       <div
-        class="flex h-12 w-full flex-1 items-center justify-between rounded-md bg-white py-2 pl-4 pr-2 font-light shadow focus-within:ring-2 focus-within:ring-sky-100"
+        class="flex h-12 w-full flex-1 items-center justify-between rounded-md border bg-white py-2 pl-4 pr-2 font-light focus-within:ring-2 focus-within:ring-sky-100"
       >
         <input
           id="search-input"
@@ -80,7 +80,7 @@
       </label>
       <select
         id="filter-select"
-        class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light shadow outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
+        class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light outline outline-1 outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
         [(ngModel)]="selectedFilter"
         (change)="onFilterChange()"
         [disabled]="loading()"
@@ -105,7 +105,15 @@
         <span class="font-light text-gray-500">{{ users().length }} users</span>
       </div>
       <div class="w-3/12">Bundles</div>
-      <div class="w-3/12">Platform Access</div>
+      <div class="w-3/12">
+        {{
+          adminPlatforms().length > 1
+            ? "Service Access"
+            : adminPlatforms().length === 1
+              ? adminPlatforms()[0].name + " Access"
+              : ""
+        }}
+      </div>
       <div class="w-1/12"></div>
     </div>
     @if (loading()) {
@@ -149,52 +157,105 @@
                 }
               </div>
               <div class="w-3/12">
-                <!-- TODO: Update this logic to only show platform specific access (BPA admin sees BPA platform access, etc.) once platform admins role handling is implemented -->
                 @if (user.platform_memberships.length > 0) {
-                  @for (
-                    platform of user.platform_memberships;
-                    track platform.id
-                  ) {
-                    <div
-                      class="flex items-center gap-2 text-sm font-medium"
-                      [ngClass]="{
-                        'text-green-500':
-                          platform.approval_status === 'approved',
-                        'text-yellow-500':
-                          platform.approval_status === 'pending',
-                        'text-red-500': platform.approval_status === 'revoked',
-                      }"
-                    >
-                      <span class="truncate">
-                        {{ platform.platform_name }}
-                      </span>
-                      @if (platform.approval_status === "revoked") {
-                        <div class="group relative inline-block">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-5 min-h-5 min-w-5 transition-all hover:cursor-pointer hover:text-red-600"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                  @if (adminPlatforms().length > 1) {
+                    <!-- Show all platforms with names for multi-platform admins -->
+                    @for (
+                      platform of user.platform_memberships;
+                      track platform.id
+                    ) {
+                      <div
+                        class="flex items-center gap-2 text-sm font-medium"
+                        [ngClass]="{
+                          'text-green-500':
+                            platform.approval_status === 'approved',
+                          'text-yellow-500':
+                            platform.approval_status === 'pending',
+                          'text-red-500':
+                            platform.approval_status === 'revoked',
+                        }"
+                      >
+                        <span class="truncate">
+                          {{ platform.platform_name }}
+                        </span>
+                        @if (platform.approval_status === "revoked") {
+                          <div class="group relative inline-block">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="size-5 min-h-5 min-w-5 transition-all hover:cursor-pointer hover:text-red-600"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
 
-                          <!-- Tooltip -->
-                          <div
-                            class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 sm:max-w-48 md:max-w-64 lg:max-w-72 xl:max-w-96"
-                          >
-                            {{ platform.revocation_reason || "Revoked" }}
+                            <!-- Tooltip -->
                             <div
-                              class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
-                            ></div>
+                              class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 sm:max-w-48 md:max-w-64 lg:max-w-72 xl:max-w-96"
+                            >
+                              {{ platform.revocation_reason || "Revoked" }}
+                              <div
+                                class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
+                              ></div>
+                            </div>
                           </div>
+                        }
+                      </div>
+                    }
+                  } @else {
+                    <!-- Show approval status only for single-platform admins -->
+                    @for (
+                      platform of user.platform_memberships;
+                      track platform.id
+                    ) {
+                      @if (platform.platform_id === adminPlatforms()[0].id) {
+                        <div
+                          class="flex items-center gap-2 text-sm font-medium"
+                          [ngClass]="{
+                            'text-green-500':
+                              platform.approval_status === 'approved',
+                            'text-yellow-500':
+                              platform.approval_status === 'pending',
+                            'text-red-500':
+                              platform.approval_status === 'revoked',
+                          }"
+                        >
+                          <span class="truncate">
+                            {{ platform.approval_status | titlecase }}
+                          </span>
+                          @if (platform.approval_status === "revoked") {
+                            <div class="group relative inline-block">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                class="size-5 min-h-5 min-w-5 transition-all hover:cursor-pointer hover:text-red-600"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
+                                  clip-rule="evenodd"
+                                />
+                              </svg>
+
+                              <!-- Tooltip -->
+                              <div
+                                class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 sm:max-w-48 md:max-w-64 lg:max-w-72 xl:max-w-96"
+                              >
+                                {{ platform.revocation_reason || "Revoked" }}
+                                <div
+                                  class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
+                                ></div>
+                              </div>
+                            </div>
+                          }
                         </div>
                       }
-                    </div>
+                    }
                   }
                 }
               </div>
@@ -252,40 +313,48 @@
                         </svg>
                         View User Details
                       </button>
-                      <!-- TODO: Update this logic to only show platform specific access (BPA admin sees BPA platform access, etc.) once platform admins role handling is implemented -->
-                      @if (
-                        user.platform_memberships[0].approval_status ===
-                        "approved"
-                      ) {
-                        <button
-                          type="button"
-                          (click)="
-                            openRevokeModal(
-                              user.id,
-                              user.email,
-                              user.platform_memberships[0].platform_id
-                            )
-                          "
-                          class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                          role="menuitem"
-                          tabindex="-1"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="size-5"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                          </svg>
-                          Revoke
-                        </button>
+                      <!-- Show revoke button only when user has exactly 1 platform membership -->
+                      @if (user.platform_memberships.length === 1) {
+                        @for (
+                          platform of user.platform_memberships;
+                          track platform.id
+                        ) {
+                          @if (
+                            platform.approval_status === "approved" &&
+                            (adminPlatforms().length > 1 ||
+                              platform.platform_id === adminPlatforms()[0].id)
+                          ) {
+                            <button
+                              type="button"
+                              (click)="
+                                openRevokeModal(
+                                  user.id,
+                                  user.email,
+                                  platform.platform_id
+                                )
+                              "
+                              class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                              role="menuitem"
+                              tabindex="-1"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                class="size-5"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                />
+                              </svg>
+                              Revoke
+                            </button>
+                          }
+                        }
                       }
                       @if (!user.email_verified) {
                         <button

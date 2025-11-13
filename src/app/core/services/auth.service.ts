@@ -13,6 +13,7 @@ import {
   take,
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AdminPlatformResponse } from './api.service';
 
 export interface AuthError {
   error: string;
@@ -105,6 +106,29 @@ export class AuthService {
   );
 
   isGeneralAdmin = toSignal(this.isGeneralAdmin$, { initialValue: false });
+
+  // Observable that fetches the platforms the current user has admin privileges for
+  adminPlatforms$ = this.auth0Service.isAuthenticated$.pipe(
+    switchMap((isAuth) =>
+      isAuth
+        ? this.auth0Service.getAccessTokenSilently().pipe(
+            switchMap((token) =>
+              this.http.get<AdminPlatformResponse[]>(
+                `${environment.auth0.backend}/me/platforms/admin-roles`,
+                { headers: { Authorization: `Bearer ${token}` } },
+              ),
+            ),
+            catchError((error) => {
+              console.error('Failed to fetch admin platforms:', error);
+              return of([]);
+            }),
+          )
+        : of([]),
+    ),
+    shareReplay(1),
+  );
+
+  adminPlatforms = toSignal(this.adminPlatforms$, { initialValue: [] });
 
   constructor() {
     this.checkForAuthErrors();

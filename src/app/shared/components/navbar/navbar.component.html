@@ -20,7 +20,7 @@
       routerLink="/"
       class="cursor-pointer text-3xl font-semibold text-gray-900 transition-all hover:text-gray-950"
     >
-      {{ isAdmin() ? "Admin Dashboard" : "My BioCommons Access" }}
+      {{ navTitle() }}
     </a>
     @if (isAdmin()) {
       <div class="relative">
