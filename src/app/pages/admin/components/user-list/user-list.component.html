@@ -313,47 +313,47 @@
                         </svg>
                         View User Details
                       </button>
-                      <!-- Show revoke button only when user has exactly 1 platform membership -->
-                      @if (user.platform_memberships.length === 1) {
-                        @for (
-                          platform of user.platform_memberships;
-                          track platform.id
+                      @for (
+                        platform of user.platform_memberships;
+                        track platform.id
+                      ) {
+                        <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
+                        @if (
+                          platform.approval_status === "approved" &&
+                          ((adminPlatforms().length > 1 &&
+                            user.platform_memberships.length === 1) ||
+                            (adminPlatforms().length === 1 &&
+                              platform.platform_id === adminPlatforms()[0].id))
                         ) {
-                          @if (
-                            platform.approval_status === "approved" &&
-                            (adminPlatforms().length > 1 ||
-                              platform.platform_id === adminPlatforms()[0].id)
-                          ) {
-                            <button
-                              type="button"
-                              (click)="
-                                openRevokeModal(
-                                  user.id,
-                                  user.email,
-                                  platform.platform_id
-                                )
-                              "
-                              class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                              role="menuitem"
-                              tabindex="-1"
+                          <button
+                            type="button"
+                            (click)="
+                              openRevokeModal(
+                                user.id,
+                                user.email,
+                                platform.platform_id
+                              )
+                            "
+                            class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                            role="menuitem"
+                            tabindex="-1"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                              stroke="currentColor"
+                              class="size-5"
                             >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="size-5"
-                              >
-                                <path
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                />
-                              </svg>
-                              Revoke
-                            </button>
-                          }
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                              />
+                            </svg>
+                            Revoke
+                          </button>
                         }
                       }
                       @if (!user.email_verified) {
