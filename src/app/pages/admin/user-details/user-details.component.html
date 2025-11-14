@@ -223,10 +223,7 @@
                         [attr.aria-checked]="
                           membership.approval_status === 'approved'
                         "
-                        [disabled]="
-                          adminPlatforms().length === 1 &&
-                          membership.platform_id !== adminPlatforms()[0].id
-                        "
+                        [disabled]="!canManagePlatform(membership.platform_id)"
                         (click)="
                           togglePlatformApproval(
                             membership.platform_id,

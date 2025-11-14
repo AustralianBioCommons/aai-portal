@@ -149,6 +149,10 @@ export class UserDetailsComponent implements OnInit {
     return bundle?.logoUrls || [];
   }
 
+  canManagePlatform(platformId: string): boolean {
+    return this.adminPlatforms().some((p) => p.id === platformId);
+  }
+
   togglePlatformApproval(platformId: PlatformId, currentStatus: string) {
     if (currentStatus === 'approved') {
       this.openRevokeModal(platformId);
