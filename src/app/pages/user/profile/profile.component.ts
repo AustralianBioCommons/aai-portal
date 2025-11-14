@@ -12,6 +12,10 @@ import {
   biocommonsBundles,
 } from '../../../core/constants/constants';
 import { EditButtonComponent } from './edit-button/edit-button.component';
+import {
+  ChangePasswordFormComponent,
+  PasswordChangeResult,
+} from './change-password-form/change-password-form.component';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -21,6 +25,7 @@ import { environment } from '../../../../environments/environment';
     AlertComponent,
     ButtonComponent,
     EditButtonComponent,
+    ChangePasswordFormComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
@@ -40,6 +45,7 @@ export class ProfileComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  showPasswordForm = signal(false);
 
   ngOnInit(): void {
     this.loadUserProfile();
@@ -60,6 +66,22 @@ export class ProfileComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  openPasswordForm(): void {
+    this.showPasswordForm.set(true);
+    this.alert.set(null);
+  }
+
+  closePasswordForm(): void {
+    this.showPasswordForm.set(false);
+  }
+
+  handlePasswordFormResult(result: PasswordChangeResult): void {
+    this.alert.set(result);
+    if (result.type === 'success') {
+      this.showPasswordForm.set(false);
+    }
   }
 
   getBundleLogoUrls(groupId: string): string[] {

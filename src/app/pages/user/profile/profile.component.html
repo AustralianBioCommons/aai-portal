@@ -74,9 +74,18 @@
                 <div class="text-sm font-light text-gray-500">Password</div>
                 <div class="flex items-center justify-between gap-6">
                   <div>••••••••••••</div>
-                  <app-edit-button text="Change"></app-edit-button>
+                  <app-edit-button
+                    text="Change"
+                    (pressed)="openPasswordForm()"
+                  ></app-edit-button>
                 </div>
               </div>
+              @if (showPasswordForm()) {
+                <app-change-password-form
+                  (completed)="handlePasswordFormResult($event)"
+                  (cancelled)="closePasswordForm()"
+                />
+              }
             </div>
           </div>
         </div>

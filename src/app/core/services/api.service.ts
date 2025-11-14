@@ -63,6 +63,11 @@ export interface AllPendingResponse {
   groups: GroupUserResponse[];
 }
 
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
 export interface FilterOption {
   id: string;
   name: string;
@@ -124,6 +129,13 @@ export class ApiService {
   getUserProfile(): Observable<UserProfileData> {
     return this.http.get<UserProfileData>(
       `${environment.auth0.backend}/me/profile`,
+    );
+  }
+
+  changePassword(payload: ChangePasswordRequest): Observable<void> {
+    return this.http.post<void>(
+      `${environment.auth0.backend}/me/password`,
+      payload,
     );
   }
 

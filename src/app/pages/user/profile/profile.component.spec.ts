@@ -7,6 +7,7 @@ import {
 } from '../../../core/services/api.service';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { ChangePasswordFormComponent } from './change-password-form/change-password-form.component';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -38,7 +39,10 @@ describe('ProfileComponent', () => {
   };
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserProfile']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getUserProfile',
+      'changePassword',
+    ]);
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
       providers: [{ provide: ApiService, useValue: apiSpy }],
@@ -48,6 +52,7 @@ describe('ProfileComponent', () => {
     component = fixture.componentInstance;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
+    mockApiService.changePassword.and.returnValue(of(void 0));
   });
 
   it('should create', () => {
@@ -150,5 +155,34 @@ describe('ProfileComponent', () => {
     expect(fallback.nativeElement.textContent.trim()).toBe(
       'Launch link unavailable',
     );
+  });
+
+  it('should toggle the change password form and react to results', () => {
+    fixture.detectChanges();
+
+    const changeButton = fixture.debugElement.query(
+      By.css('#user-password app-edit-button button'),
+    );
+    changeButton.triggerEventHandler('click');
+    fixture.detectChanges();
+
+    const formDebug = fixture.debugElement.query(
+      By.directive(ChangePasswordFormComponent),
+    );
+    expect(formDebug).toBeTruthy();
+
+    const result = {
+      type: 'success',
+      message: 'Password updated.',
+    } as const;
+    formDebug.componentInstance.completed.emit(result);
+    fixture.detectChanges();
+
+    expect(component.alert()).toEqual(result);
+
+    formDebug.componentInstance.cancelled.emit();
+    fixture.detectChanges();
+
+    expect(component.showPasswordForm()).toBeFalse();
   });
 });
