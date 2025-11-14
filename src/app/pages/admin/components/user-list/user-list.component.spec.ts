@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router, provideRouter } from '@angular/router';
 import { of, throwError, Subject } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { UserListComponent } from './user-list.component';
 import {
@@ -11,11 +12,13 @@ import {
 } from '../../../../core/services/api.service';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { PlatformId } from '../../../../core/constants/constants';
+import { AuthService } from '../../../../core/services/auth.service';
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
   let fixture: ComponentFixture<UserListComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   const mockUsers: BiocommonsUserResponse[] = [
     {
@@ -59,10 +62,15 @@ describe('UserListComponent', () => {
     );
     mockApiService.revokePlatformAccess.and.returnValue(of({ updated: true }));
 
+    mockAuthService = jasmine.createSpyObj('AuthService', [], {
+      adminPlatforms: signal([]),
+    });
+
     await TestBed.configureTestingModule({
       imports: [UserListComponent, FormsModule],
       providers: [
         { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: mockAuthService },
         provideRouter([]),
       ],
     }).compileComponents();

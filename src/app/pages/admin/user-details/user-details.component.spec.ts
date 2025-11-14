@@ -3,12 +3,14 @@ import { ActivatedRoute, Router, UrlTree } from '@angular/router';
 import { Renderer2 } from '@angular/core';
 import { of, throwError, Observable, EMPTY } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { signal } from '@angular/core';
 
 import { UserDetailsComponent } from './user-details.component';
 import {
   ApiService,
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 describe('UserDetailsComponent', () => {
   let component: UserDetailsComponent;
@@ -92,10 +94,15 @@ describe('UserDetailsComponent', () => {
       queryParams: of({}),
     };
 
+    const authSpy = jasmine.createSpyObj('AuthService', [], {
+      adminPlatforms: signal([]),
+    });
+
     await TestBed.configureTestingModule({
       imports: [UserDetailsComponent],
       providers: [
         { provide: ApiService, useValue: apiSpy },
+        { provide: AuthService, useValue: authSpy },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: Renderer2, useValue: rendererSpy },
         { provide: Router, useValue: routerSpy },
@@ -252,6 +259,50 @@ describe('UserDetailsComponent', () => {
       'Bioplatforms Australia Data Portal',
     );
     expect(component.getPlatformName('unknown')).toBe('unknown');
+  });
+
+  it('should return true when admin can manage the platform', () => {
+    const authService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
+    Object.defineProperty(authService, 'adminPlatforms', {
+      value: signal([
+        { id: 'galaxy', name: 'Galaxy Australia' },
+        { id: 'bpa_data_portal', name: 'BPA Data Portal' },
+      ]),
+      configurable: true,
+    });
+    component.adminPlatforms = authService.adminPlatforms;
+
+    expect(component.canManagePlatform('galaxy')).toBeTrue();
+    expect(component.canManagePlatform('bpa_data_portal')).toBeTrue();
+  });
+
+  it('should return false when admin cannot manage the platform', () => {
+    const authService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
+    Object.defineProperty(authService, 'adminPlatforms', {
+      value: signal([{ id: 'galaxy', name: 'Galaxy Australia' }]),
+      configurable: true,
+    });
+    component.adminPlatforms = authService.adminPlatforms;
+
+    expect(component.canManagePlatform('bpa_data_portal')).toBeFalse();
+    expect(component.canManagePlatform('unknown_platform')).toBeFalse();
+  });
+
+  it('should return false when admin has no platforms', () => {
+    const authService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
+    Object.defineProperty(authService, 'adminPlatforms', {
+      value: signal([]),
+      configurable: true,
+    });
+    component.adminPlatforms = authService.adminPlatforms;
+
+    expect(component.canManagePlatform('galaxy')).toBeFalse();
   });
 
   it('should resend verification email', () => {

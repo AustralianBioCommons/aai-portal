@@ -7,6 +7,7 @@ import {
   signal,
   effect,
   DestroyRef,
+  computed,
 } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiService } from '../../../core/services/api.service';
@@ -39,12 +40,28 @@ export class NavbarComponent {
   user = this.authService.user;
   isAdmin = this.authService.isGeneralAdmin;
   isLoading = this.authService.isLoading;
+  adminPlatforms = this.authService.adminPlatforms;
 
-  // Component state
+  // Component state signals
   pendingCount = signal(0);
   revokedCount = signal(0);
   unverifiedCount = signal(0);
   userMenuOpen = signal(false);
+
+  // Computed signal for the navigation title
+  navTitle = computed(() => {
+    if (!this.isAdmin()) {
+      return 'My BioCommons Access';
+    }
+
+    const platforms = this.adminPlatforms();
+    if (platforms.length > 1) {
+      return 'BioCommons Admin Dashboard';
+    } else if (platforms.length === 1) {
+      return `${platforms[0].name} Admin Dashboard`;
+    }
+    return 'Bundle Admin Dashboard';
+  });
 
   navigationPages = [
     { label: 'All', route: '/all-users' },

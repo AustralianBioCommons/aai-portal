@@ -23,6 +23,7 @@ import {
 } from '../../../core/constants/constants';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-user-details',
@@ -43,6 +44,7 @@ export class UserDetailsComponent implements OnInit {
   private router = inject(Router);
   private apiService = inject(ApiService);
   private renderer = inject(Renderer2);
+  private authService = inject(AuthService);
 
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
@@ -60,6 +62,7 @@ export class UserDetailsComponent implements OnInit {
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
   selectedPlatformForRevoke = signal<PlatformId | null>(null);
+  adminPlatforms = this.authService.adminPlatforms;
 
   // Form controls
   revokeReasonControl = new FormControl('', {
@@ -144,6 +147,10 @@ export class UserDetailsComponent implements OnInit {
     const bundleId = groupId.split('/').pop() || '';
     const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
+  }
+
+  canManagePlatform(platformId: string): boolean {
+    return this.adminPlatforms().some((p) => p.id === platformId);
   }
 
   togglePlatformApproval(platformId: PlatformId, currentStatus: string) {

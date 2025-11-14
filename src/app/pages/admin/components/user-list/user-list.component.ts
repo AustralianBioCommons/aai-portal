@@ -15,7 +15,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgClass } from '@angular/common';
+import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -29,6 +29,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
 import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 /**
  * Reusable user list component with filtering and search.
@@ -51,6 +52,7 @@ import { ModalComponent } from '../../../../shared/components/modal/modal.compon
     AlertComponent,
     NgClass,
     ModalComponent,
+    TitleCasePipe,
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
@@ -60,6 +62,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   private renderer = inject(Renderer2);
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
+  private authService = inject(AuthService);
 
   // Cleanup subjects
   private destroy$ = new Subject<void>();
@@ -87,6 +90,8 @@ export class UserListComponent implements OnInit, OnDestroy {
     email: string;
     platformId: string;
   } | null>(null);
+
+  adminPlatforms = this.authService.adminPlatforms;
 
   // Form controls
   revokeReasonControl = new FormControl('', {
