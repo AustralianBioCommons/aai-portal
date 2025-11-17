@@ -29,6 +29,8 @@ describe('NavbarComponent', () => {
       isGeneralAdmin: signal(false),
       isLoading: signal(false),
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal(null),
     });
     const routerSpy = jasmine.createSpyObj(
       'Router',
@@ -85,6 +87,8 @@ describe('NavbarComponent', () => {
       isGeneralAdmin: signal(true),
       isLoading: signal(false),
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal('biocommons'),
     });
 
     const routerSpy = jasmine.createSpyObj(
@@ -157,6 +161,8 @@ describe('NavbarComponent', () => {
       isGeneralAdmin: signal(true),
       isLoading: signal(false),
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal('biocommons'),
     });
 
     const routerSpy = jasmine.createSpyObj(
@@ -257,6 +263,8 @@ describe('NavbarComponent', () => {
       isGeneralAdmin: signal(true),
       isLoading: signal(false),
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal('biocommons'),
     });
 
     const routerSpy = jasmine.createSpyObj(

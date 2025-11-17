@@ -64,6 +64,8 @@ describe('UserListComponent', () => {
 
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal(null),
     });
 
     await TestBed.configureTestingModule({
