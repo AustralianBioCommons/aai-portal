@@ -19,6 +19,7 @@ import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { TooltipComponent } from '../../../../shared/components/tooltip/tooltip.component';
 import {
   BiocommonsUserResponse,
   FilterOption,
@@ -48,11 +49,12 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    LoadingSpinnerComponent,
-    AlertComponent,
     NgClass,
-    ModalComponent,
     TitleCasePipe,
+    LoadingSpinnerComponent,
+    TooltipComponent,
+    AlertComponent,
+    ModalComponent,
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',

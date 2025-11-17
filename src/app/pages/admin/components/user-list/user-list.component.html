@@ -108,9 +108,13 @@
         <span class="font-light text-gray-500">{{ users().length }} users</span>
       </div>
       <div class="w-3/12">
-        {{ adminType() !== 'bundle' ? "Bundles" : "Bundle Access" }}
+        {{
+          adminType() !== "bundle"
+            ? "Bundles"
+            : adminGroups()[0].short_name + " Bundle Access"
+        }}
       </div>
-      @if (adminType() !== 'bundle') {
+      @if (adminType() !== "bundle") {
         <div class="w-3/12">
           {{
             adminType() === "biocommons"
@@ -147,26 +151,56 @@
               </div>
               <div class="flex w-3/12 flex-wrap gap-2">
                 @if (user.group_memberships.length) {
-                  @for (group of user.group_memberships; track group.id) {
-                    <span
-                      class="rounded-md border px-2 py-0.5 text-sm font-medium"
-                      [ngClass]="{
-                        'border-green-600 bg-green-50 text-green-700':
-                          group.approval_status === 'approved',
-                        'border-yellow-600 bg-yellow-50 text-yellow-800':
-                          group.approval_status === 'pending',
-                        'border-red-600 bg-red-50 text-red-700':
-                          group.approval_status === 'revoked',
-                      }"
-                    >
-                      {{ group.group_short_name }}
-                    </span>
+                  @if (adminType() !== "bundle") {
+                    @for (group of user.group_memberships; track group.id) {
+                      <span
+                        class="rounded-md border px-2 py-0.5 text-sm font-medium"
+                        [ngClass]="{
+                          'border-green-600 bg-green-50 text-green-700':
+                            group.approval_status === 'approved',
+                          'border-yellow-600 bg-yellow-50 text-yellow-800':
+                            group.approval_status === 'pending',
+                          'border-red-600 bg-red-50 text-red-700':
+                            group.approval_status === 'revoked',
+                        }"
+                      >
+                        {{ group.group_short_name }}
+                      </span>
+                    }
+                  } @else {
+                    <!-- Show approval status only for bundle admins -->
+                    @for (group of user.group_memberships; track group.id) {
+                      @if (
+                        adminType() === "bundle" &&
+                        group.group_id === adminGroups()[0].id
+                      ) {
+                        <div
+                          class="flex items-center gap-2 text-sm font-medium"
+                          [ngClass]="{
+                            'text-green-500':
+                              group.approval_status === 'approved',
+                            'text-yellow-500':
+                              group.approval_status === 'pending',
+                            'text-red-500': group.approval_status === 'revoked',
+                          }"
+                        >
+                          <span class="truncate">
+                            {{ group.approval_status | titlecase }}
+                          </span>
+                          @if (group.approval_status === "revoked") {
+                            <app-tooltip
+                              [message]="group.revocation_reason || 'Revoked'"
+                            />
+                          }
+                        </div>
+                      }
+                    }
                   }
                 } @else {
                   None
                 }
               </div>
-              @if (adminType() !== 'bundle') {
+              @if (adminType() !== "bundle") {
                 <div class="w-3/12">
                   @if (adminType() === "biocommons") {
                     <!-- Show all platforms with names for multi-platform (biocommons) admins -->
@@ -189,30 +223,9 @@
                           {{ platform.platform_name }}
                         </span>
                         @if (platform.approval_status === "revoked") {
-                          <div class="group relative inline-block">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              class="size-5 min-h-5 min-w-5 transition-all hover:cursor-pointer hover:text-red-600"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-
-                            <!-- Tooltip -->
-                            <div
-                              class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 sm:max-w-48 md:max-w-64 lg:max-w-72 xl:max-w-96"
-                            >
-                              {{ platform.revocation_reason || "Revoked" }}
-                              <div
-                                class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
-                              ></div>
-                            </div>
-                          </div>
+                          <app-tooltip
+                            [message]="platform.revocation_reason || 'Revoked'"
+                          />
                         }
                       </div>
                     }
@@ -241,30 +254,11 @@
                             {{ platform.approval_status | titlecase }}
                           </span>
                           @if (platform.approval_status === "revoked") {
-                            <div class="group relative inline-block">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                class="size-5 min-h-5 min-w-5 transition-all hover:cursor-pointer hover:text-red-600"
-                              >
-                                <path
-                                  fill-rule="evenodd"
-                                  d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
-                                  clip-rule="evenodd"
-                                />
-                              </svg>
-
-                              <!-- Tooltip -->
-                              <div
-                                class="absolute left-1/2 top-full z-50 hidden w-max max-w-40 -translate-x-1/2 translate-y-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white opacity-0 shadow-lg transition-all group-hover:block group-hover:opacity-90 sm:max-w-48 md:max-w-64 lg:max-w-72 xl:max-w-96"
-                              >
-                                {{ platform.revocation_reason || "Revoked" }}
-                                <div
-                                  class="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-gray-900 placeholder-opacity-90"
-                                ></div>
-                              </div>
-                            </div>
+                            <app-tooltip
+                              [message]="
+                                platform.revocation_reason || 'Revoked'
+                              "
+                            />
                           }
                         </div>
                       }

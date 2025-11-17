@@ -15,6 +15,7 @@ import {
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import {
   PLATFORMS,
@@ -30,6 +31,7 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [
     DatePipe,
     LoadingSpinnerComponent,
+    TooltipComponent,
     RouterLink,
     AlertComponent,
     ButtonComponent,
@@ -63,7 +65,9 @@ export class UserDetailsComponent implements OnInit {
   returnUrl = signal<string>('/all-users');
   selectedPlatformForRevoke = signal<PlatformId | null>(null);
   openMenuMembershipId = signal<string | null>(null);
+  adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
+  adminGroups = this.authService.adminGroups;
 
   // Form controls
   revokeReasonControl = new FormControl('', {
@@ -160,6 +164,13 @@ export class UserDetailsComponent implements OnInit {
 
   canManagePlatform(platformId: string): boolean {
     return this.adminPlatforms().some((p) => p.id === platformId);
+  }
+
+  canManageGroup(groupId: string): boolean {
+    if (this.adminType() !== 'bundle') {
+      return false;
+    }
+    return this.adminGroups().some((g) => g.id === groupId);
   }
 
   toggleMembershipMenu(membershipId: string): void {
