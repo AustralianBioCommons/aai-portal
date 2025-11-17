@@ -13,7 +13,7 @@ import {
   take,
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AdminPlatformResponse } from './api.service';
+import { AdminPlatformResponse, AdminGroupResponse } from './api.service';
 
 export interface AuthError {
   error: string;
@@ -129,6 +129,29 @@ export class AuthService {
   );
 
   adminPlatforms = toSignal(this.adminPlatforms$, { initialValue: [] });
+
+  // Observable that fetches the groups the current user has admin privileges for
+  adminGroups$ = this.auth0Service.isAuthenticated$.pipe(
+    switchMap((isAuth) =>
+      isAuth
+        ? this.auth0Service.getAccessTokenSilently().pipe(
+            switchMap((token) =>
+              this.http.get<AdminGroupResponse[]>(
+                `${environment.auth0.backend}/me/groups/admin-roles`,
+                { headers: { Authorization: `Bearer ${token}` } },
+              ),
+            ),
+            catchError((error) => {
+              console.error('Failed to fetch admin groups:', error);
+              return of([]);
+            }),
+          )
+        : of([]),
+    ),
+    shareReplay(1),
+  );
+
+  adminGroups = toSignal(this.adminGroups$, { initialValue: [] });
 
   constructor() {
     this.checkForAuthErrors();

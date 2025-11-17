@@ -41,6 +41,7 @@ export class NavbarComponent {
   isAdmin = this.authService.isGeneralAdmin;
   isLoading = this.authService.isLoading;
   adminPlatforms = this.authService.adminPlatforms;
+  adminGroups = this.authService.adminGroups;
 
   // Component state signals
   pendingCount = signal(0);
@@ -60,7 +61,7 @@ export class NavbarComponent {
     } else if (platforms.length === 1) {
       return `${platforms[0].name} Admin Dashboard`;
     }
-    return 'Bundle Admin Dashboard';
+    return `${this.adminGroups()[0]?.short_name} Bundle Admin Dashboard`;
   });
 
   navigationPages = [

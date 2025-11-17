@@ -92,6 +92,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   } | null>(null);
 
   adminPlatforms = this.authService.adminPlatforms;
+  adminGroups = this.authService.adminGroups;
 
   // Form controls
   revokeReasonControl = new FormControl('', {

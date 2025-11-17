@@ -100,20 +100,27 @@
     <div
       class="mb-2 mt-6 flex items-center px-4 text-sm font-medium text-gray-900"
     >
-      <div class="w-5/12 flex-1">
+      <div
+        class="flex-1"
+        [ngClass]="adminPlatforms().length ? 'w-5/12' : 'w-8/12'"
+      >
         Total:
         <span class="font-light text-gray-500">{{ users().length }} users</span>
       </div>
-      <div class="w-3/12">Bundles</div>
       <div class="w-3/12">
-        {{
-          adminPlatforms().length > 1
-            ? "Services"
-            : adminPlatforms().length === 1
-              ? adminPlatforms()[0].name + " Access"
-              : ""
-        }}
+        {{ adminPlatforms().length ? "Bundles" : "Bundle Access" }}
       </div>
+      @if (adminPlatforms().length) {
+        <div class="w-3/12">
+          {{
+            adminPlatforms().length > 1
+              ? "Services"
+              : adminPlatforms().length === 1
+                ? adminPlatforms()[0].name + " Access"
+                : ""
+          }}
+        </div>
+      }
       <div class="w-1/12"></div>
     </div>
     @if (loading()) {
@@ -132,11 +139,14 @@
             <div
               class="flex items-center rounded-md bg-white p-4 font-normal shadow"
             >
-              <div class="w-5/12 flex-1 truncate">
+              <div
+                class="flex-1 truncate"
+                [ngClass]="adminPlatforms().length ? 'w-5/12' : 'w-8/12'"
+              >
                 {{ user.email }}
               </div>
               <div class="flex w-3/12 flex-wrap gap-2">
-                @if (user.group_memberships.length > 0) {
+                @if (user.group_memberships.length) {
                   @for (group of user.group_memberships; track group.id) {
                     <span
                       class="rounded-md border px-2 py-0.5 text-sm font-medium"
@@ -156,8 +166,8 @@
                   None
                 }
               </div>
-              <div class="w-3/12">
-                @if (user.platform_memberships.length > 0) {
+              @if (adminPlatforms().length) {
+                <div class="w-3/12">
                   @if (adminPlatforms().length > 1) {
                     <!-- Show all platforms with names for multi-platform admins -->
                     @for (
@@ -212,7 +222,10 @@
                       platform of user.platform_memberships;
                       track platform.id
                     ) {
-                      @if (platform.platform_id === adminPlatforms()[0].id) {
+                      @if (
+                        adminPlatforms().length === 1 &&
+                        platform.platform_id === adminPlatforms()[0].id
+                      ) {
                         <div
                           class="flex items-center gap-2 text-sm font-medium"
                           [ngClass]="{
@@ -257,8 +270,8 @@
                       }
                     }
                   }
-                }
-              </div>
+                </div>
+              }
               <div class="relative flex w-1/12 justify-end">
                 <!-- Ellipsis menu -->
                 <button

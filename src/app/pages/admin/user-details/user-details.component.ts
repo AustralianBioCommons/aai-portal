@@ -62,6 +62,7 @@ export class UserDetailsComponent implements OnInit {
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
   selectedPlatformForRevoke = signal<PlatformId | null>(null);
+  openMenuMembershipId = signal<string | null>(null);
   adminPlatforms = this.authService.adminPlatforms;
 
   // Form controls
@@ -111,6 +112,14 @@ export class UserDetailsComponent implements OnInit {
       ) {
         this.actionMenuOpen.set(false);
       }
+
+      // Close group membership menu
+      if (
+        !target.closest('.membership-menu-button') &&
+        !target.closest('.membership-menu-dropdown')
+      ) {
+        this.openMenuMembershipId.set(null);
+      }
     });
   }
 
@@ -151,6 +160,36 @@ export class UserDetailsComponent implements OnInit {
 
   canManagePlatform(platformId: string): boolean {
     return this.adminPlatforms().some((p) => p.id === platformId);
+  }
+
+  toggleMembershipMenu(membershipId: string): void {
+    if (this.openMenuMembershipId() === membershipId) {
+      this.openMenuMembershipId.set(null);
+    } else {
+      this.openMenuMembershipId.set(membershipId);
+    }
+  }
+
+  isMembershipMenuOpen(membershipId: string): boolean {
+    return this.openMenuMembershipId() === membershipId;
+  }
+
+  approveGroupMembership(membershipId: string): void {
+    this.openMenuMembershipId.set(null);
+    // TODO: Implement API call to approve group membership
+    console.log('Approve group membership:', membershipId);
+  }
+
+  rejectGroupMembership(membershipId: string): void {
+    this.openMenuMembershipId.set(null);
+    // TODO: Implement API call to reject group membership
+    console.log('Reject group membership:', membershipId);
+  }
+
+  revokeGroupMembership(membershipId: string): void {
+    this.openMenuMembershipId.set(null);
+    // TODO: Implement API call to revoke group membership
+    console.log('Revoke group membership:', membershipId);
   }
 
   togglePlatformApproval(platformId: PlatformId, currentStatus: string) {
