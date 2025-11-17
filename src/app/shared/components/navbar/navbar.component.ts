@@ -40,6 +40,7 @@ export class NavbarComponent {
   user = this.authService.user;
   isAdmin = this.authService.isGeneralAdmin;
   isLoading = this.authService.isLoading;
+  adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
@@ -56,9 +57,9 @@ export class NavbarComponent {
     }
 
     const platforms = this.adminPlatforms();
-    if (platforms.length > 1) {
+    if (this.adminType() === 'biocommons') {
       return 'BioCommons Admin Dashboard';
-    } else if (platforms.length === 1) {
+    } else if (this.adminType() === 'platform') {
       return `${platforms[0].name} Admin Dashboard`;
     }
     return `${this.adminGroups()[0]?.short_name} Bundle Admin Dashboard`;

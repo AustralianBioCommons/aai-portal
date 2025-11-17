@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import {
@@ -14,6 +14,8 @@ import {
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AdminPlatformResponse, AdminGroupResponse } from './api.service';
+
+export type AdminType = 'biocommons' | 'platform' | 'bundle' | null;
 
 export interface AuthError {
   error: string;
@@ -152,6 +154,33 @@ export class AuthService {
   );
 
   adminGroups = toSignal(this.adminGroups$, { initialValue: [] });
+
+  // Computed signal that determines the type of admin based on their roles
+  adminType = computed<AdminType>(() => {
+    if (!this.isGeneralAdmin()) {
+      return null;
+    }
+
+    const platforms = this.adminPlatforms();
+    const groups = this.adminGroups();
+
+    // BioCommons admin: manages multiple platforms
+    if (platforms.length > 1) {
+      return 'biocommons';
+    }
+
+    // Platform admin: manages exactly one platform
+    if (platforms.length === 1) {
+      return 'platform';
+    }
+
+    // Bundle admin: manages groups but no platforms
+    if (groups.length > 0) {
+      return 'bundle';
+    }
+
+    return null;
+  });
 
   constructor() {
     this.checkForAuthErrors();

@@ -91,6 +91,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     platformId: string;
   } | null>(null);
 
+  adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 

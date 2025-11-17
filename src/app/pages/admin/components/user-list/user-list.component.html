@@ -102,20 +102,20 @@
     >
       <div
         class="flex-1"
-        [ngClass]="adminPlatforms().length ? 'w-5/12' : 'w-8/12'"
+        [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
       >
         Total:
         <span class="font-light text-gray-500">{{ users().length }} users</span>
       </div>
       <div class="w-3/12">
-        {{ adminPlatforms().length ? "Bundles" : "Bundle Access" }}
+        {{ adminType() !== 'bundle' ? "Bundles" : "Bundle Access" }}
       </div>
-      @if (adminPlatforms().length) {
+      @if (adminType() !== 'bundle') {
         <div class="w-3/12">
           {{
-            adminPlatforms().length > 1
+            adminType() === "biocommons"
               ? "Services"
-              : adminPlatforms().length === 1
+              : adminType() === "platform"
                 ? adminPlatforms()[0].name + " Access"
                 : ""
           }}
@@ -141,7 +141,7 @@
             >
               <div
                 class="flex-1 truncate"
-                [ngClass]="adminPlatforms().length ? 'w-5/12' : 'w-8/12'"
+                [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
               >
                 {{ user.email }}
               </div>
@@ -166,10 +166,10 @@
                   None
                 }
               </div>
-              @if (adminPlatforms().length) {
+              @if (adminType() !== 'bundle') {
                 <div class="w-3/12">
-                  @if (adminPlatforms().length > 1) {
-                    <!-- Show all platforms with names for multi-platform admins -->
+                  @if (adminType() === "biocommons") {
+                    <!-- Show all platforms with names for multi-platform (biocommons) admins -->
                     @for (
                       platform of user.platform_memberships;
                       track platform.id
@@ -223,7 +223,7 @@
                       track platform.id
                     ) {
                       @if (
-                        adminPlatforms().length === 1 &&
+                        adminType() === "platform" &&
                         platform.platform_id === adminPlatforms()[0].id
                       ) {
                         <div
@@ -333,9 +333,9 @@
                         <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
                         @if (
                           platform.approval_status === "approved" &&
-                          ((adminPlatforms().length > 1 &&
+                          ((adminType() === "biocommons" &&
                             user.platform_memberships.length === 1) ||
-                            (adminPlatforms().length === 1 &&
+                            (adminType() === "platform" &&
                               platform.platform_id === adminPlatforms()[0].id))
                         ) {
                           <button
