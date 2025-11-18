@@ -62,7 +62,7 @@ export class NavbarComponent {
     } else if (this.adminType() === 'platform') {
       return `${platforms[0].name} Admin Dashboard`;
     }
-    return `${this.adminGroups()[0]?.short_name} Bundle Admin Dashboard`;
+    return `${this.adminGroups()[0]?.short_name || ''} Bundle Admin Dashboard`;
   });
 
   navigationPages = [
