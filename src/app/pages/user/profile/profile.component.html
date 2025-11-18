@@ -44,14 +44,18 @@
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div id="user-username">
-                <div class="text-sm font-light text-gray-500">Username</div>
-                <div class="flex items-center justify-between gap-6">
-                  <div>{{ user()?.username }}</div>
-                  <app-edit-button></app-edit-button>
-                </div>
-              </div>
+              <app-inline-edit-field
+                #usernameField
+                id="user-username"
+                label="Username"
+                fieldKey="username"
+                [value]="user()?.username || ''"
+                [saving]="savingField() === 'username'"
+                (save)="saveUsername($event, usernameField)"
+                ></app-inline-edit-field>
+
               <div id="user-email">
+
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-2">
