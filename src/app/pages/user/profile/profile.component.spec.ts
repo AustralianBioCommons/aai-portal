@@ -7,6 +7,7 @@ import {
   UserProfileData,
 } from '../../../core/services/api.service';
 import { InlineEditFieldComponent } from '../../../shared/components/inline-edit-field/inline-edit-field.component';
+import { PasswordEditFieldComponent } from '../../../shared/components/password-edit-field/password-edit-field.component';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 
@@ -14,6 +15,7 @@ describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
+  let reloadSpy: jasmine.Spy;
 
   const mockUser: UserProfileData = {
     user_id: 'auth0|1234567890',
@@ -54,6 +56,7 @@ describe('ProfileComponent', () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserProfile',
       'updateUserUsername',
+      'updatePassword',
     ]);
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
@@ -65,6 +68,9 @@ describe('ProfileComponent', () => {
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
     mockApiService.updateUserUsername.and.returnValue(of(mockAuth0User));
+    mockApiService.updatePassword.and.returnValue(of(true));
+    reloadSpy = spyOn(component, 'reloadPage').and.stub();
+    sessionStorage.removeItem('profile_flash_message');
   });
 
   it('should create', () => {
@@ -158,6 +164,107 @@ describe('ProfileComponent', () => {
       'Invalid username: please check the requirements and try again.',
     );
     expect(component.alert()).toBeNull();
+  });
+
+  it('handles a successful password change', () => {
+    sessionStorage.removeItem('profile_flash_message');
+    mockApiService.updatePassword.and.returnValue(of(true));
+
+    fixture.detectChanges();
+    const passwordField = fixture.debugElement.query(
+      By.directive(PasswordEditFieldComponent),
+    ).componentInstance as PasswordEditFieldComponent;
+
+    passwordField.startEdit();
+    passwordField.currentPassword.set('Current123!');
+    passwordField.onNewPasswordChange('NewPassword1!');
+    passwordField.submit();
+
+    fixture.detectChanges();
+
+    expect(mockApiService.updatePassword).toHaveBeenCalledWith(
+      'Current123!',
+      'NewPassword1!',
+    );
+    expect(passwordField.isEditing()).toBeFalse();
+    expect(sessionStorage.getItem('profile_flash_message')).toBe(
+      JSON.stringify({
+        type: 'success',
+        message: 'Password changed successfully.',
+      }),
+    );
+    expect(reloadSpy).toHaveBeenCalled();
+    expect(component.savingField()).toBeNull();
+  });
+
+  it('shows an error alert when password update fails with invalid new password', () => {
+    sessionStorage.removeItem('profile_flash_message');
+    const errorResponse = new Error('New password rejected');
+    mockApiService.updatePassword.and.returnValue(
+      throwError(() => errorResponse),
+    );
+
+    fixture.detectChanges();
+    const passwordField = fixture.debugElement.query(
+      By.directive(PasswordEditFieldComponent),
+    ).componentInstance as PasswordEditFieldComponent;
+    const consoleSpy = spyOn(console, 'error');
+
+    passwordField.startEdit();
+    passwordField.currentPassword.set('Current123!');
+    passwordField.onNewPasswordChange('InvalidPassword1!');
+    passwordField.submit();
+
+    fixture.detectChanges();
+
+    expect(mockApiService.updatePassword).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to update password:',
+      errorResponse,
+    );
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message:
+        'Failed to update password. Please check your current password and try again.',
+    });
+    expect(reloadSpy).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem('profile_flash_message')).toBeNull();
+    expect(component.savingField()).toBeNull();
+  });
+
+  it('shows an error alert when the current password is incorrect', () => {
+    sessionStorage.removeItem('profile_flash_message');
+    const errorResponse = new Error('Current password incorrect');
+    mockApiService.updatePassword.and.returnValue(
+      throwError(() => errorResponse),
+    );
+
+    fixture.detectChanges();
+    const passwordField = fixture.debugElement.query(
+      By.directive(PasswordEditFieldComponent),
+    ).componentInstance as PasswordEditFieldComponent;
+    const consoleSpy = spyOn(console, 'error');
+
+    passwordField.startEdit();
+    passwordField.currentPassword.set('WrongPassword1!');
+    passwordField.onNewPasswordChange('NewValid1!');
+    passwordField.submit();
+
+    fixture.detectChanges();
+
+    expect(mockApiService.updatePassword).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Failed to update password:',
+      errorResponse,
+    );
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message:
+        'Failed to update password. Please check your current password and try again.',
+    });
+    expect(reloadSpy).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem('profile_flash_message')).toBeNull();
+    expect(component.savingField()).toBeNull();
   });
 
   it('should display platform memberships correctly', () => {
