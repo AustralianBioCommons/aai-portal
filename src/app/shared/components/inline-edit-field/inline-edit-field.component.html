@@ -1,0 +1,47 @@
+<!-- inline-edit-field.component.html -->
+<div class="space-y-1">
+  <div class="text-sm font-light text-gray-500">{{ label }}</div>
+
+  @if (!isEditing()) {
+    <div class="flex items-center justify-between gap-6">
+      <div>
+        {{ value }}
+      </div>
+      <button
+        type="button"
+        class="text-sm text-blue-600 hover:underline"
+        (click)="startEdit()"
+      >
+        Edit
+      </button>
+    </div>
+  } @else {
+    <div class="space-y-3">
+      <input
+        #inputElement
+        [type]="type"
+        class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        [value]="editValue()"
+        (input)="editValue.set(inputElement.value)"
+      />
+      <div class="flex items-center justify-end gap-3">
+        <button
+          type="button"
+          class="text-sm px-3 py-1 rounded border border-gray-300"
+          (click)="cancel()"
+          [disabled]="saving"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="text-sm px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-60"
+          (click)="submit()"
+          [disabled]="saving"
+        >
+          {{ saving ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  }
+</div>
