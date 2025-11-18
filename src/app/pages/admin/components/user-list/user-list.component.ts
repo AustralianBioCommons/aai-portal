@@ -167,6 +167,10 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.openMenuUserId.set(null);
   }
 
+  canManageGroup(groupId: string): boolean {
+    return this.adminGroups().some((g) => g.id === groupId);
+  }
+
   openRevokeModal(userId: string, email: string, platformId: string): void {
     this.selectedUserForRevoke.set({ userId, email, platformId });
     this.revokeReasonControl.reset();

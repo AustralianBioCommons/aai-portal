@@ -172,7 +172,7 @@
                     @for (group of user.group_memberships; track group.id) {
                       @if (
                         adminType() === "bundle" &&
-                        group.group_id === adminGroups()[0].id
+                        canManageGroup(group.group_id)
                       ) {
                         <div
                           class="flex items-center gap-2 text-sm font-medium"

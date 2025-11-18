@@ -13,6 +13,8 @@ import {
 } from '../../../core/constants/constants';
 import { EditButtonComponent } from './edit-button/edit-button.component';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../core/services/auth.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -21,12 +23,15 @@ import { environment } from '../../../../environments/environment';
     AlertComponent,
     ButtonComponent,
     EditButtonComponent,
+    RouterLink,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
+  private authService = inject(AuthService);
+
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
@@ -40,6 +45,8 @@ export class ProfileComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  isGeneralAdmin = this.authService.isGeneralAdmin;
 
   ngOnInit(): void {
     this.loadUserProfile();
