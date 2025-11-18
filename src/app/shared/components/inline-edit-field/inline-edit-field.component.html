@@ -24,6 +24,16 @@
         [value]="editValue()"
         (input)="editValue.set(inputElement.value)"
       />
+
+      @if (
+        (control.invalid && (control.dirty || control.touched)) ||
+        validationError()
+        ) {
+        <div class="text-xs text-red-600">
+          {{ validationError() || invalidMessage }}
+        </div>
+      }
+
       <div class="flex items-center justify-end gap-3">
         <button
           type="button"
