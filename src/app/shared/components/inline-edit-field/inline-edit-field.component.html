@@ -21,9 +21,12 @@
         #inputElement
         [type]="type"
         class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        [value]="editValue()"
-        (input)="editValue.set(inputElement.value)"
+        [value]="control.value"
+        (input)="onInput(inputElement.value)"
       />
+      @if (helpText) {
+        <div class="text-xs text-gray-500">{{ helpText }}</div>
+      }
 
       @if (
         (control.invalid && (control.dirty || control.touched)) ||

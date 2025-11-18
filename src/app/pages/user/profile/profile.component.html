@@ -49,6 +49,8 @@
                 id="user-username"
                 label="Username"
                 fieldKey="username"
+                helpText="Your username should contain 3 or more characters, including letters, numbers, dashes, and underscores."
+                invalidMessage="Invalid username: please check the requirements and try again."
                 [validators]="[usernameRequirements]"
                 [value]="user()?.username || ''"
                 [saving]="savingField() === 'username'"

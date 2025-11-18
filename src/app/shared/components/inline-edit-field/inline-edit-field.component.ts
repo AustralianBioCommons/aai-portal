@@ -23,11 +23,11 @@ export class InlineEditFieldComponent {
   @Input() saving = false;
   @Input() validators: ValidatorFn[] | null = null;
   @Input() invalidMessage = 'Invalid value';
+  @Input() helpText = '';
 
   @Output() save = new EventEmitter<string>();
 
   isEditing = signal(false);
-  editValue = signal('');
   validationError = signal<string | null>(null);
 
   // Internal control used only for validation
@@ -43,14 +43,18 @@ export class InlineEditFieldComponent {
       this.control.updateValueAndValidity({ emitEvent: false });
     }
 
+    // Keep control in sync when not editing (e.g. user updated from outside)
     if ('value' in changes && !this.isEditing()) {
-      // Keep control in sync when not editing
-      this.control.setValue(this.value ?? '');
+      this.control.setValue(this.value ?? '', { emitEvent: false });
     }
   }
 
   startEdit(): void {
-    this.editValue.set(this.value ?? '');
+    const current = this.value ?? '';
+    this.control.setValue(current, { emitEvent: false });
+    this.control.markAsPristine();
+    this.control.markAsUntouched();
+    this.validationError.set(null);
     this.isEditing.set(true);
   }
 
@@ -59,13 +63,32 @@ export class InlineEditFieldComponent {
     this.validationError.set(null);
   }
 
+  onInput(value: string): void {
+    this.control.setValue(value);
+    this.control.markAsDirty();
+    this.control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    this.validationError.set(null);
+  }
+
   submit(): void {
-    const newValue = this.editValue().trim();
-    if (!newValue || newValue === this.value) {
+    this.control.markAsTouched();
+    this.control.updateValueAndValidity();
+
+    if (this.control.invalid) {
+      this.validationError.set(this.invalidMessage);
+      return;
+    }
+
+    const newValue = this.control.value.trim();
+
+    // If nothing changed, just close
+    if (!newValue || newValue === (this.value ?? '')) {
       this.isEditing.set(false);
       this.validationError.set(null);
       return;
     }
+
+    this.validationError.set(null);
     this.save.emit(newValue);
   }
 }
