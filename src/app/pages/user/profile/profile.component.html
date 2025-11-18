@@ -74,13 +74,12 @@
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div id="user-password">
-                <div class="text-sm font-light text-gray-500">Password</div>
-                <div class="flex items-center justify-between gap-6">
-                  <div>••••••••••••</div>
-                  <app-edit-button text="Change"></app-edit-button>
-                </div>
-              </div>
+              <app-password-edit-field
+                #passwordField
+                id="user-password"
+                [saving]="savingField() === 'password'"
+                (changePassword)="changePassword($event, passwordField)"
+              ></app-password-edit-field>
             </div>
           </div>
         </div>
