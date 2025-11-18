@@ -285,4 +285,11 @@ export class ApiService {
       {},
     );
   }
+
+  updateUserUsername(username: string) {
+    return this.http.post<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/me/profile/username/update`,
+      { username: username },
+    );
+  }
 }
