@@ -1,4 +1,5 @@
 import { Component, signal, OnInit, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import {
   ApiService,
   UserProfileData,
@@ -32,6 +33,7 @@ import { usernameRequirements } from '../../../shared/validators/usernames';
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
+  private document = inject(DOCUMENT);
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
@@ -114,7 +116,7 @@ export class ProfileComponent implements OnInit {
             }),
           );
 
-          window.location.reload();
+          this.reloadPage();
         },
         error: (err) => {
           console.error('Failed to update password:', err);
@@ -149,6 +151,11 @@ export class ProfileComponent implements OnInit {
     const bundleId = groupId.split('/').pop() || '';
     const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
+  }
+
+  // Wrap reload to make it easier to test
+  public reloadPage(): void {
+    this.document.location.reload();
   }
 
   protected readonly usernameRequirements = usernameRequirements;
