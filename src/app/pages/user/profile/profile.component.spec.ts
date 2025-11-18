@@ -14,7 +14,6 @@ describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   const mockUser: UserProfileData = {
     user_id: 'auth0|1234567890',
@@ -57,9 +56,6 @@ describe('ProfileComponent', () => {
     fixture = TestBed.createComponent(ProfileComponent);
     component = fixture.componentInstance;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
-    mockAuthService = TestBed.inject(
-      AuthService,
-    ) as jasmine.SpyObj<AuthService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
   });
 
