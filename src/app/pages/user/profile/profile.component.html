@@ -49,6 +49,7 @@
                 id="user-username"
                 label="Username"
                 fieldKey="username"
+                [validators]="[usernameRequirements]"
                 [value]="user()?.username || ''"
                 [saving]="savingField() === 'username'"
                 (save)="saveUsername($event, usernameField)"

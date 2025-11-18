@@ -15,6 +15,7 @@ import { EditButtonComponent } from './edit-button/edit-button.component';
 import { environment } from '../../../../environments/environment';
 import { InlineEditFieldComponent } from '../../../shared/components/inline-edit-field/inline-edit-field.component';
 import { PasswordEditFieldComponent } from '../../../shared/components/password-edit-field/password-edit-field.component';
+import { usernameRequirements } from '../../../shared/validators/usernames';
 
 @Component({
   selector: 'app-profile',
@@ -149,4 +150,6 @@ export class ProfileComponent implements OnInit {
     const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
   }
+
+  protected readonly usernameRequirements = usernameRequirements;
 }
