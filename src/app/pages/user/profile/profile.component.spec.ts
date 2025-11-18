@@ -39,17 +39,16 @@ describe('ProfileComponent', () => {
     ],
   };
   // Full data from Auth0
-  const mockAuth0User: BiocommonsUserDetails = { 
-      ...mockUser, 
-      username: 'valid-username', 
-      created_at: "today", 
-      identities: [], 
-      updated_at: "today",
-      nickname: 'valid-username',
-      platform_memberships: [
-      ],
-      group_memberships: []
-    };
+  const mockAuth0User: BiocommonsUserDetails = {
+    ...mockUser,
+    username: 'valid-username',
+    created_at: 'today',
+    identities: [],
+    updated_at: 'today',
+    nickname: 'valid-username',
+    platform_memberships: [],
+    group_memberships: [],
+  };
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
@@ -111,7 +110,7 @@ describe('ProfileComponent', () => {
   });
 
   it('updates the username when a valid value is entered', () => {
-    const updatedAuth0User = {...mockAuth0User, username: 'valid-username'}
+    const updatedAuth0User = { ...mockAuth0User, username: 'valid-username' };
     mockApiService.updateUserUsername.and.returnValue(of(updatedAuth0User));
 
     fixture.detectChanges();

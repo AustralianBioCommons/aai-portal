@@ -8,9 +8,8 @@ describe('InlineEditFieldComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [InlineEditFieldComponent]
-    })
-    .compileComponents();
+      imports: [InlineEditFieldComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(InlineEditFieldComponent);
     component = fixture.componentInstance;

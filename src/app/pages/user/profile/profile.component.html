@@ -55,10 +55,9 @@
                 [value]="user()?.username || ''"
                 [saving]="savingField() === 'username'"
                 (save)="saveUsername($event, usernameField)"
-                ></app-inline-edit-field>
+              ></app-inline-edit-field>
 
               <div id="user-email">
-
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-2">

@@ -6,6 +6,7 @@ import {
   Output,
   signal,
   SimpleChanges,
+  OnChanges,
 } from '@angular/core';
 import { FormControl, ValidatorFn } from '@angular/forms';
 
@@ -15,7 +16,7 @@ import { FormControl, ValidatorFn } from '@angular/forms';
   templateUrl: './inline-edit-field.component.html',
   host: { class: 'block' },
 })
-export class InlineEditFieldComponent {
+export class InlineEditFieldComponent implements OnChanges {
   @Input({ required: true }) label!: string;
   @Input({ required: true }) fieldKey!: string;
   @Input({ required: true }) value!: string | null;

@@ -31,7 +31,7 @@
       @if (
         (control.invalid && (control.dirty || control.touched)) ||
         validationError()
-        ) {
+      ) {
         <div class="text-xs text-red-600">
           {{ validationError() || invalidMessage }}
         </div>
@@ -40,7 +40,7 @@
       <div class="flex items-center justify-end gap-3">
         <button
           type="button"
-          class="text-sm px-3 py-1 rounded border border-gray-300"
+          class="rounded border border-gray-300 px-3 py-1 text-sm"
           (click)="cancel()"
           [disabled]="saving"
         >
@@ -48,11 +48,11 @@
         </button>
         <button
           type="button"
-          class="text-sm px-3 py-1 rounded bg-blue-600 text-white disabled:opacity-60"
+          class="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-60"
           (click)="submit()"
           [disabled]="saving"
         >
-          {{ saving ? 'Saving...' : 'Save' }}
+          {{ saving ? "Saving..." : "Save" }}
         </button>
       </div>
     </div>
