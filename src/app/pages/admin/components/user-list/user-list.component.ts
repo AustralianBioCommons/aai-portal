@@ -19,6 +19,7 @@ import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { TooltipComponent } from '../../../../shared/components/tooltip/tooltip.component';
 import {
   BiocommonsUserResponse,
   FilterOption,
@@ -48,11 +49,12 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    LoadingSpinnerComponent,
-    AlertComponent,
     NgClass,
-    ModalComponent,
     TitleCasePipe,
+    LoadingSpinnerComponent,
+    TooltipComponent,
+    AlertComponent,
+    ModalComponent,
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
@@ -91,7 +93,9 @@ export class UserListComponent implements OnInit, OnDestroy {
     platformId: string;
   } | null>(null);
 
+  adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
+  adminGroups = this.authService.adminGroups;
 
   // Form controls
   revokeReasonControl = new FormControl('', {
@@ -161,6 +165,10 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
 
     this.openMenuUserId.set(null);
+  }
+
+  canManageGroup(groupId: string): boolean {
+    return this.adminGroups().some((g) => g.id === groupId);
   }
 
   openRevokeModal(userId: string, email: string, platformId: string): void {

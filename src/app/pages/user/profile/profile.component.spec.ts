@@ -5,8 +5,10 @@ import {
   ApiService,
   UserProfileData,
 } from '../../../core/services/api.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { signal } from '@angular/core';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -39,9 +41,16 @@ describe('ProfileComponent', () => {
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', ['getUserProfile']);
+    const authSpy = jasmine.createSpyObj('AuthService', [], {
+      isGeneralAdmin: signal(false),
+    });
+
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
-      providers: [{ provide: ApiService, useValue: apiSpy }],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: AuthService, useValue: authSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);

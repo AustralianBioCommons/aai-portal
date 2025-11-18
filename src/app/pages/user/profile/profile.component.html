@@ -17,6 +17,30 @@
     <div class="text-red-500">{{ error() }}</div>
   } @else if (user()) {
     <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
+      @if (isGeneralAdmin()) {
+        <div class="flex justify-start">
+          <a
+            routerLink="/"
+            class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-4"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+              />
+            </svg>
+            Return to Dashboard
+          </a>
+        </div>
+      }
       <div class="flex items-center gap-6">
         <img
           [src]="user()?.picture"

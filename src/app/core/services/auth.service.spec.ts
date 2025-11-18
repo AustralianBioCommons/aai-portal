@@ -62,11 +62,16 @@ describe('AuthService', () => {
   }
 
   afterEach(() => {
-    // Flush any pending admin platforms requests
-    const pendingRequests = httpMock.match(
+    // Flush any pending admin platforms and groups requests
+    const platformRequests = httpMock.match(
       `${environment.auth0.backend}/me/platforms/admin-roles`,
     );
-    pendingRequests.forEach((req) => req.flush([]));
+    platformRequests.forEach((req) => req.flush([]));
+
+    const groupRequests = httpMock.match(
+      `${environment.auth0.backend}/me/groups/admin-roles`,
+    );
+    groupRequests.forEach((req) => req.flush([]));
 
     httpMock.verify();
   });

@@ -27,6 +27,8 @@ describe('DefaultLayoutComponent', () => {
       isGeneralAdmin: signal(isAdmin),
       isGeneralAdmin$: isAdminSubject.asObservable(),
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal(isAdmin ? 'biocommons' : null),
     });
 
     authSpy.isAuthenticated.and.returnValue(isAuthenticated);
