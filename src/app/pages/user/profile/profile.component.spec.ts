@@ -3,8 +3,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProfileComponent } from './profile.component';
 import {
   ApiService,
+  BiocommonsUserDetails,
   UserProfileData,
 } from '../../../core/services/api.service';
+import { InlineEditFieldComponent } from '../../../shared/components/inline-edit-field/inline-edit-field.component';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 
@@ -36,9 +38,24 @@ describe('ProfileComponent', () => {
       },
     ],
   };
+  // Full data from Auth0
+  const mockAuth0User: BiocommonsUserDetails = { 
+      ...mockUser, 
+      username: 'valid-username', 
+      created_at: "today", 
+      identities: [], 
+      updated_at: "today",
+      nickname: 'valid-username',
+      platform_memberships: [
+      ],
+      group_memberships: []
+    };
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', ['getUserProfile']);
+    const apiSpy = jasmine.createSpyObj('ApiService', [
+      'getUserProfile',
+      'updateUserUsername',
+    ]);
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
       providers: [{ provide: ApiService, useValue: apiSpy }],
@@ -48,6 +65,7 @@ describe('ProfileComponent', () => {
     component = fixture.componentInstance;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
+    mockApiService.updateUserUsername.and.returnValue(of(mockAuth0User));
   });
 
   it('should create', () => {
@@ -90,6 +108,57 @@ describe('ProfileComponent', () => {
 
     expect(userName.nativeElement.textContent).toContain('Example User');
     expect(userEmail.nativeElement.textContent).toContain('user@example.com');
+  });
+
+  it('updates the username when a valid value is entered', () => {
+    const updatedAuth0User = {...mockAuth0User, username: 'valid-username'}
+    mockApiService.updateUserUsername.and.returnValue(of(updatedAuth0User));
+
+    fixture.detectChanges();
+
+    const usernameFieldDebug = fixture.debugElement.query(
+      By.directive(InlineEditFieldComponent),
+    );
+    const usernameField =
+      usernameFieldDebug.componentInstance as InlineEditFieldComponent;
+
+    usernameField.startEdit();
+    usernameField.onInput('valid-username');
+    fixture.detectChanges();
+
+    usernameField.submit();
+    fixture.detectChanges();
+
+    expect(mockApiService.updateUserUsername).toHaveBeenCalledWith(
+      'valid-username',
+    );
+    expect(component.user()).toEqual(updatedAuth0User);
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Username updated successfully.',
+    });
+  });
+
+  it('shows a validation error and skips saving when the username is invalid', () => {
+    fixture.detectChanges();
+
+    const usernameFieldDebug = fixture.debugElement.query(
+      By.directive(InlineEditFieldComponent),
+    );
+    const usernameField =
+      usernameFieldDebug.componentInstance as InlineEditFieldComponent;
+
+    usernameField.startEdit();
+    usernameField.onInput('Ab');
+
+    usernameField.submit();
+    fixture.detectChanges();
+
+    expect(mockApiService.updateUserUsername).not.toHaveBeenCalled();
+    expect(usernameField.validationError()).toBe(
+      'Invalid username: please check the requirements and try again.',
+    );
+    expect(component.alert()).toBeNull();
   });
 
   it('should display platform memberships correctly', () => {
