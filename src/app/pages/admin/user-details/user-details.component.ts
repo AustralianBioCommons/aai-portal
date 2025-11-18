@@ -26,6 +26,13 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
 
+type RevokeModalData = {
+  type: 'platform' | 'group';
+  id: string;
+  name: string;
+  email: string;
+} | null;
+
 @Component({
   selector: 'app-user-details',
   imports: [
@@ -60,10 +67,9 @@ export class UserDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
-  showRevokeModal = signal(false);
+  revokeModalData = signal<RevokeModalData>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
-  selectedPlatformForRevoke = signal<PlatformId | null>(null);
   openMenuMembershipId = signal<string | null>(null);
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -193,20 +199,67 @@ export class UserDetailsComponent implements OnInit {
 
   approveGroupMembership(membershipId: string): void {
     this.openMenuMembershipId.set(null);
-    // TODO: Implement API call to approve group membership
-    console.log('Approve group membership:', membershipId);
+    const userId = this.user()!.user_id;
+    const membership = this.user()!.group_memberships.find(
+      (m) => m.id === membershipId,
+    );
+    if (!membership) {
+      return;
+    }
+
+    this.alert.set(null);
+    this.apiService.approveGroupAccess(userId, membership.group_id).subscribe({
+      next: () => {
+        this.alert.set({
+          type: 'success',
+          message: 'Group access approved successfully',
+        });
+        this.refreshUserDetails(userId);
+      },
+      error: (error) => {
+        console.error('Failed to approve group access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to approve group access',
+        });
+      },
+    });
   }
 
+  // TODO: Implement reject group membership
   rejectGroupMembership(membershipId: string): void {
     this.openMenuMembershipId.set(null);
-    // TODO: Implement API call to reject group membership
-    console.log('Reject group membership:', membershipId);
+    this.alert.set({
+      type: 'error',
+      message: `Rejecting group membership ${membershipId} is not yet implemented`,
+    });
   }
 
   revokeGroupMembership(membershipId: string): void {
     this.openMenuMembershipId.set(null);
-    // TODO: Implement API call to revoke group membership
-    console.log('Revoke group membership:', membershipId);
+    const membership = this.user()!.group_memberships.find(
+      (m) => m.id === membershipId,
+    );
+    if (!membership) {
+      return;
+    }
+    this.revokeModalData.set({
+      type: 'group',
+      id: membership.group_id,
+      name: membership.group_name,
+      email: this.user()!.email,
+    });
+    this.revokeReasonControl.reset();
+  }
+
+  getRevokeModalTitle(): string {
+    const modalData = this.revokeModalData();
+    if (!modalData) return '';
+    if (modalData.type === 'platform') {
+      return `Do you want to revoke ${modalData.email}?`;
+    } else {
+      return `Do you want to revoke ${modalData.email} from ${modalData.name}?`;
+    }
   }
 
   togglePlatformApproval(platformId: PlatformId, currentStatus: string) {
@@ -218,22 +271,25 @@ export class UserDetailsComponent implements OnInit {
   }
 
   openRevokeModal(platformId: PlatformId): void {
-    this.selectedPlatformForRevoke.set(platformId);
+    this.revokeModalData.set({
+      type: 'platform',
+      id: platformId,
+      name: this.getPlatformName(platformId),
+      email: this.user()!.email,
+    });
     this.revokeReasonControl.reset();
-    this.showRevokeModal.set(true);
   }
 
   closeRevokeModal(): void {
-    this.showRevokeModal.set(false);
+    this.revokeModalData.set(null);
     this.revokeReasonControl.reset();
-    this.selectedPlatformForRevoke.set(null);
   }
 
-  confirmRevokePlatformAccess(): void {
-    const platformId = this.selectedPlatformForRevoke();
+  confirmRevoke(): void {
+    const modalData = this.revokeModalData();
     this.revokeReasonControl.markAsTouched();
 
-    if (!platformId || this.revokeReasonControl.invalid) {
+    if (!modalData || this.revokeReasonControl.invalid) {
       return;
     }
 
@@ -241,24 +297,49 @@ export class UserDetailsComponent implements OnInit {
     const reason = this.revokeReasonControl.value.trim();
     this.alert.set(null);
 
-    this.apiService.revokePlatformAccess(userId, platformId, reason).subscribe({
-      next: () => {
-        this.alert.set({
-          type: 'success',
-          message: 'Platform access revoked successfully',
+    if (modalData.type === 'platform') {
+      this.apiService
+        .revokePlatformAccess(userId, modalData.id as PlatformId, reason)
+        .subscribe({
+          next: () => {
+            this.alert.set({
+              type: 'success',
+              message: 'Platform access revoked successfully',
+            });
+            this.closeRevokeModal();
+            this.refreshUserDetails(userId);
+          },
+          error: (error) => {
+            console.error('Failed to revoke platform access:', error);
+            this.alert.set({
+              type: 'error',
+              message: 'Failed to revoke platform access',
+            });
+            this.closeRevokeModal();
+          },
         });
-        this.closeRevokeModal();
-        this.refreshUserDetails(userId);
-      },
-      error: (error) => {
-        console.error('Failed to revoke platform access:', error);
-        this.alert.set({
-          type: 'error',
-          message: 'Failed to revoke platform access',
+    } else {
+      this.apiService
+        .revokeGroupAccess(userId, modalData.id, reason)
+        .subscribe({
+          next: () => {
+            this.alert.set({
+              type: 'success',
+              message: 'Group access revoked successfully',
+            });
+            this.closeRevokeModal();
+            this.refreshUserDetails(userId);
+          },
+          error: (error) => {
+            console.error('Failed to revoke group access:', error);
+            this.alert.set({
+              type: 'error',
+              message: 'Failed to revoke group access',
+            });
+            this.closeRevokeModal();
+          },
         });
-        this.closeRevokeModal();
-      },
-    });
+    }
   }
 
   private approvePlatform(platformId: PlatformId) {

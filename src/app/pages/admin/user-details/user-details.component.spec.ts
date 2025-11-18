@@ -51,10 +51,10 @@ describe('UserDetailsComponent', () => {
     ],
     group_memberships: [
       {
-        id: 'pm2',
-        group_id: 'bpa',
-        group_name: 'Bioplatforms Australia',
-        group_short_name: 'BPA',
+        id: 'gm',
+        group_id: 'tsi',
+        group_name: 'Threatened Species Initiative',
+        group_short_name: 'TSI',
         approval_status: 'pending',
         updated_by: 'admin',
       },
@@ -67,6 +67,8 @@ describe('UserDetailsComponent', () => {
       'resendVerificationEmail',
       'approvePlatformAccess',
       'revokePlatformAccess',
+      'approveGroupAccess',
+      'revokeGroupAccess',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -446,19 +448,23 @@ describe('UserDetailsComponent', () => {
 
       component.togglePlatformApproval('galaxy', 'approved');
 
-      expect(component.showRevokeModal()).toBeTrue();
-      expect(component.selectedPlatformForRevoke()).toBe('galaxy');
+      expect(component.revokeModalData()).toBeTruthy();
+      expect(component.revokeModalData()?.type).toBe('platform');
+      expect(component.revokeModalData()?.id).toBe('galaxy');
     });
 
     it('should close revoke modal and reset form', () => {
-      component.showRevokeModal.set(true);
-      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeModalData.set({
+        type: 'platform',
+        id: 'galaxy',
+        name: 'Galaxy Australia',
+        email: 'test@example.com',
+      });
       component.revokeReasonControl.setValue('test reason');
 
       component.closeRevokeModal();
 
-      expect(component.showRevokeModal()).toBeFalse();
-      expect(component.selectedPlatformForRevoke()).toBeNull();
+      expect(component.revokeModalData()).toBeNull();
       expect(component.revokeReasonControl.value).toBe('');
     });
 
@@ -469,24 +475,34 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeModalData.set({
+        type: 'platform',
+        id: 'galaxy',
+        name: 'Galaxy Australia',
+        email: 'test@example.com',
+      });
       component.revokeReasonControl.setValue('Security violation');
 
-      component.confirmRevokePlatformAccess();
+      component.confirmRevoke();
 
       expect(mockApiService.revokePlatformAccess).toHaveBeenCalledWith(
         '123',
         'galaxy',
         'Security violation',
       );
-      expect(component.showRevokeModal()).toBeFalse();
+      expect(component.revokeModalData()).toBeNull();
     });
 
     it('should not revoke without reason', () => {
-      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeModalData.set({
+        type: 'platform',
+        id: 'galaxy',
+        name: 'Galaxy Australia',
+        email: 'test@example.com',
+      });
       component.revokeReasonControl.setValue('');
 
-      component.confirmRevokePlatformAccess();
+      component.confirmRevoke();
 
       expect(mockApiService.revokePlatformAccess).not.toHaveBeenCalled();
       expect(component.revokeReasonControl.touched).toBeTrue();
@@ -533,17 +549,22 @@ describe('UserDetailsComponent', () => {
       spyOn(console, 'error');
       fixture.detectChanges();
 
-      component.selectedPlatformForRevoke.set('galaxy');
+      component.revokeModalData.set({
+        type: 'platform',
+        id: 'galaxy',
+        name: 'Galaxy Australia',
+        email: 'test@example.com',
+      });
       component.revokeReasonControl.setValue('Test reason');
 
-      component.confirmRevokePlatformAccess();
+      component.confirmRevoke();
 
       expect(console.error).toHaveBeenCalledWith(
         'Failed to revoke platform access:',
         jasmine.any(Error),
       );
       expect(component.alert()?.type).toBe('error');
-      expect(component.showRevokeModal()).toBeFalse();
+      expect(component.revokeModalData()).toBeNull();
     });
 
     it('should display toggle switch for platform memberships', () => {
@@ -559,7 +580,12 @@ describe('UserDetailsComponent', () => {
     });
 
     it('should show revoke modal in DOM when open', () => {
-      component.showRevokeModal.set(true);
+      component.revokeModalData.set({
+        type: 'platform',
+        id: 'galaxy',
+        name: 'Galaxy Australia',
+        email: 'test@example.com',
+      });
       fixture.detectChanges();
 
       const modal = fixture.debugElement.query(By.css('.fixed.inset-0'));
@@ -594,6 +620,61 @@ describe('UserDetailsComponent', () => {
         By.css('.group-hover\\:block'),
       );
       expect(tooltip).toBeTruthy();
+    });
+  });
+
+  describe('Group Membership Actions', () => {
+    it('should approve group membership', () => {
+      mockApiService.approveGroupAccess.and.returnValue(of({ updated: true }));
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.approveGroupMembership('gm');
+
+      expect(mockApiService.approveGroupAccess).toHaveBeenCalledWith(
+        '123',
+        'tsi',
+      );
+      expect(component.alert()?.type).toBe('success');
+      expect(component.alert()?.message).toBe(
+        'Group access approved successfully',
+      );
+    });
+
+    it('should open revoke modal for group membership', () => {
+      fixture.detectChanges();
+
+      component.revokeGroupMembership('gm');
+
+      expect(component.revokeModalData()).toBeTruthy();
+      expect(component.revokeModalData()?.type).toBe('group');
+      expect(component.revokeModalData()?.id).toBe('tsi');
+      expect(component.revokeModalData()?.name).toBe(
+        'Threatened Species Initiative',
+      );
+    });
+
+    it('should revoke group membership with reason', () => {
+      mockApiService.revokeGroupAccess.and.returnValue(of({ updated: true }));
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.revokeModalData.set({
+        type: 'group',
+        id: 'tsi',
+        name: 'Threatened Species Initiative',
+        email: 'test@example.com',
+      });
+      component.revokeReasonControl.setValue('No longer needed');
+
+      component.confirmRevoke();
+
+      expect(mockApiService.revokeGroupAccess).toHaveBeenCalledWith(
+        '123',
+        'tsi',
+        'No longer needed',
+      );
+      expect(component.revokeModalData()).toBeNull();
     });
   });
 });

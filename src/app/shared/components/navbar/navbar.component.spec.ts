@@ -219,7 +219,7 @@ describe('NavbarComponent', () => {
     Object.defineProperty(mockAuthService, 'isGeneralAdmin', {
       value: signal(true),
     });
-    component.isAdmin = mockAuthService.isGeneralAdmin;
+    component.isGeneralAdmin = mockAuthService.isGeneralAdmin;
 
     const pages = component.navigationPages;
     expect(pages).toEqual([

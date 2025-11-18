@@ -38,7 +38,7 @@ export class NavbarComponent {
   // Auth signals
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
-  isAdmin = this.authService.isGeneralAdmin;
+  isGeneralAdmin = this.authService.isGeneralAdmin;
   isLoading = this.authService.isLoading;
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -52,7 +52,7 @@ export class NavbarComponent {
 
   // Computed signal for the navigation title
   navTitle = computed(() => {
-    if (!this.isAdmin()) {
+    if (!this.isGeneralAdmin()) {
       return 'My BioCommons Access';
     }
 
@@ -90,7 +90,7 @@ export class NavbarComponent {
   }
 
   private refreshCounts() {
-    if (!this.isAuthenticated() || this.isLoading() || !this.isAdmin()) {
+    if (!this.isAuthenticated() || this.isLoading() || !this.isGeneralAdmin()) {
       return;
     }
 

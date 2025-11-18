@@ -9,15 +9,15 @@
 }
 
 <!-- Revoke Modal -->
-@if (showRevokeModal()) {
+@if (revokeModalData()) {
   <app-modal
-    [title]="'Do you want to revoke ' + user()!.email + '?'"
+    [title]="getRevokeModalTitle()"
     type="revoke"
     [textareaControl]="revokeReasonControl"
     textareaLabel="Revocation reason"
     primaryButtonText="Yes"
     secondaryButtonText="No"
-    (primaryOutput)="confirmRevokePlatformAccess()"
+    (primaryOutput)="confirmRevoke()"
     (secondaryOutput)="closeRevokeModal()"
   />
 }

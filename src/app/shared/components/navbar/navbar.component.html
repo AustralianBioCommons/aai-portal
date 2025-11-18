@@ -22,7 +22,7 @@
     >
       {{ navTitle() }}
     </a>
-    @if (isAdmin()) {
+    @if (isGeneralAdmin()) {
       <div class="relative">
         <button
           type="button"
@@ -140,7 +140,7 @@
     }
   </div>
 
-  @if (isNavigationPage() && isAdmin()) {
+  @if (isNavigationPage() && isGeneralAdmin()) {
     <!-- Mobile Dropdown (visible on small screens) -->
     <div class="mx-6 mb-8 sm:hidden">
       <select
@@ -182,14 +182,18 @@
           "
         >
           {{ page.label }}
-          @if (isAdmin() && page.label === "Pending" && pendingCount() > 0) {
+          @if (
+            isGeneralAdmin() && page.label === "Pending" && pendingCount() > 0
+          ) {
             <span
               class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
             >
               {{ pendingCount() }}
             </span>
           }
-          @if (isAdmin() && page.label === "Revoked" && revokedCount() > 0) {
+          @if (
+            isGeneralAdmin() && page.label === "Revoked" && revokedCount() > 0
+          ) {
             <span
               class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
             >
@@ -197,7 +201,9 @@
             </span>
           }
           @if (
-            isAdmin() && page.label === "Unverified" && unverifiedCount() > 0
+            isGeneralAdmin() &&
+            page.label === "Unverified" &&
+            unverifiedCount() > 0
           ) {
             <span
               class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
