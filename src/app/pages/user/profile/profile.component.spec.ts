@@ -129,6 +129,7 @@ describe('ProfileComponent', () => {
     mockApiService.updateUserUsername.and.returnValue(of(updatedAuth0User));
 
     fixture.detectChanges();
+    mockApiService.getUserProfile.and.returnValue(of(updatedAuth0User));
 
     const usernameFieldDebug = fixture.debugElement.query(
       By.directive(InlineEditFieldComponent),
