@@ -13,6 +13,7 @@ describe('InlineEditFieldComponent', () => {
 
     fixture = TestBed.createComponent(InlineEditFieldComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('value', 'Initial Value');
     fixture.detectChanges();
   });
 
