@@ -1,5 +1,5 @@
 import { Component, computed, signal, inject, effect } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrandingService } from '../../core/services/branding.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -12,6 +12,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 })
 export class EmailVerifiedComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly brandingService = inject(BrandingService);
 
   readonly emailVerified = signal(false);
@@ -31,5 +32,9 @@ export class EmailVerifiedComponent {
       this.emailVerified.set(params.get('success') === 'true');
       this.errorMessage.set(params.get('message') || '');
     });
+  }
+
+  navigateToProfile(): void {
+    this.router.navigate(['/profile']);
   }
 }
