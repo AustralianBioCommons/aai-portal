@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EmailVerifiedComponent } from './email-verified.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { of } from 'rxjs';
 
 describe('EmailVerifiedComponent', () => {
   let fixture: ComponentFixture<EmailVerifiedComponent>;
   let component: EmailVerifiedComponent;
+  let routerSpy: jasmine.SpyObj<Router>;
 
   const createComponent = async (
     queryParams: Record<string, string | null>,
@@ -18,10 +19,13 @@ describe('EmailVerifiedComponent', () => {
       }),
     };
 
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
     await TestBed.configureTestingModule({
       imports: [EmailVerifiedComponent],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub },
+        { provide: Router, useValue: routerSpy },
         Title,
       ],
     }).compileComponents();
@@ -84,14 +88,11 @@ describe('EmailVerifiedComponent', () => {
     expect(errorDiv?.textContent).toContain('Verification token expired');
   });
 
-  it('should have routerLink attribute on continue button', async () => {
+  it('should navigate to /profile when continue button is clicked', async () => {
     await createComponent({ success: 'true', message: null });
 
-    const compiled = fixture.nativeElement as HTMLElement;
-    const button = compiled.querySelector('app-button');
-    const routerLink =
-      button?.getAttribute('routerlink') ||
-      button?.getAttribute('ng-reflect-router-link');
-    expect(routerLink).toBe('/profile');
+    component.navigateToProfile();
+
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/profile']);
   });
 });
