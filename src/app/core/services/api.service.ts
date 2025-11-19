@@ -40,11 +40,20 @@ export interface UserProfileData {
 }
 
 /**
- * response for which platforms the admin can manage
+ * Response for which platforms the admin can manage
  */
 export interface AdminPlatformResponse {
   id: PlatformId;
   name: string;
+}
+
+/**
+ * Response for which groups the admin can manage
+ */
+export interface AdminGroupResponse {
+  id: string;
+  name: string;
+  short_name: string;
 }
 
 export interface PlatformUserResponse {

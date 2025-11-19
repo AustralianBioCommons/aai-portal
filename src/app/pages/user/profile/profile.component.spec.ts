@@ -8,8 +8,10 @@ import {
 } from '../../../core/services/api.service';
 import { InlineEditFieldComponent } from '../../../shared/components/inline-edit-field/inline-edit-field.component';
 import { PasswordEditFieldComponent } from '../../../shared/components/password-edit-field/password-edit-field.component';
+import { AuthService } from '../../../core/services/auth.service';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { signal } from '@angular/core';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -58,9 +60,16 @@ describe('ProfileComponent', () => {
       'updateUserUsername',
       'updatePassword',
     ]);
+    const authSpy = jasmine.createSpyObj('AuthService', [], {
+      isGeneralAdmin: signal(false),
+    });
+
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
-      providers: [{ provide: ApiService, useValue: apiSpy }],
+      providers: [
+        { provide: ApiService, useValue: apiSpy },
+        { provide: AuthService, useValue: authSpy },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);

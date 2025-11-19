@@ -1,19 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { EmailVerifiedComponent } from './email-verified.component';
-import { ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { of, throwError } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { of } from 'rxjs';
 
 describe('EmailVerifiedComponent', () => {
   let fixture: ComponentFixture<EmailVerifiedComponent>;
   let component: EmailVerifiedComponent;
-  let httpClientSpy: jasmine.SpyObj<HttpClient>;
-
-  beforeEach(() => {
-    httpClientSpy = jasmine.createSpyObj('HttpClient', ['get']);
-  });
+  let routerSpy: jasmine.SpyObj<Router>;
 
   const createComponent = async (
     queryParams: Record<string, string | null>,
@@ -25,11 +19,13 @@ describe('EmailVerifiedComponent', () => {
       }),
     };
 
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+
     await TestBed.configureTestingModule({
       imports: [EmailVerifiedComponent],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub },
-        { provide: HttpClient, useValue: httpClientSpy },
+        { provide: Router, useValue: routerSpy },
         Title,
       ],
     }).compileComponents();
@@ -41,85 +37,18 @@ describe('EmailVerifiedComponent', () => {
     }
   };
 
-  afterEach(() => {
-    httpClientSpy.get.calls.reset();
-  });
-
   it('should mark email as verified if success=true', async () => {
-    httpClientSpy.get.and.returnValue(of({ app: 'galaxy' }));
     await createComponent({
       success: 'true',
-      email: 'test@example.com',
       message: '',
     });
 
     expect(component.emailVerified()).toBeTrue();
   });
 
-  it('should use galaxy URL if app response is galaxy', async () => {
-    httpClientSpy.get.and.returnValue(of({ app: 'galaxy' }));
-    await createComponent({
-      success: 'true',
-      email: 'galaxy@example.com',
-      message: '',
-    });
-
-    expect(httpClientSpy.get).toHaveBeenCalledWith(
-      `${environment.auth0.backend}/utils/registration_info?user_email=galaxy%40example.com`,
-    );
-    expect(component.appId()).toBe('galaxy');
-    const expectedUrl = environment.platformUrls.galaxyPlatform.replace(
-      /\/+$/,
-      '',
-    );
-    expect(component.appUrl()).toBe(expectedUrl);
-  });
-
-  it('should use bpa URL if app response is bpa', async () => {
-    httpClientSpy.get.and.returnValue(of({ app: 'bpa' }));
-    await createComponent({
-      success: 'true',
-      email: 'bpa@example.com',
-      message: '',
-    });
-
-    expect(component.appId()).toBe('bpa');
-    const expectedUrl = environment.platformUrls.bpaPlatform.replace(
-      /\/+$/,
-      '',
-    );
-    expect(component.appUrl()).toBe(expectedUrl);
-  });
-
-  it('should use biocommons URL if app response is biocommons', async () => {
-    httpClientSpy.get.and.returnValue(of({ app: 'biocommons' }));
-    await createComponent({
-      success: 'true',
-      email: 'bio@example.com',
-      message: '',
-    });
-
-    expect(component.appId()).toBe('biocommons');
-    expect(component.appUrl()).toContain('login.test.biocommons.org.au');
-  });
-
-  it('should not fail if app lookup throws', async () => {
-    httpClientSpy.get.and.returnValue(throwError(() => new Error('API down')));
-    await createComponent({
-      success: 'true',
-      email: 'fail@example.com',
-      message: '',
-    });
-
-    expect(httpClientSpy.get).toHaveBeenCalled();
-    expect(component.appId()).toBe('biocommons'); // fallback
-  });
-
   it('should set error message if present in query params', async () => {
-    httpClientSpy.get.and.returnValue(of({ app: 'biocommons' }));
     await createComponent({
       success: 'false',
-      email: 'test@example.com',
       message: 'Verification failed',
     });
 
@@ -127,8 +56,8 @@ describe('EmailVerifiedComponent', () => {
     expect(component.emailVerified()).toBeFalse();
   });
 
-  it('should display success message and link on email verification success', async () => {
-    await createComponent({ success: 'true', email: null, message: null });
+  it('should display success message and button on email verification success', async () => {
+    await createComponent({ success: 'true', message: null });
 
     const compiled = fixture.nativeElement as HTMLElement;
 
@@ -139,14 +68,13 @@ describe('EmailVerifiedComponent', () => {
       'Your email has been successfully verified',
     );
 
-    const link = compiled.querySelector('app-button');
-    expect(link?.textContent).toContain('Continue');
+    const button = compiled.querySelector('app-button');
+    expect(button?.textContent).toContain('Continue');
   });
 
   it('should render error message and error detail if verification failed', async () => {
     await createComponent({
       success: 'false',
-      email: null,
       message: 'Verification token expired',
     });
 
@@ -160,14 +88,11 @@ describe('EmailVerifiedComponent', () => {
     expect(errorDiv?.textContent).toContain('Verification token expired');
   });
 
-  it('should not call getAppInfo if email is missing in query params', async () => {
-    httpClientSpy.get.and.returnValue(of({ app: 'galaxy' }));
-    await createComponent({ success: 'true', email: null, message: '' }, false);
+  it('should navigate to /profile when continue button is clicked', async () => {
+    await createComponent({ success: 'true', message: null });
 
-    const spy = spyOn(component, 'getAppInfo');
-    fixture.detectChanges();
+    component.navigateToProfile();
 
-    expect(spy).not.toHaveBeenCalled();
-    expect(httpClientSpy.get).not.toHaveBeenCalled();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/profile']);
   });
 });

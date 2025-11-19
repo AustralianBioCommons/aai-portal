@@ -17,6 +17,8 @@ import { environment } from '../../../../environments/environment';
 import { InlineEditFieldComponent } from '../../../shared/components/inline-edit-field/inline-edit-field.component';
 import { PasswordEditFieldComponent } from '../../../shared/components/password-edit-field/password-edit-field.component';
 import { usernameRequirements } from '../../../shared/validators/usernames';
+import { AuthService } from '../../../core/services/auth.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
@@ -27,6 +29,7 @@ import { usernameRequirements } from '../../../shared/validators/usernames';
     EditButtonComponent,
     InlineEditFieldComponent,
     PasswordEditFieldComponent,
+    RouterLink,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
@@ -34,6 +37,8 @@ import { usernameRequirements } from '../../../shared/validators/usernames';
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private document = inject(DOCUMENT);
+  private authService = inject(AuthService);
+
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
@@ -48,6 +53,8 @@ export class ProfileComponent implements OnInit {
   error = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   savingField = signal<string | null>(null);
+
+  isGeneralAdmin = this.authService.isGeneralAdmin;
 
   ngOnInit(): void {
     this.loadUserProfile();

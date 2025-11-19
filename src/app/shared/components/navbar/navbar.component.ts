@@ -38,9 +38,11 @@ export class NavbarComponent {
   // Auth signals
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
-  isAdmin = this.authService.isGeneralAdmin;
+  isGeneralAdmin = this.authService.isGeneralAdmin;
   isLoading = this.authService.isLoading;
+  adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
+  adminGroups = this.authService.adminGroups;
 
   // Component state signals
   pendingCount = signal(0);
@@ -50,17 +52,17 @@ export class NavbarComponent {
 
   // Computed signal for the navigation title
   navTitle = computed(() => {
-    if (!this.isAdmin()) {
+    if (!this.isGeneralAdmin()) {
       return 'My BioCommons Access';
     }
 
     const platforms = this.adminPlatforms();
-    if (platforms.length > 1) {
+    if (this.adminType() === 'biocommons') {
       return 'BioCommons Admin Dashboard';
-    } else if (platforms.length === 1) {
+    } else if (this.adminType() === 'platform') {
       return `${platforms[0].name} Admin Dashboard`;
     }
-    return 'Bundle Admin Dashboard';
+    return `${this.adminGroups()[0]?.short_name || ''} Bundle Admin Dashboard`;
   });
 
   navigationPages = [
@@ -88,7 +90,7 @@ export class NavbarComponent {
   }
 
   private refreshCounts() {
-    if (!this.isAuthenticated() || this.isLoading() || !this.isAdmin()) {
+    if (!this.isAuthenticated() || this.isLoading() || !this.isGeneralAdmin()) {
       return;
     }
 

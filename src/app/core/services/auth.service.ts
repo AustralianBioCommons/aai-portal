@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import {
@@ -13,7 +13,9 @@ import {
   take,
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AdminPlatformResponse } from './api.service';
+import { AdminPlatformResponse, AdminGroupResponse } from './api.service';
+
+export type AdminType = 'biocommons' | 'platform' | 'bundle' | null;
 
 export interface AuthError {
   error: string;
@@ -79,56 +81,89 @@ export class AuthService {
     { initialValue: null },
   );
 
+  /**
+   * Helper method to create authenticated API observables
+   */
+  private createAuth0Request$<T>(
+    endpoint: string,
+    errorMessage: string,
+    fallbackValue: T,
+  ): Observable<T> {
+    return this.auth0Service.isAuthenticated$.pipe(
+      switchMap((isAuth) =>
+        isAuth
+          ? this.auth0Service.getAccessTokenSilently().pipe(
+              switchMap((token) =>
+                this.http.get<T>(`${environment.auth0.backend}${endpoint}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                }),
+              ),
+              catchError((error) => {
+                console.error(errorMessage, error);
+                return of(fallbackValue);
+              }),
+            )
+          : of(fallbackValue),
+      ),
+      shareReplay(1),
+    );
+  }
+
   // Observable that checks if the current user has general admin privileges
   // (BioCommons admin, platform admin, or group admin) - this is used to
   // determine whether to show admin-only features in the UI
-  isGeneralAdmin$ = this.auth0Service.isAuthenticated$.pipe(
-    switchMap((isAuth) =>
-      isAuth
-        ? this.auth0Service.getAccessTokenSilently().pipe(
-            switchMap((token) =>
-              this.http.get<boolean>(
-                `${environment.auth0.backend}/me/is-general-admin`,
-                { headers: { Authorization: `Bearer ${token}` } },
-              ),
-            ),
-            catchError((error) => {
-              console.error('Failed to check admin status:', error);
-              return of(false);
-            }),
-          )
-        : of(false),
-    ),
-    // shareReplay(1) ensures multiple subscribers share the same HTTP request
-    // and new subscribers immediately get the last cached admin status value
-    // This prevents redundant API calls when multiple components check admin permissions
-    shareReplay(1),
+  isGeneralAdmin$ = this.createAuth0Request$<boolean>(
+    '/me/is-general-admin',
+    'Failed to check admin status:',
+    false,
   );
 
   isGeneralAdmin = toSignal(this.isGeneralAdmin$, { initialValue: false });
 
   // Observable that fetches the platforms the current user has admin privileges for
-  adminPlatforms$ = this.auth0Service.isAuthenticated$.pipe(
-    switchMap((isAuth) =>
-      isAuth
-        ? this.auth0Service.getAccessTokenSilently().pipe(
-            switchMap((token) =>
-              this.http.get<AdminPlatformResponse[]>(
-                `${environment.auth0.backend}/me/platforms/admin-roles`,
-                { headers: { Authorization: `Bearer ${token}` } },
-              ),
-            ),
-            catchError((error) => {
-              console.error('Failed to fetch admin platforms:', error);
-              return of([]);
-            }),
-          )
-        : of([]),
-    ),
-    shareReplay(1),
+  adminPlatforms$ = this.createAuth0Request$<AdminPlatformResponse[]>(
+    '/me/platforms/admin-roles',
+    'Failed to fetch admin platforms: ',
+    [],
   );
 
   adminPlatforms = toSignal(this.adminPlatforms$, { initialValue: [] });
+
+  // Observable that fetches the groups the current user has admin privileges for
+  adminGroups$ = this.createAuth0Request$<AdminGroupResponse[]>(
+    '/me/groups/admin-roles',
+    'Failed to fetch admin groups: ',
+    [],
+  );
+
+  adminGroups = toSignal(this.adminGroups$, { initialValue: [] });
+
+  // Computed signal that determines the type of admin based on their roles
+  adminType = computed<AdminType>(() => {
+    if (!this.isGeneralAdmin()) {
+      return null;
+    }
+
+    const platforms = this.adminPlatforms();
+    const groups = this.adminGroups();
+
+    // BioCommons admin: manages multiple platforms
+    if (platforms.length > 1) {
+      return 'biocommons';
+    }
+
+    // Platform admin: manages exactly one platform
+    if (platforms.length === 1) {
+      return 'platform';
+    }
+
+    // Bundle admin: manages groups but no platforms
+    if (groups.length > 0) {
+      return 'bundle';
+    }
+
+    return null;
+  });
 
   constructor() {
     this.checkForAuthErrors();
