@@ -78,8 +78,7 @@ export class ProfileComponent implements OnInit {
     this.alert.set(null);
 
     this.apiService.updateUserUsername(username).subscribe({
-      next: (updatedUser) => {
-        this.user.set(updatedUser);
+      next: () => {
         this.savingField.set(null);
         // Stop editing mode
         field.cancel();
@@ -87,6 +86,7 @@ export class ProfileComponent implements OnInit {
           type: 'success',
           message: 'Username updated successfully.',
         });
+        this.loadUserProfile();
       },
       error: (err) => {
         console.error('Failed to update username:', err);
