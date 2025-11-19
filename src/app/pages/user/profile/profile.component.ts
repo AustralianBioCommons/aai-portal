@@ -82,11 +82,15 @@ export class ProfileComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Failed to update usernname:', err);
+        console.error('Failed to update username:', err);
+        const errorDetail = err.error?.detail || null;
+        const errorMessage = errorDetail
+          ? `Failed to update username: ${errorDetail}`
+          : `Failed to update username.`;
         this.savingField.set(null);
         this.alert.set({
           type: 'error',
-          message: 'Failed to update username.',
+          message: errorMessage,
         });
       },
     });
