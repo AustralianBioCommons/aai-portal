@@ -5,8 +5,9 @@ import {
   Input,
   Output,
   signal,
-  SimpleChanges,
-  OnChanges,
+  effect,
+  untracked,
+  input,
 } from '@angular/core';
 import { FormControl, ValidatorFn } from '@angular/forms';
 
@@ -16,15 +17,15 @@ import { FormControl, ValidatorFn } from '@angular/forms';
   templateUrl: './inline-edit-field.component.html',
   host: { class: 'block' },
 })
-export class InlineEditFieldComponent implements OnChanges {
+export class InlineEditFieldComponent {
   @Input({ required: true }) label!: string;
   @Input({ required: true }) fieldKey!: string;
-  @Input({ required: true }) value!: string | null;
   @Input() type = 'text';
   @Input() saving = false;
   @Input() validators: ValidatorFn[] | null = null;
   @Input() invalidMessage = 'Invalid value';
   @Input() helpText = '';
+  value = input.required<string>();
 
   @Output() save = new EventEmitter<string>();
 
@@ -34,24 +35,26 @@ export class InlineEditFieldComponent implements OnChanges {
   // Internal control used only for validation
   control = new FormControl<string>('', { nonNullable: true });
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if ('validators' in changes) {
+  constructor() {
+    effect(() => {
       if (this.validators) {
         this.control.setValidators(this.validators);
       } else {
         this.control.clearValidators();
       }
       this.control.updateValueAndValidity({ emitEvent: false });
-    }
+    });
 
-    // Keep control in sync when not editing (e.g. user updated from outside)
-    if ('value' in changes && !this.isEditing()) {
-      this.control.setValue(this.value ?? '', { emitEvent: false });
-    }
+    effect(() => {
+      // Keep control in sync when not editing (e.g. user updated from outside)
+      if (!untracked(this.isEditing)) {
+        this.control.setValue(this.value() ?? '', { emitEvent: false });
+      }
+    });
   }
 
   startEdit(): void {
-    const current = this.value ?? '';
+    const current = this.value() ?? '';
     this.control.setValue(current, { emitEvent: false });
     this.control.markAsPristine();
     this.control.markAsUntouched();
@@ -83,7 +86,7 @@ export class InlineEditFieldComponent implements OnChanges {
     const newValue = this.control.value.trim();
 
     // If nothing changed, just close
-    if (!newValue || newValue === (this.value ?? '')) {
+    if (!newValue || newValue === (this.value() ?? '')) {
       this.isEditing.set(false);
       this.validationError.set(null);
       return;
