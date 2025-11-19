@@ -166,6 +166,34 @@ describe('ProfileComponent', () => {
     expect(component.alert()).toBeNull();
   });
 
+  it('shows an error alert with detail when username update fails with API error', () => {
+    const errorResponse = { error: { detail: 'Username already taken' } };
+    mockApiService.updateUserUsername.and.returnValue(
+      throwError(() => errorResponse),
+    );
+
+    fixture.detectChanges();
+
+    const usernameFieldDebug = fixture.debugElement.query(
+      By.directive(InlineEditFieldComponent),
+    );
+    const usernameField =
+      usernameFieldDebug.componentInstance as InlineEditFieldComponent;
+
+    usernameField.startEdit();
+    usernameField.onInput('valid-username');
+    usernameField.submit();
+    fixture.detectChanges();
+
+    expect(mockApiService.updateUserUsername).toHaveBeenCalledWith(
+      'valid-username',
+    );
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'Failed to update username: Username already taken',
+    });
+  });
+
   it('handles a successful password change', () => {
     sessionStorage.removeItem('profile_flash_message');
     mockApiService.updatePassword.and.returnValue(of(true));
