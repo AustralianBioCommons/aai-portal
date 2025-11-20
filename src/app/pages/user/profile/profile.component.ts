@@ -1,14 +1,19 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import {
   ApiService,
   UserProfileData,
 } from '../../../core/services/api.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import {
   PLATFORMS,
   PlatformId,
@@ -16,9 +21,18 @@ import {
 } from '../../../core/constants/constants';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
-import { passwordRequirements } from '../../../shared/validators/passwords';
+import {
+  passwordRequirements,
+  ALLOWED_SPECIAL_CHARACTERS,
+} from '../../../shared/validators/passwords';
 import { AuthService } from '../../../core/services/auth.service';
 import { RouterLink } from '@angular/router';
+import {
+  emailLengthValidator,
+  internationalEmailValidator,
+  toAsciiEmail,
+} from '../../../shared/validators/emails';
+import { ValidationService } from '../../../core/services/validation.service';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -41,6 +55,7 @@ export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private document = inject(DOCUMENT);
   private authService = inject(AuthService);
+  private validationService = inject(ValidationService);
 
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
@@ -56,7 +71,17 @@ export class ProfileComponent implements OnInit {
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   savingField = signal<string | null>(null);
 
-  emailDraft = signal('');
+  emailControl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      internationalEmailValidator,
+      emailLengthValidator,
+    ],
+  });
+  emailForm = new FormGroup({
+    email: this.emailControl,
+  });
   emailFlowState = signal<'idle' | 'otp-sent'>('idle');
   emailOtp = signal('');
   emailLoading = signal(false);
@@ -64,24 +89,33 @@ export class ProfileComponent implements OnInit {
   emailError = signal<string | null>(null);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
-  passwordCurrent = signal('');
+  currentPasswordControl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required],
+  });
   passwordError = signal<string | null>(null);
+  passwordAttempted = signal(false);
   activeModal = signal<ProfileModal | null>(null);
   nameControl = new FormControl<string>('', { nonNullable: true });
   usernameControl = new FormControl<string>('', {
     nonNullable: true,
     validators: [usernameRequirements],
   });
+  usernameError = signal<string | null>(null);
   newPasswordControl = new FormControl<string>('', {
     nonNullable: true,
     validators: [passwordRequirements],
   });
+  protected readonly passwordSpecialCharacters = ALLOWED_SPECIAL_CHARACTERS;
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
   ngOnInit(): void {
     this.loadUserProfile();
     this.showMessageFromStorage();
+    this.usernameControl.valueChanges.subscribe(() => {
+      this.usernameError.set(null);
+    });
   }
 
   protected showMessageFromStorage(): void {
@@ -102,8 +136,11 @@ export class ProfileComponent implements OnInit {
       this.nameControl.setValue(this.user()!.name);
     } else if (type === 'username') {
       this.usernameControl.setValue(this.user()!.username);
+      this.usernameError.set(null);
     } else if (type === 'email') {
-      this.emailDraft.set(this.user()!.email);
+      this.emailControl.setValue(this.user()!.email);
+      this.emailControl.markAsUntouched();
+      this.emailControl.markAsPristine();
       this.emailFlowState.set('idle');
       this.emailOtp.set('');
       this.emailError.set(null);
@@ -112,9 +149,10 @@ export class ProfileComponent implements OnInit {
       this.otpLoading.set(false);
       this.emailModalNotice.set(null);
     } else if (type === 'password') {
-      this.passwordCurrent.set('');
+      this.currentPasswordControl.reset('');
       this.newPasswordControl.setValue('');
       this.passwordError.set(null);
+      this.passwordAttempted.set(false);
     }
     this.activeModal.set(type);
   }
@@ -217,15 +255,12 @@ export class ProfileComponent implements OnInit {
   protected updateUsername(): void {
     this.usernameControl.markAsTouched();
     if (this.usernameControl.invalid) {
-      this.alert.set({
-        type: 'error',
-        message: 'Please enter a valid username before saving.',
-      });
+      this.usernameError.set('Please enter a valid username before saving.');
       return;
     }
     const username = this.usernameControl.value.trim();
     if (!username) {
-      this.alert.set({ type: 'error', message: 'Username cannot be empty.' });
+      this.usernameError.set('Username cannot be empty.');
       return;
     }
     this.savingField.set('username');
@@ -243,15 +278,17 @@ export class ProfileComponent implements OnInit {
         console.error('Failed to update username:', err);
         const detail = err.error?.detail || 'Failed to update username.';
         this.savingField.set(null);
-        this.alert.set({ type: 'error', message: detail });
+        this.usernameError.set(detail);
       },
     });
   }
 
   protected submitPasswordChange(): void {
-    const current = this.passwordCurrent().trim();
+    this.currentPasswordControl.markAsTouched();
+    const current = this.currentPasswordControl.value.trim();
     this.newPasswordControl.markAsTouched();
     const next = this.newPasswordControl.value.trim();
+    this.passwordAttempted.set(true);
     if (!current || !next) {
       this.passwordError.set('Both current and new passwords are required.');
       return;
@@ -271,10 +308,14 @@ export class ProfileComponent implements OnInit {
     this.apiService.updatePassword(current, next).subscribe({
       next: () => {
         this.savingField.set(null);
-        this.alert.set({
+        const flashMessage = {
           type: 'success',
           message: 'Password changed successfully.',
-        });
+        };
+        sessionStorage.setItem(
+          'profile_flash_message',
+          JSON.stringify(flashMessage),
+        );
         this.closeModal();
         this.reloadPage();
       },
@@ -289,11 +330,12 @@ export class ProfileComponent implements OnInit {
   }
 
   protected sendEmailOtp(): void {
-    const email = this.emailDraft().trim();
-    if (!email) {
-      this.emailError.set('Please enter an email address.');
+    this.emailControl.markAsTouched();
+    if (this.emailControl.invalid) {
+      this.emailError.set('Please correct the highlighted email errors.');
       return;
     }
+    const email = toAsciiEmail(this.emailControl.value.trim());
     this.emailLoading.set(true);
     this.emailError.set(null);
     this.alert.set(null);
@@ -342,6 +384,46 @@ export class ProfileComponent implements OnInit {
         this.otpError.set(message);
       },
     });
+  }
+
+  protected getEmailValidationMessages(): string[] {
+    return this.validationService.getErrorMessages(this.emailForm, 'email');
+  }
+
+  protected shouldShowEmailValidationMessages(): boolean {
+    return (
+      this.emailControl.invalid &&
+      (this.emailControl.dirty || this.emailControl.touched)
+    );
+  }
+
+  protected shouldShowPasswordFeedback(): boolean {
+    return (
+      this.newPasswordControl.invalid &&
+      (this.newPasswordControl.dirty ||
+        this.newPasswordControl.touched ||
+        this.passwordAttempted())
+    );
+  }
+
+  protected hasPasswordRequirementError(condition: string): boolean {
+    return (
+      this.shouldShowPasswordFeedback() &&
+      this.newPasswordControl.hasError(condition)
+    );
+  }
+
+  protected shouldDisableModalPrimary(): boolean {
+    const modal = this.activeModal();
+    if (modal === 'email') {
+      return this.emailControl.invalid;
+    }
+    if (modal === 'password') {
+      return (
+        this.newPasswordControl.invalid || this.currentPasswordControl.invalid
+      );
+    }
+    return false;
   }
 
   private loadUserProfile(): void {

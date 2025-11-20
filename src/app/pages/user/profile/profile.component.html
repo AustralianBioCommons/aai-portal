@@ -13,6 +13,7 @@
   [title]="modalTitle()"
   [description]="modalDescription()"
   [primaryButtonText]="modalPrimaryText()"
+  [primaryButtonDisabled]="shouldDisableModalPrimary()"
   secondaryButtonText="Cancel"
   (primaryOutput)="handleModalPrimary()"
   (secondaryOutput)="closeModal()"
@@ -42,6 +43,9 @@
         @if (usernameControl.invalid && usernameControl.touched) {
           <div class="text-xs text-red-600">Please enter a valid username.</div>
         }
+        @if (usernameError()) {
+          <div class="text-xs text-red-600">{{ usernameError() }}</div>
+        }
       </div>
     } @else if (activeModal() === "email") {
       <div class="space-y-3">
@@ -52,10 +56,16 @@
           <input
             id="modal-email"
             type="email"
-            [value]="emailDraft()"
-            (input)="emailDraft.set($any($event.target).value)"
+            [formControl]="emailControl"
             class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
           />
+          @if (shouldShowEmailValidationMessages()) {
+            <div class="text-xs text-red-600">
+              @for (error of getEmailValidationMessages(); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          }
           @if (emailError()) {
             <div class="text-xs text-red-600">{{ emailError() }}</div>
           }
@@ -101,35 +111,74 @@
           <input
             id="modal-current-password"
             type="password"
-            [value]="passwordCurrent()"
-            (input)="passwordCurrent.set($any($event.target).value)"
+            [formControl]="currentPasswordControl"
             class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
           />
-        </div>
-        <div class="space-y-1">
-          <label
-            class="text-sm font-medium text-gray-700"
-            for="modal-new-password"
-          >
-            New password
-          </label>
-          <input
-            id="modal-new-password"
-            type="password"
-            [formControl]="newPasswordControl"
-            class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
-          />
-          @if (newPasswordControl.invalid && newPasswordControl.touched) {
+          @if (
+            currentPasswordControl.invalid &&
+            (currentPasswordControl.touched || passwordAttempted())
+          ) {
             <div class="text-xs text-red-600">
-              Password must be 8-72 characters with uppercase, lowercase, a
-              digit, and a special character.
-            </div>
-          } @else {
-            <div class="text-xs text-gray-500">
-              Passwords must be 8-72 characters, include uppercase, lowercase, a
-              number, and a special character.
+              Current password is required.
             </div>
           }
+        </div>
+        <div class="space-y-2">
+          <div>
+            <label
+              class="text-sm font-medium text-gray-700"
+              for="modal-new-password"
+            >
+              New password
+            </label>
+            <input
+              id="modal-new-password"
+              type="password"
+              [formControl]="newPasswordControl"
+              class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
+            />
+          </div>
+          <div class="space-y-1" *ngIf="shouldShowPasswordFeedback()">
+            <div class="text-xs font-semibold text-gray-700">
+              Password issues:
+            </div>
+            <div
+              *ngIf="hasPasswordRequirementError('minlength')"
+              class="text-xs text-red-600"
+            >
+              At least 8 characters
+            </div>
+            <div
+              *ngIf="hasPasswordRequirementError('maxlength')"
+              class="text-xs text-red-600"
+            >
+              72 characters or less
+            </div>
+            <div
+              *ngIf="hasPasswordRequirementError('uppercaseRequired')"
+              class="text-xs text-red-600"
+            >
+              At least one uppercase letter
+            </div>
+            <div
+              *ngIf="hasPasswordRequirementError('lowercaseRequired')"
+              class="text-xs text-red-600"
+            >
+              At least one lowercase letter
+            </div>
+            <div
+              *ngIf="hasPasswordRequirementError('digitRequired')"
+              class="text-xs text-red-600"
+            >
+              At least one number
+            </div>
+            <div
+              *ngIf="hasPasswordRequirementError('specialCharacterRequired')"
+              class="text-xs text-red-600"
+            >
+              At least one special character ({{ passwordSpecialCharacters }})
+            </div>
+          </div>
         </div>
         @if (passwordError()) {
           <div class="text-xs text-red-600">{{ passwordError() }}</div>
@@ -179,7 +228,7 @@
           class="h-16 w-16 rounded-full bg-gray-200 object-cover"
         />
         <div class="space-y-2">
-          <div class="text-3xl font-semibold text-gray-900">
+          <div id="user-name" class="text-3xl font-semibold text-gray-900">
             {{ user()?.name }}
           </div>
         </div>
@@ -222,7 +271,7 @@
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-2">
-                    <div>{{ user()?.email }}</div>
+                    <div id="user-email">{{ user()?.email }}</div>
                     <span
                       class="rounded px-2 py-1 text-xs font-semibold uppercase"
                       [class]="
