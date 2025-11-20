@@ -23,6 +23,8 @@
       </p>
     }
 
+    <ng-content select="[modal-content]"></ng-content>
+
     @if (type() === "revoke" && textareaControl()) {
       <div>
         <label
