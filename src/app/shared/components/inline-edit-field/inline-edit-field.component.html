@@ -20,7 +20,7 @@
       <input
         #inputElement
         [type]="type"
-        class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
         [value]="control.value"
         (input)="onInput(inputElement.value)"
       />
@@ -40,7 +40,7 @@
       <div class="flex items-center justify-end gap-3">
         <button
           type="button"
-          class="rounded border border-gray-300 px-3 py-1 text-sm"
+          class="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-200"
           (click)="cancel()"
           [disabled]="saving"
         >
@@ -48,7 +48,7 @@
         </button>
         <button
           type="button"
-          class="rounded bg-blue-600 px-3 py-1 text-sm text-white disabled:opacity-60"
+          class="rounded bg-sky-600 px-3 py-1 text-sm text-white hover:bg-sky-900 disabled:opacity-60"
           (click)="submit()"
           [disabled]="saving"
         >
