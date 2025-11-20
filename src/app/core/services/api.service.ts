@@ -294,4 +294,18 @@ export class ApiService {
       {},
     );
   }
+
+  updateUserUsername(username: string) {
+    return this.http.post<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/me/profile/username/update`,
+      { username: username },
+    );
+  }
+
+  updatePassword(currentPassword: string, newPassword: string) {
+    return this.http.post<boolean>(
+      `${environment.auth0.backend}/me/profile/password/update`,
+      { current_password: currentPassword, new_password: newPassword },
+    );
+  }
 }

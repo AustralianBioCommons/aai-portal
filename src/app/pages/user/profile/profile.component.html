@@ -68,13 +68,19 @@
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div id="user-username">
-                <div class="text-sm font-light text-gray-500">Username</div>
-                <div class="flex items-center justify-between gap-6">
-                  <div>{{ user()?.username }}</div>
-                  <app-edit-button></app-edit-button>
-                </div>
-              </div>
+              <app-inline-edit-field
+                #usernameField
+                id="user-username"
+                label="Username"
+                fieldKey="username"
+                helpText="Your username should contain 3 or more characters, including letters, numbers, dashes, and underscores."
+                invalidMessage="Invalid username: please check the requirements and try again."
+                [validators]="[usernameRequirements]"
+                [value]="user()?.username || ''"
+                [saving]="savingField() === 'username'"
+                (save)="saveUsername($event, usernameField)"
+              ></app-inline-edit-field>
+
               <div id="user-email">
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center justify-between gap-6">
@@ -94,13 +100,12 @@
                   <app-edit-button></app-edit-button>
                 </div>
               </div>
-              <div id="user-password">
-                <div class="text-sm font-light text-gray-500">Password</div>
-                <div class="flex items-center justify-between gap-6">
-                  <div>••••••••••••</div>
-                  <app-edit-button text="Change"></app-edit-button>
-                </div>
-              </div>
+              <app-password-edit-field
+                #passwordField
+                id="user-password"
+                [saving]="savingField() === 'password'"
+                (changePassword)="changePassword($event, passwordField)"
+              ></app-password-edit-field>
             </div>
           </div>
         </div>
