@@ -97,7 +97,10 @@ export class ProfileComponent implements OnInit {
   passwordError = signal<string | null>(null);
   passwordAttempted = signal(false);
   activeModal = signal<ProfileModal | null>(null);
-  nameControl = new FormControl<string>('', { nonNullable: true });
+  nameControl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.maxLength(255)],
+  });
   usernameControl = new FormControl<string>('', {
     nonNullable: true,
     validators: [usernameRequirements],
