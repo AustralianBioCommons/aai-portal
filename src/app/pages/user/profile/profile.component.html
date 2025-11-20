@@ -89,10 +89,15 @@
               autocomplete="one-time-code"
               [value]="emailOtp()"
               (input)="emailOtp.set($any($event.target).value)"
+              [attr.aria-describedby]="otpError() ? 'modal-otp-error' : null"
               class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
             />
             @if (otpError()) {
-              <div class="text-xs text-red-600" role="alert">
+              <div
+                id="modal-otp-error"
+                class="text-xs text-red-600"
+                role="alert"
+              >
                 {{ otpError() }}
               </div>
             }
