@@ -209,6 +209,12 @@ export class ProfileComponent implements OnInit {
   protected modalPrimaryText(): string {
     const type = this.activeModal();
     if (type === 'email') {
+      if (this.emailLoading()) {
+        return 'Sending...';
+      }
+      if (this.otpLoading()) {
+        return 'Verifying...';
+      }
       return this.emailFlowState() === 'otp-sent' ? 'Confirm OTP' : 'Send OTP';
     }
     return this.savingField() === type ? 'Saving...' : 'Save';
