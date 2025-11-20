@@ -1,7 +1,6 @@
 import {
   Component,
   EventEmitter,
-  Input,
   Output,
   signal,
   effect,
@@ -17,13 +16,13 @@ import { FormControl, ValidatorFn } from '@angular/forms';
   host: { class: 'block' },
 })
 export class InlineEditFieldComponent {
-  @Input({ required: true }) label!: string;
-  @Input({ required: true }) fieldKey!: string;
-  @Input() type = 'text';
-  @Input() saving = false;
-  @Input() validators: ValidatorFn[] | null = null;
-  @Input() invalidMessage = 'Invalid value';
-  @Input() helpText = '';
+  label = input.required<string>();
+  fieldKey = input.required<string>();
+  type = input<string>('text');
+  saving = input.required<boolean>();
+  validators = input<ValidatorFn[] | null>(null);
+  invalidMessage = input<string>('Invalid value');
+  helpText = input<string>('');
   value = input.required<string>();
 
   @Output() save = new EventEmitter<string>();
@@ -36,8 +35,8 @@ export class InlineEditFieldComponent {
 
   constructor() {
     effect(() => {
-      if (this.validators) {
-        this.control.setValidators(this.validators);
+      if (this.validators()) {
+        this.control.setValidators(this.validators());
       } else {
         this.control.clearValidators();
       }
@@ -78,7 +77,7 @@ export class InlineEditFieldComponent {
     this.control.updateValueAndValidity();
 
     if (this.control.invalid) {
-      this.validationError.set(this.invalidMessage);
+      this.validationError.set(this.invalidMessage());
       return;
     }
 

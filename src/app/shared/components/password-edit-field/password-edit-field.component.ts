@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, input, Output, signal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { passwordRequirements } from '../../validators/passwords';
 
@@ -10,7 +10,7 @@ import { passwordRequirements } from '../../validators/passwords';
 })
 export class PasswordEditFieldComponent {
   /** Whether a save request is in progress (parent controls this). */
-  @Input() saving = false;
+  saving = input.required<boolean>();
 
   /**
    * Emitted when user submits the form.
