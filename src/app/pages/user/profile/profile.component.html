@@ -41,10 +41,14 @@
           class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
         />
         @if (usernameControl.invalid && usernameControl.touched) {
-          <div class="text-xs text-red-600">Please enter a valid username.</div>
+          <div class="text-xs text-red-600" role="alert">
+            Please enter a valid username.
+          </div>
         }
         @if (usernameError()) {
-          <div class="text-xs text-red-600">{{ usernameError() }}</div>
+          <div class="text-xs text-red-600" role="alert">
+            {{ usernameError() }}
+          </div>
         }
       </div>
     } @else if (activeModal() === "email") {
@@ -60,14 +64,16 @@
             class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
           />
           @if (shouldShowEmailValidationMessages()) {
-            <div class="text-xs text-red-600">
+            <div class="text-xs text-red-600" role="alert">
               @for (error of getEmailValidationMessages(); track error) {
                 {{ error }}<br />
               }
             </div>
           }
           @if (emailError()) {
-            <div class="text-xs text-red-600">{{ emailError() }}</div>
+            <div class="text-xs text-red-600" role="alert">
+              {{ emailError() }}
+            </div>
           }
         </div>
         @if (emailFlowState() === "otp-sent") {
@@ -86,7 +92,9 @@
               class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-biocommons-primary/50"
             />
             @if (otpError()) {
-              <div class="text-xs text-red-600">{{ otpError() }}</div>
+              <div class="text-xs text-red-600" role="alert">
+                {{ otpError() }}
+              </div>
             }
           </div>
         }
@@ -119,7 +127,7 @@
             currentPasswordControl.invalid &&
             (currentPasswordControl.touched || passwordAttempted())
           ) {
-            <div class="text-xs text-red-600">
+            <div class="text-xs text-red-600" role="alert">
               Current password is required.
             </div>
           }
@@ -146,36 +154,42 @@
             <div
               *ngIf="hasPasswordRequirementError('minlength')"
               class="text-xs text-red-600"
+              role="alert"
             >
               At least 8 characters
             </div>
             <div
               *ngIf="hasPasswordRequirementError('maxlength')"
               class="text-xs text-red-600"
+              role="alert"
             >
               72 characters or less
             </div>
             <div
               *ngIf="hasPasswordRequirementError('uppercaseRequired')"
               class="text-xs text-red-600"
+              role="alert"
             >
               At least one uppercase letter
             </div>
             <div
               *ngIf="hasPasswordRequirementError('lowercaseRequired')"
               class="text-xs text-red-600"
+              role="alert"
             >
               At least one lowercase letter
             </div>
             <div
               *ngIf="hasPasswordRequirementError('digitRequired')"
               class="text-xs text-red-600"
+              role="alert"
             >
               At least one number
             </div>
             <div
               *ngIf="hasPasswordRequirementError('specialCharacterRequired')"
               class="text-xs text-red-600"
+              role="alert"
             >
               At least one special character ({{ passwordSpecialCharacters }})
             </div>
