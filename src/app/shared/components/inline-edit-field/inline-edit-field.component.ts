@@ -1,4 +1,3 @@
-// inline-edit-field.component.ts
 import {
   Component,
   EventEmitter,
