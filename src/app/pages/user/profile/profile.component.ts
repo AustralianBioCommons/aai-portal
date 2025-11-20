@@ -89,6 +89,7 @@ export class ProfileComponent implements OnInit {
   emailError = signal<string | null>(null);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
+  emailOtpLocked = signal(false);
   currentPasswordControl = new FormControl<string>('', {
     nonNullable: true,
     validators: [Validators.required],
@@ -148,6 +149,7 @@ export class ProfileComponent implements OnInit {
       this.emailLoading.set(false);
       this.otpLoading.set(false);
       this.emailModalNotice.set(null);
+      this.emailOtpLocked.set(false);
     } else if (type === 'password') {
       this.currentPasswordControl.reset('');
       this.newPasswordControl.setValue('');
@@ -168,6 +170,7 @@ export class ProfileComponent implements OnInit {
       this.emailLoading.set(false);
       this.otpLoading.set(false);
       this.emailModalNotice.set(null);
+      this.emailOtpLocked.set(false);
     }
   }
 
@@ -339,6 +342,7 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(true);
     this.emailError.set(null);
     this.alert.set(null);
+    this.emailOtpLocked.set(false);
     this.apiService.requestEmailChange(email).subscribe({
       next: ({ message }) => {
         this.emailLoading.set(false);
@@ -382,6 +386,9 @@ export class ProfileComponent implements OnInit {
             ? 'That email is already used by another account.'
             : (detail ?? 'Invalid code. Please try again.');
         this.otpError.set(message);
+        if (status === 429) {
+          this.emailOtpLocked.set(true);
+        }
       },
     });
   }
@@ -416,7 +423,7 @@ export class ProfileComponent implements OnInit {
   protected shouldDisableModalPrimary(): boolean {
     const modal = this.activeModal();
     if (modal === 'email') {
-      return this.emailControl.invalid;
+      return this.emailControl.invalid || this.emailOtpLocked();
     }
     if (modal === 'password') {
       return (

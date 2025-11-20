@@ -342,6 +342,36 @@ describe('ProfileComponent', () => {
     expect(component.emailFlowState()).toBe('otp-sent');
   });
 
+  it('locks the email flow after too many OTP attempts', () => {
+    const errorResponse = {
+      status: 429,
+      error: { detail: 'Too many verification attempts. Try again later.' },
+    };
+    mockApiService.continueEmailChange.and.returnValue(
+      throwError(() => errorResponse),
+    );
+
+    fixture.detectChanges();
+
+    openModal('email');
+    component.emailFlowState.set('otp-sent');
+    component.emailOtp.set('123456');
+    fixture.detectChanges();
+
+    confirmEmailChange();
+    fixture.detectChanges();
+
+    expect(component.emailOtpLocked()).toBeTrue();
+    expect(component.otpError()).toBe(errorResponse.error.detail);
+    const shouldDisableModalPrimary = () =>
+      (
+        component as unknown as {
+          shouldDisableModalPrimary(): boolean;
+        }
+      ).shouldDisableModalPrimary();
+    expect(shouldDisableModalPrimary()).toBeTrue();
+  });
+
   it('handles a successful password change', () => {
     sessionStorage.removeItem('profile_flash_message');
     component.currentPasswordControl.setValue('Current123!');
