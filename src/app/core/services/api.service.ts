@@ -35,6 +35,9 @@ export interface UserProfileData {
   email_verified: boolean;
   username: string;
   picture: string;
+  created_at: string;
+  last_login: string | null;
+  updated_at: string;
   platform_memberships: UserProfilePlatformData[];
   group_memberships: UserProfileGroupData[];
 }
@@ -133,6 +136,20 @@ export class ApiService {
   getUserProfile(): Observable<UserProfileData> {
     return this.http.get<UserProfileData>(
       `${environment.auth0.backend}/me/profile`,
+    );
+  }
+
+  requestEmailChange(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/me/profile/email/update`,
+      { email },
+    );
+  }
+
+  continueEmailChange(otp: string): Observable<void> {
+    return this.http.post<void>(
+      `${environment.auth0.backend}/me/profile/email/continue`,
+      { otp },
     );
   }
 
@@ -299,6 +316,13 @@ export class ApiService {
     return this.http.post<BiocommonsUserDetails>(
       `${environment.auth0.backend}/me/profile/username/update`,
       { username: username },
+    );
+  }
+
+  updateFullName(fullName: string) {
+    return this.http.post<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/me/profile/full-name/update`,
+      { full_name: fullName },
     );
   }
 

@@ -23,6 +23,8 @@
       </p>
     }
 
+    <ng-content select="[modal-content]"></ng-content>
+
     @if (type() === "revoke" && textareaControl()) {
       <div>
         <label
@@ -63,7 +65,12 @@
       <app-button type="button" variant="secondary" (click)="onSecondary()">
         {{ secondaryButtonText() }}
       </app-button>
-      <app-button type="button" variant="primary" (click)="onPrimary()">
+      <app-button
+        type="button"
+        variant="primary"
+        (click)="onPrimary()"
+        [disabled]="primaryButtonDisabled()"
+      >
         {{ primaryButtonText() }}
       </app-button>
     </div>
