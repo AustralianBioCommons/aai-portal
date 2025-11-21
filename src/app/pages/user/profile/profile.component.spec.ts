@@ -249,13 +249,10 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     expect(component.usernameError()).toBe('Username already taken');
-    expect(component.alert()).toBeNull();
-    const inlineError = fixture.debugElement
-      .queryAll(By.css('div.text-xs.text-red-600'))
-      .find((el) =>
-        el.nativeElement.textContent.includes('Username already taken'),
-      );
-    expect(inlineError).toBeTruthy();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'Username already taken',
+    });
   });
 
   it('sends an OTP when a new email address is entered', () => {
@@ -414,7 +411,11 @@ describe('ProfileComponent', () => {
     expect(component.passwordError()).toBe(
       'Failed to update password. Please check your current password and try again.',
     );
-    expect(component.alert()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message:
+        'Failed to update password. Please check your current password and try again.',
+    });
     expect(reloadSpy).not.toHaveBeenCalled();
     expect(sessionStorage.getItem('profile_flash_message')).toBeNull();
     expect(component.savingField()).toBeNull();
@@ -438,7 +439,11 @@ describe('ProfileComponent', () => {
     expect(component.passwordError()).toBe(
       'Failed to update password. Please check your current password and try again.',
     );
-    expect(component.alert()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message:
+        'Failed to update password. Please check your current password and try again.',
+    });
     expect(reloadSpy).not.toHaveBeenCalled();
     expect(sessionStorage.getItem('profile_flash_message')).toBeNull();
     expect(component.savingField()).toBeNull();

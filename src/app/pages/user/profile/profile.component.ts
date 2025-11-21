@@ -259,6 +259,7 @@ export class ProfileComponent implements OnInit {
         console.error('Failed to update name:', err);
         const detail = err.error?.detail || 'Failed to update name.';
         this.savingField.set(null);
+        this.closeModal();
         this.alert.set({ type: 'error', message: detail });
       },
     });
@@ -290,7 +291,9 @@ export class ProfileComponent implements OnInit {
         console.error('Failed to update username:', err);
         const detail = err.error?.detail || 'Failed to update username.';
         this.savingField.set(null);
+        this.closeModal();
         this.usernameError.set(detail);
+        this.alert.set({ type: 'error', message: detail });
       },
     });
   }
@@ -337,6 +340,12 @@ export class ProfileComponent implements OnInit {
         this.passwordError.set(
           'Failed to update password. Please check your current password and try again.',
         );
+        this.closeModal();
+        this.alert.set({
+          type: 'error',
+          message:
+            'Failed to update password. Please check your current password and try again.',
+        });
       },
     });
   }
