@@ -10,10 +10,7 @@ import { environment } from '../../../environments/environment';
  * (because they involve registration, where the user won't
  * be logged in)
  */
-const BYPASS_URLS = [
-  '/register',
-  '/utils/registration_info',
-] as readonly string[];
+const BYPASS_URLS = ['/register', '/utils/register/'] as readonly string[];
 /**
  * HTTP interceptor that adds the Auth0 access token to requests sent to the AAI backend API
  */

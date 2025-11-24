@@ -96,9 +96,34 @@ export class ValidationService {
   }
 
   /**
+   * Checks if a specific field has a backend error.
+   * @param fieldName The field name to check
+   * @returns True if the field has a backend error
+   */
+  hasFieldBackendError(fieldName: string): boolean {
+    return fieldName in this.backendErrorMessages;
+  }
+
+  /**
+   * Clears the backend error message for a specific field.
+   * @param fieldName The field name to clear the error for
+   */
+  clearFieldBackendError(fieldName: string) {
+    delete this.backendErrorMessages[fieldName];
+  }
+
+  /**
+   * Checks if there are any backend error messages.
+   * @returns True if there are any backend errors
+   */
+  hasBackendErrors(): boolean {
+    return Object.keys(this.backendErrorMessages).length > 0;
+  }
+
+  /**
    * Resets the backend error messages for all fields.
    */
-  reset() {
+  resetBackendErrors() {
     this.backendErrorMessages = {};
   }
 

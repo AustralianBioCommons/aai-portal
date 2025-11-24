@@ -11,7 +11,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, of } from 'rxjs';
+import { catchError, of, forkJoin } from 'rxjs';
 import { biocommonsBundles, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
@@ -26,6 +26,7 @@ import {
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
+import { AvailabilityResponse } from '../../shared/types/backend.types';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -78,6 +79,8 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   errorAlert = signal<string | null>(null);
   isSubmitting = signal<boolean>(false);
+  isCheckingAvailability = signal<boolean>(false);
+  registrationEmail = signal<string | null>(null);
 
   bundles: Bundle[] = biocommonsBundles;
 
@@ -103,21 +106,35 @@ export class RegisterComponent implements OnInit, OnDestroy {
     });
 
   termsForm: FormGroup = this.formBuilder.nonNullable.group({});
-  protected readonly registrationEmail = signal<string | null>(null);
-
-  private readonly popStateHandler = (event: PopStateEvent) => {
-    const stepFromState = event.state?.step;
-    if (typeof stepFromState !== 'number') {
-      return;
-    }
-    this.transitionToStep(stepFromState, { fromHistory: true });
-  };
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
-    this.applyFullNameLengthValidation();
+
+    this.registrationForm.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.applyFullNameLengthValidation();
+      });
+
+    this.registrationForm
+      .get('username')
+      ?.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.validationService.hasFieldBackendError('username')) {
+          this.validationService.clearFieldBackendError('username');
+        }
+      });
+
+    this.registrationForm
+      .get('email')
+      ?.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.validationService.hasFieldBackendError('email')) {
+          this.validationService.clearFieldBackendError('email');
+        }
+      });
   }
 
   ngOnInit(): void {
@@ -130,6 +147,110 @@ export class RegisterComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (typeof window !== 'undefined') {
       window.removeEventListener('popstate', this.popStateHandler);
+    }
+  }
+
+  private readonly popStateHandler = (event: PopStateEvent) => {
+    const stepFromState = event.state?.step;
+    if (typeof stepFromState !== 'number') {
+      return;
+    }
+    this.transitionToStep(stepFromState, { fromHistory: true });
+  };
+
+  private applyFullNameLengthValidation(): void {
+    const firstNameControl = this.registrationForm.get('firstName');
+    const lastNameControl = this.registrationForm.get('lastName');
+
+    if (!firstNameControl || !lastNameControl) {
+      return;
+    }
+
+    const sanitize = (value: string | null | undefined): string =>
+      (value ?? '').trim();
+
+    const firstName = sanitize(firstNameControl.value);
+    const lastName = sanitize(lastNameControl.value);
+    const combined = [firstName, lastName].filter(Boolean).join(' ');
+    const exceedsLimit = combined.length > 255;
+
+    const updateControlError = (
+      control: AbstractControl<string>,
+      hasError: boolean,
+    ) => {
+      const existingErrors = control.errors ?? {};
+      if (hasError) {
+        if (!existingErrors['fullNameTooLong']) {
+          control.setErrors({ ...existingErrors, fullNameTooLong: true });
+        }
+      } else if (existingErrors['fullNameTooLong']) {
+        const remaining = { ...existingErrors };
+        delete remaining['fullNameTooLong'];
+        const nextErrors = Object.keys(remaining).length > 0 ? remaining : null;
+        control.setErrors(nextErrors);
+      }
+    };
+    updateControlError(firstNameControl, exceedsLimit);
+    updateControlError(lastNameControl, exceedsLimit);
+  }
+
+  private updateHistoryState(step: number, replace: boolean): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const existingState = window.history.state ?? {};
+    const newState = { ...existingState, step };
+    const title = typeof document !== 'undefined' ? document.title : '';
+    if (replace) {
+      window.history.replaceState(newState, title);
+    } else {
+      window.history.pushState(newState, title);
+    }
+  }
+
+  private transitionToStep(
+    targetStep: number,
+    options: { fromHistory?: boolean; persistValidation?: boolean } = {},
+  ): void {
+    const previousStep = this.currentStep();
+    if (targetStep === previousStep) {
+      return;
+    }
+
+    if (targetStep < 1) {
+      this.router.navigate(['../'], { relativeTo: this.route });
+      return;
+    }
+
+    let clampedStep = targetStep;
+    if (clampedStep > this.totalSteps) {
+      clampedStep = this.totalSteps;
+    }
+
+    const movingForward = clampedStep > previousStep;
+
+    if (clampedStep < previousStep) {
+      for (let step = previousStep; step > clampedStep; step--) {
+        this.resetStepValidation(step, options.persistValidation);
+      }
+    }
+
+    this.currentStep.set(clampedStep);
+
+    if (!options.fromHistory) {
+      this.updateHistoryState(clampedStep, false);
+    }
+
+    if (clampedStep === 4 && movingForward) {
+      this.initializeTermsForm();
+    }
+
+    if (
+      !options.fromHistory &&
+      typeof window !== 'undefined' &&
+      typeof window.scrollTo === 'function'
+    ) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -157,51 +278,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
     this.termsForm = this.formBuilder.nonNullable.group(termsControls);
   }
 
-  private applyFullNameLengthValidation(): void {
-    const enforce = () => {
-      const firstControl = this.registrationForm.get('firstName');
-      const lastControl = this.registrationForm.get('lastName');
-
-      if (!firstControl || !lastControl) {
-        return;
-      }
-
-      const sanitize = (value: string | null | undefined): string =>
-        (value ?? '').trim();
-
-      const firstName = sanitize(firstControl.value);
-      const lastName = sanitize(lastControl.value);
-      const combined = [firstName, lastName].filter(Boolean).join(' ');
-      const exceedsLimit = combined.length > 255;
-
-      const updateControlError = (
-        control: AbstractControl<string>,
-        hasError: boolean,
-      ) => {
-        const existingErrors = control.errors ?? {};
-        if (hasError) {
-          if (!existingErrors['fullNameTooLong']) {
-            control.setErrors({ ...existingErrors, fullNameTooLong: true });
-          }
-        } else if (existingErrors['fullNameTooLong']) {
-          const remaining = { ...existingErrors };
-          delete remaining['fullNameTooLong'];
-          const nextErrors =
-            Object.keys(remaining).length > 0 ? remaining : null;
-          control.setErrors(nextErrors);
-        }
-      };
-
-      updateControlError(firstControl, exceedsLimit);
-      updateControlError(lastControl, exceedsLimit);
-    };
-
-    this.registrationForm.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => enforce());
-    enforce();
-  }
-
   resolved(captchaResponse: string | null): void {
     this.recaptchaToken.set(captchaResponse);
   }
@@ -224,72 +300,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
   }
 
-  private updateHistoryState(step: number, replace: boolean): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const existingState = window.history.state ?? {};
-    const newState = { ...existingState, step };
-    const title = typeof document !== 'undefined' ? document.title : '';
-    if (replace) {
-      window.history.replaceState(newState, title);
-    } else {
-      window.history.pushState(newState, title);
-    }
-  }
-
-  private transitionToStep(
-    targetStep: number,
-    options: { fromHistory?: boolean } = {},
-  ): void {
-    const previousStep = this.currentStep();
-    if (targetStep === previousStep) {
-      return;
-    }
-
-    if (targetStep < 1) {
-      this.router.navigate(['../'], { relativeTo: this.route });
-      return;
-    }
-
-    let clampedStep = targetStep;
-    if (clampedStep > this.totalSteps) {
-      clampedStep = this.totalSteps;
-    }
-
-    const movingForward = clampedStep > previousStep;
-
-    if (clampedStep < previousStep) {
-      for (let step = previousStep; step > clampedStep; step--) {
-        this.resetStepValidation(step);
-      }
-    }
-
-    this.currentStep.set(clampedStep);
-
-    if (!options.fromHistory) {
-      this.updateHistoryState(clampedStep, false);
-    }
-
-    if (clampedStep === 4 && movingForward) {
-      this.initializeTermsForm();
-    }
-
-    if (
-      !options.fromHistory &&
-      typeof window !== 'undefined' &&
-      typeof window.scrollTo === 'function'
-    ) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
   getSelectedBundle(): Bundle | undefined {
     const selectedId = this.bundleForm.get('selectedBundle')?.value;
     return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
   prevStep() {
+    this.errorAlert.set(null);
     if (this.currentStep() === 1) {
       this.router.navigate(['../'], { relativeTo: this.route });
     } else {
@@ -303,6 +320,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   }
 
   nextStep() {
+    this.errorAlert.set(null);
     switch (this.currentStep()) {
       case 1:
         this.transitionToStep(this.currentStep() + 1);
@@ -340,7 +358,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
 
     form.markAllAsTouched();
-    if (form.valid) {
+
+    if (form.valid && !this.validationService.hasBackendErrors()) {
+      if (this.currentStep() === 2) {
+        this.checkAvailability();
+        return true;
+      }
+
       if (onSuccess) {
         onSuccess();
       }
@@ -352,7 +376,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     }
   }
 
-  private resetStepValidation(step: number) {
+  private resetStepValidation(step: number, persistValidation = false) {
     this.errorAlert.set(null);
     switch (step) {
       case 1:
@@ -360,7 +384,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
       case 2:
         this.registrationForm.markAsUntouched();
         this.registrationForm.markAsPristine();
-        this.validationService.reset();
+        if (!persistValidation) {
+          this.validationService.resetBackendErrors();
+        }
         this.recaptchaToken.set(null);
         this.recaptchaAttempted.set(false);
         break;
@@ -397,9 +423,67 @@ export class RegisterComponent implements OnInit, OnDestroy {
     );
   }
 
+  private checkAvailability() {
+    this.isCheckingAvailability.set(true);
+    this.errorAlert.set(null);
+
+    const formValue = this.registrationForm.value;
+    const username = formValue.username!;
+    const email = toAsciiEmail(formValue.email!);
+
+    forkJoin({
+      username: this.http
+        .get<AvailabilityResponse>(
+          `${environment.auth0.backend}/utils/register/check-username-availability`,
+          { params: { username } },
+        )
+        .pipe(
+          catchError((error: HttpErrorResponse) => {
+            console.error('Username availability check failed:', error);
+            return of({ available: true } as AvailabilityResponse);
+          }),
+        ),
+      email: this.http
+        .get<AvailabilityResponse>(
+          `${environment.auth0.backend}/utils/register/check-email-availability`,
+          { params: { email } },
+        )
+        .pipe(
+          catchError((error: HttpErrorResponse) => {
+            console.error('Email availability check failed:', error);
+            return of({ available: true } as AvailabilityResponse);
+          }),
+        ),
+    }).subscribe(({ username: usernameResponse, email: emailResponse }) => {
+      this.isCheckingAvailability.set(false);
+
+      const fieldErrors = [
+        ...(usernameResponse.field_errors || []),
+        ...(emailResponse.field_errors || []),
+      ];
+
+      if (fieldErrors.length > 0) {
+        fieldErrors.forEach((fieldError) => {
+          this.validationService.setBackendErrorMessages({
+            error: {
+              message: 'Validation failed',
+              field_errors: [fieldError],
+            },
+          } as HttpErrorResponse);
+        });
+
+        this.registrationForm.markAllAsTouched();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        this.transitionToStep(this.currentStep() + 1);
+      }
+    });
+  }
+
   private completeRegistration() {
     this.isSubmitting.set(true);
     this.errorAlert.set(null);
+    this.validationService.resetBackendErrors();
 
     const formValue = this.registrationForm.value;
     const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
@@ -422,9 +506,15 @@ export class RegisterComponent implements OnInit, OnDestroy {
         catchError((error: HttpErrorResponse) => {
           console.error('Registration failed:', error);
           this.validationService.setBackendErrorMessages(error);
-          this.errorAlert.set(
-            error?.error?.message || 'Registration failed. Please try again.',
-          );
+
+          const errorMessage =
+            error?.error?.message || 'Registration failed. Please try again.';
+
+          if (errorMessage.toLowerCase().includes('already taken')) {
+            this.transitionToStep(2, { persistValidation: true });
+            this.registrationForm.markAllAsTouched();
+          }
+          this.errorAlert.set(errorMessage);
           this.isSubmitting.set(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return of(null);
