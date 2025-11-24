@@ -203,7 +203,54 @@ describe('RegisterComponent', () => {
       component.recaptchaToken.set('test-recaptcha-token');
       component.nextStep();
 
+      const usernameReq = httpMock.expectOne(
+        `${environment.auth0.backend}/utils/check-username-availability?username=johndoe`,
+      );
+      expect(usernameReq.request.method).toBe('GET');
+      usernameReq.flush({ available: true });
+
+      const emailReq = httpMock.expectOne(
+        `${environment.auth0.backend}/utils/check-email-availability?email=john.doe@example.com`,
+      );
+      expect(emailReq.request.method).toBe('GET');
+      emailReq.flush({ available: true });
+
       expect(component.currentStep()).toBe(3);
+    });
+
+    it('should stay on step 2 if username or email is already taken', () => {
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'taken@example.com',
+        username: 'takenusr',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+
+      component.recaptchaToken.set('test-recaptcha-token');
+      component.nextStep();
+
+      const usernameReq = httpMock.expectOne(
+        `${environment.auth0.backend}/utils/check-username-availability?username=takenusr`,
+      );
+      usernameReq.flush({
+        available: false,
+        field_errors: [
+          { field: 'username', message: 'Username is already taken' },
+        ],
+      });
+
+      const emailReq = httpMock.expectOne(
+        `${environment.auth0.backend}/utils/check-email-availability?email=taken@example.com`,
+      );
+      emailReq.flush({
+        available: false,
+        field_errors: [{ field: 'email', message: 'Email is already taken' }],
+      });
+
+      expect(component.currentStep()).toBe(2);
+      expect(component.registrationForm.touched).toBe(true);
     });
 
     it('should go back to step 1', () => {
@@ -651,6 +698,18 @@ describe('RegisterComponent', () => {
       component.recaptchaToken.set('token');
       pushStateSpy.calls.reset();
       component.nextStep();
+
+      // Mock the availability check API calls
+      const usernameReq = httpMock.expectOne(
+        `${environment.auth0.backend}/utils/check-username-availability?username=janedoe`,
+      );
+      usernameReq.flush({ available: true });
+
+      const emailReq = httpMock.expectOne(
+        `${environment.auth0.backend}/utils/check-email-availability?email=jane.doe@example.com`,
+      );
+      emailReq.flush({ available: true });
+
       expect(component.currentStep()).toBe(3);
       const [stateArg] = pushStateSpy.calls.mostRecent().args as [
         Record<string, unknown>,

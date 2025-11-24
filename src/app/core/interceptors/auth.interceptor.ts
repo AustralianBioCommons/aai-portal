@@ -12,7 +12,9 @@ import { environment } from '../../../environments/environment';
  */
 const BYPASS_URLS = [
   '/register',
-  '/utils/registration_info',
+  '/utils/registration-info',
+  '/utils/check-username-availability',
+  '/utils/check-email-availability',
 ] as readonly string[];
 /**
  * HTTP interceptor that adds the Auth0 access token to requests sent to the AAI backend API
