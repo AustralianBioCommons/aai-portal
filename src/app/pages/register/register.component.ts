@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
@@ -59,7 +59,7 @@ interface RegistrationRequest {
   ],
   styleUrl: './register.component.css',
 })
-export class RegisterComponent implements OnInit, OnDestroy {
+export class RegisterComponent {
   public router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
@@ -70,9 +70,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
   private readonly galaxyPlatformUrl =
     environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
 
-  currentStep = signal(1);
-  totalSteps = 6;
-
   recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   recaptchaToken = signal<string | null>(null);
   recaptchaAttempted = signal(false);
@@ -81,6 +78,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   isSubmitting = signal<boolean>(false);
   isCheckingAvailability = signal<boolean>(false);
   registrationEmail = signal<string | null>(null);
+  isRegistrationComplete = signal<boolean>(false);
 
   bundles: Bundle[] = biocommonsBundles;
 
@@ -135,28 +133,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
           this.validationService.clearFieldBackendError('email');
         }
       });
-  }
 
-  ngOnInit(): void {
-    if (typeof window !== 'undefined') {
-      this.updateHistoryState(this.currentStep(), true);
-      window.addEventListener('popstate', this.popStateHandler);
-    }
+    this.initializeTermsForm();
   }
-
-  ngOnDestroy(): void {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('popstate', this.popStateHandler);
-    }
-  }
-
-  private readonly popStateHandler = (event: PopStateEvent) => {
-    const stepFromState = event.state?.step;
-    if (typeof stepFromState !== 'number') {
-      return;
-    }
-    this.transitionToStep(stepFromState, { fromHistory: true });
-  };
 
   private applyFullNameLengthValidation(): void {
     const firstNameControl = this.registrationForm.get('firstName');
@@ -194,69 +173,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     updateControlError(lastNameControl, exceedsLimit);
   }
 
-  private updateHistoryState(step: number, replace: boolean): void {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const existingState = window.history.state ?? {};
-    const newState = { ...existingState, step };
-    const title = typeof document !== 'undefined' ? document.title : '';
-    if (replace) {
-      window.history.replaceState(newState, title);
-    } else {
-      window.history.pushState(newState, title);
-    }
-  }
-
-  private transitionToStep(
-    targetStep: number,
-    options: { fromHistory?: boolean; persistValidation?: boolean } = {},
-  ): void {
-    const previousStep = this.currentStep();
-    if (targetStep === previousStep) {
-      return;
-    }
-
-    if (targetStep < 1) {
-      this.router.navigate(['../'], { relativeTo: this.route });
-      return;
-    }
-
-    let clampedStep = targetStep;
-    if (clampedStep > this.totalSteps) {
-      clampedStep = this.totalSteps;
-    }
-
-    const movingForward = clampedStep > previousStep;
-
-    if (clampedStep < previousStep) {
-      for (let step = previousStep; step > clampedStep; step--) {
-        this.resetStepValidation(step, options.persistValidation);
-      }
-    }
-
-    this.currentStep.set(clampedStep);
-
-    if (!options.fromHistory) {
-      this.updateHistoryState(clampedStep, false);
-    }
-
-    if (clampedStep === 4 && movingForward) {
-      this.initializeTermsForm();
-    }
-
-    if (
-      !options.fromHistory &&
-      typeof window !== 'undefined' &&
-      typeof window.scrollTo === 'function'
-    ) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }
-
   private initializeTermsForm() {
-    const selectedBundle = this.getSelectedBundle();
-
     // Always include BioCommons Access terms
     const termsControls: Record<string, FormControl<boolean>> = {
       biocommonsAccess: this.formBuilder.nonNullable.control(
@@ -265,11 +182,33 @@ export class RegisterComponent implements OnInit, OnDestroy {
       ),
     };
 
+    this.termsForm = this.formBuilder.nonNullable.group(termsControls);
+
+    // Watch for bundle selection changes to update terms form
+    this.bundleForm
+      .get('selectedBundle')
+      ?.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe((selectedBundle) => {
+        this.updateTermsFormForBundle(selectedBundle);
+      });
+  }
+
+  private updateTermsFormForBundle(bundleId: string) {
+    const bundle = this.bundles.find((b) => b.id === bundleId);
+
+    // Always include BioCommons Access terms
+    const termsControls: Record<string, FormControl<boolean>> = {
+      biocommonsAccess: this.formBuilder.nonNullable.control(
+        this.termsForm.get('biocommonsAccess')?.value ?? false,
+        Validators.requiredTrue,
+      ),
+    };
+
     // Add bundle-specific terms if a bundle is selected
-    if (selectedBundle) {
-      selectedBundle.services.forEach((service) => {
+    if (bundle) {
+      bundle.services.forEach((service) => {
         termsControls[service.id] = this.formBuilder.nonNullable.control(
-          false,
+          this.termsForm.get(service.id)?.value ?? false,
           Validators.requiredTrue,
         );
       });
@@ -305,122 +244,34 @@ export class RegisterComponent implements OnInit, OnDestroy {
     return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
-  prevStep() {
-    this.errorAlert.set(null);
-    if (this.currentStep() === 1) {
-      this.router.navigate(['../'], { relativeTo: this.route });
-    } else {
-      const targetStep = this.currentStep() - 1;
-
-      this.transitionToStep(targetStep, { fromHistory: true });
-      if (typeof window !== 'undefined') {
-        window.history.back();
-      }
-    }
+  goBack() {
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 
-  nextStep() {
+  submitRegistration() {
     this.errorAlert.set(null);
-    switch (this.currentStep()) {
-      case 1:
-        this.transitionToStep(this.currentStep() + 1);
-        break;
-      case 2:
-        this.handleStepValidation(this.registrationForm);
-        break;
-      case 3:
-        this.transitionToStep(this.currentStep() + 1);
-        break;
-      case 4:
-        this.handleStepValidation(this.termsForm);
-        break;
-      case 5:
-        this.completeRegistration();
-        break;
-      default:
-        if (this.currentStep() < this.totalSteps) {
-          this.transitionToStep(this.currentStep() + 1);
-        }
-        break;
-    }
-  }
+    this.recaptchaAttempted.set(true);
 
-  private handleStepValidation(
-    form: FormGroup,
-    onSuccess?: () => void,
-  ): boolean {
-    if (this.currentStep() === 2) {
-      this.recaptchaAttempted.set(true);
-      if (!this.recaptchaToken()) {
-        form.markAllAsTouched();
-        return false;
-      }
+    this.registrationForm.markAllAsTouched();
+    this.termsForm.markAllAsTouched();
+
+    if (!this.recaptchaToken()) {
+      return;
     }
 
-    form.markAllAsTouched();
-
-    if (form.valid && !this.validationService.hasBackendErrors()) {
-      if (this.currentStep() === 2) {
-        this.checkAvailability();
-        return true;
-      }
-
-      if (onSuccess) {
-        onSuccess();
-      }
-      this.transitionToStep(this.currentStep() + 1);
-      return true;
-    } else {
+    if (
+      !this.registrationForm.valid ||
+      this.validationService.hasBackendErrors()
+    ) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      return false;
+      return;
     }
-  }
 
-  private resetStepValidation(step: number, persistValidation = false) {
-    this.errorAlert.set(null);
-    switch (step) {
-      case 1:
-        break;
-      case 2:
-        this.registrationForm.markAsUntouched();
-        this.registrationForm.markAsPristine();
-        if (!persistValidation) {
-          this.validationService.resetBackendErrors();
-        }
-        this.recaptchaToken.set(null);
-        this.recaptchaAttempted.set(false);
-        break;
-      case 3:
-        break;
-      case 4:
-        this.termsForm.markAsUntouched();
-        this.termsForm.markAsPristine();
-        this.recaptchaToken.set(null);
-        this.recaptchaAttempted.set(false);
-        break;
-      case 5:
-        this.isSubmitting.set(false);
-        break;
+    if (!this.termsForm.valid) {
+      return;
     }
-  }
 
-  toggleTermsAcceptance(serviceId: string) {
-    const currentValue = this.termsForm.get(serviceId)?.value;
-    this.termsForm.patchValue({ [serviceId]: !currentValue });
-  }
-
-  isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
-    return this.validationService.isFieldInvalid(
-      this.registrationForm,
-      fieldName,
-    );
-  }
-
-  getErrorMessages(fieldName: keyof RegistrationForm): string[] {
-    return this.validationService.getErrorMessages(
-      this.registrationForm,
-      fieldName,
-    );
+    this.checkAvailability();
   }
 
   private checkAvailability() {
@@ -475,7 +326,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.registrationForm.markAllAsTouched();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        this.transitionToStep(this.currentStep() + 1);
+        this.completeRegistration();
       }
     });
   }
@@ -511,7 +362,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
             error?.error?.message || 'Registration failed. Please try again.';
 
           if (errorMessage.toLowerCase().includes('already taken')) {
-            this.transitionToStep(2, { persistValidation: true });
             this.registrationForm.markAllAsTouched();
           }
           this.errorAlert.set(errorMessage);
@@ -524,9 +374,28 @@ export class RegisterComponent implements OnInit, OnDestroy {
         this.isSubmitting.set(false);
         if (result) {
           this.registrationEmail.set(requestBody.email);
-          this.transitionToStep(this.currentStep() + 1);
+          this.isRegistrationComplete.set(true);
         }
       });
+  }
+
+  toggleTermsAcceptance(serviceId: string) {
+    const currentValue = this.termsForm.get(serviceId)?.value;
+    this.termsForm.patchValue({ [serviceId]: !currentValue });
+  }
+
+  isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
+    return this.validationService.isFieldInvalid(
+      this.registrationForm,
+      fieldName,
+    );
+  }
+
+  getErrorMessages(fieldName: keyof RegistrationForm): string[] {
+    return this.validationService.getErrorMessages(
+      this.registrationForm,
+      fieldName,
+    );
   }
 
   getFinalPageButton(): { text: string; action: () => void } {
