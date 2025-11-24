@@ -204,13 +204,13 @@ describe('RegisterComponent', () => {
       component.nextStep();
 
       const usernameReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/check-username-availability?username=johndoe`,
+        `${environment.auth0.backend}/utils/register/check-username-availability?username=johndoe`,
       );
       expect(usernameReq.request.method).toBe('GET');
       usernameReq.flush({ available: true });
 
       const emailReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/check-email-availability?email=john.doe@example.com`,
+        `${environment.auth0.backend}/utils/register/check-email-availability?email=john.doe@example.com`,
       );
       expect(emailReq.request.method).toBe('GET');
       emailReq.flush({ available: true });
@@ -232,7 +232,7 @@ describe('RegisterComponent', () => {
       component.nextStep();
 
       const usernameReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/check-username-availability?username=takenusr`,
+        `${environment.auth0.backend}/utils/register/check-username-availability?username=takenusr`,
       );
       usernameReq.flush({
         available: false,
@@ -242,7 +242,7 @@ describe('RegisterComponent', () => {
       });
 
       const emailReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/check-email-availability?email=taken@example.com`,
+        `${environment.auth0.backend}/utils/register/check-email-availability?email=taken@example.com`,
       );
       emailReq.flush({
         available: false,
@@ -701,12 +701,12 @@ describe('RegisterComponent', () => {
 
       // Mock the availability check API calls
       const usernameReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/check-username-availability?username=janedoe`,
+        `${environment.auth0.backend}/utils/register/check-username-availability?username=janedoe`,
       );
       usernameReq.flush({ available: true });
 
       const emailReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/check-email-availability?email=jane.doe@example.com`,
+        `${environment.auth0.backend}/utils/register/check-email-availability?email=jane.doe@example.com`,
       );
       emailReq.flush({ available: true });
 

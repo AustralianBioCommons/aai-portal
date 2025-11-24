@@ -434,7 +434,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     forkJoin({
       username: this.http
         .get<AvailabilityResponse>(
-          `${environment.auth0.backend}/utils/check-username-availability`,
+          `${environment.auth0.backend}/utils/register/check-username-availability`,
           { params: { username } },
         )
         .pipe(
@@ -445,7 +445,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
         ),
       email: this.http
         .get<AvailabilityResponse>(
-          `${environment.auth0.backend}/utils/check-email-availability`,
+          `${environment.auth0.backend}/utils/register/check-email-availability`,
           { params: { email } },
         )
         .pipe(
