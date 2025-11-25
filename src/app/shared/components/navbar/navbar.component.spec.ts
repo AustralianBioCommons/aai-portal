@@ -19,8 +19,10 @@ describe('NavbarComponent', () => {
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserAllPending',
-      'getAdminPendingUsers',
-      'getAdminRevokedUsers',
+      'getPlatformAdminPendingUsers',
+      'getPlatformAdminRevokedUsers',
+      'getGroupAdminPendingUsers',
+      'getGroupAdminRevokedUsers',
       'getAdminUnverifiedUsers',
     ]);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
@@ -73,22 +75,24 @@ describe('NavbarComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
-  it('should calculate all user counts (pending, revoked, unverified) for admin users', async () => {
+  it('should calculate user counts for admin users', async () => {
     const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
       isGeneralAdmin: signal(true),
       isLoading: signal(false),
-      adminPlatforms: signal([]),
+      adminPlatforms: signal([{ id: 'galaxy', name: 'Galaxy' }]),
       adminGroups: signal([]),
-      adminType: signal('biocommons'),
+      adminType: signal('platform'),
     });
 
     const routerSpy = jasmine.createSpyObj(
@@ -137,10 +141,10 @@ describe('NavbarComponent', () => {
       { id: '6', email: 'unverified1@test.com' },
     ];
 
-    mockApiService.getAdminPendingUsers.and.returnValue(
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(
       of(mockPendingUsers as BiocommonsUserResponse[]),
     );
-    mockApiService.getAdminRevokedUsers.and.returnValue(
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(
       of(mockRevokedUsers as BiocommonsUserResponse[]),
     );
     mockApiService.getAdminUnverifiedUsers.and.returnValue(
@@ -154,15 +158,15 @@ describe('NavbarComponent', () => {
     expect(adminComponent.unverifiedCount()).toBe(1);
   });
 
-  it('should handle API error gracefully and reset all counts', async () => {
+  it('should handle API error gracefully and reset all counts for platform admin', async () => {
     const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
-      user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
+      user: signal({ name: 'Platform Admin', picture: 'admin.jpg' }),
       isGeneralAdmin: signal(true),
       isLoading: signal(false),
-      adminPlatforms: signal([]),
+      adminPlatforms: signal([{ id: 'galaxy', name: 'Galaxy' }]),
       adminGroups: signal([]),
-      adminType: signal('biocommons'),
+      adminType: signal('platform'),
     });
 
     const routerSpy = jasmine.createSpyObj(
@@ -198,10 +202,10 @@ describe('NavbarComponent', () => {
     const adminFixture = TestBed.createComponent(NavbarComponent);
     const adminComponent = adminFixture.componentInstance;
 
-    mockApiService.getAdminPendingUsers.and.returnValue(
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(
       throwError(() => new Error('API Error')),
     );
-    mockApiService.getAdminRevokedUsers.and.returnValue(
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(
       throwError(() => new Error('API Error')),
     );
     mockApiService.getAdminUnverifiedUsers.and.returnValue(
@@ -262,9 +266,9 @@ describe('NavbarComponent', () => {
       user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
       isGeneralAdmin: signal(true),
       isLoading: signal(false),
-      adminPlatforms: signal([]),
+      adminPlatforms: signal([{ id: 'galaxy', name: 'Galaxy' }]),
       adminGroups: signal([]),
-      adminType: signal('biocommons'),
+      adminType: signal('platform'),
     });
 
     const routerSpy = jasmine.createSpyObj(
@@ -300,34 +304,20 @@ describe('NavbarComponent', () => {
     const adminFixture = TestBed.createComponent(NavbarComponent);
     const dataRefreshService = TestBed.inject(DataRefreshService);
 
-    const mockPendingUsers: BiocommonsUserResponse[] = [
-      {
-        id: '1',
-        email: 'user1@example.com',
-        username: 'user1',
-        email_verified: true,
-        created_at: '2023-01-01',
-        platform_memberships: [],
-        group_memberships: [],
-      },
-    ];
-
-    mockApiService.getAdminPendingUsers.and.returnValue(of(mockPendingUsers));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     adminFixture.detectChanges();
 
-    // Reset calls from initialization
-    mockApiService.getAdminPendingUsers.calls.reset();
-    mockApiService.getAdminRevokedUsers.calls.reset();
+    mockApiService.getPlatformAdminPendingUsers.calls.reset();
+    mockApiService.getPlatformAdminRevokedUsers.calls.reset();
     mockApiService.getAdminUnverifiedUsers.calls.reset();
 
-    // Trigger refresh
     dataRefreshService.triggerRefresh();
 
-    expect(mockApiService.getAdminPendingUsers).toHaveBeenCalled();
-    expect(mockApiService.getAdminRevokedUsers).toHaveBeenCalled();
+    expect(mockApiService.getPlatformAdminPendingUsers).toHaveBeenCalled();
+    expect(mockApiService.getPlatformAdminRevokedUsers).toHaveBeenCalled();
     expect(mockApiService.getAdminUnverifiedUsers).toHaveBeenCalled();
   });
 });

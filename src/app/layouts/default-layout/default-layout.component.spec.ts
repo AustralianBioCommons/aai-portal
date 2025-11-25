@@ -48,8 +48,10 @@ describe('DefaultLayoutComponent', () => {
 
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserAllPending',
-      'getAdminPendingUsers',
-      'getAdminRevokedUsers',
+      'getPlatformAdminPendingUsers',
+      'getPlatformAdminRevokedUsers',
+      'getGroupAdminPendingUsers',
+      'getGroupAdminRevokedUsers',
       'getAdminUnverifiedUsers',
     ]);
 
@@ -102,8 +104,10 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
   });
 
@@ -123,8 +127,10 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
@@ -149,8 +155,10 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
@@ -175,8 +183,10 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
@@ -201,8 +211,10 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
+    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
 
     fixture.detectChanges();
