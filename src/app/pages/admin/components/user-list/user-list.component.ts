@@ -34,7 +34,7 @@ import { DataRefreshService } from '../../../../core/services/data-refresh.servi
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
 
-const DEFAULT_PAGE_SIZE = 10;
+export const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * Reusable user list component with filtering and search.
