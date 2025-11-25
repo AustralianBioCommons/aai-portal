@@ -321,6 +321,8 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   onFilterChange(): void {
     this.searchTerm.set('');
+    this.page.set(1);
+    this.loadUserCounts();
     this.loadUsers();
   }
 
