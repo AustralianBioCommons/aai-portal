@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, AfterViewInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, of, forkJoin } from 'rxjs';
+import { catchError, of, fromEvent } from 'rxjs';
 import { biocommonsBundles, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
@@ -26,7 +26,6 @@ import {
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
-import { AvailabilityResponse } from '../../shared/types/backend.types';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -46,6 +45,11 @@ interface RegistrationRequest {
   bundle?: string;
 }
 
+interface Section {
+  id: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
@@ -59,7 +63,7 @@ interface RegistrationRequest {
   ],
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
+export class RegisterComponent implements AfterViewInit {
   public router = inject(Router);
   private route = inject(ActivatedRoute);
   private formBuilder = inject(FormBuilder);
@@ -76,9 +80,17 @@ export class RegisterComponent {
 
   errorAlert = signal<string | null>(null);
   isSubmitting = signal<boolean>(false);
-  isCheckingAvailability = signal<boolean>(false);
   registrationEmail = signal<string | null>(null);
   isRegistrationComplete = signal<boolean>(false);
+
+  activeSection = signal<string>('introduction');
+  visitedSections = signal<Set<string>>(new Set(['introduction']));
+  sections: Section[] = [
+    { id: 'introduction', label: 'Introduction' },
+    { id: 'your-details', label: 'Your Details' },
+    { id: 'add-bundle', label: 'Add a Bundle' },
+    { id: 'terms', label: 'Terms & Conditions' },
+  ];
 
   bundles: Bundle[] = biocommonsBundles;
 
@@ -135,6 +147,92 @@ export class RegisterComponent {
       });
 
     this.initializeTermsForm();
+
+    fromEvent(window, 'scroll')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.updateActiveSection();
+      });
+  }
+
+  ngAfterViewInit(): void {
+    this.updateActiveSection();
+  }
+
+  private updateActiveSection(): void {
+    const scrollPosition = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // Set the scroll threshold 1/3 of the viewport
+    const scrollThreshold = scrollPosition + windowHeight / 3;
+
+    let currentSectionIndex = 0;
+
+    // If we're near the bottom of the page, activate the last section
+    if (scrollPosition + windowHeight >= documentHeight - 50) {
+      currentSectionIndex = this.sections.length - 1;
+      this.activeSection.set(this.sections[currentSectionIndex].id);
+
+      // Mark all sections as visited
+      this.visitedSections.update(
+        () => new Set(this.sections.map((s) => s.id)),
+      );
+      return;
+    }
+
+    // Find the current section based on scroll position
+    for (let i = this.sections.length - 1; i >= 0; i--) {
+      const section = this.sections[i];
+      const element = document.getElementById(section.id);
+      if (element && element.offsetTop <= scrollThreshold) {
+        currentSectionIndex = i;
+        this.activeSection.set(section.id);
+
+        // Mark this section and all previous sections as visited
+        this.visitedSections.update((visited) => {
+          const newVisited = new Set(visited);
+          for (let j = 0; j <= i; j++) {
+            newVisited.add(this.sections[j].id);
+          }
+          return newVisited;
+        });
+        return;
+      }
+    }
+  }
+
+  scrollToSection(event: Event, sectionId: string): void {
+    event.preventDefault();
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 100; // Offset for navbar
+      const elementPosition = element.offsetTop - offset;
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth',
+      });
+    }
+  }
+
+  getActiveStepObject(): Section | undefined {
+    return this.sections.find((s) => s.id === this.activeSection());
+  }
+
+  isSectionCompleted(sectionId: string): boolean {
+    const currentIndex = this.sections.findIndex(
+      (s) => s.id === this.activeSection(),
+    );
+    const sectionIndex = this.sections.findIndex((s) => s.id === sectionId);
+    return this.isSectionVisited(sectionId) && sectionIndex < currentIndex;
+  }
+
+  isSectionVisited(sectionId: string): boolean {
+    return this.visitedSections().has(sectionId);
+  }
+
+  isSectionActive(sectionId: string): boolean {
+    return this.activeSection() === sectionId;
   }
 
   private applyFullNameLengthValidation(): void {
@@ -251,90 +349,20 @@ export class RegisterComponent {
   submitRegistration() {
     this.errorAlert.set(null);
     this.recaptchaAttempted.set(true);
-
     this.registrationForm.markAllAsTouched();
     this.termsForm.markAllAsTouched();
 
-    if (!this.recaptchaToken()) {
-      return;
-    }
-
     if (
+      !this.recaptchaToken() ||
       !this.registrationForm.valid ||
-      this.validationService.hasBackendErrors()
+      this.validationService.hasBackendErrors() ||
+      !this.termsForm.valid
     ) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.scrollToFirstError();
       return;
     }
 
-    if (!this.termsForm.valid) {
-      return;
-    }
-
-    this.checkAvailability();
-  }
-
-  private checkAvailability() {
-    this.isCheckingAvailability.set(true);
-    this.errorAlert.set(null);
-
-    const formValue = this.registrationForm.value;
-    const username = formValue.username!;
-    const email = toAsciiEmail(formValue.email!);
-
-    forkJoin({
-      username: this.http
-        .get<AvailabilityResponse>(
-          `${environment.auth0.backend}/utils/register/check-username-availability`,
-          { params: { username } },
-        )
-        .pipe(
-          catchError((error: HttpErrorResponse) => {
-            console.error('Username availability check failed:', error);
-            return of({ available: true } as AvailabilityResponse);
-          }),
-        ),
-      email: this.http
-        .get<AvailabilityResponse>(
-          `${environment.auth0.backend}/utils/register/check-email-availability`,
-          { params: { email } },
-        )
-        .pipe(
-          catchError((error: HttpErrorResponse) => {
-            console.error('Email availability check failed:', error);
-            return of({ available: true } as AvailabilityResponse);
-          }),
-        ),
-    }).subscribe(({ username: usernameResponse, email: emailResponse }) => {
-      this.isCheckingAvailability.set(false);
-
-      const fieldErrors = [
-        ...(usernameResponse.field_errors || []),
-        ...(emailResponse.field_errors || []),
-      ];
-
-      if (fieldErrors.length > 0) {
-        fieldErrors.forEach((fieldError) => {
-          this.validationService.setBackendErrorMessages({
-            error: {
-              message: 'Validation failed',
-              field_errors: [fieldError],
-            },
-          } as HttpErrorResponse);
-        });
-
-        this.registrationForm.markAllAsTouched();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        this.completeRegistration();
-      }
-    });
-  }
-
-  private completeRegistration() {
     this.isSubmitting.set(true);
-    this.errorAlert.set(null);
-    this.validationService.resetBackendErrors();
 
     const formValue = this.registrationForm.value;
     const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
@@ -361,12 +389,10 @@ export class RegisterComponent {
           const errorMessage =
             error?.error?.message || 'Registration failed. Please try again.';
 
-          if (errorMessage.toLowerCase().includes('already taken')) {
-            this.registrationForm.markAllAsTouched();
-          }
+          this.registrationForm.markAllAsTouched();
           this.errorAlert.set(errorMessage);
           this.isSubmitting.set(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          this.scrollToFirstError();
           return of(null);
         }),
       )
@@ -377,6 +403,26 @@ export class RegisterComponent {
           this.isRegistrationComplete.set(true);
         }
       });
+  }
+
+  private scrollToFirstError(): void {
+    for (const fieldName of Object.keys(this.registrationForm.controls)) {
+      const control = this.registrationForm.get(fieldName);
+      if (control?.invalid) {
+        const element = document.getElementById(fieldName);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+      }
+    }
+
+    if (this.termsForm.invalid) {
+      const termsElement = document.getElementById('terms');
+      if (termsElement) {
+        termsElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
   }
 
   toggleTermsAcceptance(serviceId: string) {
