@@ -96,8 +96,14 @@ export class NavbarComponent {
 
     // Fetch all counts in parallel
     forkJoin({
-      pending: this.api.getAdminPendingUsers(),
-      revoked: this.api.getAdminRevokedUsers(),
+      pending:
+        this.adminType() === 'bundle'
+          ? this.api.getGroupAdminPendingUsers()
+          : this.api.getPlatformAdminPendingUsers(),
+      revoked:
+        this.adminType() === 'bundle'
+          ? this.api.getGroupAdminRevokedUsers()
+          : this.api.getPlatformAdminRevokedUsers(),
       unverified: this.api.getAdminUnverifiedUsers(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))

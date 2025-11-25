@@ -14,8 +14,9 @@ export class PendingUsersComponent {
   private authService = inject(AuthService);
 
   title = 'Pending Requests';
+
   getUsers =
     this.authService.adminType() === 'bundle'
-      ? this.apiService.getGroupAdminPendingUsers
+      ? this.apiService.getGroupAdminPendingUsers.bind(this.apiService)
       : this.apiService.getPlatformAdminPendingUsers.bind(this.apiService);
 }

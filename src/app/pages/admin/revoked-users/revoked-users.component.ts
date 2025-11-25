@@ -14,8 +14,9 @@ export class RevokedUsersComponent {
   private authService = inject(AuthService);
 
   title = 'Revoked Users';
+
   getUsers =
     this.authService.adminType() === 'bundle'
-      ? this.apiService.getGroupAdminRevokedUsers
+      ? this.apiService.getGroupAdminRevokedUsers.bind(this.apiService)
       : this.apiService.getPlatformAdminRevokedUsers.bind(this.apiService);
 }
