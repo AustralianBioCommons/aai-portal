@@ -127,6 +127,13 @@ export interface AdminGetUsersApiParams {
   groupApprovalStatus?: Status;
 }
 
+export interface AdminUserCountsResponse {
+  all: number;
+  pending: number;
+  revoked: number;
+  unverified: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -273,6 +280,12 @@ export class ApiService {
       ...params,
       emailVerified: false,
     });
+  }
+
+  getAdminUserCounts(): Observable<AdminUserCountsResponse> {
+    return this.http.get<AdminUserCountsResponse>(
+      `${environment.auth0.backend}/admin/users/counts`,
+    );
   }
 
   getUserDetails(userId: string): Observable<BiocommonsUserDetails> {

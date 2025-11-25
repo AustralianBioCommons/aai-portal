@@ -3,10 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, throwError, EMPTY } from 'rxjs';
 import { signal } from '@angular/core';
 import { NavbarComponent } from './navbar.component';
-import {
-  ApiService,
-  BiocommonsUserResponse,
-} from '../../../core/services/api.service';
+import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 
@@ -19,11 +16,7 @@ describe('NavbarComponent', () => {
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserAllPending',
-      'getPlatformAdminPendingUsers',
-      'getPlatformAdminRevokedUsers',
-      'getGroupAdminPendingUsers',
-      'getGroupAdminRevokedUsers',
-      'getAdminUnverifiedUsers',
+      'getAdminUserCounts',
     ]);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
@@ -75,11 +68,6 @@ describe('NavbarComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
-    mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
-    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
@@ -128,27 +116,13 @@ describe('NavbarComponent', () => {
     const adminFixture = TestBed.createComponent(NavbarComponent);
     const adminComponent = adminFixture.componentInstance;
 
-    const mockPendingUsers: Partial<BiocommonsUserResponse>[] = [
-      { id: '1', email: 'pending1@test.com' },
-      { id: '2', email: 'pending2@test.com' },
-    ];
-    const mockRevokedUsers: Partial<BiocommonsUserResponse>[] = [
-      { id: '3', email: 'revoked1@test.com' },
-      { id: '4', email: 'revoked2@test.com' },
-      { id: '5', email: 'revoked3@test.com' },
-    ];
-    const mockUnverifiedUsers: Partial<BiocommonsUserResponse>[] = [
-      { id: '6', email: 'unverified1@test.com' },
-    ];
-
-    mockApiService.getPlatformAdminPendingUsers.and.returnValue(
-      of(mockPendingUsers as BiocommonsUserResponse[]),
-    );
-    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(
-      of(mockRevokedUsers as BiocommonsUserResponse[]),
-    );
-    mockApiService.getAdminUnverifiedUsers.and.returnValue(
-      of(mockUnverifiedUsers as BiocommonsUserResponse[]),
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({
+        all: 10,
+        pending: 2,
+        revoked: 3,
+        unverified: 1,
+      }),
     );
 
     adminFixture.detectChanges();
@@ -202,13 +176,7 @@ describe('NavbarComponent', () => {
     const adminFixture = TestBed.createComponent(NavbarComponent);
     const adminComponent = adminFixture.componentInstance;
 
-    mockApiService.getPlatformAdminPendingUsers.and.returnValue(
-      throwError(() => new Error('API Error')),
-    );
-    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(
-      throwError(() => new Error('API Error')),
-    );
-    mockApiService.getAdminUnverifiedUsers.and.returnValue(
+    mockApiService.getAdminUserCounts.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
@@ -304,20 +272,12 @@ describe('NavbarComponent', () => {
     const adminFixture = TestBed.createComponent(NavbarComponent);
     const dataRefreshService = TestBed.inject(DataRefreshService);
 
-    mockApiService.getPlatformAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getPlatformAdminRevokedUsers.and.returnValue(of([]));
-    mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
-
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
+    );
     adminFixture.detectChanges();
-
-    mockApiService.getPlatformAdminPendingUsers.calls.reset();
-    mockApiService.getPlatformAdminRevokedUsers.calls.reset();
-    mockApiService.getAdminUnverifiedUsers.calls.reset();
-
+    mockApiService.getAdminUserCounts.calls.reset();
     dataRefreshService.triggerRefresh();
-
-    expect(mockApiService.getPlatformAdminPendingUsers).toHaveBeenCalled();
-    expect(mockApiService.getPlatformAdminRevokedUsers).toHaveBeenCalled();
-    expect(mockApiService.getAdminUnverifiedUsers).toHaveBeenCalled();
+    expect(mockApiService.getAdminUserCounts).toHaveBeenCalled();
   });
 });

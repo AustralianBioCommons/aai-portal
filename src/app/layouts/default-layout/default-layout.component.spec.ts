@@ -53,6 +53,7 @@ describe('DefaultLayoutComponent', () => {
       'getGroupAdminPendingUsers',
       'getGroupAdminRevokedUsers',
       'getAdminUnverifiedUsers',
+      'getAdminUserCounts',
     ]);
 
     const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
@@ -109,6 +110,9 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
+    );
   });
 
   it('should create', () => {
@@ -132,6 +136,9 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
+    );
 
     fixture.detectChanges();
 
@@ -160,6 +167,9 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
+    );
 
     fixture.detectChanges();
 
@@ -188,6 +198,9 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
+    );
 
     fixture.detectChanges();
 
@@ -216,6 +229,9 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getGroupAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getGroupAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
+    );
 
     fixture.detectChanges();
 
