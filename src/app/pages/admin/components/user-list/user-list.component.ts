@@ -7,6 +7,8 @@ import {
   input,
   inject,
   Renderer2,
+  effect,
+  untracked,
 } from '@angular/core';
 import {
   FormsModule,
@@ -14,7 +16,7 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -31,6 +33,8 @@ import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
+
+const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * Reusable user list component with filtering and search.
@@ -60,6 +64,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   styleUrl: './user-list.component.css',
 })
 export class UserListComponent implements OnInit, OnDestroy {
+  private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private apiService = inject(ApiService);
@@ -80,6 +85,9 @@ export class UserListComponent implements OnInit, OnDestroy {
   openMenuUserId = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   users = signal<BiocommonsUserResponse[]>([]);
+  totalUsers = signal<number>(0);
+  page = signal<number>(1);
+  totalPages = signal<number>(10);
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
@@ -100,9 +108,26 @@ export class UserListComponent implements OnInit, OnDestroy {
     validators: [Validators.required],
   });
 
+  constructor() {
+    effect(() => {
+      const p = this.page();
+
+      // Run the load method without tracking its internal signal reads
+      untracked(() => {
+        this.loadUsers();
+      });
+      return p;
+    });
+  }
+
   ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params['page']) {
+        this.page.set(parseInt(params['page'], 10));
+      }
+    });
+    this.loadUserCounts();
     this.loadFilterOptions();
-    this.loadUsers();
     this.setupSearchDebounce();
     this.setupClickOutsideHandler();
   }
@@ -110,6 +135,14 @@ export class UserListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  setPage(p: number) {
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { page: p },
+      queryParamsHandling: 'merge', // preserve other filters/sorts
+    });
   }
 
   private setupClickOutsideHandler(): void {
