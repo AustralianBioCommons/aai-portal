@@ -127,6 +127,13 @@ export interface AdminGetUsersApiParams {
   groupApprovalStatus?: Status;
 }
 
+export interface AdminUserCounts {
+  all: number;
+  pending: number;
+  revoked: number;
+  unverified: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -183,9 +190,10 @@ export class ApiService {
     );
   }
 
-  getAdminAllUsers(
+  private buildAdminUserQueryParams(
     params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
+    includePagination = true,
+  ): URLSearchParams {
     const {
       page = 1,
       perPage = 50,
@@ -198,11 +206,12 @@ export class ApiService {
       groupApprovalStatus,
     } = params;
 
-    const urlParams = new URLSearchParams({
-      page: page.toString(),
-      per_page: perPage.toString(),
-    });
+    const urlParams = new URLSearchParams();
 
+    if (includePagination) {
+      urlParams.set('page', page.toString());
+      urlParams.set('per_page', perPage.toString());
+    }
     if (filterBy) {
       urlParams.append('filter_by', filterBy);
     }
@@ -225,6 +234,13 @@ export class ApiService {
       urlParams.append('group_approval_status', groupApprovalStatus);
     }
 
+    return urlParams;
+  }
+
+  getAdminAllUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    const urlParams = this.buildAdminUserQueryParams(params);
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users?${urlParams.toString()}`,
     );
@@ -255,6 +271,17 @@ export class ApiService {
       ...params,
       emailVerified: false,
     });
+  }
+
+  getAdminUserCounts(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<AdminUserCounts> {
+    const urlParams = this.buildAdminUserQueryParams(params, false);
+    const queryString = urlParams.toString();
+    const url = queryString
+      ? `${environment.auth0.backend}/admin/users/counts?${queryString}`
+      : `${environment.auth0.backend}/admin/users/counts`;
+    return this.http.get<AdminUserCounts>(url);
   }
 
   getUserDetails(userId: string): Observable<BiocommonsUserDetails> {

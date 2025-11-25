@@ -14,7 +14,6 @@ import { ApiService } from '../../../core/services/api.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin } from 'rxjs';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 
 @Component({
@@ -94,18 +93,14 @@ export class NavbarComponent {
       return;
     }
 
-    // Fetch all counts in parallel
-    forkJoin({
-      pending: this.api.getAdminPendingUsers(),
-      revoked: this.api.getAdminRevokedUsers(),
-      unverified: this.api.getAdminUnverifiedUsers(),
-    })
+    this.api
+      .getAdminUserCounts()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ pending, revoked, unverified }) => {
-          this.pendingCount.set(pending?.length || 0);
-          this.revokedCount.set(revoked?.length || 0);
-          this.unverifiedCount.set(unverified?.length || 0);
+        next: (counts) => {
+          this.pendingCount.set(counts?.pending || 0);
+          this.revokedCount.set(counts?.revoked || 0);
+          this.unverifiedCount.set(counts?.unverified || 0);
         },
         error: (error) => {
           console.error('Failed to fetch user counts:', error);
