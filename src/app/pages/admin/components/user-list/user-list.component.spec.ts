@@ -461,8 +461,7 @@ describe('UserListComponent', () => {
       mockApiService.getAdminAllUsers.calls.reset();
       mockApiService.getAdminUserCount.calls.reset();
 
-      // Simulate query param change that happens after navigation
-      queryParamsSubject.next({ page: '2' });
+      component.setPage(2);
 
       // Allow effect to run
       tick();
