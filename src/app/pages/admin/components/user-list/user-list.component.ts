@@ -16,7 +16,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgClass, TitleCasePipe } from '@angular/common';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../../shared/components/tooltip/tooltip.component';
@@ -72,10 +72,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   // Input signals
   title = input.required<string>();
-  getUsers =
-    input.required<
-      (params: AdminGetUsersApiParams) => Observable<BiocommonsUserResponse[]>
-    >();
+  defaultQueryParams = input.required<Partial<AdminGetUsersApiParams>>();
   returnUrl = input<string>(''); // Optional return URL for navigation back from user details
 
   // State signals
@@ -242,24 +239,51 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadUserCounts(): void {
+    this.apiService
+      .getAdminUserCount({
+        ...this.defaultQueryParams(),
+        page: this.page(),
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: this.selectedFilter(),
+        search: this.searchTerm(),
+      })
+      .subscribe({
+        next: (counts) => {
+          this.totalPages.set(counts.pages);
+          this.totalUsers.set(counts.total);
+        },
+        error: (error) => {
+          console.error('Error loading total pages:', error);
+        },
+      });
+  }
+
+  getUsers() {
+    return this.apiService.getAdminAllUsers();
+  }
+
   loadUsers(): void {
     this.loading.set(true);
-    this.getUsers()({
-      page: 1,
-      perPage: 50,
-      filterBy: this.selectedFilter(),
-      search: this.searchTerm(),
-    }).subscribe({
-      next: (users: BiocommonsUserResponse[]) => {
-        this.users.set(users);
-        this.loading.set(false);
-      },
-      error: (error: unknown) => {
-        console.error('Error loading users:', error);
-        this.users.set([]);
-        this.loading.set(false);
-      },
-    });
+    this.apiService
+      .getAdminAllUsers({
+        ...this.defaultQueryParams(),
+        page: this.page(),
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: this.selectedFilter(),
+        search: this.searchTerm(),
+      })
+      .subscribe({
+        next: (users: BiocommonsUserResponse[]) => {
+          this.users.set(users);
+          this.loading.set(false);
+        },
+        error: (error: unknown) => {
+          console.error('Error loading users:', error);
+          this.users.set([]);
+          this.loading.set(false);
+        },
+      });
   }
 
   onFilterChange(): void {
