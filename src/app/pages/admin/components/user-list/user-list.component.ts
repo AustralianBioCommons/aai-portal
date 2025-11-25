@@ -115,6 +115,7 @@ export class UserListComponent implements OnInit, OnDestroy {
       // Run the load method without tracking its internal signal reads
       untracked(() => {
         this.loadUsers();
+        this.loadUserCounts();
       });
       return p;
     });
