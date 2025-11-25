@@ -439,4 +439,50 @@ describe('UserListComponent', () => {
       expect(component.showRevokeModal()).toBe(false);
     });
   });
+
+  describe('Pagination', () => {
+    it('should navigate to update page query param when setPage is called', () => {
+      const router = TestBed.inject(Router);
+      const navigateSpy = spyOn(router, 'navigate');
+      fixture.detectChanges();
+
+      component.setPage(2);
+
+      expect(navigateSpy).toHaveBeenCalledWith([], {
+        relativeTo: TestBed.inject(ActivatedRoute),
+        queryParams: { page: 2 },
+        queryParamsHandling: 'merge',
+      });
+    });
+
+    it('should load users and counts when page query param changes', fakeAsync(() => {
+      fixture.detectChanges(); // Initial load for page 1
+
+      mockApiService.getAdminAllUsers.calls.reset();
+      mockApiService.getAdminUserCount.calls.reset();
+
+      // Simulate query param change that happens after navigation
+      queryParamsSubject.next({ page: '2' });
+
+      // Allow effect to run
+      tick();
+      fixture.detectChanges();
+
+      expect(component.page()).toBe(2);
+
+      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
+        page: 2,
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: '',
+        search: '',
+      });
+
+      expect(mockApiService.getAdminUserCount).toHaveBeenCalledWith({
+        page: 2,
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: '',
+        search: '',
+      });
+    }));
+  });
 });
