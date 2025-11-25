@@ -230,7 +230,7 @@ export class ApiService {
     );
   }
 
-  getAdminPendingUsers(
+  getPlatformAdminPendingUsers(
     params: AdminGetUsersApiParams = {},
   ): Observable<BiocommonsUserResponse[]> {
     return this.getAdminAllUsers({
@@ -239,12 +239,30 @@ export class ApiService {
     });
   }
 
-  getAdminRevokedUsers(
+  getPlatformAdminRevokedUsers(
     params: AdminGetUsersApiParams = {},
   ): Observable<BiocommonsUserResponse[]> {
     return this.getAdminAllUsers({
       ...params,
       platformApprovalStatus: 'revoked',
+    });
+  }
+
+  getGroupAdminPendingUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    return this.getAdminAllUsers({
+      ...params,
+      groupApprovalStatus: 'pending',
+    });
+  }
+
+  getGroupAdminRevokedUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    return this.getAdminAllUsers({
+      ...params,
+      groupApprovalStatus: 'revoked',
     });
   }
 
