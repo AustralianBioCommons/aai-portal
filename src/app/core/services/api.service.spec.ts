@@ -195,4 +195,21 @@ describe('ApiService', () => {
     expect(req.request.body).toEqual({ reason });
     req.flush({ updated: true });
   });
+
+  it('should call reject group endpoint with reason', () => {
+    const userId = 'auth0|123';
+    const groupId = 'tsi';
+    const reason = 'Not suitable';
+
+    service.rejectGroupAccess(userId, groupId, reason).subscribe((response) => {
+      expect(response).toEqual({ updated: true });
+    });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/reject`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ reason });
+    req.flush({ updated: true });
+  });
 });

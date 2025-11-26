@@ -4,7 +4,10 @@ import { of } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { PendingUsersComponent } from './pending-users.component';
-import { ApiService } from '../../../core/services/api.service';
+import {
+  AdminGetUsersApiParams,
+  ApiService,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DEFAULT_PAGE_SIZE } from '../components/user-list/user-list.component';
 
@@ -60,8 +63,8 @@ describe('PendingUsersComponent', () => {
       perPage: DEFAULT_PAGE_SIZE,
       filterBy: '',
       search: '',
-      ...component.defaultQueryParams,
-    };
+      approvalStatus: 'pending',
+    } as AdminGetUsersApiParams;
 
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
       expectedParams,

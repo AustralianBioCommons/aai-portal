@@ -33,6 +33,13 @@ type RevokeModalData = {
   email: string;
 } | null;
 
+type RejectModalData = {
+  membershipId: string;
+  groupId: string;
+  name: string;
+  email: string;
+} | null;
+
 @Component({
   selector: 'app-user-details',
   imports: [
@@ -68,6 +75,7 @@ export class UserDetailsComponent implements OnInit {
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
   revokeModalData = signal<RevokeModalData>(null);
+  rejectModalData = signal<RejectModalData>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
   openMenuMembershipId = signal<string | null>(null);
@@ -79,6 +87,10 @@ export class UserDetailsComponent implements OnInit {
   revokeReasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required],
+  });
+  rejectReasonControl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.maxLength(255)],
   });
 
   ngOnInit() {
@@ -226,13 +238,22 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
-  // TODO: Implement reject group membership
   rejectGroupMembership(membershipId: string): void {
     this.openMenuMembershipId.set(null);
-    this.alert.set({
-      type: 'error',
-      message: `Rejecting group membership ${membershipId} is not yet implemented`,
+    const membership = this.user()?.group_memberships.find(
+      (m) => m.id === membershipId,
+    );
+    if (!membership || !this.user()) {
+      return;
+    }
+
+    this.rejectModalData.set({
+      membershipId,
+      groupId: membership.group_id,
+      name: membership.group_name,
+      email: this.user()!.email,
     });
+    this.rejectReasonControl.reset();
   }
 
   revokeGroupMembership(membershipId: string): void {
@@ -283,6 +304,11 @@ export class UserDetailsComponent implements OnInit {
   closeRevokeModal(): void {
     this.revokeModalData.set(null);
     this.revokeReasonControl.reset();
+  }
+
+  closeRejectModal(): void {
+    this.rejectModalData.set(null);
+    this.rejectReasonControl.reset();
   }
 
   confirmRevoke(): void {
@@ -340,6 +366,44 @@ export class UserDetailsComponent implements OnInit {
           },
         });
     }
+  }
+
+  confirmReject(): void {
+    const modalData = this.rejectModalData();
+    this.rejectReasonControl.markAsTouched();
+
+    if (!modalData || this.rejectReasonControl.invalid) {
+      return;
+    }
+
+    const reason = this.rejectReasonControl.value.trim();
+    if (!reason) {
+      this.rejectReasonControl.setErrors({ required: true });
+      return;
+    }
+
+    const userId = this.user()!.user_id;
+    this.alert.set(null);
+    this.apiService
+      .rejectGroupAccess(userId, modalData.groupId, reason)
+      .subscribe({
+        next: () => {
+          this.alert.set({
+            type: 'success',
+            message: 'Group access rejected successfully',
+          });
+          this.closeRejectModal();
+          this.refreshUserDetails(userId);
+        },
+        error: (error) => {
+          console.error('Failed to reject group access:', error);
+          this.alert.set({
+            type: 'error',
+            message: 'Failed to reject group access',
+          });
+          this.closeRejectModal();
+        },
+      });
   }
 
   private approvePlatform(platformId: PlatformId) {

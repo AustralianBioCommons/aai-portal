@@ -98,6 +98,7 @@ export interface GroupMembership {
   approval_status: string;
   updated_by: string;
   revocation_reason?: string;
+  rejection_reason?: string;
 }
 
 export interface BiocommonsUserResponse {
@@ -121,6 +122,7 @@ export interface AdminGetUsersApiParams {
   filterBy?: string;
   search?: string;
   emailVerified?: boolean;
+  approvalStatus?: Status;
   platform?: string;
   platformApprovalStatus?: Status;
   group?: string;
@@ -131,6 +133,13 @@ export interface UsersPageInfoResponse {
   total: number;
   pages: number;
   per_page: number;
+}
+
+export interface AdminUserCountsResponse {
+  all: number;
+  pending: number;
+  revoked: number;
+  unverified: number;
 }
 
 @Injectable({
@@ -198,6 +207,7 @@ export class ApiService {
       filterBy,
       search,
       emailVerified,
+      approvalStatus,
       platform,
       platformApprovalStatus,
       group,
@@ -216,6 +226,9 @@ export class ApiService {
     }
     if (emailVerified !== undefined) {
       urlParams.append('email_verified', emailVerified.toString());
+    }
+    if (approvalStatus) {
+      urlParams.append('approval_status', approvalStatus);
     }
     if (platform) {
       urlParams.append('platform', platform);
@@ -261,7 +274,7 @@ export class ApiService {
   ): Observable<BiocommonsUserResponse[]> {
     return this.getAdminAllUsers({
       ...params,
-      platformApprovalStatus: 'pending',
+      approvalStatus: 'pending',
     });
   }
 
@@ -270,7 +283,7 @@ export class ApiService {
   ): Observable<BiocommonsUserResponse[]> {
     return this.getAdminAllUsers({
       ...params,
-      platformApprovalStatus: 'revoked',
+      approvalStatus: 'revoked',
     });
   }
 
@@ -281,6 +294,12 @@ export class ApiService {
       ...params,
       emailVerified: false,
     });
+  }
+
+  getAdminUserCounts(): Observable<AdminUserCountsResponse> {
+    return this.http.get<AdminUserCountsResponse>(
+      `${environment.auth0.backend}/admin/users/counts`,
+    );
   }
 
   getUserDetails(userId: string): Observable<BiocommonsUserDetails> {
@@ -327,6 +346,17 @@ export class ApiService {
   ): Observable<{ updated: boolean }> {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
+      { reason },
+    );
+  }
+
+  rejectGroupAccess(
+    userId: string,
+    groupId: string,
+    reason: string,
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/reject`,
       { reason },
     );
   }

@@ -16,6 +16,6 @@ export class PendingUsersComponent {
 
   title = 'Pending Requests';
   defaultQueryParams: Partial<AdminGetUsersApiParams> = {
-    platformApprovalStatus: 'pending',
+    approvalStatus: 'pending',
   };
 }
