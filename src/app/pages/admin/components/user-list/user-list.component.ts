@@ -122,11 +122,13 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.activatedRoute.queryParams.subscribe((params) => {
-      if (params['page']) {
-        this.page.set(parseInt(params['page'], 10));
-      }
-    });
+    this.activatedRoute.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        if (params['page']) {
+          this.page.set(parseInt(params['page'], 10));
+        }
+      });
     this.loadUserCounts();
     this.loadFilterOptions();
     this.setupSearchDebounce();
