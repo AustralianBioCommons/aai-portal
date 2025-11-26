@@ -98,6 +98,7 @@ export interface GroupMembership {
   approval_status: string;
   updated_by: string;
   revocation_reason?: string;
+  rejection_reason?: string;
 }
 
 export interface BiocommonsUserResponse {
@@ -301,6 +302,17 @@ export class ApiService {
   ): Observable<{ updated: boolean }> {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/revoke`,
+      { reason },
+    );
+  }
+
+  rejectGroupAccess(
+    userId: string,
+    groupId: string,
+    reason: string,
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/reject`,
       { reason },
     );
   }

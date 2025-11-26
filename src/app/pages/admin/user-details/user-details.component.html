@@ -22,6 +22,26 @@
   />
 }
 
+@if (rejectModalData()) {
+  <app-modal
+    [title]="
+      'Reject ' +
+      rejectModalData()!.email +
+      ' from ' +
+      rejectModalData()!.name +
+      '?'
+    "
+    type="revoke"
+    [textareaControl]="rejectReasonControl"
+    textareaLabel="Rejection reason"
+    [textareaMaxLength]="255"
+    primaryButtonText="Reject"
+    secondaryButtonText="Cancel"
+    (primaryOutput)="confirmReject()"
+    (secondaryOutput)="closeRejectModal()"
+  />
+}
+
 <div
   class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
 >
@@ -298,9 +318,18 @@
                       </div>
                     </div>
                     <div class="flex items-center gap-4">
-                      @if (membership.approval_status === "revoked") {
+                      @if (
+                        membership.approval_status === "revoked" ||
+                        membership.approval_status === "rejected"
+                      ) {
                         <app-tooltip
-                          [message]="membership.revocation_reason || 'Revoked'"
+                          [message]="
+                            membership.rejection_reason ||
+                            membership.revocation_reason ||
+                            (membership.approval_status === 'rejected'
+                              ? 'Rejected'
+                              : 'Revoked')
+                          "
                         />
                       }
                       <span
@@ -428,7 +457,7 @@
                                       Revoke
                                     </button>
                                   }
-                                  @default {
+                                  @case ("revoked") {
                                     <button
                                       type="button"
                                       (click)="
@@ -454,6 +483,9 @@
                                       </svg>
                                       Approve
                                     </button>
+                                  }
+                                  @default {
+                                    <!-- No admin actions for rejected or other terminal states -->
                                   }
                                 }
                               </div>
