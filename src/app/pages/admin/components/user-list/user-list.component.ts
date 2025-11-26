@@ -296,10 +296,6 @@ export class UserListComponent implements OnInit, OnDestroy {
       });
   }
 
-  getUsers() {
-    return this.apiService.getAdminAllUsers();
-  }
-
   loadUsers(): void {
     this.loading.set(true);
     this.apiService
