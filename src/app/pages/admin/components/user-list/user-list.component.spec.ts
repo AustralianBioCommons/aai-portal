@@ -130,10 +130,13 @@ describe('UserListComponent', () => {
   });
 
   it('should display user count', () => {
+    mockApiService.getAdminUsersPageInfo.and.returnValue(
+      of({ total: 57, pages: 2, per_page: 50 }),
+    );
     fixture.detectChanges();
     const countElement =
       fixture.debugElement.nativeElement.querySelector('.text-gray-500');
-    expect(countElement.textContent).toContain('2 users');
+    expect(countElement.textContent).toContain('57 users');
   });
 
   it('should set loading state while loading users', () => {
