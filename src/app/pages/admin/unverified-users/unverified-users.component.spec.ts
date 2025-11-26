@@ -46,7 +46,7 @@ describe('UnverifiedUsersComponent', () => {
     expect(component.title).toBe('Unverified Users');
   });
 
-  it('should bind getUsers to getAdminUnverifiedUsers API method', () => {
+  it('should bind getUsers to the correct API method', () => {
     const params = { page: 1, perPage: 50, filterBy: '', search: '' };
     component.getUsers(params).subscribe();
 

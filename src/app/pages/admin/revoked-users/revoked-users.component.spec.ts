@@ -38,7 +38,7 @@ describe('RevokedUsersComponent', () => {
     expect(component.title).toBe('Revoked Users');
   });
 
-  it('should bind getUsers to API method', () => {
+  it('should bind getUsers to the correct API method', () => {
     const params = { page: 1, perPage: 50, filterBy: '', search: '' };
     component.getUsers(params).subscribe();
 
