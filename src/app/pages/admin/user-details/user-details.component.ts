@@ -377,10 +377,6 @@ export class UserDetailsComponent implements OnInit {
     }
 
     const reason = this.rejectReasonControl.value.trim();
-    if (!reason) {
-      this.rejectReasonControl.setErrors({ required: true });
-      return;
-    }
 
     const userId = this.user()!.user_id;
     this.alert.set(null);
