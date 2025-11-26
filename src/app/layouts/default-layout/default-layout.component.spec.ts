@@ -105,8 +105,6 @@ describe('DefaultLayoutComponent', () => {
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     mockApiService.getAdminUserCounts.and.returnValue(
       of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
@@ -129,8 +127,6 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
@@ -162,8 +158,6 @@ describe('DefaultLayoutComponent', () => {
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     mockApiService.getAdminUserCounts.and.returnValue(
       of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
@@ -193,8 +187,6 @@ describe('DefaultLayoutComponent', () => {
     );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
     mockApiService.getAdminUserCounts.and.returnValue(
       of({ all: 0, pending: 0, revoked: 0, unverified: 0 }),
@@ -222,8 +214,6 @@ describe('DefaultLayoutComponent', () => {
     mockApiService.getUserAllPending.and.returnValue(
       of({ platforms: [], groups: [] }),
     );
-    mockApiService.getAdminPendingUsers.and.returnValue(of([]));
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
