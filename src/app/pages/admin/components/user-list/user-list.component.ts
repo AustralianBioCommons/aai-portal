@@ -87,7 +87,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   users = signal<BiocommonsUserResponse[]>([]);
   totalUsers = signal<number>(0);
   page = signal<number>(1);
-  totalPages = signal<number>(10);
+  totalPages = signal<number>(0);
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
