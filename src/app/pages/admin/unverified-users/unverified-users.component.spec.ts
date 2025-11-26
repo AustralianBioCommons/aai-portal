@@ -47,13 +47,7 @@ describe('UnverifiedUsersComponent', () => {
   });
 
   it('should bind getUsers to the correct API method', () => {
-    const params = {
-      page: 1,
-      perPage: 50,
-      filterBy: '',
-      search: '',
-    };
-
+    const params = { page: 1, perPage: 50, filterBy: '', search: '' };
     component.getUsers(params).subscribe();
 
     expect(mockApiService.getAdminUnverifiedUsers).toHaveBeenCalledWith(params);
