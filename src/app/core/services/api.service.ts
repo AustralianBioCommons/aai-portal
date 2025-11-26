@@ -121,6 +121,7 @@ export interface AdminGetUsersApiParams {
   filterBy?: string;
   search?: string;
   emailVerified?: boolean;
+  approvalStatus?: Status;
   platform?: string;
   platformApprovalStatus?: Status;
   group?: string;
@@ -199,6 +200,7 @@ export class ApiService {
       filterBy,
       search,
       emailVerified,
+      approvalStatus,
       platform,
       platformApprovalStatus,
       group,
@@ -219,6 +221,9 @@ export class ApiService {
     if (emailVerified !== undefined) {
       urlParams.append('email_verified', emailVerified.toString());
     }
+    if (approvalStatus) {
+      urlParams.append('approval_status', approvalStatus);
+    }
     if (platform) {
       urlParams.append('platform', platform);
     }
@@ -237,39 +242,21 @@ export class ApiService {
     );
   }
 
-  getPlatformAdminPendingUsers(
+  getAdminPendingUsers(
     params: AdminGetUsersApiParams = {},
   ): Observable<BiocommonsUserResponse[]> {
     return this.getAdminAllUsers({
       ...params,
-      platformApprovalStatus: 'pending',
+      approvalStatus: 'pending',
     });
   }
 
-  getPlatformAdminRevokedUsers(
+  getAdminRevokedUsers(
     params: AdminGetUsersApiParams = {},
   ): Observable<BiocommonsUserResponse[]> {
     return this.getAdminAllUsers({
       ...params,
-      platformApprovalStatus: 'revoked',
-    });
-  }
-
-  getGroupAdminPendingUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      groupApprovalStatus: 'pending',
-    });
-  }
-
-  getGroupAdminRevokedUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      groupApprovalStatus: 'revoked',
+      approvalStatus: 'revoked',
     });
   }
 

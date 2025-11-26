@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ApiService } from '../../../core/services/api.service';
 import { UserListComponent } from '../components/user-list/user-list.component';
-import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-pending-users',
@@ -11,12 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class PendingUsersComponent {
   private apiService = inject(ApiService);
-  private authService = inject(AuthService);
 
   title = 'Pending Requests';
-
-  // Display pending platform requests if admin is an SBP platform admin, and bundle requests otherwise
-  getUsers = this.authService.adminPlatforms().some((p) => p.id === 'sbp')
-    ? this.apiService.getPlatformAdminPendingUsers.bind(this.apiService)
-    : this.apiService.getGroupAdminPendingUsers.bind(this.apiService);
+  getUsers = this.apiService.getAdminPendingUsers.bind(this.apiService);
 }
