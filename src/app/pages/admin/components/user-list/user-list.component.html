@@ -397,117 +397,119 @@
         }
       </div>
     }
-    <div id="pagination" class="mt-6">
-      <h2 class="text-md">Page {{ page() }} of {{ totalPages() }}</h2>
-      <nav
-        class="flex items-center justify-between gap-3 py-4"
-        aria-label="Pagination"
-      >
-        <!-- Prev -->
-        <button
-          type="button"
-          class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-          [disabled]="page() <= 1"
-          (click)="setPage(page() - 1)"
+    @if (totalUsers() > 0) {
+      <div id="pagination" class="mt-6">
+        <h2 class="text-md">Page {{ page() }} of {{ totalPages() }}</h2>
+        <nav
+          class="flex items-center justify-between gap-3 py-4"
+          aria-label="Pagination"
         >
-          <span class="text-lg leading-none">←</span>
-          Prev
-        </button>
+          <!-- Prev -->
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="page() <= 1"
+            (click)="setPage(page() - 1)"
+          >
+            <span class="text-lg leading-none">←</span>
+            Prev
+          </button>
 
-        <!-- Page numbers -->
-        <ul class="flex items-center gap-1">
-          <!-- First page -->
-          <li>
-            <button
-              type="button"
-              class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium transition"
-              [class.bg-biocommons-primary]="page() === 1"
-              [class.text-white]="page() === 1"
-              [class.hover:bg-sky-900]="page() === 1"
-              [class.bg-white]="page() !== 1"
-              [class.border]="page() !== 1"
-              [class.border-biocommons-primary]="page() !== 1"
-              [class.text-biocommons-primary]="page() !== 1"
-              [class.hover:bg-gray-100]="page() !== 1"
-              (click)="setPage(1)"
-              aria-label="Go to page 1"
-            >
-              1
-            </button>
-          </li>
-
-          <!-- Left ellipsis -->
-          @if (page() > 4) {
-            <li class="px-2 text-slate-400">…</li>
-          }
-
-          <!-- Middle pages around current -->
-          @for (
-            p of [page() - 2, page() - 1, page(), page() + 1, page() + 2];
-            track p
-          ) {
-            @if (p > 1 && p < totalPages()) {
-              <li>
-                <button
-                  type="button"
-                  class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium transition"
-                  [class.bg-biocommons-primary]="page() === p"
-                  [class.text-white]="page() === p"
-                  [class.hover:bg-sky-900]="page() === p"
-                  [class.bg-white]="page() !== p"
-                  [class.border]="page() !== p"
-                  [class.border-biocommons-primary]="page() !== p"
-                  [class.text-biocommons-primary]="page() !== p"
-                  [class.hover:bg-gray-100]="page() !== p"
-                  (click)="setPage(p)"
-                  [attr.aria-current]="page() === p ? 'page' : null"
-                  [attr.aria-label]="'Go to page ' + p"
-                >
-                  {{ p }}
-                </button>
-              </li>
-            }
-          }
-
-          <!-- Right ellipsis -->
-          @if (page() < totalPages() - 3) {
-            <li class="px-2 text-slate-400">…</li>
-          }
-
-          <!-- Last page (if more than 1) -->
-          @if (totalPages() > 1) {
+          <!-- Page numbers -->
+          <ul class="flex items-center gap-1">
+            <!-- First page -->
             <li>
               <button
                 type="button"
                 class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium transition"
-                [class.bg-biocommons-primary]="page() === totalPages()"
-                [class.text-white]="page() === totalPages()"
-                [class.hover:bg-sky-900]="page() === totalPages()"
-                [class.bg-white]="page() !== totalPages()"
-                [class.border]="page() !== totalPages()"
-                [class.border-biocommons-primary]="page() !== totalPages()"
-                [class.text-biocommons-primary]="page() !== totalPages()"
-                [class.hover:bg-gray-100]="page() !== totalPages()"
-                (click)="setPage(totalPages())"
-                [attr.aria-label]="'Go to page ' + totalPages()"
+                [class.bg-biocommons-primary]="page() === 1"
+                [class.text-white]="page() === 1"
+                [class.hover:bg-sky-900]="page() === 1"
+                [class.bg-white]="page() !== 1"
+                [class.border]="page() !== 1"
+                [class.border-biocommons-primary]="page() !== 1"
+                [class.text-biocommons-primary]="page() !== 1"
+                [class.hover:bg-gray-100]="page() !== 1"
+                (click)="setPage(1)"
+                aria-label="Go to page 1"
               >
-                {{ totalPages() }}
+                1
               </button>
             </li>
-          }
-        </ul>
 
-        <!-- Next -->
-        <button
-          type="button"
-          class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-          [disabled]="page() >= totalPages()"
-          (click)="setPage(page() + 1)"
-        >
-          Next
-          <span class="text-lg leading-none">→</span>
-        </button>
-      </nav>
-    </div>
+            <!-- Left ellipsis -->
+            @if (page() > 4) {
+              <li class="px-2 text-slate-400">…</li>
+            }
+
+            <!-- Middle pages around current -->
+            @for (
+              p of [page() - 2, page() - 1, page(), page() + 1, page() + 2];
+              track p
+            ) {
+              @if (p > 1 && p < totalPages()) {
+                <li>
+                  <button
+                    type="button"
+                    class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium transition"
+                    [class.bg-biocommons-primary]="page() === p"
+                    [class.text-white]="page() === p"
+                    [class.hover:bg-sky-900]="page() === p"
+                    [class.bg-white]="page() !== p"
+                    [class.border]="page() !== p"
+                    [class.border-biocommons-primary]="page() !== p"
+                    [class.text-biocommons-primary]="page() !== p"
+                    [class.hover:bg-gray-100]="page() !== p"
+                    (click)="setPage(p)"
+                    [attr.aria-current]="page() === p ? 'page' : null"
+                    [attr.aria-label]="'Go to page ' + p"
+                  >
+                    {{ p }}
+                  </button>
+                </li>
+              }
+            }
+
+            <!-- Right ellipsis -->
+            @if (page() < totalPages() - 3) {
+              <li class="px-2 text-slate-400">…</li>
+            }
+
+            <!-- Last page (if more than 1) -->
+            @if (totalPages() > 1) {
+              <li>
+                <button
+                  type="button"
+                  class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium transition"
+                  [class.bg-biocommons-primary]="page() === totalPages()"
+                  [class.text-white]="page() === totalPages()"
+                  [class.hover:bg-sky-900]="page() === totalPages()"
+                  [class.bg-white]="page() !== totalPages()"
+                  [class.border]="page() !== totalPages()"
+                  [class.border-biocommons-primary]="page() !== totalPages()"
+                  [class.text-biocommons-primary]="page() !== totalPages()"
+                  [class.hover:bg-gray-100]="page() !== totalPages()"
+                  (click)="setPage(totalPages())"
+                  [attr.aria-label]="'Go to page ' + totalPages()"
+                >
+                  {{ totalPages() }}
+                </button>
+              </li>
+            }
+          </ul>
+
+          <!-- Next -->
+          <button
+            type="button"
+            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            [disabled]="page() >= totalPages()"
+            (click)="setPage(page() + 1)"
+          >
+            Next
+            <span class="text-lg leading-none">→</span>
+          </button>
+        </nav>
+      </div>
+    }
   </div>
 </div>
