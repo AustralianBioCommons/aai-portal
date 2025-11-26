@@ -47,7 +47,6 @@ describe('DefaultLayoutComponent', () => {
     routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
     const apiSpy = jasmine.createSpyObj('ApiService', [
-      'getUserAllPending',
       'getAdminPendingUsers',
       'getAdminRevokedUsers',
       'getAdminUnverifiedUsers',
@@ -100,9 +99,6 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
@@ -124,9 +120,6 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
@@ -153,9 +146,6 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
@@ -182,9 +172,6 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
@@ -211,9 +198,6 @@ describe('DefaultLayoutComponent', () => {
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     mockApiService.getAdminPendingUsers.and.returnValue(of([]));
     mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
     mockApiService.getAdminUnverifiedUsers.and.returnValue(of([]));
