@@ -269,33 +269,6 @@ export class ApiService {
     );
   }
 
-  getAdminPendingUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      approvalStatus: 'pending',
-    });
-  }
-
-  getAdminRevokedUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      approvalStatus: 'revoked',
-    });
-  }
-
-  getAdminUnverifiedUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      emailVerified: false,
-    });
-  }
-
   getAdminUserCounts(): Observable<AdminUserCountsResponse> {
     return this.http.get<AdminUserCountsResponse>(
       `${environment.auth0.backend}/admin/users/counts`,
