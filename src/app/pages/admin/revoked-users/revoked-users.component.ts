@@ -16,6 +16,6 @@ export class RevokedUsersComponent {
 
   title = 'Revoked Users';
   defaultQueryParams: Partial<AdminGetUsersApiParams> = {
-    platformApprovalStatus: 'revoked',
+    approvalStatus: 'revoked',
   };
 }
