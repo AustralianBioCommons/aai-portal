@@ -15,8 +15,8 @@ export class PendingUsersComponent {
 
   title = 'Pending Requests';
 
-  getUsers =
-    this.authService.adminType() === 'bundle'
-      ? this.apiService.getGroupAdminPendingUsers.bind(this.apiService)
-      : this.apiService.getPlatformAdminPendingUsers.bind(this.apiService);
+  // Display pending platform requests if admin is an SBP platform admin, and bundle requests otherwise
+  getUsers = this.authService.adminPlatforms().some((p) => p.id === 'sbp')
+    ? this.apiService.getPlatformAdminPendingUsers.bind(this.apiService)
+    : this.apiService.getGroupAdminPendingUsers.bind(this.apiService);
 }
