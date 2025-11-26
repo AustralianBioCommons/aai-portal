@@ -127,7 +127,7 @@ export interface AdminGetUsersApiParams {
   groupApprovalStatus?: Status;
 }
 
-export interface UserCountResponse {
+export interface UsersPageInfoResponse {
   total: number;
   pages: number;
   per_page: number;
@@ -243,12 +243,16 @@ export class ApiService {
     );
   }
 
-  getAdminUserCount(
+  /**
+   * Accepts the same params as getAdminAllUsers() but returns the
+   * total users and pages matching the query.
+   */
+  getAdminUsersPageInfo(
     params: AdminGetUsersApiParams = {},
-  ): Observable<UserCountResponse> {
+  ): Observable<UsersPageInfoResponse> {
     const urlParams = this.getUserUrlParams(params);
-    return this.http.get<UserCountResponse>(
-      `${environment.auth0.backend}/admin/user-count?${urlParams.toString()}`,
+    return this.http.get<UsersPageInfoResponse>(
+      `${environment.auth0.backend}/admin/users/pages?${urlParams.toString()}`,
     );
   }
 

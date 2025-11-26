@@ -17,11 +17,11 @@ describe('AllUsersComponent', () => {
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
       'getAdminAllUsers',
-      'getAdminUserCount',
+      'getAdminUsersPageInfo',
       'getFilterOptions',
     ]);
     mockApiService.getAdminAllUsers.and.returnValue(of([]));
-    mockApiService.getAdminUserCount.and.returnValue(
+    mockApiService.getAdminUsersPageInfo.and.returnValue(
       of({ pages: 0, total: 0, per_page: 50 }),
     );
     mockApiService.getFilterOptions.and.returnValue(of([]));

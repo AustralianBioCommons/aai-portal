@@ -61,7 +61,7 @@ describe('UserListComponent', () => {
       'resendVerificationEmail',
       'revokePlatformAccess',
       'getAdminAllUsers',
-      'getAdminUserCount',
+      'getAdminUsersPageInfo',
     ]);
     mockApiService.getFilterOptions.and.returnValue(of(mockFilterOptions));
     mockApiService.resendVerificationEmail.and.returnValue(
@@ -69,7 +69,7 @@ describe('UserListComponent', () => {
     );
     mockApiService.revokePlatformAccess.and.returnValue(of({ updated: true }));
     mockApiService.getAdminAllUsers.and.returnValue(of(mockUsers));
-    mockApiService.getAdminUserCount.and.returnValue(of(mockUserCounts));
+    mockApiService.getAdminUsersPageInfo.and.returnValue(of(mockUserCounts));
 
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
       adminPlatforms: signal([]),
@@ -459,7 +459,7 @@ describe('UserListComponent', () => {
       fixture.detectChanges(); // Initial load for page 1
 
       mockApiService.getAdminAllUsers.calls.reset();
-      mockApiService.getAdminUserCount.calls.reset();
+      mockApiService.getAdminUsersPageInfo.calls.reset();
 
       component.setPage(2);
 
@@ -476,7 +476,7 @@ describe('UserListComponent', () => {
         search: '',
       });
 
-      expect(mockApiService.getAdminUserCount).toHaveBeenCalledWith({
+      expect(mockApiService.getAdminUsersPageInfo).toHaveBeenCalledWith({
         page: 2,
         perPage: DEFAULT_PAGE_SIZE,
         filterBy: '',

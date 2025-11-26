@@ -275,7 +275,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   loadUserCounts(): void {
     this.apiService
-      .getAdminUserCount({
+      .getAdminUsersPageInfo({
         ...this.defaultQueryParams(),
         page: this.page(),
         perPage: DEFAULT_PAGE_SIZE,
