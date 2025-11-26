@@ -161,7 +161,8 @@
                           'border-yellow-600 bg-yellow-50 text-yellow-800':
                             group.approval_status === 'pending',
                           'border-red-600 bg-red-50 text-red-700':
-                            group.approval_status === 'revoked',
+                            group.approval_status === 'revoked' ||
+                            group.approval_status === 'rejected',
                         }"
                       >
                         {{ group.group_short_name }}
@@ -181,15 +182,26 @@
                               group.approval_status === 'approved',
                             'text-yellow-500':
                               group.approval_status === 'pending',
-                            'text-red-500': group.approval_status === 'revoked',
+                            'text-red-500':
+                              group.approval_status === 'revoked' ||
+                              group.approval_status === 'rejected',
                           }"
                         >
                           <span class="truncate">
                             {{ group.approval_status | titlecase }}
                           </span>
-                          @if (group.approval_status === "revoked") {
+                          @if (
+                            group.approval_status === "revoked" ||
+                            group.approval_status === "rejected"
+                          ) {
                             <app-tooltip
-                              [message]="group.revocation_reason || 'Revoked'"
+                              [message]="
+                                group.rejection_reason ||
+                                group.revocation_reason ||
+                                (group.approval_status === 'rejected'
+                                  ? 'Rejected'
+                                  : 'Revoked')
+                              "
                             />
                           }
                         </div>
