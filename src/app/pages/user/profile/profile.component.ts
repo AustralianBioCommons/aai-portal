@@ -197,13 +197,13 @@ export class ProfileComponent implements OnInit {
   protected modalTitle(): string {
     switch (this.activeModal()) {
       case 'name':
-        return 'Edit full name';
+        return 'Edit my name';
       case 'username':
-        return 'Update username';
+        return 'Edit my username';
       case 'email':
-        return 'Change email address';
+        return 'Change my email address';
       case 'password':
-        return 'Change password';
+        return 'Change my password';
       default:
         return '';
     }
@@ -225,14 +225,8 @@ export class ProfileComponent implements OnInit {
 
   protected modalDescription(): string {
     switch (this.activeModal()) {
-      case 'name':
-        return 'Update the name that shows across AAI.';
-      case 'username':
-        return 'Usernames are unique and may include letters, numbers, dashes, and underscores.';
       case 'email':
-        return 'Enter a new email and verify it with the OTP sent to that inbox.';
-      case 'password':
-        return 'Choose a strong password that you can remember.';
+        return 'To verify your email, we will send an one-time-password to your new email address.';
       default:
         return '';
     }

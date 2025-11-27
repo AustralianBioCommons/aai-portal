@@ -12,6 +12,7 @@
 @if (revokeModalData()) {
   <app-modal
     [title]="getRevokeModalTitle()"
+    [description]="revokeModalData()?.email ?? ''"
     type="revoke"
     [textareaControl]="revokeReasonControl"
     textareaLabel="Revocation reason"
@@ -24,13 +25,8 @@
 
 @if (rejectModalData()) {
   <app-modal
-    [title]="
-      'Reject ' +
-      rejectModalData()!.email +
-      ' from ' +
-      rejectModalData()!.name +
-      '?'
-    "
+    [title]="'Do you want to reject this user?'"
+    [description]="rejectModalData()!.email"
     type="revoke"
     [textareaControl]="rejectReasonControl"
     textareaLabel="Rejection reason"

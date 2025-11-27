@@ -277,9 +277,9 @@ export class UserDetailsComponent implements OnInit {
     const modalData = this.revokeModalData();
     if (!modalData) return '';
     if (modalData.type === 'platform') {
-      return `Do you want to revoke ${modalData.email}?`;
+      return `Do you want to revoke this user?`;
     } else {
-      return `Do you want to revoke ${modalData.email} from ${modalData.name}?`;
+      return `Do you want to revoke this user from ${modalData.name}?`;
     }
   }
 
