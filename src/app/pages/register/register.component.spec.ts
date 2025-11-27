@@ -128,16 +128,6 @@ describe('RegisterComponent', () => {
       expect(activeStep?.label).toBe('Introduction');
     });
 
-    it('should navigate back to parent route', () => {
-      const router = TestBed.inject(Router);
-      const activatedRoute = TestBed.inject(ActivatedRoute);
-      const navigateSpy = spyOn(router, 'navigate').and.stub();
-      component.goBack();
-      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
-        relativeTo: activatedRoute,
-      });
-    });
-
     it('should determine if section is valid', () => {
       expect(component.isSectionValid('introduction')).toBe(true);
       expect(component.isSectionValid('your-details')).toBe(false);

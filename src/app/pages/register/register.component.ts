@@ -358,10 +358,6 @@ export class RegisterComponent implements AfterViewInit {
     return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
-  goBack() {
-    this.router.navigate(['../'], { relativeTo: this.route });
-  }
-
   submitRegistration() {
     this.errorAlert.set(null);
     this.recaptchaAttempted.set(true);

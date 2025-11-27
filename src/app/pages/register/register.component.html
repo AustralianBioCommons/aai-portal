@@ -628,23 +628,21 @@
           </form>
 
           <!-- reCAPTCHA -->
-          <div class="flex flex-col items-center gap-0.5">
-            <re-captcha
-              (resolved)="resolved($event)"
-              siteKey="{{ recaptchaSiteKeyV2 }}"
-            ></re-captcha>
-            @if (!recaptchaToken() && recaptchaAttempted()) {
-              <div class="text-xs text-red-500">
-                Please complete the reCAPTCHA verification
-              </div>
-            }
-          </div>
 
-          <!-- Submit Button -->
-          <div class="flex items-center justify-between">
-            <app-button type="button" variant="secondary" (click)="goBack()">
-              Back
-            </app-button>
+          <div class="flex flex-col items-center justify-center gap-6">
+            <div class="flex flex-col items-center gap-0.5">
+              <re-captcha
+                (resolved)="resolved($event)"
+                siteKey="{{ recaptchaSiteKeyV2 }}"
+              ></re-captcha>
+              @if (!recaptchaToken() && recaptchaAttempted()) {
+                <div class="text-xs text-red-500">
+                  Please complete the reCAPTCHA verification
+                </div>
+              }
+            </div>
+
+            <!-- Submit Button -->
             <app-button
               type="submit"
               variant="primary"
