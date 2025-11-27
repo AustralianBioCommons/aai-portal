@@ -267,7 +267,10 @@
                       </button>
                       @if (membership.approval_status === "revoked") {
                         <app-tooltip
-                          [message]="membership.revocation_reason || 'Revoked'"
+                          [message]="
+                            formatReason(membership.revocation_reason) ||
+                            'Revoked'
+                          "
                         />
                       }
                       <span
@@ -324,11 +327,13 @@
                       ) {
                         <app-tooltip
                           [message]="
-                            membership.rejection_reason ||
-                            membership.revocation_reason ||
-                            (membership.approval_status === 'rejected'
-                              ? 'Rejected'
-                              : 'Revoked')
+                            formatReason(
+                              membership.rejection_reason ||
+                                membership.revocation_reason
+                            ) ||
+                              (membership.approval_status === 'rejected'
+                                ? 'Rejected'
+                                : 'Revoked')
                           "
                         />
                       }

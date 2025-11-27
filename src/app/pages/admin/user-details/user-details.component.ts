@@ -209,6 +209,31 @@ export class UserDetailsComponent implements OnInit {
     return this.openMenuMembershipId() === membershipId;
   }
 
+  formatReason(reason?: string | null): string {
+    if (!reason) {
+      return '';
+    }
+    const match = reason.match(/\((revoked|rejected) on (.+) by (.+)\)$/);
+    if (!match) {
+      return reason;
+    }
+
+    const [, action, isoTimestamp, actor] = match;
+    const date = new Date(isoTimestamp);
+    if (Number.isNaN(date.getTime())) {
+      return reason;
+    }
+
+    const formatted = new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+
+    const baseReason = reason.replace(match[0], '').trim();
+    const prefix = baseReason ? `${baseReason} ` : '';
+    return `${prefix}(${action} on ${formatted} by ${actor})`;
+  }
+
   approveGroupMembership(membershipId: string): void {
     this.openMenuMembershipId.set(null);
     const userId = this.user()!.user_id;

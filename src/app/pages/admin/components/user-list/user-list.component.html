@@ -196,11 +196,13 @@
                           ) {
                             <app-tooltip
                               [message]="
-                                group.rejection_reason ||
-                                group.revocation_reason ||
-                                (group.approval_status === 'rejected'
-                                  ? 'Rejected'
-                                  : 'Revoked')
+                                formatReason(
+                                  group.rejection_reason ||
+                                    group.revocation_reason
+                                ) ||
+                                  (group.approval_status === 'rejected'
+                                    ? 'Rejected'
+                                    : 'Revoked')
                               "
                             />
                           }
@@ -236,7 +238,10 @@
                         </span>
                         @if (platform.approval_status === "revoked") {
                           <app-tooltip
-                            [message]="platform.revocation_reason || 'Revoked'"
+                            [message]="
+                              formatReason(platform.revocation_reason) ||
+                              'Revoked'
+                            "
                           />
                         }
                       </div>
@@ -266,13 +271,14 @@
                             {{ platform.approval_status | titlecase }}
                           </span>
                           @if (platform.approval_status === "revoked") {
-                            <app-tooltip
-                              [message]="
-                                platform.revocation_reason || 'Revoked'
-                              "
-                            />
-                          }
-                        </div>
+                          <app-tooltip
+                            [message]="
+                              formatReason(platform.revocation_reason) ||
+                              'Revoked'
+                            "
+                          />
+                        }
+                      </div>
                       }
                     }
                   }
