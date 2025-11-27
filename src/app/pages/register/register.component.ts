@@ -206,7 +206,7 @@ export class RegisterComponent implements AfterViewInit {
     event.preventDefault();
     const element = document.getElementById(sectionId);
     if (element) {
-      const offset = 100; // Offset for navbar
+      const offset = 160; // Offset for navbar and progress bar
       const elementPosition = element.offsetTop - offset;
       window.scrollTo({
         top: elementPosition,
