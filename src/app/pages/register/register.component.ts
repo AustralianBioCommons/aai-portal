@@ -48,6 +48,7 @@ interface RegistrationRequest {
 interface Section {
   id: string;
   label: string;
+  mobileLabel: string;
 }
 
 @Component({
@@ -86,10 +87,10 @@ export class RegisterComponent implements AfterViewInit {
   activeSection = signal<string>('introduction');
   visitedSections = signal<Set<string>>(new Set(['introduction']));
   sections: Section[] = [
-    { id: 'introduction', label: 'Introduction' },
-    { id: 'your-details', label: 'Your Details' },
-    { id: 'add-bundle', label: 'Add a Bundle' },
-    { id: 'terms', label: 'Accept T&Cs' },
+    { id: 'introduction', label: 'Introduction', mobileLabel: 'Introduction' },
+    { id: 'your-details', label: 'Your Details', mobileLabel: 'Details' },
+    { id: 'add-bundle', label: 'Add a Bundle', mobileLabel: 'Bundle' },
+    { id: 'terms', label: 'Accept T&Cs', mobileLabel: 'T&Cs' },
   ];
 
   bundles: Bundle[] = biocommonsBundles;
