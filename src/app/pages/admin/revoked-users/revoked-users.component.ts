@@ -1,5 +1,8 @@
 import { Component, inject } from '@angular/core';
-import { ApiService } from '../../../core/services/api.service';
+import {
+  AdminGetUsersApiParams,
+  ApiService,
+} from '../../../core/services/api.service';
 import { UserListComponent } from '../components/user-list/user-list.component';
 
 @Component({
@@ -12,5 +15,7 @@ export class RevokedUsersComponent {
   private apiService = inject(ApiService);
 
   title = 'Revoked Users';
-  getUsers = this.apiService.getAdminRevokedUsers.bind(this.apiService);
+  defaultQueryParams: Partial<AdminGetUsersApiParams> = {
+    approvalStatus: 'revoked',
+  };
 }

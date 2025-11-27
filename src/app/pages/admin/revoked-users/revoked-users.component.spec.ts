@@ -4,8 +4,12 @@ import { of } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { RevokedUsersComponent } from './revoked-users.component';
-import { ApiService } from '../../../core/services/api.service';
+import {
+  AdminGetUsersApiParams,
+  ApiService,
+} from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DEFAULT_PAGE_SIZE } from '../components/user-list/user-list.component';
 
 describe('RevokedUsersComponent', () => {
   let component: RevokedUsersComponent;
@@ -15,14 +19,20 @@ describe('RevokedUsersComponent', () => {
 
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
-      'getAdminRevokedUsers',
+      'getAdminAllUsers',
+      'getAdminUsersPageInfo',
       'getFilterOptions',
     ]);
-    mockApiService.getAdminRevokedUsers.and.returnValue(of([]));
+    mockApiService.getAdminAllUsers.and.returnValue(of([]));
+    mockApiService.getAdminUsersPageInfo.and.returnValue(
+      of({ pages: 0, total: 0, per_page: 50 }),
+    );
     mockApiService.getFilterOptions.and.returnValue(of([]));
 
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal(null),
     });
 
     await TestBed.configureTestingModule({
@@ -46,10 +56,18 @@ describe('RevokedUsersComponent', () => {
     expect(component.title).toBe('Revoked Users');
   });
 
-  it('should bind getUsers to the correct API method', () => {
-    const params = { page: 1, perPage: 50, filterBy: '', search: '' };
-    component.getUsers(params).subscribe();
+  it('should load users with the correct params', () => {
+    fixture.detectChanges();
+    const expectedParams = {
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      filterBy: '',
+      search: '',
+      approvalStatus: 'revoked',
+    } as AdminGetUsersApiParams;
 
-    expect(mockApiService.getAdminRevokedUsers).toHaveBeenCalledWith(params);
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
+      expectedParams,
+    );
   });
 });

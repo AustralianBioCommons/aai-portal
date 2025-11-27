@@ -113,6 +113,12 @@ export interface AdminGetUsersApiParams {
   groupApprovalStatus?: Status;
 }
 
+export interface UsersPageInfoResponse {
+  total: number;
+  pages: number;
+  per_page: number;
+}
+
 export interface AdminUserCountsResponse {
   all: number;
   pending: number;
@@ -158,9 +164,9 @@ export class ApiService {
     );
   }
 
-  getAdminAllUsers(
+  private getUserUrlParams(
     params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
+  ): URLSearchParams {
     const {
       page = 1,
       perPage = 50,
@@ -173,7 +179,6 @@ export class ApiService {
       group,
       groupApprovalStatus,
     } = params;
-
     const urlParams = new URLSearchParams({
       page: page.toString(),
       per_page: perPage.toString(),
@@ -204,36 +209,30 @@ export class ApiService {
       urlParams.append('group_approval_status', groupApprovalStatus);
     }
 
+    return urlParams;
+  }
+
+  getAdminAllUsers(
+    params: AdminGetUsersApiParams = {},
+  ): Observable<BiocommonsUserResponse[]> {
+    const urlParams = this.getUserUrlParams(params);
+
     return this.http.get<BiocommonsUserResponse[]>(
       `${environment.auth0.backend}/admin/users?${urlParams.toString()}`,
     );
   }
 
-  getAdminPendingUsers(
+  /**
+   * Accepts the same params as getAdminAllUsers() but returns the
+   * total users and pages matching the query.
+   */
+  getAdminUsersPageInfo(
     params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      approvalStatus: 'pending',
-    });
-  }
-
-  getAdminRevokedUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      approvalStatus: 'revoked',
-    });
-  }
-
-  getAdminUnverifiedUsers(
-    params: AdminGetUsersApiParams = {},
-  ): Observable<BiocommonsUserResponse[]> {
-    return this.getAdminAllUsers({
-      ...params,
-      emailVerified: false,
-    });
+  ): Observable<UsersPageInfoResponse> {
+    const urlParams = this.getUserUrlParams(params);
+    return this.http.get<UsersPageInfoResponse>(
+      `${environment.auth0.backend}/admin/users/pages?${urlParams.toString()}`,
+    );
   }
 
   getAdminUserCounts(): Observable<AdminUserCountsResponse> {

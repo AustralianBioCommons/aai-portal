@@ -7,6 +7,8 @@ import {
   input,
   inject,
   Renderer2,
+  effect,
+  untracked,
 } from '@angular/core';
 import {
   FormsModule,
@@ -14,9 +16,9 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, TitleCasePipe } from '@angular/common';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../../shared/components/tooltip/tooltip.component';
@@ -31,6 +33,8 @@ import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
+
+export const DEFAULT_PAGE_SIZE = 50;
 
 /**
  * Reusable user list component with filtering and search.
@@ -60,6 +64,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   styleUrl: './user-list.component.css',
 })
 export class UserListComponent implements OnInit, OnDestroy {
+  private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private apiService = inject(ApiService);
@@ -72,10 +77,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   // Input signals
   title = input.required<string>();
-  getUsers =
-    input.required<
-      (params: AdminGetUsersApiParams) => Observable<BiocommonsUserResponse[]>
-    >();
+  defaultQueryParams = input.required<Partial<AdminGetUsersApiParams>>();
   returnUrl = input<string>(''); // Optional return URL for navigation back from user details
 
   // State signals
@@ -83,6 +85,9 @@ export class UserListComponent implements OnInit, OnDestroy {
   openMenuUserId = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   users = signal<BiocommonsUserResponse[]>([]);
+  totalUsers = signal<number>(0);
+  page = signal<number>(1);
+  totalPages = signal<number>(0);
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
@@ -103,9 +108,29 @@ export class UserListComponent implements OnInit, OnDestroy {
     validators: [Validators.required],
   });
 
+  constructor() {
+    effect(() => {
+      const p = this.page();
+
+      // Run the load method without tracking its internal signal reads
+      untracked(() => {
+        this.loadUsers();
+        this.loadUserCounts();
+      });
+      return p;
+    });
+  }
+
   ngOnInit(): void {
+    this.activatedRoute.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        if (params['page']) {
+          this.page.set(parseInt(params['page'], 10));
+        }
+      });
+    this.loadUserCounts();
     this.loadFilterOptions();
-    this.loadUsers();
     this.setupSearchDebounce();
     this.setupClickOutsideHandler();
   }
@@ -113,6 +138,14 @@ export class UserListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  setPage(p: number) {
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: { page: p },
+      queryParamsHandling: 'merge', // preserve other filters/sorts
+    });
   }
 
   private setupClickOutsideHandler(): void {
@@ -226,7 +259,11 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.searchSubject
       .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
+        if (this.page() > 1) {
+          this.page.set(1);
+        }
         this.loadUsers();
+        this.loadUserCounts();
       });
   }
 
@@ -242,28 +279,53 @@ export class UserListComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadUserCounts(): void {
+    this.apiService
+      .getAdminUsersPageInfo({
+        ...this.defaultQueryParams(),
+        page: this.page(),
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: this.selectedFilter(),
+        search: this.searchTerm(),
+      })
+      .subscribe({
+        next: (counts) => {
+          this.totalPages.set(counts.pages);
+          this.totalUsers.set(counts.total);
+        },
+        error: (error) => {
+          console.error('Error loading total pages:', error);
+        },
+      });
+  }
+
   loadUsers(): void {
     this.loading.set(true);
-    this.getUsers()({
-      page: 1,
-      perPage: 50,
-      filterBy: this.selectedFilter(),
-      search: this.searchTerm(),
-    }).subscribe({
-      next: (users: BiocommonsUserResponse[]) => {
-        this.users.set(users);
-        this.loading.set(false);
-      },
-      error: (error: unknown) => {
-        console.error('Error loading users:', error);
-        this.users.set([]);
-        this.loading.set(false);
-      },
-    });
+    this.apiService
+      .getAdminAllUsers({
+        ...this.defaultQueryParams(),
+        page: this.page(),
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: this.selectedFilter(),
+        search: this.searchTerm(),
+      })
+      .subscribe({
+        next: (users: BiocommonsUserResponse[]) => {
+          this.users.set(users);
+          this.loading.set(false);
+        },
+        error: (error: unknown) => {
+          console.error('Error loading users:', error);
+          this.users.set([]);
+          this.loading.set(false);
+        },
+      });
   }
 
   onFilterChange(): void {
     this.searchTerm.set('');
+    this.page.set(1);
+    this.loadUserCounts();
     this.loadUsers();
   }
 
