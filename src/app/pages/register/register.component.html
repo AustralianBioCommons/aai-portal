@@ -32,26 +32,72 @@
                       (click)="scrollToSection($event, section.id)"
                     >
                       <div
-                        class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 bg-white transition-all"
+                        class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
                         [ngClass]="{
-                          'border-biocommons-primary !bg-biocommons-primary':
-                            isSectionCompleted(section.id) ||
-                            (isSectionActive(section.id) &&
+                          'border-biocommons-primary':
+                            isSectionActive(section.id) ||
+                            (isSectionCompleted(section.id) &&
+                              isSectionValid(section.id)) ||
+                            (isSectionVisited(section.id) &&
+                              !isSectionCompleted(section.id) &&
                               isSectionValid(section.id)),
-                          '!border-biocommons-primary': isSectionActive(
-                            section.id
-                          ),
-                          'border-gray-300':
+                          'bg-biocommons-primary':
+                            isSectionCompleted(section.id) &&
+                            isSectionValid(section.id),
+                          'border-red-600':
                             !isSectionActive(section.id) &&
-                            !isSectionCompleted(section.id),
+                            ((isSectionCompleted(section.id) &&
+                              !isSectionValid(section.id)) ||
+                              (isSectionVisited(section.id) &&
+                                !isSectionCompleted(section.id) &&
+                                !isSectionValid(section.id))),
+                          'bg-red-600':
+                            isSectionCompleted(section.id) &&
+                            !isSectionValid(section.id),
+                          'bg-white': !isSectionCompleted(section.id),
+                          'border-gray-300': !isSectionVisited(section.id),
                         }"
                       >
                         @if (
-                          (isSectionCompleted(section.id) ||
-                            isSectionActive(section.id)) &&
+                          isSectionActive(section.id) &&
+                          section.id === "terms" &&
+                          !isSectionValid(section.id)
+                        ) {
+                          <!-- Last step: dot when active and not valid -->
+                          <div
+                            class="h-2 w-2 rounded-full bg-biocommons-primary"
+                          ></div>
+                        } @else if (
+                          isSectionActive(section.id) &&
+                          section.id === "terms" &&
                           isSectionValid(section.id)
                         ) {
-                          <!-- Check icon if section is valid -->
+                          <!-- Last step: filled check when active and valid -->
+                          <span
+                            class="absolute inset-0 rounded-full bg-biocommons-primary"
+                          ></span>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="z-10 size-4 text-white"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        } @else if (isSectionActive(section.id)) {
+                          <!-- Other steps: dot when active -->
+                          <div
+                            class="h-2 w-2 rounded-full bg-biocommons-primary"
+                          ></div>
+                        } @else if (
+                          isSectionCompleted(section.id) &&
+                          isSectionValid(section.id)
+                        ) {
+                          <!-- Check icon, filled background -->
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -68,12 +114,31 @@
                           isSectionCompleted(section.id) &&
                           !isSectionValid(section.id)
                         ) {
-                          <!-- Exclamation mark icon if section is completed but invalid -->
+                          <!-- Exclamation mark, filled background -->
                           <span class="text-sm text-white">!</span>
-                        } @else if (isSectionActive(section.id)) {
-                          <div
-                            class="h-2 w-2 rounded-full bg-biocommons-primary"
-                          ></div>
+                        } @else if (
+                          isSectionVisited(section.id) &&
+                          isSectionValid(section.id)
+                        ) {
+                          <!-- Check icon, border only -->
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="size-4 text-biocommons-primary"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        } @else if (
+                          isSectionVisited(section.id) &&
+                          !isSectionValid(section.id)
+                        ) {
+                          <!-- Exclamation mark, border only -->
+                          <span class="text-sm text-red-600">!</span>
                         }
                       </div>
                     </a>
@@ -443,7 +508,7 @@
                 tabindex="0"
                 class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                 [class.ring-transparent]="
-                  termsForm.get('biocommonsAccess')?.value !== true &&
+                  termsForm.get('biocommonsAccess')?.value !==
                   (!termsForm.get('biocommonsAccess')?.invalid ||
                     !termsForm.get('biocommonsAccess')?.touched)
                 "
