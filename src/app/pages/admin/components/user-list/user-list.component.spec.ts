@@ -5,8 +5,8 @@ import {
   tick,
 } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Router, provideRouter, ActivatedRoute, Params } from '@angular/router';
-import { of, throwError, Subject, BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+import { of, throwError, Subject } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { DEFAULT_PAGE_SIZE, UserListComponent } from './user-list.component';
@@ -24,7 +24,7 @@ describe('UserListComponent', () => {
   let fixture: ComponentFixture<UserListComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
-  let queryParamsSubject: BehaviorSubject<Params>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   const mockUsers: BiocommonsUserResponse[] = [
     {
@@ -55,7 +55,6 @@ describe('UserListComponent', () => {
   const mockUserCounts = { pages: 2, total: 100, per_page: 50 };
 
   beforeEach(async () => {
-    queryParamsSubject = new BehaviorSubject<Params>({});
     mockApiService = jasmine.createSpyObj('ApiService', [
       'getFilterOptions',
       'resendVerificationEmail',
@@ -77,19 +76,14 @@ describe('UserListComponent', () => {
       adminType: signal(null),
     });
 
+    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
     await TestBed.configureTestingModule({
       imports: [UserListComponent, FormsModule],
       providers: [
         { provide: ApiService, useValue: mockApiService },
         { provide: AuthService, useValue: mockAuthService },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            queryParams: queryParamsSubject.asObservable(),
-            snapshot: { queryParams: {} },
-          },
-        },
-        provideRouter([]),
+        { provide: Router, useValue: mockRouter },
       ],
     }).compileComponents();
 
@@ -104,14 +98,16 @@ describe('UserListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load filter options on init', () => {
+  it('should load filter options on init', fakeAsync(() => {
     fixture.detectChanges();
+    tick(250);
     expect(mockApiService.getFilterOptions).toHaveBeenCalled();
     expect(component.filterOptions()).toEqual(mockFilterOptions);
-  });
+  }));
 
-  it('should load users on init', () => {
+  it('should load users on init', fakeAsync(() => {
     fixture.detectChanges();
+    tick(250);
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
@@ -120,7 +116,7 @@ describe('UserListComponent', () => {
     });
     expect(component.users()).toEqual(mockUsers);
     expect(component.loading()).toBe(false);
-  });
+  }));
 
   it('should display the title', () => {
     fixture.detectChanges();
@@ -139,14 +135,17 @@ describe('UserListComponent', () => {
     expect(countElement.textContent).toContain('57 users');
   });
 
-  it('should set loading state while loading users', () => {
+  it('should set loading state while loading users', fakeAsync(() => {
     fixture.detectChanges();
+    tick(250);
     expect(component.loading()).toBe(false);
     component.loadUsers();
+    expect(component.loading()).toBeTrue();
+    tick(250);
     expect(component.loading()).toBe(false);
-  });
+  }));
 
-  it('should handle error when loading users', () => {
+  it('should handle error when loading users', fakeAsync(() => {
     mockApiService.getAdminAllUsers.and.returnValue(
       throwError(() => new Error('API Error')),
     );
@@ -154,58 +153,58 @@ describe('UserListComponent', () => {
     spyOn(console, 'error');
     component.loadUsers();
 
+    tick(250);
     expect(component.users()).toEqual([]);
     expect(component.loading()).toBe(false);
     expect(console.error).toHaveBeenCalled();
-  });
+  }));
 
-  it('should handle error when loading filter options', () => {
+  it('should handle error when loading filter options', fakeAsync(() => {
     mockApiService.getFilterOptions.and.returnValue(
       throwError(() => new Error('API Error')),
     );
 
     spyOn(console, 'error');
     fixture.detectChanges();
+    tick(250);
 
     expect(component.filterOptions()).toEqual([]);
     expect(console.error).toHaveBeenCalled();
-  });
+  }));
 
-  it('should filter users based on search term', (done) => {
+  it('should filter users based on search term', fakeAsync(() => {
     fixture.detectChanges();
+    tick(250);
     mockApiService.getAdminAllUsers.calls.reset();
 
     component.searchTerm.set('user1');
     component.onSearchInput();
 
-    setTimeout(() => {
-      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
-        page: 1,
-        perPage: DEFAULT_PAGE_SIZE,
-        filterBy: '',
-        search: 'user1',
-      });
-      done();
-    }, 600);
-  });
+    tick(700);
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      filterBy: '',
+      search: 'user1',
+    });
+  }));
 
-  it('should filter users based on selected filter', (done) => {
+  it('should filter users based on selected filter', fakeAsync(() => {
     fixture.detectChanges();
+    tick(250);
     mockApiService.getAdminAllUsers.calls.reset();
 
     component.selectedFilter.set('group1');
     component.onFilterChange();
 
-    setTimeout(() => {
-      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
-        page: 1,
-        perPage: DEFAULT_PAGE_SIZE,
-        filterBy: 'group1',
-        search: '',
-      });
-      done();
-    }, 0);
-  });
+    tick();
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      filterBy: 'group1',
+      search: '',
+    });
+  }));
 
   it('should reset search term when filter changes', () => {
     fixture.detectChanges();
@@ -292,9 +291,6 @@ describe('UserListComponent', () => {
   }));
 
   it('should navigate to user details with returnUrl state', () => {
-    const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    spyOn(mockRouter, 'navigate');
-
     fixture.componentRef.setInput('returnUrl', '/pending-users');
     fixture.detectChanges();
 
@@ -306,9 +302,6 @@ describe('UserListComponent', () => {
   });
 
   it('should navigate to user details with empty returnUrl when not provided', () => {
-    const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    spyOn(mockRouter, 'navigate');
-
     fixture.detectChanges();
 
     component.navigateToUserDetails('123');
@@ -444,72 +437,66 @@ describe('UserListComponent', () => {
   });
 
   describe('Pagination', () => {
-    it('should navigate to update page query param when setPage is called', () => {
-      const router = TestBed.inject(Router);
-      const navigateSpy = spyOn(router, 'navigate');
+    it('should append next page on infinite scroll', fakeAsync(() => {
+      const page1Users = mockUsers;
+      const page2Users: BiocommonsUserResponse[] = [
+        {
+          id: '3',
+          email: 'user3@example.com',
+          username: 'user3',
+          email_verified: true,
+          created_at: '2023-01-03T00:00:00Z',
+          platform_memberships: [],
+          group_memberships: [],
+        },
+      ];
+      mockApiService.getAdminAllUsers.and.returnValues(
+        of(page1Users),
+        of(page2Users),
+      );
+      mockApiService.getAdminUsersPageInfo.and.returnValue(
+        of({ total: 3, pages: 2, per_page: 50 }),
+      );
+
       fixture.detectChanges();
+      tick(250); // allow min loading delay
 
-      component.setPage(2);
+      expect(component.users().length).toBe(2);
+      component.maybeLoadNextPage();
+      expect(component.loadingMore()).toBeTrue();
+      tick(250);
 
-      expect(navigateSpy).toHaveBeenCalledWith([], {
-        relativeTo: TestBed.inject(ActivatedRoute),
-        queryParams: { page: 2 },
-        queryParamsHandling: 'merge',
-      });
-    });
+      expect(component.page()).toBe(2);
+      expect(component.users().length).toBe(3);
+      expect(component.loadingMore()).toBeFalse();
+    }));
 
-    it('should load users and counts when page query param changes', fakeAsync(() => {
-      fixture.detectChanges(); // Initial load for page 1
+    it('should not load beyond last page', fakeAsync(() => {
+      mockApiService.getAdminUsersPageInfo.and.returnValue(
+        of({ total: 2, pages: 1, per_page: 50 }),
+      );
+      fixture.detectChanges();
+      tick(250);
 
       mockApiService.getAdminAllUsers.calls.reset();
-      mockApiService.getAdminUsersPageInfo.calls.reset();
+      component.maybeLoadNextPage();
+      tick(250);
 
-      component.setPage(2);
-
-      // Allow effect to run
-      tick();
-      fixture.detectChanges();
-
-      expect(component.page()).toBe(2);
-
-      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
-        page: 2,
-        perPage: DEFAULT_PAGE_SIZE,
-        filterBy: '',
-        search: '',
-      });
-
-      expect(mockApiService.getAdminUsersPageInfo).toHaveBeenCalledWith({
-        page: 2,
-        perPage: DEFAULT_PAGE_SIZE,
-        filterBy: '',
-        search: '',
-      });
-    }));
-
-    it('should reset page when search term changes', fakeAsync(() => {
-      component.setPage(2);
-      tick();
-      fixture.detectChanges();
-      expect(component.page()).toBe(2);
-
-      component.searchTerm.set('test');
-      component.onSearchInput();
-      // Wait for search debounce
-      tick(500);
-      tick();
-      fixture.detectChanges();
-
+      expect(mockApiService.getAdminAllUsers).not.toHaveBeenCalled();
       expect(component.page()).toBe(1);
     }));
 
-    it('should reset page when filter changes', () => {
-      component.setPage(2);
-      fixture.detectChanges();
+    it('shows no users when API returns empty list', fakeAsync(() => {
+      mockApiService.getAdminAllUsers.and.returnValue(of([]));
+      mockApiService.getAdminUsersPageInfo.and.returnValue(
+        of({ total: 0, pages: 0, per_page: 50 }),
+      );
 
-      component.selectedFilter.set('group1');
       fixture.detectChanges();
-      expect(component.page()).toBe(1);
-    });
+      tick(250);
+
+      expect(component.users().length).toBe(0);
+      expect(component.loading()).toBeFalse();
+    }));
   });
 });
