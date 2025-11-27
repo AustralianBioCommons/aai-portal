@@ -15,78 +15,78 @@
   <!-- Registration Page -->
   @if (!isRegistrationComplete()) {
     <div
-      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50 p-12 sm:px-24"
+      class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50"
     >
-      <div class="mb-24 text-center text-3xl font-semibold text-gray-900">
-        Create an account
-      </div>
-      <div class="flex w-full flex-1 gap-24">
-        <!-- Progress Bar -->
-        <div class="sticky top-1/2 hidden h-fit -translate-y-1/2 lg:block">
-          <div class="flex flex-col gap-6">
-            <div class="relative flex flex-col">
-              @for (section of sections; track section.id; let idx = $index) {
-                <div class="relative">
-                  <a
-                    [href]="'#' + section.id"
-                    class="group flex cursor-pointer items-center gap-4 py-6"
-                    (click)="scrollToSection($event, section.id)"
-                  >
-                    <!-- Circle/Check indicator -->
-                    <div
-                      class="relative z-10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 bg-white transition-all"
-                      [ngClass]="{
-                        'border-biocommons-primary !bg-biocommons-primary':
-                          isSectionCompleted(section.id),
-                        '!border-biocommons-primary': isSectionActive(
-                          section.id
-                        ),
-                        'border-gray-300':
-                          !isSectionActive(section.id) &&
-                          !isSectionCompleted(section.id),
-                      }"
+      <!-- Progress Bar - Horizontal and Sticky -->
+      <div class="sticky top-0 z-30 w-full bg-white shadow">
+        <div class="mx-auto max-w-4xl px-6 pb-6 pt-8">
+          <div class="flex items-start justify-between">
+            @for (section of sections; track section.id; let idx = $index) {
+              <div class="relative flex flex-1 flex-col items-center">
+                <div class="flex w-full items-center">
+                  <!-- Circle/Check indicator -->
+                  <div class="flex w-full justify-center">
+                    <a
+                      [href]="'#' + section.id"
+                      class="group cursor-pointer"
+                      (click)="scrollToSection($event, section.id)"
                     >
-                      @if (isSectionCompleted(section.id)) {
-                        <!-- Check icon for completed sections -->
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          class="h-5 w-5 text-white"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      } @else if (isSectionActive(section.id)) {
-                        <!-- Filled dot for active section -->
-                        <div
-                          class="h-3 w-3 rounded-full bg-biocommons-primary"
-                        ></div>
-                      } @else {
-                        <!-- Gray dot for not visited -->
-                        <div class="h-2 w-2 rounded-full bg-gray-300"></div>
-                      }
-                    </div>
+                      <div
+                        class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 bg-white transition-all"
+                        [ngClass]="{
+                          'border-biocommons-primary !bg-biocommons-primary':
+                            isSectionCompleted(section.id),
+                          '!border-biocommons-primary': isSectionActive(
+                            section.id
+                          ),
+                          'border-gray-300':
+                            !isSectionActive(section.id) &&
+                            !isSectionCompleted(section.id),
+                        }"
+                      >
+                        @if (isSectionCompleted(section.id)) {
+                          @if (isSectionValid(section.id)) {
+                            <!-- Check icon if section is completed and valid -->
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="size-4 text-white"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                          } @else {
+                            <!-- Dash icon if section is completed but invalid -->
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="size-4 text-white"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                          }
+                        } @else if (isSectionActive(section.id)) {
+                          <div
+                            class="h-2 w-2 rounded-full bg-biocommons-primary"
+                          ></div>
+                        }
+                      </div>
+                    </a>
+                  </div>
 
-                    <!-- Label -->
-                    <div
-                      class="text-sm font-medium transition-all"
-                      [ngClass]="{
-                        'text-biocommons-primary':
-                          activeSection() === section.id,
-                      }"
-                    >
-                      {{ section.label }}
-                    </div>
-                  </a>
-
-                  <!-- Connecting line (only render between sections) -->
+                  <!-- Connecting line to next section -->
                   @if (idx < sections.length - 1) {
                     <div
-                      class="absolute -bottom-6 left-5 top-16 w-0.5 transition-all"
+                      class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
                       [ngClass]="{
                         'bg-biocommons-primary': isSectionCompleted(section.id),
                         'bg-gray-300': !isSectionCompleted(section.id),
@@ -94,16 +94,35 @@
                     ></div>
                   }
                 </div>
-              }
-            </div>
+
+                <!-- Label underneath -->
+                <a
+                  [href]="'#' + section.id"
+                  class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
+                  [ngClass]="{
+                    'text-biocommons-primary':
+                      activeSection() === section.id ||
+                      isSectionCompleted(section.id),
+                    'text-gray-900':
+                      activeSection() !== section.id &&
+                      !isSectionCompleted(section.id),
+                  }"
+                  (click)="scrollToSection($event, section.id)"
+                >
+                  {{ section.label }}
+                </a>
+              </div>
+            }
           </div>
         </div>
+      </div>
 
+      <div class="w-full p-12 sm:px-24">
         <!-- Main Content -->
-        <div class="flex max-w-7xl flex-1 flex-col gap-24">
+        <div class="mx-auto flex max-w-5xl flex-1 flex-col gap-24">
           <!-- Introduction Section -->
           <div id="introduction" class="flex scroll-mt-24 flex-col gap-6">
-            <h1 class="text-left text-2xl font-semibold text-gray-900">
+            <h1 class="text-left text-3xl font-semibold text-gray-900">
               My BioCommons Access
             </h1>
             <p class="text-left font-light text-gray-600">
@@ -130,7 +149,7 @@
             [formGroup]="registrationForm"
             class="flex scroll-mt-24 flex-col gap-6"
           >
-            <h2 class="text-2xl font-semibold text-gray-900">Your details</h2>
+            <h2 class="text-3xl font-semibold text-gray-900">Your details</h2>
             <p class="font-light text-gray-600">
               To create your BioCommons Access account, simply provide your full
               name, email address, and password. This single account enables you
@@ -301,7 +320,7 @@
             [formGroup]="bundleForm"
             class="flex scroll-mt-24 flex-col gap-6"
           >
-            <h2 class="text-left text-2xl font-semibold text-gray-900">
+            <h2 class="text-left text-3xl font-semibold text-gray-900">
               Add a bundle
             </h2>
             <p class="text-left font-light text-gray-600">
@@ -341,7 +360,7 @@
                         [ngClass]="
                           bundleForm.get('selectedBundle')?.value === bundle.id
                             ? 'border-biocommons-primary bg-biocommons-primary'
-                            : 'border-gray-400'
+                            : 'border-gray-300'
                         "
                       >
                         @if (
@@ -371,7 +390,7 @@
                         class="sr-only"
                       />
                     </div>
-                    <div class="text-2xl font-semibold">{{ bundle.name }}</div>
+                    <div class="text-3xl font-semibold">{{ bundle.name }}</div>
                     @if (bundle.listItems.length) {
                       <div>
                         @if (bundle.listItems.length > 0) {
@@ -415,7 +434,7 @@
           >
             <!-- BioCommons Access T&Cs -->
             <div class="space-y-6">
-              <h2 class="text-2xl font-semibold text-gray-900">
+              <h2 class="text-3xl font-semibold text-gray-900">
                 BioCommons Access terms & conditions
               </h2>
               <p class="font-light text-gray-600">
@@ -473,7 +492,7 @@
             <!-- Bundle T&Cs -->
             @if (getSelectedBundle()) {
               <div class="space-y-6">
-                <h2 class="text-2xl font-semibold text-gray-900">
+                <h2 class="text-3xl font-semibold text-gray-900">
                   {{ getSelectedBundle()?.name }} Bundle terms & conditions
                 </h2>
                 <p class="font-light text-gray-600">

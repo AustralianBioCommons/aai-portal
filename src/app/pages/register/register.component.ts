@@ -89,7 +89,7 @@ export class RegisterComponent implements AfterViewInit {
     { id: 'introduction', label: 'Introduction' },
     { id: 'your-details', label: 'Your Details' },
     { id: 'add-bundle', label: 'Add a Bundle' },
-    { id: 'terms', label: 'Terms & Conditions' },
+    { id: 'terms', label: 'Accept T&Cs' },
   ];
 
   bundles: Bundle[] = biocommonsBundles;
@@ -233,6 +233,31 @@ export class RegisterComponent implements AfterViewInit {
 
   isSectionActive(sectionId: string): boolean {
     return this.activeSection() === sectionId;
+  }
+
+  isSectionValid(sectionId: string): boolean {
+    switch (sectionId) {
+      case 'introduction':
+        return true;
+      case 'your-details':
+        return this.registrationForm.valid;
+      case 'add-bundle':
+        return true;
+      case 'terms':
+        return this.termsForm.valid;
+      default:
+        return false;
+    }
+  }
+
+  isSectionCompletedAndValid(sectionId: string): boolean {
+    return this.isSectionCompleted(sectionId) && this.isSectionValid(sectionId);
+  }
+
+  isSectionCompletedAndInvalid(sectionId: string): boolean {
+    return (
+      this.isSectionCompleted(sectionId) && !this.isSectionValid(sectionId)
+    );
   }
 
   private applyFullNameLengthValidation(): void {
