@@ -59,22 +59,6 @@ export interface AdminGroupResponse {
   short_name: string;
 }
 
-export interface PlatformUserResponse {
-  platform_id: PlatformId;
-  approval_status: string;
-}
-
-export interface GroupUserResponse {
-  group_id: string;
-  approval_status: string;
-  group_name: string;
-}
-
-export interface AllPendingResponse {
-  platforms: PlatformUserResponse[];
-  groups: GroupUserResponse[];
-}
-
 export interface FilterOption {
   id: string;
   name: string;
@@ -165,24 +149,6 @@ export class ApiService {
     return this.http.post<void>(
       `${environment.auth0.backend}/me/profile/email/continue`,
       { otp },
-    );
-  }
-
-  getUserApprovedPlatforms(): Observable<PlatformUserResponse[]> {
-    return this.http.get<PlatformUserResponse[]>(
-      `${environment.auth0.backend}/me/platforms/approved`,
-    );
-  }
-
-  getUserApprovedGroups(): Observable<GroupUserResponse[]> {
-    return this.http.get<GroupUserResponse[]>(
-      `${environment.auth0.backend}/me/groups/approved`,
-    );
-  }
-
-  getUserAllPending(): Observable<AllPendingResponse> {
-    return this.http.get<AllPendingResponse>(
-      `${environment.auth0.backend}/me/all/pending`,
     );
   }
 

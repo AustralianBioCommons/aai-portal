@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { By } from '@angular/platform-browser';
 import { Component } from '@angular/core';
 import { RegisterComponent, RegistrationForm } from './register.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -24,32 +23,22 @@ class MockHomeComponent {}
 
 class MockAuthService {}
 
-interface RegisterComponentInternals {
-  transitionToStep(step: number, options?: { fromHistory?: boolean }): void;
-}
-
 /**
  * RegisterComponent Test Suite
  *
- * Registration Flow Steps:
- * - Step 1: General information page
- * - Step 2: Registration form
- * - Step 3: Bundle selection
- * - Step 4: Terms & conditions
- * - Step 5: Review/confirmation
- * - Step 6: Success page
+ * Registration Flow Sections:
+ * - introduction: General information page
+ * - your-details: Registration form
+ * - add-bundle: Bundle selection
+ * - terms: Terms & conditions
+ * After submission: Success page
  */
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let httpMock: HttpTestingController;
-  let originalPushState: History['pushState'];
-  let originalReplaceState: History['replaceState'];
-  let originalBack: History['back'];
-  let pushStateSpy: jasmine.Spy;
-  let replaceStateSpy: jasmine.Spy;
-  let backSpy: jasmine.Spy;
   let originalScrollTo: typeof window.scrollTo;
+  let scrollToSpy: jasmine.Spy;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -65,33 +54,20 @@ describe('RegisterComponent', () => {
       ],
     }).compileComponents();
 
-    originalPushState = window.history.pushState;
-    originalReplaceState = window.history.replaceState;
-    originalBack = window.history.back;
-    pushStateSpy = spyOn(window.history, 'pushState').and.callFake(
-      (): void => undefined,
-    );
-    replaceStateSpy = spyOn(window.history, 'replaceState').and.callFake(
-      (): void => undefined,
-    );
-    backSpy = spyOn(window.history, 'back').and.callFake((): void => undefined);
     originalScrollTo = window.scrollTo;
-    window.scrollTo = jasmine.createSpy('scrollTo') as typeof window.scrollTo;
+    scrollToSpy = jasmine.createSpy('scrollTo');
+    window.scrollTo = scrollToSpy as typeof window.scrollTo;
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
-    pushStateSpy.calls.reset();
   });
 
   afterEach(() => {
     httpMock.verify();
     fixture.destroy();
     window.scrollTo = originalScrollTo;
-    window.history.pushState = originalPushState;
-    window.history.replaceState = originalReplaceState;
-    window.history.back = originalBack;
   });
 
   it('should create', () => {
@@ -99,12 +75,16 @@ describe('RegisterComponent', () => {
   });
 
   describe('Form Initialization', () => {
-    it('should initialize with step 1', () => {
-      expect(component.currentStep()).toBe(1);
+    it('should initialize with introduction section active', () => {
+      expect(component.activeSection()).toBe('introduction');
     });
 
-    it('should have 6 total steps', () => {
-      expect(component.totalSteps).toBe(6);
+    it('should have 4 sections', () => {
+      expect(component.sections.length).toBe(4);
+      expect(component.sections[0].id).toBe('introduction');
+      expect(component.sections[1].id).toBe('your-details');
+      expect(component.sections[2].id).toBe('add-bundle');
+      expect(component.sections[3].id).toBe('terms');
     });
 
     it('should initialize bundle form with empty selection', () => {
@@ -119,250 +99,188 @@ describe('RegisterComponent', () => {
     });
   });
 
-  // --- STEP 1: General Information Page ---
-
-  describe('Step 1: General Information', () => {
-    it('should display general information page', () => {
-      component.currentStep.set(1);
-      fixture.detectChanges();
-      expect(
-        fixture.debugElement
-          .query(By.css('h1'))
-          .nativeElement.textContent.trim(),
-      ).toBe('My BioCommons Access');
+  describe('Section Navigation', () => {
+    it('should mark introduction as visited initially', () => {
+      expect(component.isSectionVisited('introduction')).toBe(true);
     });
 
-    it('should proceed to step 2 when next is clicked', () => {
-      pushStateSpy.calls.reset();
-      component.nextStep();
-      expect(component.currentStep()).toBe(2);
-      expect(pushStateSpy).toHaveBeenCalled();
+    it('should check if section is active', () => {
+      expect(component.isSectionActive('introduction')).toBe(true);
+      expect(component.isSectionActive('your-details')).toBe(false);
     });
 
-    it('should navigate to parent route when going back from first step', () => {
-      const router = TestBed.inject(Router);
-      const activatedRoute = TestBed.inject(ActivatedRoute);
-      const navigateSpy = spyOn(router, 'navigate').and.stub();
-      component.prevStep();
-      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
-        relativeTo: activatedRoute,
-      });
+    it('should scroll to section when requested', () => {
+      const mockEvent = new Event('click');
+      spyOn(mockEvent, 'preventDefault');
+      const mockElement = document.createElement('div');
+      mockElement.id = 'your-details';
+      spyOn(document, 'getElementById').and.returnValue(mockElement);
+
+      component.scrollToSection(mockEvent, 'your-details');
+
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(scrollToSpy).toHaveBeenCalled();
+    });
+
+    it('should get active step object', () => {
+      const activeStep = component.getActiveStepObject();
+      expect(activeStep?.id).toBe('introduction');
+      expect(activeStep?.label).toBe('Introduction');
+    });
+
+    it('should determine if section is valid', () => {
+      expect(component.isSectionValid('introduction')).toBe(true);
+      expect(component.isSectionValid('your-details')).toBe(false);
+      expect(component.isSectionValid('add-bundle')).toBe(true);
+    });
+
+    it('should determine if section is completed', () => {
+      component.visitedSections.set(new Set(['introduction', 'your-details']));
+      component.activeSection.set('add-bundle');
+      expect(component.isSectionCompleted('introduction')).toBe(true);
+      expect(component.isSectionCompleted('your-details')).toBe(true);
+      expect(component.isSectionCompleted('add-bundle')).toBe(false);
     });
   });
 
-  // --- STEP 2: Registration Form (Your Details) ---
-
-  describe('Step 2: Registration Form', () => {
-    beforeEach(() => {
-      component.currentStep.set(2);
-      component.registrationForm.reset();
+  describe('Registration Form Validation', () => {
+    it('should have a valid form when all fields are filled correctly', () => {
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      expect(component.registrationForm.valid).toBe(true);
     });
 
-    it('should display registration form', () => {
-      fixture.detectChanges();
+    it('should validate required fields', () => {
+      const requiredControls: (keyof RegistrationForm)[] = [
+        'firstName',
+        'lastName',
+        'email',
+        'username',
+        'password',
+        'confirmPassword',
+      ];
+
+      requiredControls.forEach((controlName) => {
+        const control = component.registrationForm.get(controlName);
+        control?.markAsTouched();
+        expect(control?.errors?.['required']).toBeTruthy();
+        expect(component.getErrorMessages(controlName)).toContain(
+          'This field is required',
+        );
+      });
+    });
+
+    it('should validate email format', () => {
+      const email = component.registrationForm.get('email');
+      email?.setValue('invalid-email');
+      email?.markAsTouched();
+      expect(component.isFieldInvalid('email')).toBe(true);
+      expect(component.getErrorMessages('email')).toContain(
+        'Please enter a valid email address',
+      );
+    });
+
+    it('should validate password pattern', () => {
+      const password = component.registrationForm.get('password');
+      password?.setValue('weak');
+      password?.markAsTouched();
+      expect(component.isFieldInvalid('password')).toBe(true);
+      expect(component.getErrorMessages('password')).toContain(
+        'Password must be at least 8 characters',
+      );
+    });
+
+    it('should validate password confirmation match', () => {
+      component.registrationForm.patchValue({
+        password: 'Password123',
+        confirmPassword: 'Different123',
+      });
+      const confirmPassword = component.registrationForm.get('confirmPassword');
+      confirmPassword?.markAsTouched();
+      expect(component.isFieldInvalid('confirmPassword')).toBe(true);
+      expect(component.getErrorMessages('confirmPassword')).toContain(
+        'Passwords do not match',
+      );
+    });
+
+    it('should return empty array for fields without errors', () => {
+      const firstName = component.registrationForm.get('firstName');
+      firstName?.setValue('John');
+      expect(component.getErrorMessages('firstName')).toEqual([]);
+    });
+
+    it('should revalidate confirmPassword when password changes', () => {
+      component.registrationForm.patchValue({
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      component.registrationForm.get('confirmPassword')?.markAsTouched();
+
+      expect(component.isFieldInvalid('confirmPassword')).toBe(false);
+
+      component.registrationForm
+        .get('password')
+        ?.setValue('DifferentPassword123!');
+
+      expect(component.isFieldInvalid('confirmPassword')).toBe(true);
+      expect(component.getErrorMessages('confirmPassword')).toContain(
+        'Passwords do not match',
+      );
+    });
+
+    it('should validate combined first and last name length not exceeding 255 characters', () => {
+      const longName = 'a'.repeat(200);
+      component.registrationForm.patchValue({
+        firstName: longName,
+        lastName: longName,
+      });
+
+      const firstNameControl = component.registrationForm.get('firstName');
+      const lastNameControl = component.registrationForm.get('lastName');
+
+      expect(firstNameControl?.errors?.['fullNameTooLong']).toBeTruthy();
+      expect(lastNameControl?.errors?.['fullNameTooLong']).toBeTruthy();
+    });
+
+    it('should clear fullNameTooLong error when combined length is valid', () => {
+      const longName = 'a'.repeat(200);
+      component.registrationForm.patchValue({
+        firstName: longName,
+        lastName: longName,
+      });
+
       expect(
-        fixture.debugElement
-          .query(By.css('h1'))
-          .nativeElement.textContent.trim(),
-      ).toBe('Your details');
-    });
-
-    it('should not proceed with invalid form', () => {
-      component.nextStep();
-      expect(component.currentStep()).toBe(2);
-      expect(component.registrationForm.get('firstName')?.touched).toBe(true);
-    });
-
-    it('should not proceed without reCAPTCHA completion', () => {
-      component.registrationForm.patchValue({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        username: 'johndoe',
-        password: 'Password123!',
-        confirmPassword: 'Password123!',
-      });
-
-      component.recaptchaToken.set(null);
-      component.nextStep();
-
-      expect(component.currentStep()).toBe(2);
-      expect(component.recaptchaAttempted()).toBe(true);
-    });
-
-    it('should proceed to step 3 with valid form and reCAPTCHA', () => {
-      component.registrationForm.patchValue({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        username: 'johndoe',
-        password: 'Password123!',
-        confirmPassword: 'Password123!',
-      });
-
-      component.recaptchaToken.set('test-recaptcha-token');
-      component.nextStep();
-
-      const usernameReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/register/check-username-availability?username=johndoe`,
-      );
-      expect(usernameReq.request.method).toBe('GET');
-      usernameReq.flush({ available: true });
-
-      const emailReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/register/check-email-availability?email=john.doe@example.com`,
-      );
-      expect(emailReq.request.method).toBe('GET');
-      emailReq.flush({ available: true });
-
-      expect(component.currentStep()).toBe(3);
-    });
-
-    it('should stay on step 2 if username or email is already taken', () => {
-      component.registrationForm.patchValue({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'taken@example.com',
-        username: 'takenusr',
-        password: 'Password123!',
-        confirmPassword: 'Password123!',
-      });
-
-      component.recaptchaToken.set('test-recaptcha-token');
-      component.nextStep();
-
-      const usernameReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/register/check-username-availability?username=takenusr`,
-      );
-      usernameReq.flush({
-        available: false,
-        field_errors: [
-          { field: 'username', message: 'Username is already taken' },
+        component.registrationForm.get('firstName')?.errors?.[
+          'fullNameTooLong'
         ],
+      ).toBeTruthy();
+
+      component.registrationForm.patchValue({
+        firstName: 'John',
+        lastName: 'Doe',
       });
 
-      const emailReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/register/check-email-availability?email=taken@example.com`,
-      );
-      emailReq.flush({
-        available: false,
-        field_errors: [{ field: 'email', message: 'Email is already taken' }],
-      });
-
-      expect(component.currentStep()).toBe(2);
-      expect(component.registrationForm.touched).toBe(true);
-    });
-
-    it('should go back to step 1', () => {
-      component.prevStep();
-      expect(component.currentStep()).toBe(1);
-      expect(backSpy).toHaveBeenCalled();
-    });
-
-    describe('Form Validation', () => {
-      it('should validate required fields', () => {
-        const requiredControls: (keyof RegistrationForm)[] = [
-          'firstName',
-          'lastName',
-          'email',
-          'username',
-          'password',
-          'confirmPassword',
-        ];
-
-        requiredControls.forEach((controlName) => {
-          const control = component.registrationForm.get(controlName);
-          control?.markAsTouched();
-          expect(control?.errors?.['required']).toBeTruthy();
-          expect(component.getErrorMessages(controlName)).toContain(
-            'This field is required',
-          );
-        });
-      });
-
-      it('should validate email format', () => {
-        const email = component.registrationForm.get('email');
-        email?.setValue('invalid-email');
-        email?.markAsTouched();
-        expect(component.isFieldInvalid('email')).toBe(true);
-        expect(component.getErrorMessages('email')).toContain(
-          'Please enter a valid email address',
-        );
-      });
-
-      it('should validate password pattern', () => {
-        const password = component.registrationForm.get('password');
-        password?.setValue('weak');
-        password?.markAsTouched();
-        expect(component.isFieldInvalid('password')).toBe(true);
-        expect(component.getErrorMessages('password')).toContain(
-          'Password must be at least 8 characters',
-        );
-      });
-
-      it('should validate password confirmation match', () => {
-        component.registrationForm.patchValue({
-          password: 'Password123',
-          confirmPassword: 'Different123',
-        });
-        const confirmPassword =
-          component.registrationForm.get('confirmPassword');
-        confirmPassword?.markAsTouched();
-        expect(component.isFieldInvalid('confirmPassword')).toBe(true);
-        expect(component.getErrorMessages('confirmPassword')).toContain(
-          'Passwords do not match',
-        );
-      });
-
-      it('should return empty array for fields without errors', () => {
-        const firstName = component.registrationForm.get('firstName');
-        firstName?.setValue('John');
-        expect(component.getErrorMessages('firstName')).toEqual([]);
-      });
-
-      it('should revalidate confirmPassword when password changes', () => {
-        component.registrationForm.patchValue({
-          password: 'Password123!',
-          confirmPassword: 'Password123!',
-        });
-        component.registrationForm.get('confirmPassword')?.markAsTouched();
-
-        expect(component.isFieldInvalid('confirmPassword')).toBe(false);
-
-        component.registrationForm
-          .get('password')
-          ?.setValue('DifferentPassword123!');
-
-        expect(component.isFieldInvalid('confirmPassword')).toBe(true);
-        expect(component.getErrorMessages('confirmPassword')).toContain(
-          'Passwords do not match',
-        );
-      });
+      expect(
+        component.registrationForm.get('firstName')?.errors?.[
+          'fullNameTooLong'
+        ],
+      ).toBeFalsy();
+      expect(
+        component.registrationForm.get('lastName')?.errors?.['fullNameTooLong'],
+      ).toBeFalsy();
     });
   });
 
-  // --- STEP 3: Bundle Selection ---
-
-  describe('Step 3: Bundle Selection', () => {
-    beforeEach(() => {
-      component.currentStep.set(3);
-      component.bundleForm.reset();
-    });
-
-    it('should display bundle selection page', () => {
-      fixture.detectChanges();
-      expect(
-        fixture.debugElement
-          .query(By.css('h1'))
-          .nativeElement.textContent.trim(),
-      ).toBe('Add a bundle');
-    });
-
-    it('should select bundle without auto-advancing step', () => {
-      pushStateSpy.calls.reset();
+  describe('Bundle Selection', () => {
+    it('should select bundle', () => {
       component.toggleBundle('tsi');
       expect(component.bundleForm.get('selectedBundle')?.value).toBe('tsi');
-      expect(component.currentStep()).toBe(3);
     });
 
     it('should toggle bundle selection off when clicking same bundle', () => {
@@ -386,9 +304,9 @@ describe('RegisterComponent', () => {
       expect(selectedBundle).toBeUndefined();
     });
 
-    it('should proceed to step 4', () => {
-      component.nextStep();
-      expect(component.currentStep()).toBe(4);
+    it('should not toggle disabled bundle', () => {
+      component.toggleBundle('fungi');
+      expect(component.bundleForm.get('selectedBundle')?.value).toBe('');
     });
 
     describe('Bundle Data', () => {
@@ -439,24 +357,11 @@ describe('RegisterComponent', () => {
     });
   });
 
-  // --- STEP 4: Terms & Conditions ---
-
-  describe('Step 4: Terms & Conditions', () => {
+  describe('Terms & Conditions', () => {
     beforeEach(() => {
-      component.currentStep.set(4);
-      component.bundleForm.reset();
+      // Trigger terms form initialization through bundle selection
       component.bundleForm.patchValue({ selectedBundle: 'tsi' });
-      component['initializeTermsForm']();
-    });
-
-    it('should display terms and conditions page', () => {
       fixture.detectChanges();
-
-      const headings = fixture.debugElement.queryAll(By.css('h1'));
-      const termsHeading = headings.find((h) =>
-        h.nativeElement.textContent.trim().includes('terms & conditions'),
-      );
-      expect(termsHeading).toBeTruthy();
     });
 
     it('should initialize terms form based on selected bundle', () => {
@@ -482,15 +387,7 @@ describe('RegisterComponent', () => {
       expect(component.termsForm.get('biocommonsAccess')?.value).toBe(false);
     });
 
-    it('should not proceed with invalid terms form', () => {
-      component.nextStep();
-      expect(component.currentStep()).toBe(4);
-      expect(component.termsForm.get('biocommonsAccess')?.touched).toBe(true);
-
-      httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
-    });
-
-    it('should proceed to step 5 with accepted terms', () => {
+    it('should not submit with invalid terms form', () => {
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -499,23 +396,17 @@ describe('RegisterComponent', () => {
         password: 'Password123!',
         confirmPassword: 'Password123!',
       });
+      component.recaptchaToken.set('test-token');
 
-      component.termsForm.patchValue({
-        biocommonsAccess: true,
-        tsi: true,
-        fgenesh: true,
-      });
+      // Terms not accepted
+      component.submitRegistration();
 
-      component.nextStep();
-      expect(component.currentStep()).toBe(5);
-
+      expect(component.termsForm.get('biocommonsAccess')?.touched).toBe(true);
       httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
     });
   });
 
-  // --- STEP 5: Review/Confirmation ---
-
-  describe('Step 5: Review/Confirmation', () => {
+  describe('Registration Submission', () => {
     beforeEach(() => {
       component.bundleForm.patchValue({ selectedBundle: 'tsi' });
       component.registrationForm.patchValue({
@@ -526,32 +417,30 @@ describe('RegisterComponent', () => {
         password: 'Password123!',
         confirmPassword: 'Password123!',
       });
-      component.currentStep.set(5);
+      component.termsForm.patchValue({
+        biocommonsAccess: true,
+        tsi: true,
+        fgenesh: true,
+      });
+      component.recaptchaToken.set('test-recaptcha-token');
     });
 
-    it('should display confirmation page', () => {
-      fixture.detectChanges();
-      expect(
-        fixture.debugElement
-          .query(By.css('h1'))
-          .nativeElement.textContent.trim(),
-      ).toBe('Details confirmation');
+    it('should mark form as touched when submitted without values', () => {
+      component.registrationForm.reset();
+      component.submitRegistration();
+      expect(component.registrationForm.get('firstName')?.touched).toBe(true);
+    });
+
+    it('should set recaptchaAttempted when submitting without reCAPTCHA', () => {
+      component.recaptchaToken.set(null);
+      component.submitRegistration();
+
+      expect(component.recaptchaAttempted()).toBe(true);
+      httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
     });
 
     it('should make HTTP request when submitting registration', () => {
-      component.nextStep();
-
-      const req = httpMock.expectOne(
-        `${environment.auth0.backend}/biocommons/register`,
-      );
-      expect(req.request.method).toBe('POST');
-
-      req.flush({ success: true });
-      expect(component.currentStep()).toBe(6);
-    });
-
-    it('should complete registration and advance to final step', () => {
-      component.nextStep();
+      component.submitRegistration();
 
       const req = httpMock.expectOne(
         `${environment.auth0.backend}/biocommons/register`,
@@ -567,13 +456,23 @@ describe('RegisterComponent', () => {
       });
 
       req.flush({ success: true });
+    });
 
-      expect(component.currentStep()).toBe(6);
+    it('should complete registration successfully', () => {
+      component.submitRegistration();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      req.flush({ success: true });
+
+      expect(component.isRegistrationComplete()).toBe(true);
+      expect(component.registrationEmail()).toBe('john@example.com');
       expect(component.isSubmitting()).toBe(false);
     });
 
     it('should handle registration error and display error message', () => {
-      component.nextStep();
+      component.submitRegistration();
 
       const req = httpMock.expectOne(
         `${environment.auth0.backend}/biocommons/register`,
@@ -584,51 +483,52 @@ describe('RegisterComponent', () => {
         { status: 400, statusText: 'Bad Request' },
       );
 
-      expect(component.currentStep()).toBe(5);
-      expect(component.errorAlert()).toBeDefined();
+      expect(component.isRegistrationComplete()).toBe(false);
+      expect(component.errorAlert()).toBe('Email already exists');
       expect(component.isSubmitting()).toBe(false);
     });
 
-    it('should surface backend errors without advancing steps', () => {
-      pushStateSpy.calls.reset();
-      component.nextStep();
+    it('should surface backend errors without completing registration', () => {
+      component.submitRegistration();
 
       const req = httpMock.expectOne(
         `${environment.auth0.backend}/biocommons/register`,
       );
       req.flush(
-        { message: 'Failure' },
+        { message: 'Server error' },
         { status: 500, statusText: 'Server Error' },
       );
 
-      expect(component.currentStep()).toBe(5);
-      expect(component.errorAlert()).toBe('Failure');
-      expect(pushStateSpy).not.toHaveBeenCalled();
+      expect(component.isRegistrationComplete()).toBe(false);
+      expect(component.errorAlert()).toBe('Server error');
+      expect(component.isSubmitting()).toBe(false);
+    });
+
+    it('should handle registration without bundle', () => {
+      component.bundleForm.patchValue({ selectedBundle: '' });
+      component.termsForm.patchValue({ biocommonsAccess: true });
+
+      component.submitRegistration();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      expect(req.request.body.bundle).toBeUndefined();
+
+      req.flush({ success: true });
+      expect(component.isRegistrationComplete()).toBe(true);
     });
   });
 
-  // --- STEP 6: Success Page ---
+  describe('Success Page', () => {
+    beforeEach(() => {
+      component.isRegistrationComplete.set(true);
+      component.registrationEmail.set('john@example.com');
+    });
 
-  describe('Step 6: Success Page', () => {
-    it('should display thank you message', () => {
-      component.currentStep.set(6);
-      fixture.detectChanges();
-
-      const thankYouText = fixture.debugElement.query(By.css('.text-4xl'));
-      expect(thankYouText.nativeElement.textContent.trim()).toBe('Thank you');
-
-      const verificationMessage = fixture.debugElement.query(
-        By.css('.verification-message'),
-      );
-      const normalizedText = verificationMessage.nativeElement.textContent
-        .replace(/\s+/g, ' ')
-        .trim();
-      expect(normalizedText).toContain(
-        `We've sent a verification email to the email address you provided.`,
-      );
-      expect(normalizedText).toContain(
-        'Please open that email and click the link inside to finish setting up your account and log in.',
-      );
+    it('should display registration complete state', () => {
+      expect(component.isRegistrationComplete()).toBe(true);
+      expect(component.registrationEmail()).toBe('john@example.com');
     });
 
     describe('Final Page Button', () => {
@@ -664,148 +564,45 @@ describe('RegisterComponent', () => {
     });
   });
 
-  // --- Navigation & History Tests ---
-
-  describe('History integration', () => {
-    it('should record initial step with replaceState', () => {
-      expect(replaceStateSpy).toHaveBeenCalled();
-      const [stateArg] = replaceStateSpy.calls.mostRecent().args as [
-        Record<string, unknown>,
-      ];
-      expect(stateArg).toEqual(jasmine.objectContaining({ step: 1 }));
+  describe('reCAPTCHA', () => {
+    it('should handle reCAPTCHA resolution', () => {
+      component.resolved('test-token');
+      expect(component.recaptchaToken()).toBe('test-token');
     });
 
-    it('should push history when advancing from step 1 to step 2', () => {
-      pushStateSpy.calls.reset();
-      component.nextStep();
-      expect(pushStateSpy).toHaveBeenCalled();
-      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
-        Record<string, unknown>,
-      ];
-      expect(stateArg).toEqual(jasmine.objectContaining({ step: 2 }));
-    });
-
-    it('should push history when advancing from step 2 to step 3', () => {
-      component.currentStep.set(2);
-      component.registrationForm.patchValue({
-        firstName: 'Jane',
-        lastName: 'Doe',
-        email: 'jane.doe@example.com',
-        username: 'janedoe',
-        password: 'Password123!',
-        confirmPassword: 'Password123!',
-      });
-      component.recaptchaToken.set('token');
-      pushStateSpy.calls.reset();
-      component.nextStep();
-
-      // Mock the availability check API calls
-      const usernameReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/register/check-username-availability?username=janedoe`,
-      );
-      usernameReq.flush({ available: true });
-
-      const emailReq = httpMock.expectOne(
-        `${environment.auth0.backend}/utils/register/check-email-availability?email=jane.doe@example.com`,
-      );
-      emailReq.flush({ available: true });
-
-      expect(component.currentStep()).toBe(3);
-      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
-        Record<string, unknown>,
-      ];
-      expect(stateArg).toEqual(jasmine.objectContaining({ step: 3 }));
-    });
-
-    it('should respond to browser popstate events', () => {
-      component.currentStep.set(2);
-      expect(component.currentStep()).toBe(2);
-      pushStateSpy.calls.reset();
-      window.dispatchEvent(
-        new PopStateEvent('popstate', { state: { step: 1 } }),
-      );
-      expect(component.currentStep()).toBe(1);
-      expect(pushStateSpy).not.toHaveBeenCalled();
+    it('should handle reCAPTCHA null response', () => {
+      component.resolved(null);
+      expect(component.recaptchaToken()).toBeNull();
     });
   });
 
-  describe('transitionToStep edge cases', () => {
-    const asInternals = (
-      instance: RegisterComponent,
-    ): RegisterComponentInternals =>
-      instance as unknown as RegisterComponentInternals;
-
-    it('should ignore transition when target step matches current step', () => {
-      component.currentStep.set(2);
-      pushStateSpy.calls.reset();
-      asInternals(component).transitionToStep(2);
-      expect(component.currentStep()).toBe(2);
-      expect(pushStateSpy).not.toHaveBeenCalled();
-    });
-
-    it('should clamp transition to the final step when target exceeds total', () => {
-      component.currentStep.set(4);
-      pushStateSpy.calls.reset();
-      asInternals(component).transitionToStep(10);
-      expect(component.currentStep()).toBe(component.totalSteps);
-      const [stateArg] = pushStateSpy.calls.mostRecent().args as [
-        Record<string, unknown>,
-      ];
-      expect(stateArg).toEqual(
-        jasmine.objectContaining({ step: component.totalSteps }),
-      );
-    });
-
-    it('should skip history updates when sourced from history', () => {
-      pushStateSpy.calls.reset();
-      asInternals(component).transitionToStep(2, { fromHistory: true });
-      expect(component.currentStep()).toBe(2);
-      expect(pushStateSpy).not.toHaveBeenCalled();
-    });
-
-    it('should navigate to parent route when target step is below one', () => {
-      const router = TestBed.inject(Router);
-      const activatedRoute = TestBed.inject(ActivatedRoute);
-      const navigateSpy = spyOn(router, 'navigate').and.stub();
-      pushStateSpy.calls.reset();
-      asInternals(component).transitionToStep(0);
-      expect(component.currentStep()).toBe(1);
-      expect(navigateSpy).toHaveBeenCalledWith(['../'], {
-        relativeTo: activatedRoute,
+  describe('Bundle Item Click Handler', () => {
+    it('should stop propagation when clicking anchor element', () => {
+      const mockAnchor = document.createElement('a');
+      const mockEvent = new MouseEvent('click');
+      Object.defineProperty(mockEvent, 'target', {
+        value: mockAnchor,
+        enumerable: true,
       });
-      expect(pushStateSpy).not.toHaveBeenCalled();
+      spyOn(mockEvent, 'stopPropagation');
+
+      component.onBundleItemClick(mockEvent);
+
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
     });
 
-    it('should re-initialize terms form when moving into step 4', () => {
-      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
-      const initSpy = spyOn(
-        component as unknown as { initializeTermsForm: () => void },
-        'initializeTermsForm',
-      ).and.callThrough();
-      pushStateSpy.calls.reset();
-      asInternals(component).transitionToStep(4);
-      expect(initSpy).toHaveBeenCalled();
-      expect(component.currentStep()).toBe(4);
-    });
+    it('should not stop propagation for non-anchor elements', () => {
+      const mockDiv = document.createElement('div');
+      const mockEvent = new MouseEvent('click');
+      Object.defineProperty(mockEvent, 'target', {
+        value: mockDiv,
+        enumerable: true,
+      });
+      spyOn(mockEvent, 'stopPropagation');
 
-    it('should ignore popstate events without a numeric step', () => {
-      component.currentStep.set(2);
-      const savedStep = component.currentStep();
-      pushStateSpy.calls.reset();
-      window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
-      expect(component.currentStep()).toBe(savedStep);
-      expect(pushStateSpy).not.toHaveBeenCalled();
-    });
+      component.onBundleItemClick(mockEvent);
 
-    it('should handle transitions when scrollTo is unavailable', () => {
-      const savedScroll = window.scrollTo;
-      pushStateSpy.calls.reset();
-      // @ts-expect-error - intentionally removing scrollTo for coverage
-      window.scrollTo = undefined;
-      asInternals(component).transitionToStep(2);
-      expect(component.currentStep()).toBe(2);
-      expect(pushStateSpy).toHaveBeenCalled();
-      window.scrollTo = savedScroll;
+      expect(mockEvent.stopPropagation).not.toHaveBeenCalled();
     });
   });
 });

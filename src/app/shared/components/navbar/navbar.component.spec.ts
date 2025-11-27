@@ -14,10 +14,7 @@ describe('NavbarComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const apiSpy = jasmine.createSpyObj('ApiService', [
-      'getUserAllPending',
-      'getAdminUserCounts',
-    ]);
+    const apiSpy = jasmine.createSpyObj('ApiService', ['getAdminUserCounts']);
     const authSpy = jasmine.createSpyObj('AuthService', ['logout'], {
       isAuthenticated: signal(true),
       user: signal({ name: 'Test User', picture: 'test.jpg' }),
@@ -65,9 +62,6 @@ describe('NavbarComponent', () => {
   });
 
   it('should create', () => {
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });
@@ -218,9 +212,6 @@ describe('NavbarComponent', () => {
   });
 
   it('should call authService.logout when logout is clicked', () => {
-    mockApiService.getUserAllPending.and.returnValue(
-      of({ platforms: [], groups: [] }),
-    );
     fixture.detectChanges();
 
     component.logout();
