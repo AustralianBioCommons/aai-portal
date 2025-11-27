@@ -251,16 +251,6 @@ export class RegisterComponent implements AfterViewInit {
     }
   }
 
-  isSectionCompletedAndValid(sectionId: string): boolean {
-    return this.isSectionCompleted(sectionId) && this.isSectionValid(sectionId);
-  }
-
-  isSectionCompletedAndInvalid(sectionId: string): boolean {
-    return (
-      this.isSectionCompleted(sectionId) && !this.isSectionValid(sectionId)
-    );
-  }
-
   private applyFullNameLengthValidation(): void {
     const firstNameControl = this.registrationForm.get('firstName');
     const lastNameControl = this.registrationForm.get('lastName');
