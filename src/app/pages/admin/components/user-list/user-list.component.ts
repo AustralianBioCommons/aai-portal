@@ -259,6 +259,9 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.searchSubject
       .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => {
+        if (this.page() > 1) {
+          this.page.set(1);
+        }
         this.loadUsers();
         this.loadUserCounts();
       });
