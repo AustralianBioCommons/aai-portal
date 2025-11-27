@@ -7,8 +7,6 @@ import {
   input,
   inject,
   Renderer2,
-  effect,
-  untracked,
 } from '@angular/core';
 import {
   FormsModule,
@@ -16,7 +14,7 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -64,7 +62,6 @@ export const DEFAULT_PAGE_SIZE = 50;
   styleUrl: './user-list.component.css',
 })
 export class UserListComponent implements OnInit, OnDestroy {
-  private activatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private apiService = inject(ApiService);
@@ -74,6 +71,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   // Cleanup subjects
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
+  private removeScrollListener: (() => void) | null = null;
 
   // Input signals
   title = input.required<string>();
@@ -88,6 +86,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   totalUsers = signal<number>(0);
   page = signal<number>(1);
   totalPages = signal<number>(0);
+  loadingMore = signal(false);
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
@@ -108,44 +107,21 @@ export class UserListComponent implements OnInit, OnDestroy {
     validators: [Validators.required],
   });
 
-  constructor() {
-    effect(() => {
-      const p = this.page();
-
-      // Run the load method without tracking its internal signal reads
-      untracked(() => {
-        this.loadUsers();
-        this.loadUserCounts();
-      });
-      return p;
-    });
-  }
-
   ngOnInit(): void {
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        if (params['page']) {
-          this.page.set(parseInt(params['page'], 10));
-        }
-      });
     this.loadUserCounts();
+    this.loadUsers(true);
     this.loadFilterOptions();
     this.setupSearchDebounce();
     this.setupClickOutsideHandler();
+    this.setupScrollListener();
   }
 
   ngOnDestroy(): void {
+    if (this.removeScrollListener) {
+      this.removeScrollListener();
+    }
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  setPage(p: number) {
-    this.router.navigate([], {
-      relativeTo: this.activatedRoute,
-      queryParams: { page: p },
-      queryParamsHandling: 'merge', // preserve other filters/sorts
-    });
   }
 
   private setupClickOutsideHandler(): void {
@@ -158,6 +134,12 @@ export class UserListComponent implements OnInit, OnDestroy {
         this.openMenuUserId.set(null);
       }
     });
+  }
+
+  private setupScrollListener(): void {
+    this.removeScrollListener = this.renderer.listen('window', 'scroll', () =>
+      this.maybeLoadNextPage(),
+    );
   }
 
   toggleUserMenu(userId: string): void {
@@ -240,7 +222,7 @@ export class UserListComponent implements OnInit, OnDestroy {
             message: 'User revoked successfully',
           });
           this.closeRevokeModal();
-          this.loadUsers();
+          this.resetAndReloadUsers();
           // Trigger refresh for navbar
           this.dataRefreshService.triggerRefresh();
         },
@@ -262,7 +244,7 @@ export class UserListComponent implements OnInit, OnDestroy {
         if (this.page() > 1) {
           this.page.set(1);
         }
-        this.loadUsers();
+        this.resetAndReloadUsers();
         this.loadUserCounts();
       });
   }
@@ -283,7 +265,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.apiService
       .getAdminUsersPageInfo({
         ...this.defaultQueryParams(),
-        page: this.page(),
+        page: 1,
         perPage: DEFAULT_PAGE_SIZE,
         filterBy: this.selectedFilter(),
         search: this.searchTerm(),
@@ -299,8 +281,18 @@ export class UserListComponent implements OnInit, OnDestroy {
       });
   }
 
-  loadUsers(): void {
+  loadUsers(reset = false): void {
+    if (reset) {
+      this.users.set([]);
+    }
+    const isInitialLoad = reset || this.users().length === 0;
+    // Append when requesting subsequent pages; replace when resetting.
+    const append = !isInitialLoad;
+    const start = Date.now();
     this.loading.set(true);
+    if (!isInitialLoad) {
+      this.loadingMore.set(true);
+    }
     this.apiService
       .getAdminAllUsers({
         ...this.defaultQueryParams(),
@@ -311,13 +303,13 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
-          this.users.set(users);
-          this.loading.set(false);
+          this.users.set(append ? [...this.users(), ...users] : users);
+          this.finishLoading(start);
         },
         error: (error: unknown) => {
           console.error('Error loading users:', error);
           this.users.set([]);
-          this.loading.set(false);
+          this.finishLoading(start);
         },
       });
   }
@@ -325,11 +317,51 @@ export class UserListComponent implements OnInit, OnDestroy {
   onFilterChange(): void {
     this.searchTerm.set('');
     this.page.set(1);
+    this.users.set([]);
     this.loadUserCounts();
     this.loadUsers();
   }
 
   onSearchInput(): void {
     this.searchSubject.next(this.searchTerm());
+  }
+
+  onSearchSubmit(): void {
+    this.page.set(1);
+    this.users.set([]);
+    this.loadUserCounts();
+    this.loadUsers();
+  }
+
+  maybeLoadNextPage(): void {
+    if (this.loading()) {
+      return;
+    }
+    if (this.page() >= this.totalPages()) {
+      return;
+    }
+    const scrollPosition =
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 200;
+    if (scrollPosition) {
+      this.page.set(this.page() + 1);
+      this.loadUsers();
+    }
+  }
+
+  private resetAndReloadUsers(): void {
+    this.page.set(1);
+    this.users.set([]);
+    this.loadUserCounts();
+    this.loadUsers();
+  }
+
+  private finishLoading(startTimestamp: number): void {
+    const elapsed = Date.now() - startTimestamp;
+    const remaining = Math.max(0, 200 - elapsed);
+    setTimeout(() => {
+      this.loading.set(false);
+      this.loadingMore.set(false);
+    }, remaining);
   }
 }
