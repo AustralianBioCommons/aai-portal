@@ -6,6 +6,7 @@ import { signal } from '@angular/core';
 import { AllUsersComponent } from './all-users.component';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { DEFAULT_PAGE_SIZE } from '../components/user-list/user-list.component';
 
 describe('AllUsersComponent', () => {
   let component: AllUsersComponent;
@@ -16,13 +17,19 @@ describe('AllUsersComponent', () => {
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
       'getAdminAllUsers',
+      'getAdminUsersPageInfo',
       'getFilterOptions',
     ]);
     mockApiService.getAdminAllUsers.and.returnValue(of([]));
+    mockApiService.getAdminUsersPageInfo.and.returnValue(
+      of({ pages: 0, total: 0, per_page: 50 }),
+    );
     mockApiService.getFilterOptions.and.returnValue(of([]));
 
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
       adminPlatforms: signal([]),
+      adminGroups: signal([]),
+      adminType: signal(null),
     });
 
     await TestBed.configureTestingModule({
@@ -46,16 +53,18 @@ describe('AllUsersComponent', () => {
     expect(component.title).toBe('All Users');
   });
 
-  it('should bind getUsers to the correct API method', () => {
-    const params = {
+  it('should load users with the correct params', () => {
+    fixture.detectChanges();
+    const expectedParams = {
       page: 1,
-      perPage: 50,
+      perPage: DEFAULT_PAGE_SIZE,
       filterBy: '',
       search: '',
+      ...component.defaultQueryParams,
     };
 
-    component.getUsers(params).subscribe();
-
-    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(params);
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
+      expectedParams,
+    );
   });
 });

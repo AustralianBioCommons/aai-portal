@@ -1,10 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Router, provideRouter } from '@angular/router';
-import { of, throwError, Subject } from 'rxjs';
+import { Router, provideRouter, ActivatedRoute, Params } from '@angular/router';
+import { of, throwError, Subject, BehaviorSubject } from 'rxjs';
 import { signal } from '@angular/core';
 
-import { UserListComponent } from './user-list.component';
+import { DEFAULT_PAGE_SIZE, UserListComponent } from './user-list.component';
 import {
   ApiService,
   BiocommonsUserResponse,
@@ -19,6 +24,7 @@ describe('UserListComponent', () => {
   let fixture: ComponentFixture<UserListComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let queryParamsSubject: BehaviorSubject<Params>;
 
   const mockUsers: BiocommonsUserResponse[] = [
     {
@@ -46,21 +52,24 @@ describe('UserListComponent', () => {
     { id: 'group2', name: 'Group 2' },
   ];
 
-  const mockGetUsers = jasmine
-    .createSpy('getUsers')
-    .and.returnValue(of(mockUsers));
+  const mockUserCounts = { pages: 2, total: 100, per_page: 50 };
 
   beforeEach(async () => {
+    queryParamsSubject = new BehaviorSubject<Params>({});
     mockApiService = jasmine.createSpyObj('ApiService', [
       'getFilterOptions',
       'resendVerificationEmail',
       'revokePlatformAccess',
+      'getAdminAllUsers',
+      'getAdminUsersPageInfo',
     ]);
     mockApiService.getFilterOptions.and.returnValue(of(mockFilterOptions));
     mockApiService.resendVerificationEmail.and.returnValue(
       of({ message: 'Email sent' }),
     );
     mockApiService.revokePlatformAccess.and.returnValue(of({ updated: true }));
+    mockApiService.getAdminAllUsers.and.returnValue(of(mockUsers));
+    mockApiService.getAdminUsersPageInfo.and.returnValue(of(mockUserCounts));
 
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
       adminPlatforms: signal([]),
@@ -73,6 +82,13 @@ describe('UserListComponent', () => {
       providers: [
         { provide: ApiService, useValue: mockApiService },
         { provide: AuthService, useValue: mockAuthService },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: queryParamsSubject.asObservable(),
+            snapshot: { queryParams: {} },
+          },
+        },
         provideRouter([]),
       ],
     }).compileComponents();
@@ -81,7 +97,7 @@ describe('UserListComponent', () => {
     component = fixture.componentInstance;
 
     fixture.componentRef.setInput('title', 'Test Users');
-    fixture.componentRef.setInput('getUsers', mockGetUsers);
+    fixture.componentRef.setInput('defaultQueryParams', {});
   });
 
   it('should create', () => {
@@ -96,9 +112,9 @@ describe('UserListComponent', () => {
 
   it('should load users on init', () => {
     fixture.detectChanges();
-    expect(mockGetUsers).toHaveBeenCalledWith({
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
-      perPage: 50,
+      perPage: DEFAULT_PAGE_SIZE,
       filterBy: '',
       search: '',
     });
@@ -114,10 +130,13 @@ describe('UserListComponent', () => {
   });
 
   it('should display user count', () => {
+    mockApiService.getAdminUsersPageInfo.and.returnValue(
+      of({ total: 57, pages: 2, per_page: 50 }),
+    );
     fixture.detectChanges();
     const countElement =
       fixture.debugElement.nativeElement.querySelector('.text-gray-500');
-    expect(countElement.textContent).toContain('2 users');
+    expect(countElement.textContent).toContain('57 users');
   });
 
   it('should set loading state while loading users', () => {
@@ -128,10 +147,9 @@ describe('UserListComponent', () => {
   });
 
   it('should handle error when loading users', () => {
-    const errorGetUsers = jasmine
-      .createSpy('getUsers')
-      .and.returnValue(throwError(() => new Error('API Error')));
-    fixture.componentRef.setInput('getUsers', errorGetUsers);
+    mockApiService.getAdminAllUsers.and.returnValue(
+      throwError(() => new Error('API Error')),
+    );
 
     spyOn(console, 'error');
     component.loadUsers();
@@ -155,14 +173,15 @@ describe('UserListComponent', () => {
 
   it('should filter users based on search term', (done) => {
     fixture.detectChanges();
+    mockApiService.getAdminAllUsers.calls.reset();
 
     component.searchTerm.set('user1');
     component.onSearchInput();
 
     setTimeout(() => {
-      expect(mockGetUsers).toHaveBeenCalledWith({
+      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
         page: 1,
-        perPage: 50,
+        perPage: DEFAULT_PAGE_SIZE,
         filterBy: '',
         search: 'user1',
       });
@@ -172,14 +191,15 @@ describe('UserListComponent', () => {
 
   it('should filter users based on selected filter', (done) => {
     fixture.detectChanges();
+    mockApiService.getAdminAllUsers.calls.reset();
 
     component.selectedFilter.set('group1');
     component.onFilterChange();
 
     setTimeout(() => {
-      expect(mockGetUsers).toHaveBeenCalledWith({
+      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
         page: 1,
-        perPage: 50,
+        perPage: DEFAULT_PAGE_SIZE,
         filterBy: 'group1',
         search: '',
       });
@@ -198,13 +218,12 @@ describe('UserListComponent', () => {
 
   it('should call loadUsers when manually invoked', () => {
     fixture.detectChanges();
-    mockGetUsers.calls.reset();
 
     component.loadUsers();
 
-    expect(mockGetUsers).toHaveBeenCalledWith({
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
-      perPage: 50,
+      perPage: DEFAULT_PAGE_SIZE,
       filterBy: '',
       search: '',
     });
@@ -230,7 +249,7 @@ describe('UserListComponent', () => {
 
   it('should debounce search and not call API multiple times rapidly', (done) => {
     fixture.detectChanges();
-    mockGetUsers.calls.reset();
+    mockApiService.getAdminAllUsers.calls.reset();
 
     component.searchTerm.set('a');
     component.onSearchInput();
@@ -242,10 +261,10 @@ describe('UserListComponent', () => {
     component.onSearchInput();
 
     setTimeout(() => {
-      expect(mockGetUsers).toHaveBeenCalledTimes(1);
-      expect(mockGetUsers).toHaveBeenCalledWith({
+      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledTimes(1);
+      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
         page: 1,
-        perPage: 50,
+        perPage: DEFAULT_PAGE_SIZE,
         filterBy: '',
         search: 'abc',
       });
@@ -253,25 +272,24 @@ describe('UserListComponent', () => {
     }, 600);
   });
 
-  it('should not trigger search when the same term is entered (distinctUntilChanged)', (done) => {
+  it('should not trigger search when the same term is entered (distinctUntilChanged)', fakeAsync(() => {
     fixture.detectChanges();
-    mockGetUsers.calls.reset();
+    mockApiService.getAdminAllUsers.calls.reset();
 
     component.searchTerm.set('test');
     component.onSearchInput();
 
-    setTimeout(() => {
-      mockGetUsers.calls.reset();
+    tick(600);
 
-      component.searchTerm.set('test');
-      component.onSearchInput();
+    mockApiService.getAdminAllUsers.calls.reset();
 
-      setTimeout(() => {
-        expect(mockGetUsers).not.toHaveBeenCalled();
-        done();
-      }, 600);
-    }, 600);
-  });
+    component.searchTerm.set('test');
+    component.onSearchInput();
+
+    tick(600);
+
+    expect(mockApiService.getAdminAllUsers).not.toHaveBeenCalled();
+  }));
 
   it('should navigate to user details with returnUrl state', () => {
     const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
@@ -423,5 +441,50 @@ describe('UserListComponent', () => {
       });
       expect(component.showRevokeModal()).toBe(false);
     });
+  });
+
+  describe('Pagination', () => {
+    it('should navigate to update page query param when setPage is called', () => {
+      const router = TestBed.inject(Router);
+      const navigateSpy = spyOn(router, 'navigate');
+      fixture.detectChanges();
+
+      component.setPage(2);
+
+      expect(navigateSpy).toHaveBeenCalledWith([], {
+        relativeTo: TestBed.inject(ActivatedRoute),
+        queryParams: { page: 2 },
+        queryParamsHandling: 'merge',
+      });
+    });
+
+    it('should load users and counts when page query param changes', fakeAsync(() => {
+      fixture.detectChanges(); // Initial load for page 1
+
+      mockApiService.getAdminAllUsers.calls.reset();
+      mockApiService.getAdminUsersPageInfo.calls.reset();
+
+      component.setPage(2);
+
+      // Allow effect to run
+      tick();
+      fixture.detectChanges();
+
+      expect(component.page()).toBe(2);
+
+      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
+        page: 2,
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: '',
+        search: '',
+      });
+
+      expect(mockApiService.getAdminUsersPageInfo).toHaveBeenCalledWith({
+        page: 2,
+        perPage: DEFAULT_PAGE_SIZE,
+        filterBy: '',
+        search: '',
+      });
+    }));
   });
 });
