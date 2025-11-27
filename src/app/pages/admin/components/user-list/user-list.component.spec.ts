@@ -462,6 +462,14 @@ describe('UserListComponent', () => {
       tick(250); // allow min loading delay
 
       expect(component.users().length).toBe(2);
+      // Simulate scroll near bottom
+      Object.defineProperty(window, 'innerHeight', { value: 1000 });
+      Object.defineProperty(window, 'scrollY', { value: 1000, writable: true });
+      Object.defineProperty(document.documentElement, 'scrollHeight', {
+        value: 1800,
+        configurable: true,
+      });
+
       component.maybeLoadNextPage();
       expect(component.loadingMore()).toBeTrue();
       tick(250);
