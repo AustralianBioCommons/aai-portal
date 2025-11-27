@@ -35,7 +35,9 @@
                         class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 bg-white transition-all"
                         [ngClass]="{
                           'border-biocommons-primary !bg-biocommons-primary':
-                            isSectionCompleted(section.id),
+                            isSectionCompleted(section.id) ||
+                            (isSectionActive(section.id) &&
+                              isSectionValid(section.id)),
                           '!border-biocommons-primary': isSectionActive(
                             section.id
                           ),
@@ -44,36 +46,41 @@
                             !isSectionCompleted(section.id),
                         }"
                       >
-                        @if (isSectionCompleted(section.id)) {
-                          @if (isSectionValid(section.id)) {
-                            <!-- Check icon if section is completed and valid -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              class="size-4 text-white"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                          } @else {
-                            <!-- Dash icon if section is completed but invalid -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              class="size-4 text-white"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                          }
+                        @if (
+                          (isSectionCompleted(section.id) ||
+                            isSectionActive(section.id)) &&
+                          isSectionValid(section.id)
+                        ) {
+                          <!-- Check icon if section is valid -->
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="size-4 text-white"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        } @else if (
+                          isSectionCompleted(section.id) &&
+                          !isSectionValid(section.id)
+                        ) {
+                          <!-- Dash icon if section is completed but invalid -->
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="size-4 text-white"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
                         } @else if (isSectionActive(section.id)) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
@@ -119,7 +126,7 @@
 
       <div class="w-full p-12 sm:px-24">
         <!-- Main Content -->
-        <div class="mx-auto flex max-w-5xl flex-1 flex-col gap-24">
+        <div class="mx-auto flex max-w-6xl flex-1 flex-col gap-24">
           <!-- Introduction Section -->
           <div id="introduction" class="flex scroll-mt-24 flex-col gap-6">
             <h1 class="text-left text-3xl font-semibold text-gray-900">
