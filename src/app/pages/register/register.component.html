@@ -68,19 +68,8 @@
                           isSectionCompleted(section.id) &&
                           !isSectionValid(section.id)
                         ) {
-                          <!-- Dash icon if section is completed but invalid -->
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-4 text-white"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <!-- Exclamation mark icon if section is completed but invalid -->
+                          <span class="text-sm text-white">!</span>
                         } @else if (isSectionActive(section.id)) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
@@ -331,7 +320,7 @@
             class="flex scroll-mt-24 flex-col gap-6"
           >
             <h2 class="text-left text-3xl font-semibold text-gray-900">
-              Add a bundle
+              Add a bundle (Optional)
             </h2>
             <p class="text-left font-light text-gray-600">
               Request access to a bundle you need for your research (optional)
