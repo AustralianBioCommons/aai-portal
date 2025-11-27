@@ -30,4 +30,8 @@ export class BundleSelectionComponent {
       event.stopPropagation();
     }
   }
+
+  isSelectedBundle(bundle: Bundle) {
+    return bundle.id === this.bundleForm().get('selectedBundle')?.value;
+  }
 }

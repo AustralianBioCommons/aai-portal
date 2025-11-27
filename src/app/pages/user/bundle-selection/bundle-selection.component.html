@@ -20,8 +20,7 @@
             !bundle.disabled,
           'cursor-not-allowed opacity-50': bundle.disabled,
           group: !bundle.disabled,
-          'ring-2 ring-sky-400':
-            bundleForm().get('selectedBundle')?.value === bundle.id,
+          'ring-2 ring-sky-400': isSelectedBundle(bundle),
         }"
         (click)="!bundle.disabled && toggleBundle(bundle.id)"
         (keyup.enter)="!bundle.disabled && toggleBundle(bundle.id)"
@@ -41,12 +40,12 @@
             <div
               class="flex h-7 w-7 items-center justify-center rounded-full border p-1 transition-all"
               [ngClass]="
-                bundleForm().get('selectedBundle')?.value === bundle.id
+                isSelectedBundle(bundle)
                   ? 'border-biocommons-primary bg-biocommons-primary'
                   : 'border-gray-300'
               "
             >
-              @if (bundleForm().get("selectedBundle")?.value === bundle.id) {
+              @if (isSelectedBundle(bundle)) {
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -65,9 +64,7 @@
             </div>
             <input
               type="checkbox"
-              [checked]="
-                bundleForm().get('selectedBundle')?.value === bundle.id
-              "
+              [checked]="isSelectedBundle(bundle)"
               class="sr-only"
             />
           </div>
