@@ -379,116 +379,10 @@
           </form>
 
           <!-- Bundle Selection Section -->
-          <form
-            id="add-bundle"
-            [formGroup]="bundleForm"
-            class="flex scroll-mt-24 flex-col gap-6"
-          >
-            <h2 class="text-left text-3xl font-semibold text-gray-900">
-              Add a bundle (optional)
-            </h2>
-            <p class="text-left font-light text-gray-600">
-              Request access to a bundle you need for your research
-            </p>
-            <div class="flex flex-wrap items-stretch justify-center gap-6">
-              <!-- Bundle selection cards -->
-              @for (bundle of bundles; track bundle.id) {
-                <div
-                  tabindex="0"
-                  class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
-                  [ngClass]="{
-                    'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
-                      !bundle.disabled,
-                    'cursor-not-allowed opacity-50': bundle.disabled,
-                    group: !bundle.disabled,
-                    'ring-2 ring-sky-400':
-                      bundleForm.get('selectedBundle')?.value === bundle.id,
-                  }"
-                  (click)="!bundle.disabled && toggleBundle(bundle.id)"
-                  (keyup.enter)="!bundle.disabled && toggleBundle(bundle.id)"
-                >
-                  <!-- Bundle content -->
-                  <div class="flex flex-col gap-6">
-                    <div class="flex items-start justify-between">
-                      <div class="flex gap-6">
-                        @for (logo of bundle.logoUrls; track logo) {
-                          <img
-                            [src]="logo"
-                            [alt]="bundle.name + ' logo'"
-                            class="h-16 w-auto"
-                          />
-                        }
-                      </div>
-                      <div
-                        class="flex h-7 w-7 items-center justify-center rounded-full border p-1 transition-all"
-                        [ngClass]="
-                          bundleForm.get('selectedBundle')?.value === bundle.id
-                            ? 'border-biocommons-primary bg-biocommons-primary'
-                            : 'border-gray-300'
-                        "
-                      >
-                        @if (
-                          bundleForm.get("selectedBundle")?.value === bundle.id
-                        ) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="2"
-                            stroke="currentColor"
-                            class="size-6 text-white"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m4.5 12.75 6 6 9-13.5"
-                            />
-                          </svg>
-                        }
-                      </div>
-                      <input
-                        type="checkbox"
-                        [checked]="
-                          bundleForm.get('selectedBundle')?.value === bundle.id
-                        "
-                        class="sr-only"
-                      />
-                    </div>
-                    <div class="text-3xl font-semibold">{{ bundle.name }}</div>
-                    @if (bundle.listItems.length) {
-                      <div>
-                        @if (bundle.listItems.length > 0) {
-                          <div class="text-sm/6 font-light text-gray-600">
-                            @for (item of bundle.listItems; track item) {
-                              <div
-                                class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                  class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
-                                >
-                                  <path
-                                    d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
-                                  />
-                                </svg>
-                                <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-                                <div
-                                  [innerHTML]="item"
-                                  (click)="onBundleItemClick($event)"
-                                ></div>
-                              </div>
-                            }
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          </form>
+          <app-bundle-selection
+            [bundleForm]="bundleForm"
+            [bundles]="bundles"
+          ></app-bundle-selection>
 
           <!-- Terms & Conditions Section -->
           <form
@@ -657,10 +551,8 @@
         </div>
       </div>
     </div>
-  }
-
-  <!-- Success Page -->
-  @else {
+  } @else {
+    <!-- Success Page -->
     <div
       class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
     >

@@ -26,6 +26,7 @@ import {
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
+import { BundleSelectionComponent } from '../user/bundle-selection/bundle-selection.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -61,6 +62,7 @@ interface Section {
     AlertComponent,
     ButtonComponent,
     RegistrationNavbarComponent,
+    BundleSelectionComponent,
   ],
   styleUrl: './register.component.css',
 })
@@ -333,24 +335,6 @@ export class RegisterComponent implements AfterViewInit {
 
   resolved(captchaResponse: string | null): void {
     this.recaptchaToken.set(captchaResponse);
-  }
-
-  toggleBundle(value: string) {
-    const bundle = this.bundles.find((bundle) => bundle.id === value);
-    if (!bundle?.disabled) {
-      const currentValue = this.bundleForm.get('selectedBundle')?.value;
-      if (currentValue === value) {
-        this.bundleForm.patchValue({ selectedBundle: '' });
-      } else {
-        this.bundleForm.patchValue({ selectedBundle: value });
-      }
-    }
-  }
-
-  onBundleItemClick(event: Event) {
-    if (event.target instanceof HTMLAnchorElement) {
-      event.stopPropagation();
-    }
   }
 
   getSelectedBundle(): Bundle | undefined {
