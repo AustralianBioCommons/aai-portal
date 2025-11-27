@@ -486,5 +486,30 @@ describe('UserListComponent', () => {
         search: '',
       });
     }));
+
+    it('should reset page when search term changes', fakeAsync(() => {
+      component.setPage(2);
+      tick();
+      fixture.detectChanges();
+      expect(component.page()).toBe(2);
+
+      component.searchTerm.set('test');
+      component.onSearchInput();
+      // Wait for search debounce
+      tick(500);
+      tick();
+      fixture.detectChanges();
+
+      expect(component.page()).toBe(1);
+    }));
+
+    it('should reset page when filter changes', () => {
+      component.setPage(2);
+      fixture.detectChanges();
+
+      component.selectedFilter.set('group1');
+      fixture.detectChanges();
+      expect(component.page()).toBe(1);
+    });
   });
 });
