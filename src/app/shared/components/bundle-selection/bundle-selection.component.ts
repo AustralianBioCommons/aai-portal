@@ -31,6 +31,11 @@ export class BundleSelectionComponent {
     }
   }
 
+  getSelectedBundle(): Bundle | undefined {
+    const selectedId = this.bundleForm().get('selectedBundle')?.value;
+    return this.bundles().find((bundle) => bundle.id === selectedId);
+  }
+
   isSelectedBundle(bundle: Bundle) {
     return bundle.id === this.bundleForm().get('selectedBundle')?.value;
   }
