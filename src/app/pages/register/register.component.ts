@@ -26,7 +26,7 @@ import {
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
-import { BundleSelectionComponent } from '../user/bundle-selection/bundle-selection.component';
+import { BundleSelectionComponent } from '../../shared/components/bundle-selection/bundle-selection.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
