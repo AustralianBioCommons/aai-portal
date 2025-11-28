@@ -379,10 +379,18 @@
           </form>
 
           <!-- Bundle Selection Section -->
-          <app-bundle-selection
-            [bundleForm]="bundleForm"
-            [bundles]="bundles"
-          ></app-bundle-selection>
+          <div class="flex scroll-mt-24 flex-col gap-6">
+            <h2 class="text-left text-3xl font-semibold text-gray-900">
+              Add a bundle (optional)
+            </h2>
+            <p class="text-left font-light text-gray-600">
+              Request access to a bundle you need for your research
+            </p>
+            <app-bundle-selection
+              [bundleForm]="bundleForm"
+              [bundles]="bundles"
+            ></app-bundle-selection>
+          </div>
 
           <!-- Terms & Conditions Section -->
           <form

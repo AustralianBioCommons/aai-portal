@@ -3,12 +3,6 @@
   [formGroup]="bundleForm()"
   class="flex scroll-mt-24 flex-col gap-6"
 >
-  <h2 class="text-left text-3xl font-semibold text-gray-900">
-    Add a bundle (optional)
-  </h2>
-  <p class="text-left font-light text-gray-600">
-    Request access to a bundle you need for your research
-  </p>
   <div class="flex flex-wrap items-stretch justify-center gap-6">
     <!-- Bundle selection cards -->
     @for (bundle of bundles(); track bundle.id) {
