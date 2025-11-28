@@ -42,22 +42,15 @@
                         [ngClass]="{
                           'border-gray-300': !visited,
                           'border-biocommons-primary group-hover:border-sky-900':
-                            active ||
-                            (completed && valid) ||
-                            (visited && !completed && valid),
+                            active || (valid && (completed || visited)),
                           'border-red-600 group-hover:border-red-700':
-                            !active &&
-                            ((completed && !valid) ||
-                              (visited && !completed && !valid)),
+                            !active && !valid && (completed || visited),
                           'bg-biocommons-primary group-hover:bg-sky-900':
-                            (completed && valid) || (active && last && valid),
+                            (completed && valid) || (last && active && valid),
                           'bg-red-600 group-hover:bg-red-700':
                             completed && !valid,
-                          'bg-white hover:bg-gray-100': !(
-                            (completed && valid) ||
-                            (active && last && valid) ||
-                            (completed && !valid)
-                          ),
+                          'bg-white hover:bg-gray-100':
+                            !completed && !(last && active && valid),
                         }"
                       >
                         @if (last && active && !valid) {
