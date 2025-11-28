@@ -22,11 +22,11 @@
         <div class="mx-auto max-w-4xl px-6 pb-6 pt-8">
           <div class="flex items-start justify-between">
             @for (section of sections; track section.id; let idx = $index) {
-              @let sectionActive = isSectionActive(section.id);
-              @let sectionCompleted = isSectionCompleted(section.id);
-              @let sectionVisited = isSectionVisited(section.id);
-              @let sectionValid = isSectionValid(section.id);
-              @let sectionLast = section.id === "terms";
+              @let active = isSectionActive(section.id);
+              @let completed = isSectionCompleted(section.id);
+              @let visited = isSectionVisited(section.id);
+              @let valid = isSectionValid(section.id);
+              @let last = section.id === "terms";
 
               <div class="relative flex flex-1 flex-col items-center">
                 <div class="flex w-full items-center">
@@ -39,39 +39,34 @@
                     >
                       <div
                         class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
-                        [class.border-gray-300]="!sectionVisited"
+                        [class.border-gray-300]="!visited"
                         [class.border-biocommons-primary]="
-                          sectionActive ||
-                          (sectionCompleted && sectionValid) ||
-                          (sectionVisited && !sectionCompleted && sectionValid)
+                          active ||
+                          (completed && valid) ||
+                          (visited && !completed && valid)
                         "
                         [class.border-red-600]="
-                          !sectionActive &&
-                          ((sectionCompleted && !sectionValid) ||
-                            (sectionVisited &&
-                              !sectionCompleted &&
-                              !sectionValid))
+                          !active &&
+                          ((completed && !valid) ||
+                            (visited && !completed && !valid))
                         "
                         [class.bg-biocommons-primary]="
-                          (sectionCompleted && sectionValid) ||
-                          (sectionActive && sectionLast && sectionValid)
+                          (completed && valid) || (active && last && valid)
                         "
-                        [class.bg-red-600]="sectionCompleted && !sectionValid"
+                        [class.bg-red-600]="completed && !valid"
                         [class.bg-white]="
                           !(
-                            (sectionCompleted && sectionValid) ||
-                            (sectionActive && sectionLast && sectionValid) ||
-                            (sectionCompleted && !sectionValid)
+                            (completed && valid) ||
+                            (active && last && valid) ||
+                            (completed && !valid)
                           )
                         "
                       >
-                        @if (sectionLast && sectionActive && !sectionValid) {
+                        @if (last && active && !valid) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
-                        } @else if (
-                          sectionLast && sectionActive && sectionValid
-                        ) {
+                        } @else if (last && active && valid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -84,11 +79,11 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (sectionActive) {
+                        } @else if (active) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
-                        } @else if (sectionCompleted && sectionValid) {
+                        } @else if (completed && valid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -101,9 +96,9 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (sectionCompleted && !sectionValid) {
+                        } @else if (completed && !valid) {
                           <span class="text-sm text-white">!</span>
-                        } @else if (sectionVisited && sectionValid) {
+                        } @else if (visited && valid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -116,7 +111,7 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (sectionVisited && !sectionValid) {
+                        } @else if (visited && !valid) {
                           <span class="text-sm text-red-600">!</span>
                         }
                       </div>
@@ -127,8 +122,8 @@
                   @if (idx < sections.length - 1) {
                     <div
                       class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
-                      [class.bg-biocommons-primary]="sectionCompleted"
-                      [class.bg-gray-300]="!sectionCompleted"
+                      [class.bg-biocommons-primary]="completed"
+                      [class.bg-gray-300]="!completed"
                     ></div>
                   }
                 </div>
@@ -138,10 +133,10 @@
                   [href]="'#' + section.id"
                   class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
                   [class.text-biocommons-primary]="
-                    activeSection() === section.id || sectionCompleted
+                    activeSection() === section.id || completed
                   "
                   [class.text-gray-900]="
-                    activeSection() !== section.id && !sectionCompleted
+                    activeSection() !== section.id && !completed
                   "
                   (click)="scrollToSection($event, section.id)"
                 >
