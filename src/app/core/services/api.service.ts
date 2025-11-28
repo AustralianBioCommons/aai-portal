@@ -153,6 +153,13 @@ export class ApiService {
     );
   }
 
+  requestGroupAccess(groupId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/me/groups/request`,
+      { group_id: groupId },
+    );
+  }
+
   requestEmailChange(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/me/profile/email/update`,
