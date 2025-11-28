@@ -21,7 +21,7 @@
       <div class="sticky top-0 z-30 w-full bg-white shadow">
         <div class="mx-auto max-w-4xl px-6 pb-4 pt-6">
           <div class="flex items-start justify-between">
-            @for (section of sections; track section.id; let idx = $index) {
+            @for (section of sections; track section.id; let index = $index) {
               @let active = isSectionActive(section.id);
               @let completed = isSectionCompleted(section.id);
               @let visited = isSectionVisited(section.id);
@@ -110,7 +110,7 @@
                   </div>
 
                   <!-- Connecting line -->
-                  @if (idx < sections.length - 1) {
+                  @if (index < sections.length - 1) {
                     <div
                       class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
                       [class.bg-biocommons-primary]="completed"
