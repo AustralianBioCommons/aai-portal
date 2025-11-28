@@ -42,7 +42,7 @@
                         [ngClass]="{
                           'border-gray-300': !visited,
                           'border-biocommons-primary group-hover:border-sky-900':
-                            active || (valid && (completed || visited)),
+                            active || ((visited || completed) && valid),
                           'border-red-600 group-hover:border-red-700':
                             !active && !valid && (completed || visited),
                           'bg-biocommons-primary group-hover:bg-sky-900':
