@@ -22,9 +22,15 @@
         <div class="mx-auto max-w-4xl px-6 pb-6 pt-8">
           <div class="flex items-start justify-between">
             @for (section of sections; track section.id; let idx = $index) {
+              @let sectionActive = isSectionActive(section.id);
+              @let sectionCompleted = isSectionCompleted(section.id);
+              @let sectionVisited = isSectionVisited(section.id);
+              @let sectionValid = isSectionValid(section.id);
+              @let sectionLast = section.id === "terms";
+
               <div class="relative flex flex-1 flex-col items-center">
                 <div class="flex w-full items-center">
-                  <!-- Circle/Check indicator -->
+                  <!-- Circle / indicator -->
                   <div class="flex w-full justify-center">
                     <a
                       [href]="'#' + section.id"
@@ -33,49 +39,39 @@
                     >
                       <div
                         class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
-                        [ngClass]="{
-                          'border-biocommons-primary':
-                            isSectionActive(section.id) ||
-                            (isSectionCompleted(section.id) &&
-                              isSectionValid(section.id)) ||
-                            (isSectionVisited(section.id) &&
-                              !isSectionCompleted(section.id) &&
-                              isSectionValid(section.id)),
-                          'bg-biocommons-primary':
-                            isSectionCompleted(section.id) &&
-                            isSectionValid(section.id),
-                          'border-red-600':
-                            !isSectionActive(section.id) &&
-                            ((isSectionCompleted(section.id) &&
-                              !isSectionValid(section.id)) ||
-                              (isSectionVisited(section.id) &&
-                                !isSectionCompleted(section.id) &&
-                                !isSectionValid(section.id))),
-                          'bg-red-600':
-                            isSectionCompleted(section.id) &&
-                            !isSectionValid(section.id),
-                          'bg-white': !isSectionCompleted(section.id),
-                          'border-gray-300': !isSectionVisited(section.id),
-                        }"
+                        [class.border-gray-300]="!sectionVisited"
+                        [class.border-biocommons-primary]="
+                          sectionActive ||
+                          (sectionCompleted && sectionValid) ||
+                          (sectionVisited && !sectionCompleted && sectionValid)
+                        "
+                        [class.border-red-600]="
+                          !sectionActive &&
+                          ((sectionCompleted && !sectionValid) ||
+                            (sectionVisited &&
+                              !sectionCompleted &&
+                              !sectionValid))
+                        "
+                        [class.bg-biocommons-primary]="
+                          (sectionCompleted && sectionValid) ||
+                          (sectionActive && sectionLast && sectionValid)
+                        "
+                        [class.bg-red-600]="sectionCompleted && !sectionValid"
+                        [class.bg-white]="
+                          !(
+                            (sectionCompleted && sectionValid) ||
+                            (sectionActive && sectionLast && sectionValid) ||
+                            (sectionCompleted && !sectionValid)
+                          )
+                        "
                       >
-                        @if (
-                          isSectionActive(section.id) &&
-                          section.id === "terms" &&
-                          !isSectionValid(section.id)
-                        ) {
-                          <!-- Last step: dot when active and not valid -->
+                        @if (sectionLast && sectionActive && !sectionValid) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
                         } @else if (
-                          isSectionActive(section.id) &&
-                          section.id === "terms" &&
-                          isSectionValid(section.id)
+                          sectionLast && sectionActive && sectionValid
                         ) {
-                          <!-- Last step: filled check when active and valid -->
-                          <span
-                            class="absolute inset-0 rounded-full bg-biocommons-primary"
-                          ></span>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -88,16 +84,11 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (isSectionActive(section.id)) {
-                          <!-- Other steps: dot when active -->
+                        } @else if (sectionActive) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
-                        } @else if (
-                          isSectionCompleted(section.id) &&
-                          isSectionValid(section.id)
-                        ) {
-                          <!-- Check icon, filled background -->
+                        } @else if (sectionCompleted && sectionValid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -110,17 +101,9 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (
-                          isSectionCompleted(section.id) &&
-                          !isSectionValid(section.id)
-                        ) {
-                          <!-- Exclamation mark, filled background -->
+                        } @else if (sectionCompleted && !sectionValid) {
                           <span class="text-sm text-white">!</span>
-                        } @else if (
-                          isSectionVisited(section.id) &&
-                          isSectionValid(section.id)
-                        ) {
-                          <!-- Check icon, border only -->
+                        } @else if (sectionVisited && sectionValid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
@@ -133,47 +116,39 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (
-                          isSectionVisited(section.id) &&
-                          !isSectionValid(section.id)
-                        ) {
-                          <!-- Exclamation mark, border only -->
+                        } @else if (sectionVisited && !sectionValid) {
                           <span class="text-sm text-red-600">!</span>
                         }
                       </div>
                     </a>
                   </div>
 
-                  <!-- Connecting line to next section -->
+                  <!-- Connecting line -->
                   @if (idx < sections.length - 1) {
                     <div
                       class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
-                      [ngClass]="{
-                        'bg-biocommons-primary': isSectionCompleted(section.id),
-                        'bg-gray-300': !isSectionCompleted(section.id),
-                      }"
+                      [class.bg-biocommons-primary]="sectionCompleted"
+                      [class.bg-gray-300]="!sectionCompleted"
                     ></div>
                   }
                 </div>
 
-                <!-- Label underneath -->
+                <!-- Label -->
                 <a
                   [href]="'#' + section.id"
                   class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
-                  [ngClass]="{
-                    'text-biocommons-primary':
-                      activeSection() === section.id ||
-                      isSectionCompleted(section.id),
-                    'text-gray-900':
-                      activeSection() !== section.id &&
-                      !isSectionCompleted(section.id),
-                  }"
+                  [class.text-biocommons-primary]="
+                    activeSection() === section.id || sectionCompleted
+                  "
+                  [class.text-gray-900]="
+                    activeSection() !== section.id && !sectionCompleted
+                  "
                   (click)="scrollToSection($event, section.id)"
                 >
                   <span class="hidden sm:inline">{{ section.label }}</span>
-                  <span class="inline sm:hidden">{{
-                    section.mobileLabel
-                  }}</span>
+                  <span class="inline sm:hidden">
+                    {{ section.mobileLabel }}
+                  </span>
                 </a>
               </div>
             }
