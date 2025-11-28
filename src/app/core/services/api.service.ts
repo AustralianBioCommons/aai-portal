@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
 import { PlatformId } from '../constants/constants';
 
-export type Status = 'approved' | 'revoked' | 'pending';
+export type Status = 'approved' | 'revoked' | 'pending' | 'rejected';
 
 // Platform membership data for user profile: shouldn't include
 // revoked platforms
