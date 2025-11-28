@@ -1,0 +1,22 @@
+<div class="flex h-full w-full flex-col">
+  <div
+    class="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-start bg-gray-50 px-6 pb-6 pt-8"
+  >
+    <app-bundle-selection
+      class="mx-auto max-w-4xl px-6 pb-6 pt-8"
+      [bundleForm]="bundleForm"
+      [bundles]="bundles()"
+    >
+    </app-bundle-selection>
+    <div class="flex items-center justify-between">
+      <app-button
+        type="submit"
+        variant="primary"
+        (click)="submit()"
+        [loading]="isSubmitting()"
+      >
+        Submit
+      </app-button>
+    </div>
+  </div>
+</div>

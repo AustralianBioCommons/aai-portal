@@ -16,6 +16,7 @@ import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.componen
 import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
 import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
+import { BundlesComponent } from './pages/user/bundles/bundles.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -72,6 +73,11 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+      },
+      {
+        path: 'bundles',
+        component: BundlesComponent,
+        data: { title: 'Select Bundles' },
       },
       {
         path: 'user/:id',
