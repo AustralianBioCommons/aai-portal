@@ -42,6 +42,12 @@ export interface UserProfileData {
   group_memberships: UserProfileGroupData[];
 }
 
+export interface UserGroupStatus {
+  group_id: string;
+  approval_status: Status;
+  group_name: string;
+}
+
 /**
  * Response for which platforms the admin can manage
  */
@@ -135,6 +141,15 @@ export class ApiService {
   getUserProfile(): Observable<UserProfileData> {
     return this.http.get<UserProfileData>(
       `${environment.auth0.backend}/me/profile`,
+    );
+  }
+
+  /**
+   * Return the status of the current user's group memberships
+   */
+  getUserGroups(): Observable<UserGroupStatus[]> {
+    return this.http.get<UserGroupStatus[]>(
+      `${environment.auth0.backend}/me/groups`,
     );
   }
 
