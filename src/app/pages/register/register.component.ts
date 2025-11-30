@@ -162,7 +162,8 @@ export class RegisterComponent implements AfterViewInit {
 
   private updateActiveSection(): void {
     // In test environments, skip scroll-based calculations to keep defaults stable.
-    if ((window as any).__karma__) {
+    const isKarma = (window as typeof window & { __karma__?: boolean }).__karma__;
+    if (isKarma) {
       return;
     }
 
