@@ -161,9 +161,19 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   private updateActiveSection(): void {
+    // In unit tests or when DOM sections are not rendered, keep defaults.
+    if (!document.getElementById('introduction')) {
+      return;
+    }
+
+    const docHeight = document.documentElement.scrollHeight;
+    // In unit tests there may be no rendered sections; skip updates to keep defaults stable.
+    if (!docHeight) {
+      return;
+    }
+
     const scrollPosition = window.scrollY;
     const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
 
     // Set the scroll threshold 1/3 of the viewport
     const scrollThreshold = scrollPosition + windowHeight / 3;
@@ -171,7 +181,7 @@ export class RegisterComponent implements AfterViewInit {
     let currentSectionIndex = 0;
 
     // If we're near the bottom of the page, activate the last section
-    if (scrollPosition + windowHeight >= documentHeight - 50) {
+    if (scrollPosition + windowHeight >= docHeight - 50) {
       currentSectionIndex = this.sections.length - 1;
       this.activeSection.set(this.sections[currentSectionIndex].id);
 

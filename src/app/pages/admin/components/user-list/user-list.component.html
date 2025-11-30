@@ -209,7 +209,7 @@
                                   group.rejection_reason ||
                                     group.revocation_reason,
                                   group.updated_at,
-                                  group.updated_by,
+                                  group.updated_by
                                 ) ||
                                   (group.approval_status === 'rejected'
                                     ? 'Rejected'
@@ -253,7 +253,7 @@
                               formatReason(
                                 platform.revocation_reason,
                                 platform.updated_at,
-                                platform.updated_by,
+                                platform.updated_by
                               ) || 'Revoked'
                             "
                           />
@@ -287,13 +287,13 @@
                           @if (platform.approval_status === "revoked") {
                             <app-tooltip
                               [message]="
-                                formatReason(
-                                  platform.revocation_reason,
-                                  platform.updated_at,
-                                  platform.updated_by,
-                                ) || 'Revoked'
-                              "
-                            />
+                              formatReason(
+                                platform.revocation_reason,
+                                platform.updated_at,
+                                platform.updated_by
+                              ) || 'Revoked'
+                            "
+                          />
                           }
                         </div>
                       }

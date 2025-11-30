@@ -267,7 +267,7 @@
                             formatReason(
                               membership.revocation_reason,
                               membership.updated_at,
-                              membership.updated_by,
+                              membership.updated_by
                             ) || 'Revoked'
                           "
                         />
@@ -330,7 +330,7 @@
                               membership.rejection_reason ||
                                 membership.revocation_reason,
                               membership.updated_at,
-                              membership.updated_by,
+                              membership.updated_by
                             ) ||
                               (membership.approval_status === 'rejected'
                                 ? 'Rejected'
