@@ -205,11 +205,15 @@
                           ) {
                             <app-tooltip
                               [message]="
-                                group.rejection_reason ||
-                                group.revocation_reason ||
-                                (group.approval_status === 'rejected'
-                                  ? 'Rejected'
-                                  : 'Revoked')
+                                formatReason(
+                                  group.rejection_reason ||
+                                    group.revocation_reason,
+                                  group.updated_at,
+                                  group.updated_by,
+                                ) ||
+                                  (group.approval_status === 'rejected'
+                                    ? 'Rejected'
+                                    : 'Revoked')
                               "
                             />
                           }
@@ -245,7 +249,13 @@
                         </span>
                         @if (platform.approval_status === "revoked") {
                           <app-tooltip
-                            [message]="platform.revocation_reason || 'Revoked'"
+                            [message]="
+                              formatReason(
+                                platform.revocation_reason,
+                                platform.updated_at,
+                                platform.updated_by,
+                              ) || 'Revoked'
+                            "
                           />
                         }
                       </div>
@@ -277,7 +287,11 @@
                           @if (platform.approval_status === "revoked") {
                             <app-tooltip
                               [message]="
-                                platform.revocation_reason || 'Revoked'
+                                formatReason(
+                                  platform.revocation_reason,
+                                  platform.updated_at,
+                                  platform.updated_by,
+                                ) || 'Revoked'
                               "
                             />
                           }

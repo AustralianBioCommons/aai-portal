@@ -438,4 +438,36 @@ export class UserDetailsComponent implements OnInit {
       },
     });
   }
+
+  formatReason(
+    reason?: string | null,
+    updatedAt?: string | null,
+    updatedBy?: string | null,
+  ): string {
+    if (!reason && !updatedAt) {
+      return '';
+    }
+
+    const match = reason?.match(/\((revoked|rejected) on (.+) by (.+)\)$/);
+    const baseReason = match ? reason?.replace(match[0], '').trim() : reason?.trim() || '';
+    const action = match?.[1] ?? 'updated';
+    const actor = updatedBy || match?.[3] || '(unknown)';
+    const isoTimestamp = updatedAt || match?.[2];
+
+    const date = isoTimestamp ? new Date(isoTimestamp) : null;
+    const formattedDate =
+      date && !Number.isNaN(date.getTime())
+        ? new Intl.DateTimeFormat(undefined, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }).format(date)
+        : isoTimestamp;
+
+    if (!formattedDate) {
+      return reason || '';
+    }
+
+    const prefix = baseReason ? `${baseReason} ` : '';
+    return `${prefix}(${action} on ${formattedDate} by ${actor})`;
+  }
 }
