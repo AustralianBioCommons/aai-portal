@@ -375,7 +375,9 @@ export class UserListComponent implements OnInit, OnDestroy {
     }
 
     const match = reason?.match(/\((revoked|rejected) on (.+) by (.+)\)$/);
-    const baseReason = match ? reason?.replace(match[0], '').trim() : reason?.trim() || '';
+    const baseReason = match
+      ? reason?.replace(match[0], '').trim()
+      : reason?.trim() || '';
     const action = match?.[1] ?? 'updated';
     const actor = updatedBy || match?.[3] || '(unknown)';
     const isoTimestamp = updatedAt || match?.[2];
