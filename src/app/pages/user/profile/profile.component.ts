@@ -226,7 +226,7 @@ export class ProfileComponent implements OnInit {
   protected modalDescription(): string {
     switch (this.activeModal()) {
       case 'email':
-        return 'To verify your email, we will send an one-time-password to your new email address.';
+        return 'To verify your email, we will send a one-time-password (OTP) to your new email address.';
       default:
         return '';
     }
