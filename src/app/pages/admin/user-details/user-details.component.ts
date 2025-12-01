@@ -453,7 +453,9 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
-  private withReasonFields(user: BiocommonsUserDetails): UserDetailsWithReasons {
+  private withReasonFields(
+    user: BiocommonsUserDetails,
+  ): UserDetailsWithReasons {
     const platform_memberships = user.platform_memberships.map((pm) => {
       const parsed = parseReasonFields(
         pm.revocation_reason,

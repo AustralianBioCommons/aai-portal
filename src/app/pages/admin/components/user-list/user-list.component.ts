@@ -121,9 +121,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     validators: [Validators.required],
   });
 
-  private withReasonFields(
-    user: BiocommonsUserResponse,
-  ): UserWithReasons {
+  private withReasonFields(user: BiocommonsUserResponse): UserWithReasons {
     const platform_memberships = user.platform_memberships.map((pm) => {
       const parsed = parseReasonFields(
         pm.revocation_reason,
@@ -348,7 +346,9 @@ export class UserListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
           const normalized = users.map((u) => this.withReasonFields(u));
-          this.users.set(append ? [...this.users(), ...normalized] : normalized);
+          this.users.set(
+            append ? [...this.users(), ...normalized] : normalized,
+          );
           this.finishLoading(start);
         },
         error: (error: unknown) => {

@@ -26,6 +26,7 @@ import {
 } from '../../shared/validators/emails';
 import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
+import { buildSectionContext } from './register-section-utils';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -161,34 +162,12 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   private updateActiveSection(): void {
-    // In test environments, skip scroll-based calculations to keep defaults stable.
-    const isKarma = (window as typeof window & { __karma__?: boolean })
-      .__karma__;
-    if (isKarma) {
+    const context = buildSectionContext(this.sections);
+    if (!context) {
       return;
     }
 
-    const sectionElements = this.sections
-      .map((section) => document.getElementById(section.id))
-      .filter((el): el is HTMLElement => Boolean(el));
-
-    // In unit tests or when DOM sections are not rendered, keep defaults.
-    if (sectionElements.length === 0) {
-      return;
-    }
-
-    const docHeight = document.documentElement.scrollHeight;
-    // In unit tests there may be no rendered sections; skip updates to keep defaults stable.
-    if (!docHeight) {
-      return;
-    }
-
-    // If all sections sit at the top (e.g., JSDOM with no layout), keep defaults.
-    const allAtTop = sectionElements.every((el) => el.offsetTop === 0);
-    if (allAtTop && window.scrollY === 0) {
-      return;
-    }
-
+    const { docHeight, elementsById } = context;
     const scrollPosition = window.scrollY;
     const windowHeight = window.innerHeight;
 
@@ -212,7 +191,7 @@ export class RegisterComponent implements AfterViewInit {
     // Find the current section based on scroll position
     for (let i = this.sections.length - 1; i >= 0; i--) {
       const section = this.sections[i];
-      const element = document.getElementById(section.id);
+      const element = elementsById.get(section.id);
       if (element && element.offsetTop <= scrollThreshold) {
         currentSectionIndex = i;
         this.activeSection.set(section.id);

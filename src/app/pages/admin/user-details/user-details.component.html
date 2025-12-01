@@ -263,13 +263,20 @@
                       </button>
                       @if (membership.approval_status === "revoked") {
                         <app-tooltip>
-                          <ng-container *ngIf="membership.reasonText; else platformRevokedFallback">
+                          <ng-container
+                            *ngIf="
+                              membership.reasonText;
+                              else platformRevokedFallback
+                            "
+                          >
                             {{ membership.reasonText }}
                             ({{ membership.action }} on
-                            {{ membership.updatedAt | date: 'short' }} by
-                            {{ membership.updatedBy || '(unknown)' }})
+                            {{ membership.updatedAt | date: "short" }} by
+                            {{ membership.updatedBy || "(unknown)" }})
                           </ng-container>
-                          <ng-template #platformRevokedFallback>Revoked</ng-template>
+                          <ng-template #platformRevokedFallback
+                            >Revoked</ng-template
+                          >
                         </app-tooltip>
                       }
                       <span
@@ -325,11 +332,16 @@
                         membership.approval_status === "rejected"
                       ) {
                         <app-tooltip>
-                          <ng-container *ngIf="membership.reasonText; else groupStatusFallback">
+                          <ng-container
+                            *ngIf="
+                              membership.reasonText;
+                              else groupStatusFallback
+                            "
+                          >
                             {{ membership.reasonText }}
                             ({{ membership.action }} on
-                            {{ membership.updatedAt | date: 'short' }} by
-                            {{ membership.updatedBy || '(unknown)' }})
+                            {{ membership.updatedAt | date: "short" }} by
+                            {{ membership.updatedBy || "(unknown)" }})
                           </ng-container>
                           <ng-template #groupStatusFallback>
                             {{ membership.approval_status | titlecase }}
