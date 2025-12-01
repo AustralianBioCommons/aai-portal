@@ -45,12 +45,12 @@
           placeholder="By name or email address"
           [(ngModel)]="searchTerm"
           (input)="onSearchInput()"
-          (keydown.enter)="loadUsers()"
+          (keydown.enter)="onSearchSubmit()"
         />
         <button
           type="button"
           class="rounded-full p-2 transition-all hover:bg-gray-200"
-          (click)="loadUsers()"
+          (click)="onSearchSubmit()"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -96,40 +96,49 @@
   </div>
 
   <div class="flex flex-1 flex-col">
-    <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
-
-    <!-- List header -->
     <div
-      class="mb-2 mt-6 flex items-center px-4 text-sm font-medium text-gray-900"
+      class="sticky z-20 -mx-6 bg-gray-50 px-6 pt-2 md:-mx-12 md:px-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
+      style="position: -webkit-sticky; top: 160px"
     >
-      <div
-        class="flex-1"
-        [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
-      >
-        Total:
-        <span class="font-light text-gray-500">{{ totalUsers() }} users</span>
-      </div>
-      <div class="w-3/12">
-        {{
-          adminType() !== "bundle"
-            ? "Bundles"
-            : adminGroups()[0].short_name + " Bundle Access"
-        }}
-      </div>
-      @if (adminType() !== "bundle") {
-        <div class="w-3/12">
-          {{
-            adminType() === "biocommons"
-              ? "Services"
-              : adminType() === "platform"
-                ? adminPlatforms()[0].name + " Access"
-                : ""
-          }}
+      <div class="border-b border-gray-200 pb-3">
+        <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
+
+        <!-- List header -->
+        <div
+          class="mt-4 flex items-center px-4 text-sm font-medium text-gray-900"
+        >
+          <div
+            class="flex-1"
+            [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
+          >
+            Total:
+            <span class="font-light text-gray-500"
+              >{{ totalUsers() }} users</span
+            >
+          </div>
+          <div class="w-3/12">
+            {{
+              adminType() !== "bundle"
+                ? "Bundles"
+                : adminGroups()[0].short_name + " Bundle Access"
+            }}
+          </div>
+          @if (adminType() !== "bundle") {
+            <div class="w-3/12">
+              {{
+                adminType() === "biocommons"
+                  ? "Services"
+                  : adminType() === "platform"
+                    ? adminPlatforms()[0].name + " Access"
+                    : ""
+              }}
+            </div>
+          }
+          <div class="w-1/12"></div>
         </div>
-      }
-      <div class="w-1/12"></div>
+      </div>
     </div>
-    @if (loading()) {
+    @if (loading() && users().length === 0) {
       <div class="flex w-full flex-1 items-center justify-center">
         <app-loading-spinner />
       </div>
@@ -408,112 +417,14 @@
               </div>
             </div>
           }
+          @if (loadingMore()) {
+            <div
+              class="flex items-center justify-center py-4 text-sm text-gray-600"
+            >
+              <app-loading-spinner />
+            </div>
+          }
         }
-      </div>
-    }
-    @if (totalUsers() > 0) {
-      <div id="pagination" class="mt-6">
-        <h2 class="text-md">Page {{ page() }} of {{ totalPages() }}</h2>
-        <nav
-          class="flex items-center justify-between gap-3 py-4"
-          aria-label="Pagination"
-        >
-          <!-- Prev -->
-          <button
-            type="button"
-            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            [disabled]="page() <= 1"
-            (click)="setPage(page() - 1)"
-          >
-            <span class="text-lg leading-none">←</span>
-            Prev
-          </button>
-
-          <!-- Page numbers -->
-          <ul class="flex items-center gap-1">
-            <!-- First page -->
-            <li>
-              <button
-                type="button"
-                class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium text-biocommons-primary transition"
-                [ngClass]="
-                  page() === 1
-                    ? 'bg-biocommons-primary text-white hover:bg-sky-900'
-                    : 'border border-biocommons-primary bg-white hover:bg-gray-100'
-                "
-                (click)="setPage(1)"
-                aria-label="Go to page 1"
-              >
-                1
-              </button>
-            </li>
-
-            <!-- Left ellipsis -->
-            @if (page() > 4) {
-              <li class="px-2 text-slate-400">…</li>
-            }
-
-            <!-- Middle pages around current -->
-            @for (
-              p of [page() - 2, page() - 1, page(), page() + 1, page() + 2];
-              track p
-            ) {
-              @if (p > 1 && p < totalPages()) {
-                <li>
-                  <button
-                    type="button"
-                    class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium text-biocommons-primary transition"
-                    [ngClass]="
-                      page() === p
-                        ? 'bg-biocommons-primary text-white hover:bg-sky-900'
-                        : 'border border-biocommons-primary bg-white hover:bg-gray-100'
-                    "
-                    (click)="setPage(p)"
-                    [attr.aria-current]="page() === p ? 'page' : null"
-                    [attr.aria-label]="'Go to page ' + p"
-                  >
-                    {{ p }}
-                  </button>
-                </li>
-              }
-            }
-
-            <!-- Right ellipsis -->
-            @if (page() < totalPages() - 3) {
-              <li class="px-2 text-slate-400">…</li>
-            }
-
-            <!-- Last page (if more than 1) -->
-            @if (totalPages() > 1) {
-              <li>
-                <button
-                  type="button"
-                  class="min-w-9 rounded-lg px-3 py-2 text-sm font-medium text-biocommons-primary transition"
-                  [ngClass]="
-                    page() === totalPages()
-                      ? 'bg-biocommons-primary text-white hover:bg-sky-900'
-                      : 'border border-biocommons-primary bg-white hover:bg-gray-100'
-                  "
-                  (click)="setPage(totalPages())"
-                  [attr.aria-label]="'Go to page ' + totalPages()"
-                >
-                  {{ totalPages() }}
-                </button>
-              </li>
-            }
-          </ul>
-
-          <!-- Next -->
-          <button
-            type="button"
-            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-            [disabled]="page() >= totalPages()"
-            (click)="setPage(page() + 1)"
-          >
-            Next
-            <span class="text-lg leading-none">→</span>
-          </button>
-        </nav>
       </div>
     }
   </div>
