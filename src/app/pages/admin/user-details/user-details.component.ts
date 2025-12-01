@@ -6,6 +6,7 @@ import {
   ViewChild,
   ElementRef,
   Renderer2,
+  computed,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -79,9 +80,16 @@ export class UserDetailsComponent implements OnInit {
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
   openMenuMembershipId = signal<string | null>(null);
+
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
+
+  readonly isSbpAdmin = computed(
+    () =>
+      this.adminType() === 'platform' &&
+      this.adminPlatforms().some((p) => p?.id === 'sbp'),
+  );
 
   // Form controls
   revokeReasonControl = new FormControl('', {

@@ -18,7 +18,7 @@
     </button>
     <a
       routerLink="/"
-      class="cursor-pointer text-3xl font-semibold text-gray-900 transition-all hover:text-gray-950"
+      class="cursor-pointer text-center text-2xl font-semibold text-gray-900 transition-all hover:text-gray-950 sm:text-3xl"
     >
       {{ navTitle() }}
     </a>
@@ -146,7 +146,7 @@
       <select
         [value]="getCurrentRoute()"
         (change)="onNavigationChange($event)"
-        class="h-12 w-full rounded-md border-r-8 border-transparent bg-biocommons-primary px-4 py-3 font-light text-white shadow outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
+        class="h-12 w-full rounded-md border-r-8 border-transparent bg-biocommons-primary px-4 py-3 text-center font-light text-white shadow outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
       >
         @for (page of navigationPages; track page.route) {
           <option [value]="page.route">

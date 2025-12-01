@@ -9,6 +9,7 @@ import {
   Renderer2,
   effect,
   untracked,
+  computed,
 } from '@angular/core';
 import {
   FormsModule,
@@ -101,6 +102,12 @@ export class UserListComponent implements OnInit, OnDestroy {
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
+
+  readonly isSbpAdmin = computed(
+    () =>
+      this.adminType() === 'platform' &&
+      this.adminPlatforms().some((p) => p?.id === 'sbp'),
+  );
 
   // Form controls
   revokeReasonControl = new FormControl('', {
