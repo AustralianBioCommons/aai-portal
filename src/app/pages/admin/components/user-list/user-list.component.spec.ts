@@ -18,6 +18,7 @@ import {
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { PlatformId } from '../../../../core/constants/constants';
 import { AuthService } from '../../../../core/services/auth.service';
+import { withReasonFields } from '../../../../shared/utils/reason-format';
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
@@ -114,7 +115,7 @@ describe('UserListComponent', () => {
       filterBy: '',
       search: '',
     });
-    expect(component.users()).toEqual(mockUsers);
+    expect(component.users()).toEqual(mockUsers.map((u) => withReasonFields(u)));
     expect(component.loading()).toBe(false);
   }));
 

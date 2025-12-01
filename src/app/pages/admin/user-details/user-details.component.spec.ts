@@ -11,6 +11,7 @@ import {
   BiocommonsUserDetails,
 } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { withReasonFields } from '../../../shared/utils/reason-format';
 
 describe('UserDetailsComponent', () => {
   let component: UserDetailsComponent;
@@ -60,6 +61,7 @@ describe('UserDetailsComponent', () => {
       },
     ],
   };
+  const mockUserWithReasons = withReasonFields(mockUserDetails);
 
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
@@ -129,7 +131,7 @@ describe('UserDetailsComponent', () => {
     fixture.detectChanges();
 
     expect(mockApiService.getUserDetails).toHaveBeenCalledWith('123');
-    expect(component.user()).toEqual(mockUserDetails);
+    expect(component.user()).toEqual(mockUserWithReasons);
     expect(component.loading()).toBeFalse();
     expect(component.error()).toBeNull();
   });
@@ -313,7 +315,7 @@ describe('UserDetailsComponent', () => {
     const mockResponse = { message: 'Email sent successfully' };
     mockApiService.resendVerificationEmail.and.returnValue(of(mockResponse));
 
-    component.user.set(mockUserDetails);
+    component.user.set(mockUserWithReasons);
     component.resendVerificationEmail();
 
     expect(mockApiService.resendVerificationEmail).toHaveBeenCalledWith('123');
@@ -330,7 +332,7 @@ describe('UserDetailsComponent', () => {
     );
     spyOn(console, 'error');
 
-    component.user.set(mockUserDetails);
+    component.user.set(mockUserWithReasons);
     component.resendVerificationEmail();
 
     expect(console.error).toHaveBeenCalledWith(
@@ -348,7 +350,7 @@ describe('UserDetailsComponent', () => {
     mockApiService.resendVerificationEmail.and.returnValue(of(mockResponse));
 
     component.alert.set({ type: 'error', message: 'Previous error' });
-    component.user.set(mockUserDetails);
+    component.user.set(mockUserWithReasons);
 
     component.resendVerificationEmail();
 

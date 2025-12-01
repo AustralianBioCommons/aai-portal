@@ -25,16 +25,15 @@ import {
   FilterOption,
   ApiService,
   AdminGetUsersApiParams,
+  PlatformMembership,
+  GroupMembership,
 } from '../../../../core/services/api.service';
 import { AlertComponent } from '../../../../shared/components/alert/alert.component';
 import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
-import {
-  parseReasonFields,
-  ReasonFields,
-} from '../../../../shared/utils/reason-format';
+import { ReasonFields, withReasonFields } from '../../../../shared/utils/reason-format';
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -120,34 +119,6 @@ export class UserListComponent implements OnInit, OnDestroy {
     nonNullable: true,
     validators: [Validators.required],
   });
-
-  private withReasonFields(user: BiocommonsUserResponse): UserWithReasons {
-    const platform_memberships = user.platform_memberships.map((pm) => {
-      const parsed = parseReasonFields(
-        pm.revocation_reason,
-        pm.updated_at,
-        pm.updated_by,
-        pm.approval_status === 'revoked' ? 'revoked' : undefined,
-      );
-      return { ...pm, ...parsed };
-    });
-
-    const group_memberships = user.group_memberships.map((gm) => {
-      const parsed = parseReasonFields(
-        gm.revocation_reason || gm.rejection_reason,
-        gm.updated_at,
-        gm.updated_by,
-        gm.approval_status === 'revoked'
-          ? 'revoked'
-          : gm.approval_status === 'rejected'
-            ? 'rejected'
-            : undefined,
-      );
-      return { ...gm, ...parsed };
-    });
-
-    return { ...user, platform_memberships, group_memberships };
-  }
 
   ngOnInit(): void {
     this.loadUserCounts();
@@ -345,7 +316,7 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
-          const normalized = users.map((u) => this.withReasonFields(u));
+          const normalized = users.map((u) => withReasonFields(u));
           this.users.set(
             append ? [...this.users(), ...normalized] : normalized,
           );

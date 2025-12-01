@@ -13,6 +13,8 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ApiService,
   BiocommonsUserDetails,
+  PlatformMembership,
+  GroupMembership,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
@@ -25,10 +27,7 @@ import {
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
-import {
-  parseReasonFields,
-  ReasonFields,
-} from '../../../shared/utils/reason-format';
+import { ReasonFields, withReasonFields } from '../../../shared/utils/reason-format';
 
 type RevokeModalData = {
   type: 'platform' | 'group';
@@ -445,41 +444,11 @@ export class UserDetailsComponent implements OnInit {
   private refreshUserDetails(userId: string) {
     this.apiService.getUserDetails(userId).subscribe({
       next: (user) => {
-        this.user.set(this.withReasonFields(user));
+        this.user.set(withReasonFields(user));
       },
       error: (err) => {
         console.error('Failed to refresh user details:', err);
       },
     });
-  }
-
-  private withReasonFields(
-    user: BiocommonsUserDetails,
-  ): UserDetailsWithReasons {
-    const platform_memberships = user.platform_memberships.map((pm) => {
-      const parsed = parseReasonFields(
-        pm.revocation_reason,
-        pm.updated_at,
-        pm.updated_by,
-        pm.approval_status === 'revoked' ? 'revoked' : undefined,
-      );
-      return { ...pm, ...parsed };
-    });
-
-    const group_memberships = user.group_memberships.map((gm) => {
-      const parsed = parseReasonFields(
-        gm.revocation_reason || gm.rejection_reason,
-        gm.updated_at,
-        gm.updated_by,
-        gm.approval_status === 'revoked'
-          ? 'revoked'
-          : gm.approval_status === 'rejected'
-            ? 'rejected'
-            : undefined,
-      );
-      return { ...gm, ...parsed };
-    });
-
-    return { ...user, platform_memberships, group_memberships };
   }
 }
