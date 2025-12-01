@@ -33,7 +33,10 @@ import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
-import { ReasonFields, withReasonFields } from '../../../../shared/utils/reason-format';
+import {
+  ReasonFields,
+  withReasonFields,
+} from '../../../../shared/utils/reason-format';
 
 export const DEFAULT_PAGE_SIZE = 50;
 

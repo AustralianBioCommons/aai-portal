@@ -27,7 +27,10 @@ import {
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
-import { ReasonFields, withReasonFields } from '../../../shared/utils/reason-format';
+import {
+  ReasonFields,
+  withReasonFields,
+} from '../../../shared/utils/reason-format';
 
 type RevokeModalData = {
   type: 'platform' | 'group';

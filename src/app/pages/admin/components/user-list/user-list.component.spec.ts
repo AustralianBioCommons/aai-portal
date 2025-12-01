@@ -115,7 +115,9 @@ describe('UserListComponent', () => {
       filterBy: '',
       search: '',
     });
-    expect(component.users()).toEqual(mockUsers.map((u) => withReasonFields(u)));
+    expect(component.users()).toEqual(
+      mockUsers.map((u) => withReasonFields(u)),
+    );
     expect(component.loading()).toBe(false);
   }));
 
