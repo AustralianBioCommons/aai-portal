@@ -50,10 +50,12 @@ export function parseReasonFields(
   };
 }
 
-export function withReasonFields<T extends {
-  platform_memberships: PlatformMembership[];
-  group_memberships: GroupMembership[];
-}>(
+export function withReasonFields<
+  T extends {
+    platform_memberships: PlatformMembership[];
+    group_memberships: GroupMembership[];
+  },
+>(
   user: T,
 ): T & {
   platform_memberships: (PlatformMembership & ReasonFields)[];
