@@ -8,7 +8,7 @@ import {
   Renderer2,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ApiService,
@@ -59,7 +59,9 @@ type UserDetailsWithReasons = Omit<
 @Component({
   selector: 'app-user-details',
   imports: [
+    CommonModule,
     DatePipe,
+    TitleCasePipe,
     LoadingSpinnerComponent,
     TooltipComponent,
     RouterLink,

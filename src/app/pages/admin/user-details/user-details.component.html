@@ -262,7 +262,7 @@
                         ></span>
                       </button>
                       @if (membership.approval_status === "revoked") {
-                        <app-tooltip>
+                        <app-tooltip [message]="''">
                           <ng-container
                             *ngIf="
                               membership.reasonText;
@@ -331,7 +331,7 @@
                         membership.approval_status === "revoked" ||
                         membership.approval_status === "rejected"
                       ) {
-                        <app-tooltip>
+                        <app-tooltip [message]="''">
                           <ng-container
                             *ngIf="
                               membership.reasonText;

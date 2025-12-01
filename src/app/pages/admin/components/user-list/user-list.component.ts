@@ -15,7 +15,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgClass, TitleCasePipe } from '@angular/common';
+import { CommonModule, NgClass, TitleCasePipe, DatePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -67,8 +67,10 @@ type UserWithReasons = Omit<
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    CommonModule,
     NgClass,
     TitleCasePipe,
+    DatePipe,
     LoadingSpinnerComponent,
     TooltipComponent,
     AlertComponent,

@@ -203,7 +203,7 @@
                             group.approval_status === "revoked" ||
                             group.approval_status === "rejected"
                           ) {
-                            <app-tooltip>
+                            <app-tooltip [message]="''">
                               <ng-container
                                 *ngIf="
                                   group.reasonText;
@@ -251,7 +251,7 @@
                           {{ platform.platform_name }}
                         </span>
                         @if (platform.approval_status === "revoked") {
-                          <app-tooltip>
+                          <app-tooltip [message]="''">
                             <ng-container
                               *ngIf="
                                 platform.reasonText;
@@ -295,7 +295,7 @@
                             {{ platform.approval_status | titlecase }}
                           </span>
                           @if (platform.approval_status === "revoked") {
-                            <app-tooltip>
+                            <app-tooltip [message]="''">
                               <ng-container
                                 *ngIf="
                                   platform.reasonText;
