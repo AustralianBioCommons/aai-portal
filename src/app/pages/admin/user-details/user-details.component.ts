@@ -25,7 +25,10 @@ import {
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
-import { formatReason } from '../../../shared/utils/reason-format';
+import {
+  parseReasonFields,
+  ReasonFields,
+} from '../../../shared/utils/reason-format';
 
 type RevokeModalData = {
   type: 'platform' | 'group';
@@ -40,6 +43,16 @@ type RejectModalData = {
   name: string;
   email: string;
 } | null;
+
+type PlatformMembershipWithReason = PlatformMembership & ReasonFields;
+type GroupMembershipWithReason = GroupMembership & ReasonFields;
+type UserDetailsWithReasons = Omit<
+  BiocommonsUserDetails,
+  'platform_memberships' | 'group_memberships'
+> & {
+  platform_memberships: PlatformMembershipWithReason[];
+  group_memberships: GroupMembershipWithReason[];
+};
 
 @Component({
   selector: 'app-user-details',
@@ -71,7 +84,7 @@ export class UserDetailsComponent implements OnInit {
   actionMenuButton!: ElementRef;
 
   // State signals
-  user = signal<BiocommonsUserDetails | null>(null);
+  user = signal<UserDetailsWithReasons | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
   actionMenuOpen = signal(false);
@@ -432,7 +445,7 @@ export class UserDetailsComponent implements OnInit {
   private refreshUserDetails(userId: string) {
     this.apiService.getUserDetails(userId).subscribe({
       next: (user) => {
-        this.user.set(user);
+        this.user.set(this.withReasonFields(user));
       },
       error: (err) => {
         console.error('Failed to refresh user details:', err);
@@ -440,5 +453,31 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
-  formatReason = formatReason;
+  private withReasonFields(user: BiocommonsUserDetails): UserDetailsWithReasons {
+    const platform_memberships = user.platform_memberships.map((pm) => {
+      const parsed = parseReasonFields(
+        pm.revocation_reason,
+        pm.updated_at,
+        pm.updated_by,
+        pm.approval_status === 'revoked' ? 'revoked' : undefined,
+      );
+      return { ...pm, ...parsed };
+    });
+
+    const group_memberships = user.group_memberships.map((gm) => {
+      const parsed = parseReasonFields(
+        gm.revocation_reason || gm.rejection_reason,
+        gm.updated_at,
+        gm.updated_by,
+        gm.approval_status === 'revoked'
+          ? 'revoked'
+          : gm.approval_status === 'rejected'
+            ? 'rejected'
+            : undefined,
+      );
+      return { ...gm, ...parsed };
+    });
+
+    return { ...user, platform_memberships, group_memberships };
+  }
 }

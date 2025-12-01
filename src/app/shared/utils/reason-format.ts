@@ -1,20 +1,23 @@
 export type ReasonAction = 'revoked' | 'rejected' | 'updated';
 
+export interface ReasonFields {
+  reasonText: string;
+  action: ReasonAction;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
 /**
- * Format a revocation/rejection reason into a human-friendly string.
+ * Normalize revocation/rejection reason fields for display.
  * Prefers structured fields (updatedAt/updatedBy/action) and falls back to
  * parsing legacy "(action on <date> by <actor>)" suffixes when present.
  */
-export function formatReason(
+export function parseReasonFields(
   reason?: string | null,
   updatedAt?: string | null,
   updatedBy?: string | null,
   action?: ReasonAction,
-): string {
-  if (!reason && !updatedAt) {
-    return '';
-  }
-
+): ReasonFields {
   const legacyMatch = reason?.match(/\((revoked|rejected) on (.+) by (.+)\)$/);
   const baseReason = legacyMatch
     ? reason?.replace(legacyMatch[0], '').trim()
@@ -23,22 +26,22 @@ export function formatReason(
   const effectiveAction: ReasonAction =
     action ?? (legacyMatch?.[1] as ReasonAction) ?? 'updated';
 
-  const actor = updatedBy || legacyMatch?.[3] || '(unknown)';
+  const actor = updatedBy || legacyMatch?.[3] || '';
   const isoTimestamp = updatedAt || legacyMatch?.[2];
 
-  const date = isoTimestamp ? new Date(isoTimestamp) : null;
-  const formattedDate =
-    date && !Number.isNaN(date.getTime())
-      ? new Intl.DateTimeFormat(undefined, {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-        }).format(date)
-      : isoTimestamp;
+  const reasonText =
+    baseReason ||
+    reason ||
+    (effectiveAction === 'revoked'
+      ? 'Revoked'
+      : effectiveAction === 'rejected'
+        ? 'Rejected'
+        : '');
 
-  if (!formattedDate) {
-    return reason || '';
-  }
-
-  const prefix = baseReason ? `${baseReason} ` : '';
-  return `${prefix}(${effectiveAction} on ${formattedDate} by ${actor})`;
+  return {
+    reasonText,
+    action: effectiveAction,
+    updatedAt: isoTimestamp || undefined,
+    updatedBy: actor || undefined,
+  };
 }

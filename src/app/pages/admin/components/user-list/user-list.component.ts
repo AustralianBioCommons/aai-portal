@@ -31,9 +31,22 @@ import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
-import { formatReason } from '../../../../shared/utils/reason-format';
+import {
+  parseReasonFields,
+  ReasonFields,
+} from '../../../../shared/utils/reason-format';
 
 export const DEFAULT_PAGE_SIZE = 50;
+
+type PlatformMembershipWithReason = PlatformMembership & ReasonFields;
+type GroupMembershipWithReason = GroupMembership & ReasonFields;
+type UserWithReasons = Omit<
+  BiocommonsUserResponse,
+  'platform_memberships' | 'group_memberships'
+> & {
+  platform_memberships: PlatformMembershipWithReason[];
+  group_memberships: GroupMembershipWithReason[];
+};
 
 /**
  * Reusable user list component with filtering and search.
@@ -83,7 +96,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   loading = signal(false);
   openMenuUserId = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
-  users = signal<BiocommonsUserResponse[]>([]);
+  users = signal<UserWithReasons[]>([]);
   totalUsers = signal<number>(0);
   page = signal<number>(1);
   totalPages = signal<number>(0);
@@ -107,6 +120,36 @@ export class UserListComponent implements OnInit, OnDestroy {
     nonNullable: true,
     validators: [Validators.required],
   });
+
+  private withReasonFields(
+    user: BiocommonsUserResponse,
+  ): UserWithReasons {
+    const platform_memberships = user.platform_memberships.map((pm) => {
+      const parsed = parseReasonFields(
+        pm.revocation_reason,
+        pm.updated_at,
+        pm.updated_by,
+        pm.approval_status === 'revoked' ? 'revoked' : undefined,
+      );
+      return { ...pm, ...parsed };
+    });
+
+    const group_memberships = user.group_memberships.map((gm) => {
+      const parsed = parseReasonFields(
+        gm.revocation_reason || gm.rejection_reason,
+        gm.updated_at,
+        gm.updated_by,
+        gm.approval_status === 'revoked'
+          ? 'revoked'
+          : gm.approval_status === 'rejected'
+            ? 'rejected'
+            : undefined,
+      );
+      return { ...gm, ...parsed };
+    });
+
+    return { ...user, platform_memberships, group_memberships };
+  }
 
   ngOnInit(): void {
     this.loadUserCounts();
@@ -304,7 +347,8 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
-          this.users.set(append ? [...this.users(), ...users] : users);
+          const normalized = users.map((u) => this.withReasonFields(u));
+          this.users.set(append ? [...this.users(), ...normalized] : normalized);
           this.finishLoading(start);
         },
         error: (error: unknown) => {
@@ -365,6 +409,4 @@ export class UserListComponent implements OnInit, OnDestroy {
       this.loadingMore.set(false);
     }, remaining);
   }
-
-  formatReason = formatReason;
 }

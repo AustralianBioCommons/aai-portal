@@ -203,19 +203,17 @@
                             group.approval_status === "revoked" ||
                             group.approval_status === "rejected"
                           ) {
-                            <app-tooltip
-                              [message]="
-                                formatReason(
-                                  group.rejection_reason ||
-                                    group.revocation_reason,
-                                  group.updated_at,
-                                  group.updated_by
-                                ) ||
-                                (group.approval_status === 'rejected'
-                                  ? 'Rejected'
-                                  : 'Revoked')
-                              "
-                            />
+                            <app-tooltip>
+                              <ng-container *ngIf="group.reasonText; else groupStatusFallback">
+                                {{ group.reasonText }}
+                                ({{ group.action }} on
+                                {{ group.updatedAt | date: 'short' }} by
+                                {{ group.updatedBy || '(unknown)' }})
+                              </ng-container>
+                              <ng-template #groupStatusFallback>
+                                {{ group.approval_status | titlecase }}
+                              </ng-template>
+                            </app-tooltip>
                           }
                         </div>
                       }
@@ -248,15 +246,15 @@
                           {{ platform.platform_name }}
                         </span>
                         @if (platform.approval_status === "revoked") {
-                          <app-tooltip
-                            [message]="
-                              formatReason(
-                                platform.revocation_reason,
-                                platform.updated_at,
-                                platform.updated_by
-                              ) || 'Revoked'
-                            "
-                          />
+                          <app-tooltip>
+                            <ng-container *ngIf="platform.reasonText; else platformRevokedFallback">
+                              {{ platform.reasonText }}
+                              ({{ platform.action }} on
+                              {{ platform.updatedAt | date: 'short' }} by
+                              {{ platform.updatedBy || '(unknown)' }})
+                            </ng-container>
+                            <ng-template #platformRevokedFallback>Revoked</ng-template>
+                          </app-tooltip>
                         }
                       </div>
                     }
@@ -285,15 +283,15 @@
                             {{ platform.approval_status | titlecase }}
                           </span>
                           @if (platform.approval_status === "revoked") {
-                            <app-tooltip
-                              [message]="
-                                formatReason(
-                                  platform.revocation_reason,
-                                  platform.updated_at,
-                                  platform.updated_by
-                                ) || 'Revoked'
-                              "
-                            />
+                            <app-tooltip>
+                              <ng-container *ngIf="platform.reasonText; else platformRevokedFallbackSingle">
+                                {{ platform.reasonText }}
+                                ({{ platform.action }} on
+                                {{ platform.updatedAt | date: 'short' }} by
+                                {{ platform.updatedBy || '(unknown)' }})
+                              </ng-container>
+                              <ng-template #platformRevokedFallbackSingle>Revoked</ng-template>
+                            </app-tooltip>
                           }
                         </div>
                       }
