@@ -69,30 +69,31 @@ export const SBP_ALLOWED_EMAIL_DOMAINS = [
   'student.unimelb.edu.au',
 ] as const;
 
-const tsiBundleService: BundleService = {
+const TSI_SERVICE: BundleService = {
   id: 'tsi',
   termsTitle: 'TSI Terms and Conditions',
   termsUrl: 'https://threatenedspeciesinitiative.com/',
 };
 
-const fgeneshBundleService: BundleService = {
+const FGENESH_SERVICE: BundleService = {
   id: 'fgenesh',
   termsTitle: 'Fgenesh++ Terms and Conditions',
   termsUrl: 'https://site.usegalaxy.org.au/fgenesh-terms.html',
 };
 
-export const biocommonsBundles: Bundle[] = [
+export const BIOCOMMONS_BUNDLES: Bundle[] = [
   {
     id: 'tsi',
     name: 'Threatened Species Initiative (TSI)',
     logoUrls: ['/assets/tsi-logo.jpg'],
     listItems: [
-      'The <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> and <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> data access',
-      'TSI public and restricted datasets in the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
-      '<a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> 2TB storage space, high memory nodes, workflows and tools',
-      'Easily import data into <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
+      'Access <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> open data',
+      'Access embargoed TSI data from <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
+      'Easily transfer data from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> to <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a>',
+      'Full access to <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> service',
+      'Run large genome assemblies and genome annotation <a href="https://www.biocommons.org.au/fgenesh-plus-plus" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">FgenesH++</a> pipelines on <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a>',
     ],
-    services: [tsiBundleService, fgeneshBundleService],
+    services: [TSI_SERVICE, FGENESH_SERVICE],
   },
   {
     id: 'fungi',

@@ -73,7 +73,6 @@ export class UserListComponent implements OnInit {
 
   // Cleanup subject for search
   private searchSubject$ = new Subject<string>();
-  private removeScrollListener: (() => void) | null = null;
 
   // Input signals
   title = input.required<string>();
@@ -82,16 +81,16 @@ export class UserListComponent implements OnInit {
 
   // State signals
   loading = signal(false);
-  openMenuUserId = signal<string | null>(null);
+  loadingMore = signal(false);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   users = signal<BiocommonsUserResponse[]>([]);
   totalUsers = signal<number>(0);
   page = signal<number>(1);
   totalPages = signal<number>(0);
-  loadingMore = signal(false);
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
+  openMenuUserId = signal<string | null>(null);
   showRevokeModal = signal(false);
   selectedUserForRevoke = signal<{
     userId: string;

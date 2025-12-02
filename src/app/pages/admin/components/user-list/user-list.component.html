@@ -10,8 +10,9 @@
 <!-- Revoke Modal -->
 @if (showRevokeModal()) {
   <app-modal
-    [title]="'Do you want to revoke ' + selectedUserForRevoke()!.email + '?'"
     type="revoke"
+    title="Do you want to revoke this user?"
+    [description]="selectedUserForRevoke()!.email"
     [textareaControl]="revokeReasonControl"
     [textareaLabel]="'Revocation reason'"
     primaryButtonText="Yes"

@@ -12,7 +12,7 @@ import { AlertComponent } from '../../../shared/components/alert/alert.component
 import {
   PLATFORMS,
   PlatformId,
-  biocommonsBundles,
+  BIOCOMMONS_BUNDLES,
 } from '../../../core/constants/constants';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -56,18 +56,21 @@ export class UserDetailsComponent implements OnInit {
   private authService = inject(AuthService);
 
   protected readonly PLATFORMS = PLATFORMS;
-  protected readonly biocommonsBundles = biocommonsBundles;
+  protected readonly BIOCOMMONS_BUNDLES = BIOCOMMONS_BUNDLES;
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
   loading = signal(true);
-  error = signal<string | null>(null);
-  actionMenuOpen = signal(false);
-  revokeModalData = signal<RevokeModalData>(null);
-  rejectModalData = signal<RejectModalData>(null);
+  pageError = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
-  openMenuMembershipId = signal<string | null>(null);
+
+  openMenuAction = signal(false);
+  openMenuGroupId = signal<string | null>(null);
+  openMenuPlatformId = signal<string | null>(null);
+
+  revokeModalData = signal<RevokeModalData>(null);
+  rejectModalData = signal<RejectModalData>(null);
 
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -84,6 +87,7 @@ export class UserDetailsComponent implements OnInit {
     nonNullable: true,
     validators: [Validators.required],
   });
+
   rejectReasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(255)],
@@ -109,12 +113,12 @@ export class UserDetailsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to load user details:', err);
-          this.error.set('Failed to load user details');
+          this.pageError.set('Failed to load user details');
           this.loading.set(false);
         },
       });
     } else {
-      this.error.set('No user ID provided');
+      this.pageError.set('No user ID provided');
       this.loading.set(false);
     }
   }
@@ -137,7 +141,7 @@ export class UserDetailsComponent implements OnInit {
         });
       },
     });
-    this.actionMenuOpen.set(false);
+    this.openMenuAction.set(false);
   }
 
   getPlatformName(platformId: string): string {
@@ -146,7 +150,7 @@ export class UserDetailsComponent implements OnInit {
 
   getBundleLogoUrls(groupId: string): string[] {
     const bundleId = groupId.split('/').pop() || '';
-    const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
+    const bundle = this.BIOCOMMONS_BUNDLES.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
   }
 
@@ -167,20 +171,49 @@ export class UserDetailsComponent implements OnInit {
     return this.adminGroups().some((g) => g.id === groupId);
   }
 
-  toggleMembershipMenu(membershipId: string): void {
-    if (this.openMenuMembershipId() === membershipId) {
-      this.openMenuMembershipId.set(null);
-    } else {
-      this.openMenuMembershipId.set(membershipId);
-    }
+  private refreshUserDetails(userId: string) {
+    this.apiService.getUserDetails(userId).subscribe({
+      next: (user) => {
+        this.user.set(user);
+      },
+      error: (err) => {
+        console.error('Failed to refresh user details:', err);
+      },
+    });
   }
 
-  isMembershipMenuOpen(membershipId: string): boolean {
-    return this.openMenuMembershipId() === membershipId;
+  isPlatformMenuOpen(platformId: string): boolean {
+    return this.openMenuPlatformId() === platformId;
   }
 
-  approveGroupMembership(membershipId: string): void {
-    this.openMenuMembershipId.set(null);
+  isGroupMenuOpen(groupId: string): boolean {
+    return this.openMenuGroupId() === groupId;
+  }
+
+  approvePlatform(platformId: PlatformId) {
+    const userId = this.user()!.user_id;
+    this.alert.set(null);
+
+    this.apiService.approvePlatformAccess(userId, platformId).subscribe({
+      next: () => {
+        this.refreshUserDetails(userId);
+        this.alert.set({
+          type: 'success',
+          message: 'Platform access approved successfully',
+        });
+      },
+      error: (error) => {
+        console.error('Failed to approve platform access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to approve platform access',
+        });
+      },
+    });
+  }
+
+  approveGroup(membershipId: string): void {
+    this.openMenuGroupId.set(null);
     const userId = this.user()!.user_id;
     const membership = this.user()!.group_memberships.find(
       (m) => m.id === membershipId,
@@ -192,11 +225,11 @@ export class UserDetailsComponent implements OnInit {
     this.alert.set(null);
     this.apiService.approveGroupAccess(userId, membership.group_id).subscribe({
       next: () => {
+        this.refreshUserDetails(userId);
         this.alert.set({
           type: 'success',
           message: 'Group access approved successfully',
         });
-        this.refreshUserDetails(userId);
       },
       error: (error) => {
         console.error('Failed to approve group access:', error);
@@ -208,8 +241,8 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
-  rejectGroupMembership(membershipId: string): void {
-    this.openMenuMembershipId.set(null);
+  rejectGroup(membershipId: string): void {
+    this.openMenuGroupId.set(null);
     const membership = this.user()?.group_memberships.find(
       (m) => m.id === membershipId,
     );
@@ -226,8 +259,8 @@ export class UserDetailsComponent implements OnInit {
     this.rejectReasonControl.reset();
   }
 
-  revokeGroupMembership(membershipId: string): void {
-    this.openMenuMembershipId.set(null);
+  revokeGroup(membershipId: string): void {
+    this.openMenuGroupId.set(null);
     const membership = this.user()!.group_memberships.find(
       (m) => m.id === membershipId,
     );
@@ -250,14 +283,6 @@ export class UserDetailsComponent implements OnInit {
       return `Do you want to revoke this user?`;
     } else {
       return `Do you want to revoke this user from ${modalData.name}?`;
-    }
-  }
-
-  togglePlatformApproval(platformId: PlatformId, currentStatus: string) {
-    if (currentStatus === 'approved') {
-      this.openRevokeModal(platformId);
-    } else {
-      this.approvePlatform(platformId);
     }
   }
 
@@ -298,20 +323,20 @@ export class UserDetailsComponent implements OnInit {
         .revokePlatformAccess(userId, modalData.id as PlatformId, reason)
         .subscribe({
           next: () => {
+            this.refreshUserDetails(userId);
+            this.closeRevokeModal();
             this.alert.set({
               type: 'success',
               message: 'Platform access revoked successfully',
             });
-            this.closeRevokeModal();
-            this.refreshUserDetails(userId);
           },
           error: (error) => {
+            this.closeRevokeModal();
             console.error('Failed to revoke platform access:', error);
             this.alert.set({
               type: 'error',
               message: 'Failed to revoke platform access',
             });
-            this.closeRevokeModal();
           },
         });
     } else {
@@ -319,20 +344,20 @@ export class UserDetailsComponent implements OnInit {
         .revokeGroupAccess(userId, modalData.id, reason)
         .subscribe({
           next: () => {
+            this.refreshUserDetails(userId);
+            this.closeRevokeModal();
             this.alert.set({
               type: 'success',
               message: 'Group access revoked successfully',
             });
-            this.closeRevokeModal();
-            this.refreshUserDetails(userId);
           },
           error: (error) => {
+            this.closeRevokeModal();
             console.error('Failed to revoke group access:', error);
             this.alert.set({
               type: 'error',
               message: 'Failed to revoke group access',
             });
-            this.closeRevokeModal();
           },
         });
     }
@@ -374,38 +399,5 @@ export class UserDetailsComponent implements OnInit {
           this.closeRejectModal();
         },
       });
-  }
-
-  private approvePlatform(platformId: PlatformId) {
-    const userId = this.user()!.user_id;
-    this.alert.set(null);
-
-    this.apiService.approvePlatformAccess(userId, platformId).subscribe({
-      next: () => {
-        this.refreshUserDetails(userId);
-        this.alert.set({
-          type: 'success',
-          message: 'Platform access approved successfully',
-        });
-      },
-      error: (error) => {
-        console.error('Failed to approve platform access:', error);
-        this.alert.set({
-          type: 'error',
-          message: 'Failed to approve platform access',
-        });
-      },
-    });
-  }
-
-  private refreshUserDetails(userId: string) {
-    this.apiService.getUserDetails(userId).subscribe({
-      next: (user) => {
-        this.user.set(user);
-      },
-      error: (err) => {
-        console.error('Failed to refresh user details:', err);
-      },
-    });
   }
 }
