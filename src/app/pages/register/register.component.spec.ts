@@ -56,7 +56,9 @@ describe('RegisterComponent', () => {
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
 
-    spyOn<any>(component, 'updateActiveSection');
+    // Prevent scroll-based section updates from running during tests
+    // This keeps activeSection stable at 'introduction' (its initial value)
+    component['updateActiveSection'] = jasmine.createSpy('updateActiveSection');
 
     fixture.detectChanges();
   });
