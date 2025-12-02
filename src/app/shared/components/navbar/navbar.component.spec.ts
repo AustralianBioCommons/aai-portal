@@ -121,9 +121,9 @@ describe('NavbarComponent', () => {
 
     adminFixture.detectChanges();
 
-    expect(adminComponent.pendingCount()).toBe(2);
-    expect(adminComponent.revokedCount()).toBe(3);
-    expect(adminComponent.unverifiedCount()).toBe(1);
+    expect(adminComponent.userCounts().pending).toBe(2);
+    expect(adminComponent.userCounts().revoked).toBe(3);
+    expect(adminComponent.userCounts().unverified).toBe(1);
   });
 
   it('should handle API error gracefully and reset all counts for platform admin', async () => {
@@ -176,9 +176,9 @@ describe('NavbarComponent', () => {
 
     adminFixture.detectChanges();
 
-    expect(adminComponent.pendingCount()).toBe(0);
-    expect(adminComponent.revokedCount()).toBe(0);
-    expect(adminComponent.unverifiedCount()).toBe(0);
+    expect(adminComponent.userCounts().pending).toBe(0);
+    expect(adminComponent.userCounts().revoked).toBe(0);
+    expect(adminComponent.userCounts().unverified).toBe(0);
   });
 
   it('should return admin navigation pages for admin', () => {
@@ -194,21 +194,6 @@ describe('NavbarComponent', () => {
       { label: 'Revoked', route: '/revoked-users' },
       { label: 'Unverified', route: '/unverified-users' },
     ]);
-  });
-
-  it('should toggle user menu', () => {
-    expect(component.userMenuOpen()).toBe(false);
-
-    component.toggleUserMenu();
-    expect(component.userMenuOpen()).toBe(true);
-
-    component.toggleUserMenu();
-    expect(component.userMenuOpen()).toBe(false);
-  });
-
-  it('should check if route is active', () => {
-    expect(component.isActive('/services')).toBe(true);
-    expect(component.isActive('/other')).toBe(false);
   });
 
   it('should call authService.logout when logout is clicked', () => {
@@ -268,7 +253,10 @@ describe('NavbarComponent', () => {
     );
     adminFixture.detectChanges();
     mockApiService.getAdminUserCounts.calls.reset();
+
     dataRefreshService.triggerRefresh();
+    adminFixture.detectChanges();
+
     expect(mockApiService.getAdminUserCounts).toHaveBeenCalled();
   });
 });

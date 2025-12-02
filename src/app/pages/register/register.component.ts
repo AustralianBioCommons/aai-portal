@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, of, fromEvent } from 'rxjs';
-import { biocommonsBundles, Bundle } from '../../core/constants/constants';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
 import { ValidationService } from '../../core/services/validation.service';
@@ -93,7 +93,7 @@ export class RegisterComponent implements AfterViewInit {
     { id: 'terms', label: 'Accept T&Cs', mobileLabel: 'T&Cs' },
   ];
 
-  bundles: Bundle[] = biocommonsBundles;
+  bundles: Bundle[] = BIOCOMMONS_BUNDLES;
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     selectedBundle: [''],

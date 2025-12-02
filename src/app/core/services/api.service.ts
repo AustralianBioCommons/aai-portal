@@ -72,6 +72,7 @@ export interface PlatformMembership {
   approval_status: string;
   updated_by: string;
   revocation_reason?: string;
+  rejection_reason?: string;
 }
 
 export interface GroupMembership {

@@ -417,30 +417,26 @@
                     </div>
                     <div class="text-3xl font-semibold">{{ bundle.name }}</div>
                     @if (bundle.listItems.length) {
-                      <div>
-                        @if (bundle.listItems.length > 0) {
-                          <div class="text-sm/6 font-light text-gray-600">
-                            @for (item of bundle.listItems; track item) {
-                              <div
-                                class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                  class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
-                                >
-                                  <path
-                                    d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
-                                  />
-                                </svg>
-                                <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-                                <div
-                                  [innerHTML]="item"
-                                  (click)="onBundleItemClick($event)"
-                                ></div>
-                              </div>
-                            }
+                      <div class="text-sm/6 font-light text-gray-600">
+                        @for (item of bundle.listItems; track item) {
+                          <div
+                            class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
+                            >
+                              <path
+                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
+                              />
+                            </svg>
+                            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+                            <div
+                              [innerHTML]="item"
+                              (click)="onBundleItemClick($event)"
+                            ></div>
                           </div>
                         }
                       </div>

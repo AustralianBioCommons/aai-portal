@@ -131,7 +131,7 @@ describe('UserDetailsComponent', () => {
     expect(mockApiService.getUserDetails).toHaveBeenCalledWith('123');
     expect(component.user()).toEqual(mockUserDetails);
     expect(component.loading()).toBeFalse();
-    expect(component.error()).toBeNull();
+    expect(component.pageError()).toBeNull();
   });
 
   it('should handle error when loading user details', () => {
@@ -142,7 +142,7 @@ describe('UserDetailsComponent', () => {
 
     fixture.detectChanges();
 
-    expect(component.error()).toBe('Failed to load user details');
+    expect(component.pageError()).toBe('Failed to load user details');
     expect(component.loading()).toBeFalse();
     expect(component.user()).toBeNull();
     expect(console.error).toHaveBeenCalledWith(
@@ -156,7 +156,7 @@ describe('UserDetailsComponent', () => {
 
     fixture.detectChanges();
 
-    expect(component.error()).toBe('No user ID provided');
+    expect(component.pageError()).toBe('No user ID provided');
     expect(component.loading()).toBeFalse();
     expect(mockApiService.getUserDetails).not.toHaveBeenCalled();
   });
@@ -211,21 +211,6 @@ describe('UserDetailsComponent', () => {
       btn.nativeElement.textContent?.includes('Actions'),
     );
     expect(actionsButton).toBeFalsy();
-  });
-
-  it('should toggle action menu when Actions button is clicked', () => {
-    const unverifiedUser = { ...mockUserDetails, email_verified: false };
-    mockApiService.getUserDetails.and.returnValue(of(unverifiedUser));
-
-    fixture.detectChanges();
-
-    expect(component.actionMenuOpen()).toBeFalse();
-
-    component.toggleActionMenu();
-    expect(component.actionMenuOpen()).toBeTrue();
-
-    component.toggleActionMenu();
-    expect(component.actionMenuOpen()).toBeFalse();
   });
 
   it('should display platform memberships correctly', () => {
@@ -317,7 +302,7 @@ describe('UserDetailsComponent', () => {
     component.resendVerificationEmail();
 
     expect(mockApiService.resendVerificationEmail).toHaveBeenCalledWith('123');
-    expect(component.actionMenuOpen()).toBeFalse();
+    expect(component.openMenuAction()).toBeFalse();
     expect(component.alert()).toEqual({
       type: 'success',
       message: 'Verification email sent successfully',
@@ -359,7 +344,7 @@ describe('UserDetailsComponent', () => {
   });
 
   it('should display error message when there is an error', () => {
-    component.error.set('Test error message');
+    component.pageError.set('Test error message');
     component.loading.set(false);
     component.user.set(null);
     fixture.detectChanges();
@@ -413,8 +398,8 @@ describe('UserDetailsComponent', () => {
     expect(component.returnUrl()).toBe('/revoked-users');
   });
 
-  describe('Platform Toggle and Revoke Modal', () => {
-    it('should toggle platform approval to approved', () => {
+  describe('Platform Approval and Revoke Modal', () => {
+    it('should approve platform access', () => {
       const pendingMembership: BiocommonsUserDetails = {
         ...mockUserDetails,
         platform_memberships: [
@@ -435,7 +420,7 @@ describe('UserDetailsComponent', () => {
 
       fixture.detectChanges();
 
-      component.togglePlatformApproval('galaxy', 'pending');
+      component.approvePlatform('galaxy');
 
       expect(mockApiService.approvePlatformAccess).toHaveBeenCalledWith(
         '123',
@@ -443,10 +428,10 @@ describe('UserDetailsComponent', () => {
       );
     });
 
-    it('should open revoke modal when toggling approved platform', () => {
+    it('should open revoke modal for platform', () => {
       fixture.detectChanges();
 
-      component.togglePlatformApproval('galaxy', 'approved');
+      component.openRevokeModal('galaxy');
 
       expect(component.revokeModalData()).toBeTruthy();
       expect(component.revokeModalData()?.type).toBe('platform');
@@ -530,7 +515,7 @@ describe('UserDetailsComponent', () => {
 
       fixture.detectChanges();
 
-      component.togglePlatformApproval('galaxy', 'pending');
+      component.approvePlatform('galaxy');
 
       expect(console.error).toHaveBeenCalledWith(
         'Failed to approve platform access:',
@@ -565,18 +550,6 @@ describe('UserDetailsComponent', () => {
       );
       expect(component.alert()?.type).toBe('error');
       expect(component.revokeModalData()).toBeNull();
-    });
-
-    it('should display toggle switch for platform memberships', () => {
-      fixture.detectChanges();
-
-      const toggleButton = fixture.debugElement.query(
-        By.css('button[role="switch"]'),
-      );
-      expect(toggleButton).toBeTruthy();
-      expect(toggleButton.nativeElement.getAttribute('aria-checked')).toBe(
-        'true',
-      );
     });
 
     it('should show revoke modal in DOM when open', () => {
@@ -629,7 +602,7 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.approveGroupMembership('gm');
+      component.approveGroup('gm');
 
       expect(mockApiService.approveGroupAccess).toHaveBeenCalledWith(
         '123',
@@ -644,7 +617,7 @@ describe('UserDetailsComponent', () => {
     it('should open revoke modal for group membership', () => {
       fixture.detectChanges();
 
-      component.revokeGroupMembership('gm');
+      component.revokeGroup('gm');
 
       expect(component.revokeModalData()).toBeTruthy();
       expect(component.revokeModalData()?.type).toBe('group');
