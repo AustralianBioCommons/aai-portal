@@ -332,6 +332,18 @@ describe('RegisterComponent', () => {
         expect(fungiBundle?.logoUrls.length).toBe(1);
       });
 
+      it('should list TSI bundle features in the expected order', () => {
+        const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
+
+        expect(tsiBundle?.listItems).toEqual([
+          'Access <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> open data',
+          'Access embargoed TSI data from <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',
+          'Easily transfer data from the <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> to <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a>',
+          'Full access to <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a> service',
+          'Run large genome assemblies and genome annotation <a href="https://www.biocommons.org.au/fgenesh-plus-plus" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">FgenesH++</a> pipelines on <a href="https://site.usegalaxy.org.au/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Galaxy Australia</a>',
+        ]);
+      });
+
       it('should have fungi bundle disabled', () => {
         const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
         expect(fungiBundle?.disabled).toBe(true);
