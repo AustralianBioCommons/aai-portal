@@ -6,7 +6,7 @@ import {
 } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of, throwError, Subject } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
 import { DEFAULT_PAGE_SIZE, UserListComponent } from './user-list.component';
@@ -226,24 +226,6 @@ describe('UserListComponent', () => {
       filterBy: '',
       search: '',
     });
-  });
-
-  it('should clean up subscriptions on destroy', () => {
-    fixture.detectChanges();
-
-    const destroySpy = spyOn(
-      component['destroy$'] as Subject<void>,
-      'next',
-    ).and.callThrough();
-    const completeSpy = spyOn(
-      component['destroy$'] as Subject<void>,
-      'complete',
-    ).and.callThrough();
-
-    component.ngOnDestroy();
-
-    expect(destroySpy).toHaveBeenCalled();
-    expect(completeSpy).toHaveBeenCalled();
   });
 
   it('should debounce search and not call API multiple times rapidly', (done) => {

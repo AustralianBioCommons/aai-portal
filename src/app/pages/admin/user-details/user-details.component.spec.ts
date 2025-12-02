@@ -213,21 +213,6 @@ describe('UserDetailsComponent', () => {
     expect(actionsButton).toBeFalsy();
   });
 
-  it('should toggle action menu when Actions button is clicked', () => {
-    const unverifiedUser = { ...mockUserDetails, email_verified: false };
-    mockApiService.getUserDetails.and.returnValue(of(unverifiedUser));
-
-    fixture.detectChanges();
-
-    expect(component.actionMenuOpen()).toBeFalse();
-
-    component.toggleActionMenu();
-    expect(component.actionMenuOpen()).toBeTrue();
-
-    component.toggleActionMenu();
-    expect(component.actionMenuOpen()).toBeFalse();
-  });
-
   it('should display platform memberships correctly', () => {
     fixture.detectChanges();
 

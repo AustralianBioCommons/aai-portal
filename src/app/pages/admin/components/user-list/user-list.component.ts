@@ -1,13 +1,12 @@
 import {
   Component,
   OnInit,
-  OnDestroy,
   signal,
   model,
   input,
   inject,
-  Renderer2,
   computed,
+  DestroyRef,
 } from '@angular/core';
 import {
   FormsModule,
@@ -18,7 +17,8 @@ import {
 import { Router } from '@angular/router';
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../../shared/components/tooltip/tooltip.component';
 import {
@@ -32,6 +32,7 @@ import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
+import { DropdownMenuComponent } from '../../../../shared/components/dropdown-menu/dropdown-menu.component';
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -58,20 +59,20 @@ export const DEFAULT_PAGE_SIZE = 50;
     TooltipComponent,
     AlertComponent,
     ModalComponent,
+    DropdownMenuComponent,
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
 })
-export class UserListComponent implements OnInit, OnDestroy {
+export class UserListComponent implements OnInit {
   private router = inject(Router);
-  private renderer = inject(Renderer2);
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
 
-  // Cleanup subjects
-  private destroy$ = new Subject<void>();
-  private searchSubject = new Subject<string>();
+  // Cleanup subject for search
+  private searchSubject$ = new Subject<string>();
   private removeScrollListener: (() => void) | null = null;
 
   // Input signals
@@ -119,33 +120,14 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.loadUsers(true);
     this.loadFilterOptions();
     this.setupSearchDebounce();
-    this.setupClickOutsideHandler();
     this.setupScrollListener();
   }
 
-  ngOnDestroy(): void {
-    if (this.removeScrollListener) {
-      this.removeScrollListener();
-    }
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  private setupClickOutsideHandler(): void {
-    this.renderer.listen('window', 'click', (e: Event) => {
-      const target = e.target as Element;
-      if (
-        !target.closest('.user-menu-button') &&
-        !target.closest('.user-menu-dropdown')
-      ) {
-        this.openMenuUserId.set(null);
-      }
-    });
-  }
-
   private setupScrollListener(): void {
-    this.removeScrollListener = this.renderer.listen('window', 'scroll', () =>
-      this.maybeLoadNextPage(),
+    const scrollHandler = () => this.maybeLoadNextPage();
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    this.destroyRef.onDestroy(() =>
+      window.removeEventListener('scroll', scrollHandler),
     );
   }
 
@@ -230,6 +212,7 @@ export class UserListComponent implements OnInit, OnDestroy {
           });
           this.closeRevokeModal();
           this.resetAndReloadUsers();
+
           // Trigger refresh for navbar
           this.dataRefreshService.triggerRefresh();
         },
@@ -245,8 +228,12 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   private setupSearchDebounce(): void {
-    this.searchSubject
-      .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
+    this.searchSubject$
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(() => {
         if (this.page() > 1) {
           this.page.set(1);
@@ -330,7 +317,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput(): void {
-    this.searchSubject.next(this.searchTerm());
+    this.searchSubject$.next(this.searchTerm());
   }
 
   onSearchSubmit(): void {

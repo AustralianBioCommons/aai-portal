@@ -100,7 +100,7 @@
       class="sticky z-20 -mx-6 bg-gray-50 px-6 pt-2 md:-mx-12 md:px-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
       style="position: -webkit-sticky; top: 160px"
     >
-      <div class="border-b border-gray-200 pb-3">
+      <div class="pb-4">
         <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
 
         <!-- List header -->
@@ -165,7 +165,7 @@
                   @if (adminType() !== "bundle") {
                     @for (group of user.group_memberships; track group.id) {
                       <span
-                        class="rounded-md border px-2 py-1 text-xs font-medium"
+                        class="rounded-md border px-2 py-0.5 text-sm font-medium"
                         [ngClass]="{
                           'border-green-600/20 bg-green-50 text-green-700':
                             group.approval_status === 'approved',
@@ -290,109 +290,82 @@
                 </div>
               }
               <div class="relative flex w-1/12 justify-end">
-                <!-- Ellipsis menu -->
-                <button
-                  type="button"
-                  class="user-menu-button rounded-full p-1 transition-all hover:bg-gray-200"
-                  (click)="toggleUserMenu(user.id)"
+                <app-dropdown-menu
+                  [isOpen]="isMenuOpen(user.id)"
+                  (isOpenChange)="openMenuUserId.set($event ? user.id : null)"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-5"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                    />
-                  </svg>
-                </button>
-                @if (isMenuOpen(user.id)) {
-                  <!-- User menu -->
-                  <div
-                    class="user-menu-dropdown absolute right-0 top-full z-10 mt-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                    role="menu"
-                    aria-orientation="vertical"
-                    tabindex="-1"
-                  >
-                    <div class="py-1">
-                      <button
-                        type="button"
-                        (click)="navigateToUserDetails(user.id)"
-                        class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                        role="menuitem"
-                        tabindex="-1"
+                  <ng-template #trigger>
+                    <button
+                      type="button"
+                      class="rounded-full p-1 transition-all hover:bg-gray-200"
+                      (click)="
+                        openMenuUserId.set(isMenuOpen(user.id) ? null : user.id)
+                      "
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-5"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke-width="1.5"
-                          stroke="currentColor"
-                          class="size-5"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                          />
-                        </svg>
-                        View User Details
-                      </button>
-                      @for (
-                        platform of user.platform_memberships;
-                        track platform.id
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                        />
+                      </svg>
+                    </button>
+                  </ng-template>
+                  <ng-template #menu>
+                    <button
+                      type="button"
+                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                      role="menuitem"
+                      tabindex="-1"
+                      (click)="navigateToUserDetails(user.id)"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-5"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                        />
+                      </svg>
+                      View User Details
+                    </button>
+                    @for (
+                      platform of user.platform_memberships;
+                      track platform.id
+                    ) {
+                      <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
+                      @if (
+                        platform.approval_status === "approved" &&
+                        ((adminType() === "biocommons" &&
+                          user.platform_memberships.length === 1) ||
+                          (adminType() === "platform" &&
+                            platform.platform_id === adminPlatforms()[0].id))
                       ) {
-                        <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
-                        @if (
-                          platform.approval_status === "approved" &&
-                          ((adminType() === "biocommons" &&
-                            user.platform_memberships.length === 1) ||
-                            (adminType() === "platform" &&
-                              platform.platform_id === adminPlatforms()[0].id))
-                        ) {
-                          <button
-                            type="button"
-                            (click)="
-                              openRevokeModal(
-                                user.id,
-                                user.email,
-                                platform.platform_id
-                              )
-                            "
-                            class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                            role="menuitem"
-                            tabindex="-1"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="1.5"
-                              stroke="currentColor"
-                              class="size-5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                              />
-                            </svg>
-                            Revoke
-                          </button>
-                        }
-                      }
-                      @if (!user.email_verified) {
                         <button
                           type="button"
-                          (click)="resendVerificationEmail(user.id)"
                           class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                           role="menuitem"
                           tabindex="-1"
+                          (click)="
+                            openRevokeModal(
+                              user.id,
+                              user.email,
+                              platform.platform_id
+                            )
+                          "
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -405,22 +378,45 @@
                             <path
                               stroke-linecap="round"
                               stroke-linejoin="round"
-                              d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
+                              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                             />
                           </svg>
-                          Resend Verification Email
+                          Revoke
                         </button>
                       }
-                    </div>
-                  </div>
-                }
+                    }
+                    @if (!user.email_verified) {
+                      <button
+                        type="button"
+                        class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                        role="menuitem"
+                        tabindex="-1"
+                        (click)="resendVerificationEmail(user.id)"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="size-5"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
+                          />
+                        </svg>
+                        Resend Verification Email
+                      </button>
+                    }
+                  </ng-template>
+                </app-dropdown-menu>
               </div>
             </div>
           }
           @if (loadingMore()) {
-            <div
-              class="flex items-center justify-center py-4 text-sm text-gray-600"
-            >
+            <div class="flex items-center justify-center py-6">
               <app-loading-spinner />
             </div>
           }

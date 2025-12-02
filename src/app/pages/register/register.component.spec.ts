@@ -58,6 +58,17 @@ describe('RegisterComponent', () => {
     scrollToSpy = jasmine.createSpy('scrollTo');
     window.scrollTo = scrollToSpy as typeof window.scrollTo;
 
+    // Mock scroll position to be at the top
+    Object.defineProperty(window, 'scrollY', { value: 0, writable: true });
+    Object.defineProperty(window, 'innerHeight', {
+      value: 768,
+      writable: true,
+    });
+    Object.defineProperty(document.documentElement, 'scrollHeight', {
+      value: 2000,
+      writable: true,
+    });
+
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);

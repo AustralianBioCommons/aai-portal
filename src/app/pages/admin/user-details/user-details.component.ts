@@ -1,13 +1,4 @@
-import {
-  Component,
-  inject,
-  signal,
-  OnInit,
-  ViewChild,
-  ElementRef,
-  Renderer2,
-  computed,
-} from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -26,6 +17,7 @@ import {
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { DropdownMenuComponent } from '../../../shared/components/dropdown-menu/dropdown-menu.component';
 
 type RevokeModalData = {
   type: 'platform' | 'group';
@@ -52,6 +44,7 @@ type RejectModalData = {
     ButtonComponent,
     ReactiveFormsModule,
     ModalComponent,
+    DropdownMenuComponent,
   ],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
@@ -60,15 +53,10 @@ export class UserDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private apiService = inject(ApiService);
-  private renderer = inject(Renderer2);
   private authService = inject(AuthService);
 
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly biocommonsBundles = biocommonsBundles;
-
-  @ViewChild('actionMenu', { read: ElementRef }) actionMenu!: ElementRef;
-  @ViewChild('actionMenuButton', { read: ElementRef })
-  actionMenuButton!: ElementRef;
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
@@ -129,32 +117,6 @@ export class UserDetailsComponent implements OnInit {
       this.error.set('No user ID provided');
       this.loading.set(false);
     }
-
-    this.setupClickOutsideMenuHandler();
-  }
-
-  private setupClickOutsideMenuHandler() {
-    this.renderer.listen('window', 'click', (e: Event) => {
-      const target = e.target as Element;
-      if (
-        !this.actionMenuButton?.nativeElement.contains(target) &&
-        !this.actionMenu?.nativeElement.contains(target)
-      ) {
-        this.actionMenuOpen.set(false);
-      }
-
-      // Close group membership menu
-      if (
-        !target.closest('.membership-menu-button') &&
-        !target.closest('.membership-menu-dropdown')
-      ) {
-        this.openMenuMembershipId.set(null);
-      }
-    });
-  }
-
-  toggleActionMenu() {
-    this.actionMenuOpen.set(!this.actionMenuOpen());
   }
 
   resendVerificationEmail() {
