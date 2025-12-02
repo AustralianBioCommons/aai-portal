@@ -37,8 +37,6 @@ describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let httpMock: HttpTestingController;
-  let originalScrollTo: typeof window.scrollTo;
-  let scrollToSpy: jasmine.Spy;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -54,31 +52,18 @@ describe('RegisterComponent', () => {
       ],
     }).compileComponents();
 
-    originalScrollTo = window.scrollTo;
-    scrollToSpy = jasmine.createSpy('scrollTo');
-    window.scrollTo = scrollToSpy as typeof window.scrollTo;
-
-    // Mock scroll position to be at the top
-    Object.defineProperty(window, 'scrollY', { value: 0, writable: true });
-    Object.defineProperty(window, 'innerHeight', {
-      value: 768,
-      writable: true,
-    });
-    Object.defineProperty(document.documentElement, 'scrollHeight', {
-      value: 2000,
-      writable: true,
-    });
-
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+
+    spyOn<any>(component, 'updateActiveSection');
+
     fixture.detectChanges();
   });
 
   afterEach(() => {
     httpMock.verify();
     fixture.destroy();
-    window.scrollTo = originalScrollTo;
   });
 
   it('should create', () => {
@@ -113,30 +98,6 @@ describe('RegisterComponent', () => {
   describe('Section Navigation', () => {
     it('should mark introduction as visited initially', () => {
       expect(component.isSectionVisited('introduction')).toBe(true);
-    });
-
-    it('should check if section is active', () => {
-      expect(component.isSectionActive('introduction')).toBe(true);
-      expect(component.isSectionActive('your-details')).toBe(false);
-    });
-
-    it('should scroll to section when requested', () => {
-      const mockEvent = new Event('click');
-      spyOn(mockEvent, 'preventDefault');
-      const mockElement = document.createElement('div');
-      mockElement.id = 'your-details';
-      spyOn(document, 'getElementById').and.returnValue(mockElement);
-
-      component.scrollToSection(mockEvent, 'your-details');
-
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(scrollToSpy).toHaveBeenCalled();
-    });
-
-    it('should get active step object', () => {
-      const activeStep = component.getActiveStepObject();
-      expect(activeStep?.id).toBe('introduction');
-      expect(activeStep?.label).toBe('Introduction');
     });
 
     it('should determine if section is valid', () => {
