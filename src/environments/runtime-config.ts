@@ -30,7 +30,7 @@ export interface RuntimeEnvironmentConfig {
 }
 
 function resolveRedirectUri(value: string | undefined): string {
-  return value && value.length > 0 ? value : window.location.origin;
+  return value?.trim() ? value : window.location.origin;
 }
 
 export function mergeEnvironmentConfig(

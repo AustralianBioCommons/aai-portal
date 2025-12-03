@@ -241,7 +241,10 @@ export class RegisterComponent implements AfterViewInit {
       case 'introduction':
         return true;
       case 'your-details':
-        return this.registrationForm.valid;
+        return (
+          this.registrationForm.valid &&
+          !this.validationService.hasBackendErrors()
+        );
       case 'add-bundle':
         return true;
       case 'terms':
@@ -279,7 +282,7 @@ export class RegisterComponent implements AfterViewInit {
       } else if (existingErrors['fullNameTooLong']) {
         const remaining = { ...existingErrors };
         delete remaining['fullNameTooLong'];
-        const nextErrors = Object.keys(remaining).length > 0 ? remaining : null;
+        const nextErrors = Object.keys(remaining).length ? remaining : null;
         control.setErrors(nextErrors);
       }
     };
@@ -420,7 +423,9 @@ export class RegisterComponent implements AfterViewInit {
   private scrollToFirstError(): void {
     for (const fieldName of Object.keys(this.registrationForm.controls)) {
       const control = this.registrationForm.get(fieldName);
-      if (control?.invalid) {
+      const hasBackendError =
+        this.validationService.hasFieldBackendError(fieldName);
+      if (control?.invalid || hasBackendError) {
         const element = document.getElementById(fieldName);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });

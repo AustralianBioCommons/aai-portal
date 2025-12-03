@@ -337,8 +337,7 @@
 
         <div class="space-y-6">
           @if (
-            user()?.platform_memberships &&
-            user()!.platform_memberships.length > 0
+            user()?.platform_memberships && user()!.platform_memberships.length
           ) {
             <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
               <div class="text-2xl font-semibold">Services</div>
@@ -400,9 +399,7 @@
             </div>
           }
 
-          @if (
-            user()?.group_memberships && user()!.group_memberships.length > 0
-          ) {
+          @if (user()?.group_memberships && user()!.group_memberships.length) {
             <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
               <div class="text-2xl font-semibold">Bundles</div>
               <div class="space-y-4">
