@@ -158,8 +158,7 @@ export class SbpRegisterComponent {
         } else if (existingErrors['fullNameTooLong']) {
           const remaining = { ...existingErrors };
           delete remaining['fullNameTooLong'];
-          const nextErrors =
-            Object.keys(remaining).length > 0 ? remaining : null;
+          const nextErrors = Object.keys(remaining).length ? remaining : null;
           control.setErrors(nextErrors);
         }
       };
