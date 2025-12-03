@@ -93,7 +93,7 @@ export class RegisterComponent implements AfterViewInit {
     { id: 'terms', label: 'Accept T&Cs', mobileLabel: 'T&Cs' },
   ];
 
-  bundles: Bundle[] = BIOCOMMONS_BUNDLES;
+  BIOCOMMONS_BUNDLES: Bundle[] = BIOCOMMONS_BUNDLES;
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     selectedBundle: [''],
@@ -116,7 +116,12 @@ export class RegisterComponent implements AfterViewInit {
       confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
     });
 
-  termsForm: FormGroup = this.formBuilder.nonNullable.group({});
+  termsForm: FormGroup = this.formBuilder.nonNullable.group({
+    biocommonsAccess: this.formBuilder.nonNullable.control(
+      false,
+      Validators.requiredTrue,
+    ),
+  });
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
@@ -146,8 +151,6 @@ export class RegisterComponent implements AfterViewInit {
           this.validationService.clearFieldBackendError('email');
         }
       });
-
-    this.initializeTermsForm();
 
     fromEvent(window, 'scroll')
       .pipe(takeUntilDestroyed())
@@ -290,56 +293,14 @@ export class RegisterComponent implements AfterViewInit {
     updateControlError(lastNameControl, exceedsLimit);
   }
 
-  private initializeTermsForm() {
-    // Always include BioCommons Access terms
-    const termsControls: Record<string, FormControl<boolean>> = {
-      biocommonsAccess: this.formBuilder.nonNullable.control(
-        false,
-        Validators.requiredTrue,
-      ),
-    };
-
-    this.termsForm = this.formBuilder.nonNullable.group(termsControls);
-
-    // Watch for bundle selection changes to update terms form
-    this.bundleForm
-      .get('selectedBundle')
-      ?.valueChanges.pipe(takeUntilDestroyed())
-      .subscribe((selectedBundle) => {
-        this.updateTermsFormForBundle(selectedBundle);
-      });
-  }
-
-  private updateTermsFormForBundle(bundleId: string) {
-    const bundle = this.bundles.find((b) => b.id === bundleId);
-
-    // Always include BioCommons Access terms
-    const termsControls: Record<string, FormControl<boolean>> = {
-      biocommonsAccess: this.formBuilder.nonNullable.control(
-        this.termsForm.get('biocommonsAccess')?.value ?? false,
-        Validators.requiredTrue,
-      ),
-    };
-
-    // Add bundle-specific terms if a bundle is selected
-    if (bundle) {
-      bundle.services.forEach((service) => {
-        termsControls[service.id] = this.formBuilder.nonNullable.control(
-          this.termsForm.get(service.id)?.value ?? false,
-          Validators.requiredTrue,
-        );
-      });
-    }
-
-    this.termsForm = this.formBuilder.nonNullable.group(termsControls);
-  }
-
   resolved(captchaResponse: string | null): void {
     this.recaptchaToken.set(captchaResponse);
   }
 
   toggleBundle(value: string) {
-    const bundle = this.bundles.find((bundle) => bundle.id === value);
+    const bundle = this.BIOCOMMONS_BUNDLES.find(
+      (bundle) => bundle.id === value,
+    );
     if (!bundle?.disabled) {
       const currentValue = this.bundleForm.get('selectedBundle')?.value;
       if (currentValue === value) {
@@ -358,7 +319,7 @@ export class RegisterComponent implements AfterViewInit {
 
   getSelectedBundle(): Bundle | undefined {
     const selectedId = this.bundleForm.get('selectedBundle')?.value;
-    return this.bundles.find((bundle) => bundle.id === selectedId);
+    return this.BIOCOMMONS_BUNDLES.find((bundle) => bundle.id === selectedId);
   }
 
   submitRegistration() {

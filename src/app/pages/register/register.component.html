@@ -353,7 +353,7 @@
             </p>
             <div class="flex flex-wrap items-stretch justify-center gap-6">
               <!-- Bundle selection cards -->
-              @for (bundle of bundles; track bundle.id) {
+              @for (bundle of BIOCOMMONS_BUNDLES; track bundle.id) {
                 <div
                   tabindex="0"
                   class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
@@ -509,73 +509,6 @@
                 />
               </div>
             </div>
-
-            <!-- Bundle T&Cs -->
-            @if (getSelectedBundle()) {
-              <div class="space-y-6">
-                <h2 class="text-3xl font-semibold text-gray-900">
-                  {{ getSelectedBundle()?.name }} Bundle terms & conditions
-                </h2>
-                <p class="font-light text-gray-600">
-                  Please review the terms & conditions for each associated
-                  service and tick all boxes below to accept the complete bundle
-                  agreement.
-                </p>
-
-                @for (
-                  service of getSelectedBundle()?.services || [];
-                  track service.id
-                ) {
-                  <div
-                    tabindex="0"
-                    class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                    [class.ring-transparent]="
-                      termsForm.get(service.id)?.value !== true &&
-                      (!termsForm.get(service.id)?.invalid ||
-                        !termsForm.get(service.id)?.touched)
-                    "
-                    [class.ring-red-500]="
-                      termsForm.get(service.id)?.value !== true &&
-                      termsForm.get(service.id)?.invalid &&
-                      termsForm.get(service.id)?.touched
-                    "
-                    [class.ring-sky-400]="
-                      termsForm.get(service.id)?.value === true
-                    "
-                    (click)="toggleTermsAcceptance(service.id)"
-                    (keyup.enter)="toggleTermsAcceptance(service.id)"
-                  >
-                    <a
-                      [href]="service.termsUrl"
-                      target="_blank"
-                      class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
-                      (click)="$event.stopPropagation()"
-                    >
-                      {{ service.termsTitle }}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-4 min-h-4 min-w-4"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                        />
-                      </svg>
-                    </a>
-                    <input
-                      type="checkbox"
-                      [formControlName]="service.id"
-                      class="pointer-events-none h-4 w-4 accent-biocommons-primary"
-                    />
-                  </div>
-                }
-              </div>
-            }
 
             @if (termsForm.invalid && termsForm.touched) {
               <div class="text-sm text-red-500">
