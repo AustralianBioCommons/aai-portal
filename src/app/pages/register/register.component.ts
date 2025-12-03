@@ -161,6 +161,14 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   private updateActiveSection(): void {
+    // Skip updates when sections are not yet rendered (e.g., in tests)
+    const hasRenderedSections = this.sections.some((section) =>
+      Boolean(document.getElementById(section.id)),
+    );
+    if (!hasRenderedSections) {
+      return;
+    }
+
     const scrollPosition = window.scrollY;
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
