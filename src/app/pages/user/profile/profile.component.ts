@@ -33,6 +33,7 @@ import {
   toAsciiEmail,
 } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
+import { take } from 'rxjs/operators';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -56,6 +57,7 @@ export class ProfileComponent implements OnInit {
   private document = inject(DOCUMENT);
   private authService = inject(AuthService);
   private validationService = inject(ValidationService);
+  private readonly pendingPlatformLaunchKey = 'pending_platform_launch';
 
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly BIOCOMMONS_BUNDLES = BIOCOMMONS_BUNDLES;
@@ -117,6 +119,7 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserProfile();
     this.showMessageFromStorage();
+    this.resumePendingPlatformLaunch();
     this.usernameControl.valueChanges.subscribe(() => {
       this.usernameError.set(null);
     });
@@ -445,6 +448,26 @@ export class ProfileComponent implements OnInit {
     return false;
   }
 
+  protected launchPlatform(platformId: PlatformId): void {
+    const launchUrl = this.platformLaunchUrls[platformId];
+    if (!launchUrl) {
+      return;
+    }
+
+    this.authService
+      .ensureAuthenticated()
+      .pipe(take(1))
+      .subscribe((isAuthenticated) => {
+        if (isAuthenticated) {
+          this.openPlatform(launchUrl);
+          return;
+        }
+
+        sessionStorage.setItem(this.pendingPlatformLaunchKey, platformId);
+        this.authService.login();
+      });
+  }
+
   private loadUserProfile(): void {
     this.loading.set(true);
     this.error.set(null);
@@ -469,5 +492,35 @@ export class ProfileComponent implements OnInit {
 
   public reloadPage(): void {
     this.document.location.reload();
+  }
+
+  private resumePendingPlatformLaunch(): void {
+    const pendingPlatformId = sessionStorage.getItem(
+      this.pendingPlatformLaunchKey,
+    ) as PlatformId | null;
+
+    if (!pendingPlatformId) {
+      return;
+    }
+
+    this.authService
+      .ensureAuthenticated()
+      .pipe(take(1))
+      .subscribe((isAuthenticated) => {
+        sessionStorage.removeItem(this.pendingPlatformLaunchKey);
+
+        if (!isAuthenticated) {
+          return;
+        }
+
+        const launchUrl = this.platformLaunchUrls[pendingPlatformId];
+        if (launchUrl) {
+          this.openPlatform(launchUrl);
+        }
+      });
+  }
+
+  private openPlatform(url: string): void {
+    this.document.defaultView?.open(url, '_blank', 'noopener');
   }
 }

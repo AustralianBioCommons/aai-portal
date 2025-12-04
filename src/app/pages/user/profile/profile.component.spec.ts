@@ -9,11 +9,13 @@ import { AuthService } from '../../../core/services/auth.service';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
+import { PlatformId } from '../../../core/constants/constants';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
   let reloadSpy: jasmine.Spy;
 
   type ProfileTestHarness = ProfileComponent & {
@@ -23,6 +25,7 @@ describe('ProfileComponent', () => {
     submitPasswordChange(): void;
     sendEmailOtp(): void;
     confirmEmailChange(): void;
+    launchPlatform(platformId: PlatformId): void;
   };
   let harness: ProfileTestHarness;
 
@@ -83,9 +86,14 @@ describe('ProfileComponent', () => {
       'requestEmailChange',
       'continueEmailChange',
     ]);
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
-      isGeneralAdmin: signal(false),
-    });
+    const authSpy = jasmine.createSpyObj(
+      'AuthService',
+      ['ensureAuthenticated', 'login'],
+      {
+        isGeneralAdmin: signal(false),
+      },
+    );
+    authSpy.ensureAuthenticated.and.returnValue(of(true));
 
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
@@ -99,6 +107,7 @@ describe('ProfileComponent', () => {
     component = fixture.componentInstance;
     harness = component as ProfileTestHarness;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
     mockApiService.updateUserUsername.and.returnValue(of(mockAuth0User));
     mockApiService.updatePassword.and.returnValue(of(true));
@@ -109,6 +118,7 @@ describe('ProfileComponent', () => {
     mockApiService.continueEmailChange.and.returnValue(of(void 0));
     reloadSpy = spyOn(component, 'reloadPage').and.stub();
     sessionStorage.removeItem('profile_flash_message');
+    sessionStorage.removeItem('pending_platform_launch');
   });
 
   const openModal = (type: 'username' | 'password' | 'name' | 'email') =>
@@ -507,5 +517,52 @@ describe('ProfileComponent', () => {
     expect(fallback.nativeElement.textContent.trim()).toBe(
       'Launch link unavailable',
     );
+  });
+
+  it('opens launch URLs after authentication', () => {
+    const openSpy = spyOn(window, 'open').and.stub();
+
+    fixture.detectChanges();
+    harness.launchPlatform('galaxy');
+
+    expect(openSpy).toHaveBeenCalledWith(
+      (component as unknown as { platformLaunchUrls: Record<string, string> })
+        .platformLaunchUrls['galaxy'],
+      '_blank',
+      'noopener',
+    );
+    expect(mockAuthService.ensureAuthenticated).toHaveBeenCalled();
+    expect(mockAuthService.login).not.toHaveBeenCalled();
+  });
+
+  it('requests authentication before launching a platform when needed', () => {
+    const openSpy = spyOn(window, 'open').and.stub();
+    mockAuthService.ensureAuthenticated.and.returnValue(of(false));
+
+    fixture.detectChanges();
+    harness.launchPlatform('galaxy');
+
+    expect(mockAuthService.ensureAuthenticated).toHaveBeenCalled();
+    expect(sessionStorage.getItem('pending_platform_launch')).toBe(
+      'galaxy',
+    );
+    expect(mockAuthService.login).toHaveBeenCalled();
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  it('resumes pending platform launch after login', () => {
+    const openSpy = spyOn(window, 'open').and.stub();
+    sessionStorage.setItem('pending_platform_launch', 'galaxy');
+    mockAuthService.ensureAuthenticated.and.returnValue(of(true));
+
+    fixture.detectChanges();
+
+    expect(openSpy).toHaveBeenCalledWith(
+      (component as unknown as { platformLaunchUrls: Record<string, string> })
+        .platformLaunchUrls['galaxy'],
+      '_blank',
+      'noopener',
+    );
+    expect(sessionStorage.getItem('pending_platform_launch')).toBeNull();
   });
 });
