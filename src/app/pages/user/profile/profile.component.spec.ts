@@ -107,7 +107,9 @@ describe('ProfileComponent', () => {
     component = fixture.componentInstance;
     harness = component as ProfileTestHarness;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
-    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    mockAuthService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
     mockApiService.updateUserUsername.and.returnValue(of(mockAuth0User));
     mockApiService.updatePassword.and.returnValue(of(true));
@@ -543,9 +545,7 @@ describe('ProfileComponent', () => {
     harness.launchPlatform('galaxy');
 
     expect(mockAuthService.ensureAuthenticated).toHaveBeenCalled();
-    expect(sessionStorage.getItem('pending_platform_launch')).toBe(
-      'galaxy',
-    );
+    expect(sessionStorage.getItem('pending_platform_launch')).toBe('galaxy');
     expect(mockAuthService.login).toHaveBeenCalled();
     expect(openSpy).not.toHaveBeenCalled();
   });
