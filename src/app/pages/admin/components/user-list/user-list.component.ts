@@ -1,14 +1,12 @@
 import {
   Component,
   OnInit,
-  OnDestroy,
   signal,
   model,
   input,
   inject,
-  Renderer2,
-  effect,
-  untracked,
+  computed,
+  DestroyRef,
 } from '@angular/core';
 import {
   FormsModule,
@@ -16,10 +14,11 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../../shared/components/tooltip/tooltip.component';
 import {
@@ -33,6 +32,7 @@ import { PlatformId } from '../../../../core/constants/constants';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
+import { DropdownMenuComponent } from '../../../../shared/components/dropdown-menu/dropdown-menu.component';
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -59,21 +59,20 @@ export const DEFAULT_PAGE_SIZE = 50;
     TooltipComponent,
     AlertComponent,
     ModalComponent,
+    DropdownMenuComponent,
   ],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
 })
-export class UserListComponent implements OnInit, OnDestroy {
-  private activatedRoute = inject(ActivatedRoute);
+export class UserListComponent implements OnInit {
   private router = inject(Router);
-  private renderer = inject(Renderer2);
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
 
-  // Cleanup subjects
-  private destroy$ = new Subject<void>();
-  private searchSubject = new Subject<string>();
+  // Cleanup subject for search
+  private searchSubject$ = new Subject<string>();
 
   // Input signals
   title = input.required<string>();
@@ -82,7 +81,7 @@ export class UserListComponent implements OnInit, OnDestroy {
 
   // State signals
   loading = signal(false);
-  openMenuUserId = signal<string | null>(null);
+  loadingMore = signal(false);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   users = signal<BiocommonsUserResponse[]>([]);
   totalUsers = signal<number>(0);
@@ -91,6 +90,7 @@ export class UserListComponent implements OnInit, OnDestroy {
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
+  openMenuUserId = signal<string | null>(null);
   showRevokeModal = signal(false);
   selectedUserForRevoke = signal<{
     userId: string;
@@ -102,62 +102,32 @@ export class UserListComponent implements OnInit, OnDestroy {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
+  readonly isSbpAdmin = computed(
+    () =>
+      this.adminType() === 'platform' &&
+      this.adminPlatforms().some((p) => p?.id === 'sbp'),
+  );
+
   // Form controls
   revokeReasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required],
   });
 
-  constructor() {
-    effect(() => {
-      const p = this.page();
-
-      // Run the load method without tracking its internal signal reads
-      untracked(() => {
-        this.loadUsers();
-        this.loadUserCounts();
-      });
-      return p;
-    });
-  }
-
   ngOnInit(): void {
-    this.activatedRoute.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        if (params['page']) {
-          this.page.set(parseInt(params['page'], 10));
-        }
-      });
     this.loadUserCounts();
+    this.loadUsers(true);
     this.loadFilterOptions();
     this.setupSearchDebounce();
-    this.setupClickOutsideHandler();
+    this.setupScrollListener();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  setPage(p: number) {
-    this.router.navigate([], {
-      relativeTo: this.activatedRoute,
-      queryParams: { page: p },
-      queryParamsHandling: 'merge', // preserve other filters/sorts
-    });
-  }
-
-  private setupClickOutsideHandler(): void {
-    this.renderer.listen('window', 'click', (e: Event) => {
-      const target = e.target as Element;
-      if (
-        !target.closest('.user-menu-button') &&
-        !target.closest('.user-menu-dropdown')
-      ) {
-        this.openMenuUserId.set(null);
-      }
-    });
+  private setupScrollListener(): void {
+    const scrollHandler = () => this.maybeLoadNextPage();
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    this.destroyRef.onDestroy(() =>
+      window.removeEventListener('scroll', scrollHandler),
+    );
   }
 
   toggleUserMenu(userId: string): void {
@@ -240,7 +210,8 @@ export class UserListComponent implements OnInit, OnDestroy {
             message: 'User revoked successfully',
           });
           this.closeRevokeModal();
-          this.loadUsers();
+          this.resetAndReloadUsers();
+
           // Trigger refresh for navbar
           this.dataRefreshService.triggerRefresh();
         },
@@ -256,13 +227,17 @@ export class UserListComponent implements OnInit, OnDestroy {
   }
 
   private setupSearchDebounce(): void {
-    this.searchSubject
-      .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
+    this.searchSubject$
+      .pipe(
+        debounceTime(500),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe(() => {
         if (this.page() > 1) {
           this.page.set(1);
         }
-        this.loadUsers();
+        this.resetAndReloadUsers();
         this.loadUserCounts();
       });
   }
@@ -283,7 +258,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     this.apiService
       .getAdminUsersPageInfo({
         ...this.defaultQueryParams(),
-        page: this.page(),
+        page: 1,
         perPage: DEFAULT_PAGE_SIZE,
         filterBy: this.selectedFilter(),
         search: this.searchTerm(),
@@ -299,8 +274,18 @@ export class UserListComponent implements OnInit, OnDestroy {
       });
   }
 
-  loadUsers(): void {
+  loadUsers(reset = false): void {
+    if (reset) {
+      this.users.set([]);
+    }
+    const isInitialLoad = reset || this.users().length === 0;
+    // Append when requesting subsequent pages; replace when resetting.
+    const append = !isInitialLoad;
+    const start = Date.now();
     this.loading.set(true);
+    if (!isInitialLoad) {
+      this.loadingMore.set(true);
+    }
     this.apiService
       .getAdminAllUsers({
         ...this.defaultQueryParams(),
@@ -311,13 +296,13 @@ export class UserListComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
-          this.users.set(users);
-          this.loading.set(false);
+          this.users.set(append ? [...this.users(), ...users] : users);
+          this.finishLoading(start);
         },
         error: (error: unknown) => {
           console.error('Error loading users:', error);
           this.users.set([]);
-          this.loading.set(false);
+          this.finishLoading(start);
         },
       });
   }
@@ -325,11 +310,51 @@ export class UserListComponent implements OnInit, OnDestroy {
   onFilterChange(): void {
     this.searchTerm.set('');
     this.page.set(1);
+    this.users.set([]);
     this.loadUserCounts();
     this.loadUsers();
   }
 
   onSearchInput(): void {
-    this.searchSubject.next(this.searchTerm());
+    this.searchSubject$.next(this.searchTerm());
+  }
+
+  onSearchSubmit(): void {
+    this.page.set(1);
+    this.users.set([]);
+    this.loadUserCounts();
+    this.loadUsers();
+  }
+
+  maybeLoadNextPage(): void {
+    if (this.loading()) {
+      return;
+    }
+    if (this.page() >= this.totalPages()) {
+      return;
+    }
+    const scrollPosition =
+      window.innerHeight + window.scrollY >=
+      document.documentElement.scrollHeight - 200;
+    if (scrollPosition) {
+      this.page.set(this.page() + 1);
+      this.loadUsers();
+    }
+  }
+
+  private resetAndReloadUsers(): void {
+    this.page.set(1);
+    this.users.set([]);
+    this.loadUserCounts();
+    this.loadUsers();
+  }
+
+  private finishLoading(startTimestamp: number): void {
+    const elapsed = Date.now() - startTimestamp;
+    const remaining = Math.max(0, 200 - elapsed);
+    setTimeout(() => {
+      this.loading.set(false);
+      this.loadingMore.set(false);
+    }, remaining);
   }
 }

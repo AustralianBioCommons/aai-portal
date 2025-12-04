@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, of, fromEvent } from 'rxjs';
-import { biocommonsBundles, Bundle } from '../../core/constants/constants';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
 import { ValidationService } from '../../core/services/validation.service';
@@ -95,7 +95,7 @@ export class RegisterComponent implements AfterViewInit {
     { id: 'terms', label: 'Accept T&Cs', mobileLabel: 'T&Cs' },
   ];
 
-  bundles: Bundle[] = biocommonsBundles;
+  bundles: Bundle[] = BIOCOMMONS_BUNDLES;
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     selectedBundle: [''],
@@ -243,7 +243,10 @@ export class RegisterComponent implements AfterViewInit {
       case 'introduction':
         return true;
       case 'your-details':
-        return this.registrationForm.valid;
+        return (
+          this.registrationForm.valid &&
+          !this.validationService.hasBackendErrors()
+        );
       case 'add-bundle':
         return true;
       case 'terms':
@@ -281,7 +284,7 @@ export class RegisterComponent implements AfterViewInit {
       } else if (existingErrors['fullNameTooLong']) {
         const remaining = { ...existingErrors };
         delete remaining['fullNameTooLong'];
-        const nextErrors = Object.keys(remaining).length > 0 ? remaining : null;
+        const nextErrors = Object.keys(remaining).length ? remaining : null;
         control.setErrors(nextErrors);
       }
     };
@@ -340,10 +343,6 @@ export class RegisterComponent implements AfterViewInit {
   getSelectedBundle(): Bundle | undefined {
     const selectedId = this.bundleForm.get('selectedBundle')?.value;
     return this.bundles.find((bundle) => bundle.id === selectedId);
-  }
-
-  goBack() {
-    this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   submitRegistration() {
@@ -408,7 +407,9 @@ export class RegisterComponent implements AfterViewInit {
   private scrollToFirstError(): void {
     for (const fieldName of Object.keys(this.registrationForm.controls)) {
       const control = this.registrationForm.get(fieldName);
-      if (control?.invalid) {
+      const hasBackendError =
+        this.validationService.hasFieldBackendError(fieldName);
+      if (control?.invalid || hasBackendError) {
         const element = document.getElementById(fieldName);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });

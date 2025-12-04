@@ -2,19 +2,29 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
 /**
- * Service to broadcast data refresh events across components
+ * Service when one component needs to tell others to re-fetch or recompute data,
+ * without sharing any actual state.
+ *
+ * Example: page change triggers navbar to refresh its counts.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class DataRefreshService {
-  private refreshSubject = new Subject<void>();
-
-  // Observable that components can subscribe to
-  refresh$ = this.refreshSubject.asObservable();
+  /**
+   * Internal subject used to broadcast refresh events.
+   */
+  private readonly refreshSubject = new Subject<void>();
 
   /**
-   * Trigger a data refresh across all listening components
+   * Public stream components can subscribe to.
+   * Emits whenever triggerRefresh() is called.
+   */
+  public readonly refresh$ = this.refreshSubject.asObservable();
+
+  /**
+   * Broadcast a refresh event to all subscribers.
+   * Call this after actions that should cause dependent UI/data to update.
    */
   triggerRefresh(): void {
     this.refreshSubject.next();

@@ -17,7 +17,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import {
   PLATFORMS,
   PlatformId,
-  biocommonsBundles,
+  BIOCOMMONS_BUNDLES,
 } from '../../../core/constants/constants';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
@@ -58,7 +58,7 @@ export class ProfileComponent implements OnInit {
   private validationService = inject(ValidationService);
 
   protected readonly PLATFORMS = PLATFORMS;
-  protected readonly biocommonsBundles = biocommonsBundles;
+  protected readonly BIOCOMMONS_BUNDLES = BIOCOMMONS_BUNDLES;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
     bpa_data_portal: environment.platformUrls.bpaPlatform,
     galaxy: environment.platformUrls.galaxyPlatform,
@@ -226,7 +226,7 @@ export class ProfileComponent implements OnInit {
   protected modalDescription(): string {
     switch (this.activeModal()) {
       case 'email':
-        return 'To verify your email, we will send an one-time-password to your new email address.';
+        return 'To verify your email, we will send a one-time-password (OTP) to your new email address.';
       default:
         return '';
     }
@@ -463,7 +463,7 @@ export class ProfileComponent implements OnInit {
 
   protected getBundleLogoUrls(groupId: string): string[] {
     const bundleId = groupId.split('/').pop() || '';
-    const bundle = this.biocommonsBundles.find((b) => b.id === bundleId);
+    const bundle = this.BIOCOMMONS_BUNDLES.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
   }
 

@@ -17,70 +17,52 @@
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50"
     >
-      <!-- Progress Bar - Horizontal and Sticky -->
+      <!-- Progress Bar -->
       <div class="sticky top-0 z-30 w-full bg-white shadow">
-        <div class="mx-auto max-w-4xl px-6 pb-6 pt-8">
+        <div class="mx-auto max-w-4xl px-6 pb-4 pt-6">
           <div class="flex items-start justify-between">
-            @for (section of sections; track section.id; let idx = $index) {
-              <div class="relative flex flex-1 flex-col items-center">
+            @for (section of sections; track section.id; let index = $index) {
+              @let active = isSectionActive(section.id);
+              @let completed = isSectionCompleted(section.id);
+              @let visited = isSectionVisited(section.id);
+              @let valid = isSectionValid(section.id);
+              @let last = section.id === "terms";
+
+              <div class="group relative flex flex-1 flex-col items-center">
                 <div class="flex w-full items-center">
-                  <!-- Circle/Check indicator -->
+                  <!-- Circle Indicator -->
                   <div class="flex w-full justify-center">
                     <a
                       [href]="'#' + section.id"
-                      class="group cursor-pointer"
+                      class="cursor-pointer"
                       (click)="scrollToSection($event, section.id)"
                     >
                       <div
                         class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
                         [ngClass]="{
-                          'border-biocommons-primary':
-                            isSectionActive(section.id) ||
-                            (isSectionCompleted(section.id) &&
-                              isSectionValid(section.id)) ||
-                            (isSectionVisited(section.id) &&
-                              !isSectionCompleted(section.id) &&
-                              isSectionValid(section.id)),
-                          'bg-biocommons-primary':
-                            isSectionCompleted(section.id) &&
-                            isSectionValid(section.id),
-                          'border-red-600':
-                            !isSectionActive(section.id) &&
-                            ((isSectionCompleted(section.id) &&
-                              !isSectionValid(section.id)) ||
-                              (isSectionVisited(section.id) &&
-                                !isSectionCompleted(section.id) &&
-                                !isSectionValid(section.id))),
-                          'bg-red-600':
-                            isSectionCompleted(section.id) &&
-                            !isSectionValid(section.id),
-                          'bg-white': !isSectionCompleted(section.id),
-                          'border-gray-300': !isSectionVisited(section.id),
+                          'border-gray-300': !visited,
+                          'border-biocommons-primary group-hover:border-sky-900':
+                            active || ((visited || completed) && valid),
+                          'border-red-600 group-hover:border-red-700':
+                            !active && !valid && (completed || visited),
+                          'bg-biocommons-primary group-hover:bg-sky-900':
+                            (completed && valid) || (last && active && valid),
+                          'bg-red-600 group-hover:bg-red-700':
+                            completed && !valid,
+                          'bg-white hover:bg-gray-100':
+                            !completed && !(last && active && valid),
                         }"
                       >
-                        @if (
-                          isSectionActive(section.id) &&
-                          section.id === "terms" &&
-                          !isSectionValid(section.id)
-                        ) {
-                          <!-- Last step: dot when active and not valid -->
+                        @if (last && active && !valid) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
-                        } @else if (
-                          isSectionActive(section.id) &&
-                          section.id === "terms" &&
-                          isSectionValid(section.id)
-                        ) {
-                          <!-- Last step: filled check when active and valid -->
-                          <span
-                            class="absolute inset-0 rounded-full bg-biocommons-primary"
-                          ></span>
+                        } @else if (last && active && valid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
                             fill="currentColor"
-                            class="z-10 size-4 text-white"
+                            class="z-10 size-5 text-white"
                           >
                             <path
                               fill-rule="evenodd"
@@ -88,21 +70,16 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (isSectionActive(section.id)) {
-                          <!-- Other steps: dot when active -->
+                        } @else if (active) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
-                        } @else if (
-                          isSectionCompleted(section.id) &&
-                          isSectionValid(section.id)
-                        ) {
-                          <!-- Check icon, filled background -->
+                        } @else if (completed && valid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
                             fill="currentColor"
-                            class="size-4 text-white"
+                            class="size-5 text-white"
                           >
                             <path
                               fill-rule="evenodd"
@@ -110,22 +87,14 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (
-                          isSectionCompleted(section.id) &&
-                          !isSectionValid(section.id)
-                        ) {
-                          <!-- Exclamation mark, filled background -->
-                          <span class="text-sm text-white">!</span>
-                        } @else if (
-                          isSectionVisited(section.id) &&
-                          isSectionValid(section.id)
-                        ) {
-                          <!-- Check icon, border only -->
+                        } @else if (completed && !valid) {
+                          <span class="text-white">!</span>
+                        } @else if (visited && valid) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
                             fill="currentColor"
-                            class="size-4 text-biocommons-primary"
+                            class="size-5 text-biocommons-primary"
                           >
                             <path
                               fill-rule="evenodd"
@@ -133,47 +102,39 @@
                               clip-rule="evenodd"
                             />
                           </svg>
-                        } @else if (
-                          isSectionVisited(section.id) &&
-                          !isSectionValid(section.id)
-                        ) {
-                          <!-- Exclamation mark, border only -->
-                          <span class="text-sm text-red-600">!</span>
+                        } @else if (visited && !valid) {
+                          <span class="text-red-600">!</span>
                         }
                       </div>
                     </a>
                   </div>
 
-                  <!-- Connecting line to next section -->
-                  @if (idx < sections.length - 1) {
+                  <!-- Connecting line -->
+                  @if (index < sections.length - 1) {
                     <div
                       class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
-                      [ngClass]="{
-                        'bg-biocommons-primary': isSectionCompleted(section.id),
-                        'bg-gray-300': !isSectionCompleted(section.id),
-                      }"
+                      [class.bg-biocommons-primary]="completed"
+                      [class.bg-gray-300]="!completed"
                     ></div>
                   }
                 </div>
 
-                <!-- Label underneath -->
+                <!-- Label -->
                 <a
                   [href]="'#' + section.id"
                   class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
-                  [ngClass]="{
-                    'text-biocommons-primary':
-                      activeSection() === section.id ||
-                      isSectionCompleted(section.id),
-                    'text-gray-900':
-                      activeSection() !== section.id &&
-                      !isSectionCompleted(section.id),
-                  }"
+                  [class.text-biocommons-primary]="
+                    activeSection() === section.id || completed
+                  "
+                  [class.text-gray-900]="
+                    activeSection() !== section.id && !completed
+                  "
                   (click)="scrollToSection($event, section.id)"
                 >
                   <span class="hidden sm:inline">{{ section.label }}</span>
-                  <span class="inline sm:hidden">{{
-                    section.mobileLabel
-                  }}</span>
+                  <span class="inline sm:hidden">
+                    {{ section.mobileLabel }}
+                  </span>
                 </a>
               </div>
             }
@@ -381,11 +342,12 @@
           <!-- Bundle Selection Section -->
           <div class="flex scroll-mt-24 flex-col gap-6">
             <h2 class="text-left text-3xl font-semibold text-gray-900">
-              Add a bundle (optional)
+              Add a bundle (Optional)
             </h2>
             <p class="text-left font-light text-gray-600">
               Request access to a bundle you need for your research
             </p>
+
             <app-bundle-selection
               [bundleForm]="bundleForm"
               [bundles]="bundles"
@@ -530,23 +492,21 @@
           </form>
 
           <!-- reCAPTCHA -->
-          <div class="flex flex-col items-center gap-0.5">
-            <re-captcha
-              (resolved)="resolved($event)"
-              siteKey="{{ recaptchaSiteKeyV2 }}"
-            ></re-captcha>
-            @if (!recaptchaToken() && recaptchaAttempted()) {
-              <div class="text-xs text-red-500">
-                Please complete the reCAPTCHA verification
-              </div>
-            }
-          </div>
 
-          <!-- Submit Button -->
-          <div class="flex items-center justify-between">
-            <app-button type="button" variant="secondary" (click)="goBack()">
-              Back
-            </app-button>
+          <div class="flex flex-col items-center justify-center gap-6">
+            <div class="flex flex-col items-center gap-0.5">
+              <re-captcha
+                (resolved)="resolved($event)"
+                siteKey="{{ recaptchaSiteKeyV2 }}"
+              ></re-captcha>
+              @if (!recaptchaToken() && recaptchaAttempted()) {
+                <div class="text-xs text-red-500">
+                  Please complete the reCAPTCHA verification
+                </div>
+              }
+            </div>
+
+            <!-- Submit Button -->
             <app-button
               type="submit"
               variant="primary"

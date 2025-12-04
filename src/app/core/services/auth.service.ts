@@ -158,7 +158,7 @@ export class AuthService {
     }
 
     // Bundle admin: manages groups but no platforms
-    if (groups.length > 0) {
+    if (groups.length) {
       return 'bundle';
     }
 

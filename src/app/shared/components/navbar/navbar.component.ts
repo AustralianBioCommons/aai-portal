@@ -1,53 +1,66 @@
 import {
   Component,
   inject,
-  Renderer2,
-  ViewChild,
-  ElementRef,
   signal,
   effect,
-  DestroyRef,
   computed,
+  untracked,
 } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
-import { ApiService } from '../../../core/services/api.service';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  ApiService,
+  AdminUserCountsResponse,
+} from '../../../core/services/api.service';
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  NavigationEnd,
+} from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
+import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterLink, RouterLinkActive, CommonModule, DropdownMenuComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
   private authService = inject(AuthService);
   private apiService = inject(ApiService);
-  private renderer = inject(Renderer2);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
   private dataRefreshService = inject(DataRefreshService);
 
-  @ViewChild('menu', { read: ElementRef }) menu!: ElementRef;
-  @ViewChild('userMenuButton', { read: ElementRef })
-  userMenuButton!: ElementRef;
-
   // Auth signals
+  isLoading = this.authService.isLoading;
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
   isGeneralAdmin = this.authService.isGeneralAdmin;
-  isLoading = this.authService.isLoading;
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
   // Component state signals
-  pendingCount = signal(0);
-  revokedCount = signal(0);
-  unverifiedCount = signal(0);
   userMenuOpen = signal(false);
+  userCounts = signal<AdminUserCountsResponse>({
+    all: 0,
+    pending: 0,
+    revoked: 0,
+    unverified: 0,
+  });
+
+  private refreshTick = toSignal(this.dataRefreshService.refresh$, {
+    initialValue: null,
+  });
+
+  private navigationEndTrigger = toSignal(
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)),
+    { initialValue: null },
+  );
 
   // Computed signal for the navigation title
   navTitle = computed(() => {
@@ -72,69 +85,35 @@ export class NavbarComponent {
   ];
 
   constructor() {
-    this.setupCountTracking();
-    this.setupDataRefreshListener();
-    this.setupClickOutsideMenuHandler();
-  }
+    effect((onCleanup) => {
+      this.refreshTick();
+      this.navigationEndTrigger();
 
-  /**
-   * Set up a listener for data refresh events.
-   */
-  private setupDataRefreshListener() {
-    this.dataRefreshService.refresh$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.refreshCounts();
+      untracked(() => {
+        if (
+          !this.isAuthenticated() ||
+          !this.isGeneralAdmin() ||
+          this.isLoading()
+        ) {
+          return;
+        }
+
+        const subscription = this.apiService.getAdminUserCounts().subscribe({
+          next: (counts) => this.userCounts.set(counts),
+          error: (err) => {
+            console.error('Failed to fetch user counts:', err);
+            this.userCounts.set({
+              all: 0,
+              pending: 0,
+              revoked: 0,
+              unverified: 0,
+            });
+          },
+        });
+
+        onCleanup(() => subscription.unsubscribe());
       });
-  }
-
-  private refreshCounts() {
-    if (!this.isAuthenticated() || this.isLoading() || !this.isGeneralAdmin()) {
-      return;
-    }
-
-    this.apiService
-      .getAdminUserCounts()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (counts) => {
-          this.pendingCount.set(counts.pending);
-          this.revokedCount.set(counts.revoked);
-          this.unverifiedCount.set(counts.unverified);
-        },
-        error: (error) => {
-          console.error('Failed to fetch user counts:', error);
-          this.pendingCount.set(0);
-          this.revokedCount.set(0);
-          this.unverifiedCount.set(0);
-        },
-      });
-  }
-
-  private setupCountTracking() {
-    effect(() => {
-      this.refreshCounts();
     });
-  }
-
-  private setupClickOutsideMenuHandler() {
-    this.renderer.listen('window', 'click', (e: Event) => {
-      const target = e.target as Element;
-      if (
-        !this.userMenuButton?.nativeElement.contains(target) &&
-        !this.menu?.nativeElement.contains(target)
-      ) {
-        this.userMenuOpen.set(false);
-      }
-    });
-  }
-
-  toggleUserMenu() {
-    this.userMenuOpen.set(!this.userMenuOpen());
-  }
-
-  isActive(url: string): boolean {
-    return this.router.url === url;
   }
 
   isNavigationPage(): boolean {

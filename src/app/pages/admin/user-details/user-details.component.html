@@ -43,8 +43,8 @@
 >
   @if (loading()) {
     <app-loading-spinner />
-  } @else if (error()) {
-    <div class="text-red-500">{{ error() }}</div>
+  } @else if (pageError()) {
+    <div class="text-red-500">{{ pageError() }}</div>
   } @else if (user()) {
     <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
       <div class="flex items-center justify-between">
@@ -70,67 +70,60 @@
         </a>
 
         @if (!user()?.email_verified) {
-          <div class="relative">
-            <app-button
-              type="button"
-              variant="primary"
-              (click)="toggleActionMenu()"
-              #actionMenuButton
-            >
-              <div class="flex items-center justify-center gap-2">
-                Actions
+          <app-dropdown-menu
+            [isOpen]="openMenuAction()"
+            (isOpenChange)="openMenuAction.set($event)"
+          >
+            <ng-template #trigger>
+              <app-button
+                type="button"
+                variant="primary"
+                (click)="openMenuAction.set(!openMenuAction())"
+              >
+                <div class="flex items-center justify-center gap-2">
+                  Actions
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-4"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+                </div>
+              </app-button>
+            </ng-template>
+            <ng-template #menu>
+              <button
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                role="menuitem"
+                tabindex="-1"
+                (click)="resendVerificationEmail()"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke-width="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  class="size-5"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
                   />
                 </svg>
-              </div>
-            </app-button>
-
-            @if (actionMenuOpen()) {
-              <div
-                class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                role="menu"
-                aria-orientation="vertical"
-                tabindex="-1"
-                #actionMenu
-              >
-                <div role="none">
-                  <button
-                    (click)="resendVerificationEmail()"
-                    class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                    role="menuitem"
-                    tabindex="-1"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="size-5"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
-                      />
-                    </svg>
-                    Resend Verification Email
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
+                Resend Verification Email
+              </button>
+            </ng-template>
+          </app-dropdown-menu>
         }
       </div>
 
@@ -221,51 +214,15 @@
                   track membership.id
                 ) {
                   <div class="flex items-center justify-between gap-6">
-                    <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2">
                       <img
                         [src]="PLATFORMS[membership.platform_id].logoUrl"
                         [alt]="getPlatformName(membership.platform_id)"
-                        class="h-16 w-16 object-contain"
+                        class="mr-4 h-16 min-h-16 w-16 min-w-16 object-contain"
                       />
                       <div class="font-medium">
                         {{ getPlatformName(membership.platform_id) }}
                       </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                      <button
-                        type="button"
-                        role="switch"
-                        [attr.aria-checked]="
-                          membership.approval_status === 'approved'
-                        "
-                        [disabled]="!canManagePlatform(membership.platform_id)"
-                        (click)="
-                          togglePlatformApproval(
-                            membership.platform_id,
-                            membership.approval_status
-                          )
-                        "
-                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-biocommons-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
-                        [class]="
-                          membership.approval_status === 'approved'
-                            ? 'bg-green-600'
-                            : 'bg-gray-200'
-                        "
-                      >
-                        <span
-                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                          [class]="
-                            membership.approval_status === 'approved'
-                              ? 'translate-x-5'
-                              : 'translate-x-0'
-                          "
-                        ></span>
-                      </button>
-                      @if (membership.approval_status === "revoked") {
-                        <app-tooltip
-                          [message]="membership.revocation_reason || 'Revoked'"
-                        />
-                      }
                       <span
                         class="rounded px-2 py-1 text-xs font-semibold uppercase"
                         [class]="
@@ -278,7 +235,140 @@
                       >
                         {{ membership.approval_status }}
                       </span>
+                      @if (membership.approval_status === "revoked") {
+                        <app-tooltip
+                          [message]="membership.revocation_reason || 'Revoked'"
+                        />
+                      }
                     </div>
+                    @if (canManagePlatform(membership.platform_id)) {
+                      <app-dropdown-menu
+                        [isOpen]="isPlatformMenuOpen(membership.platform_id)"
+                        (isOpenChange)="
+                          $event
+                            ? openMenuPlatformId.set(membership.platform_id)
+                            : openMenuPlatformId.set(null)
+                        "
+                      >
+                        <ng-template #trigger>
+                          <button
+                            type="button"
+                            class="rounded-full p-1 transition-all hover:bg-gray-200"
+                            (click)="
+                              openMenuPlatformId.set(
+                                isPlatformMenuOpen(membership.platform_id)
+                                  ? null
+                                  : membership.platform_id
+                              )
+                            "
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                              stroke="currentColor"
+                              class="size-5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                              />
+                            </svg>
+                          </button>
+                        </ng-template>
+                        <ng-template #menu>
+                          @switch (membership.approval_status) {
+                            @case ("pending") {
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="
+                                  openMenuPlatformId.set(null);
+                                  approvePlatform(membership.platform_id)
+                                "
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Approve
+                              </button>
+                            }
+                            @case ("approved") {
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="
+                                  openMenuPlatformId.set(null);
+                                  openRevokeModal(membership.platform_id)
+                                "
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Revoke
+                              </button>
+                            }
+                            @case ("revoked") {
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="
+                                  openMenuPlatformId.set(null);
+                                  approvePlatform(membership.platform_id)
+                                "
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Approve
+                              </button>
+                            }
+                            @default {}
+                          }
+                        </ng-template>
+                      </app-dropdown-menu>
+                    }
                   </div>
                 }
               </div>
@@ -294,9 +384,9 @@
                   track membership.id
                 ) {
                   <div class="flex items-center justify-between gap-6">
-                    <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-2">
                       <div
-                        class="flex h-16 w-16 items-center justify-center gap-1"
+                        class="mr-4 flex h-16 min-h-16 w-16 min-w-16 items-center justify-center gap-1"
                       >
                         @for (
                           logoUrl of getBundleLogoUrls(membership.group_id);
@@ -312,8 +402,6 @@
                       <div class="font-medium">
                         {{ membership.group_name }}
                       </div>
-                    </div>
-                    <div class="flex items-center gap-4">
                       @if (
                         membership.approval_status === "revoked" ||
                         membership.approval_status === "rejected"
@@ -340,13 +428,27 @@
                       >
                         {{ membership.approval_status }}
                       </span>
-                      @if (canManageGroup(membership.group_id)) {
-                        <div class="relative">
-                          <!-- Ellipsis menu -->
+                    </div>
+                    @if (canManageGroup(membership.group_id)) {
+                      <app-dropdown-menu
+                        [isOpen]="isGroupMenuOpen(membership.id)"
+                        (isOpenChange)="
+                          $event
+                            ? openMenuGroupId.set(membership.id)
+                            : openMenuGroupId.set(null)
+                        "
+                      >
+                        <ng-template #trigger>
                           <button
                             type="button"
-                            class="membership-menu-button rounded-full p-1 transition-all hover:bg-gray-200"
-                            (click)="toggleMembershipMenu(membership.id)"
+                            class="rounded-full p-1 transition-all hover:bg-gray-200"
+                            (click)="
+                              openMenuGroupId.set(
+                                isGroupMenuOpen(membership.id)
+                                  ? null
+                                  : membership.id
+                              )
+                            "
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -363,133 +465,115 @@
                               />
                             </svg>
                           </button>
-                          @if (isMembershipMenuOpen(membership.id)) {
-                            <!-- Membership menu -->
-                            <div
-                              class="membership-menu-dropdown absolute right-0 top-full z-10 mt-1 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                              role="menu"
-                              aria-orientation="vertical"
-                              tabindex="-1"
-                            >
-                              <div class="py-1">
-                                @switch (membership.approval_status) {
-                                  @case ("pending") {
-                                    <button
-                                      type="button"
-                                      (click)="
-                                        approveGroupMembership(membership.id)
-                                      "
-                                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                      role="menuitem"
-                                      tabindex="-1"
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-5"
-                                      >
-                                        <path
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                      </svg>
-                                      Approve
-                                    </button>
-                                    <button
-                                      type="button"
-                                      (click)="
-                                        rejectGroupMembership(membership.id)
-                                      "
-                                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                      role="menuitem"
-                                      tabindex="-1"
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-5"
-                                      >
-                                        <path
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                      </svg>
+                        </ng-template>
+                        <ng-template #menu>
+                          @switch (membership.approval_status) {
+                            @case ("pending") {
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="approveGroup(membership.id)"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Approve
+                              </button>
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="rejectGroup(membership.id)"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
 
-                                      Reject
-                                    </button>
-                                  }
-                                  @case ("approved") {
-                                    <button
-                                      type="button"
-                                      (click)="
-                                        revokeGroupMembership(membership.id)
-                                      "
-                                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                      role="menuitem"
-                                      tabindex="-1"
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-5"
-                                      >
-                                        <path
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                      </svg>
-                                      Revoke
-                                    </button>
-                                  }
-                                  @case ("revoked") {
-                                    <button
-                                      type="button"
-                                      (click)="
-                                        approveGroupMembership(membership.id)
-                                      "
-                                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                      role="menuitem"
-                                      tabindex="-1"
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-5"
-                                      >
-                                        <path
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                      </svg>
-                                      Approve
-                                    </button>
-                                  }
-                                  @default {
-                                    <!-- No admin actions for rejected or other terminal states -->
-                                  }
-                                }
-                              </div>
-                            </div>
+                                Reject
+                              </button>
+                            }
+                            @case ("approved") {
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="revokeGroup(membership.id)"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Revoke
+                              </button>
+                            }
+                            @case ("revoked") {
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                                (click)="approveGroup(membership.id)"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Approve
+                              </button>
+                            }
+                            @default {
+                              <!-- No admin actions for rejected or other terminal states -->
+                            }
                           }
-                        </div>
-                      }
-                    </div>
+                        </ng-template>
+                      </app-dropdown-menu>
+                    }
                   </div>
                 }
               </div>
