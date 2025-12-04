@@ -1,9 +1,10 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
-import { biocommonsBundles, Bundle } from '../../../core/constants/constants';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
 import { BundleSelectionComponent } from '../../../shared/components/bundle-selection/bundle-selection.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-bundles',
@@ -12,6 +13,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
   styleUrl: './bundles.component.css',
 })
 export class BundlesComponent implements OnInit {
+  public router = inject(Router);
   private formBuilder = inject(FormBuilder);
   private apiService = inject(ApiService);
 
@@ -19,7 +21,7 @@ export class BundlesComponent implements OnInit {
     selectedBundle: [''],
   });
 
-  bundles = signal<Bundle[]>(biocommonsBundles);
+  bundles = signal<Bundle[]>(BIOCOMMONS_BUNDLES);
   isSubmitting = signal<boolean>(false);
 
   ngOnInit() {
@@ -32,7 +34,20 @@ export class BundlesComponent implements OnInit {
   }
 
   submit() {
-    return true;
+    this.isSubmitting.set(true);
+    const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
+    const groupId = `biocommons/group/${selectedBundle}`;
+
+    this.apiService.requestGroupAccess(groupId).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.router.navigate(['/profile']);
+      },
+      error: (error) => {
+        console.error(error);
+        this.isSubmitting.set(false);
+      },
+    });
   }
 
   /**
@@ -46,7 +61,7 @@ export class BundlesComponent implements OnInit {
           return { ...g, id: shortId };
         });
         console.log(groupsWithIds);
-        const updatedBundles = biocommonsBundles.map((bundle) => {
+        const updatedBundles = BIOCOMMONS_BUNDLES.map((bundle) => {
           const groupStatus = groupsWithIds.find((g) => g.id === bundle.id);
           if (groupStatus?.approval_status === 'approved') {
             return { ...bundle, disabled: true };
