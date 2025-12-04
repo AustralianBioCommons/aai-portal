@@ -165,8 +165,6 @@ export class RegisterComponent implements AfterViewInit {
     if (scrollPosition + windowHeight >= documentHeight - 50) {
       currentSectionIndex = this.sections.length - 1;
       this.activeSection.set(this.sections[currentSectionIndex].id);
-
-      // Mark all sections as visited
       this.visitedSections.update(
         () => new Set(this.sections.map((s) => s.id)),
       );
@@ -180,8 +178,6 @@ export class RegisterComponent implements AfterViewInit {
       if (element && element.offsetTop <= scrollThreshold) {
         currentSectionIndex = i;
         this.activeSection.set(section.id);
-
-        // Mark this section and all previous sections as visited
         this.visitedSections.update((visited) => {
           const newVisited = new Set(visited);
           for (let j = 0; j <= i; j++) {
@@ -272,9 +268,7 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   onBundleItemClick(event: Event): void {
-    if (event.target instanceof HTMLAnchorElement) {
-      event.stopPropagation();
-    }
+    if (event.target instanceof HTMLAnchorElement) event.stopPropagation();
   }
 
   submitRegistration(): void {
