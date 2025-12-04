@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BundleSelectionComponent } from './bundle-selection.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { biocommonsBundles } from '../../../core/constants/constants';
+import { BIOCOMMONS_BUNDLES } from '../../../core/constants/constants';
 
 describe('BundleSelectionComponent', () => {
   let component: BundleSelectionComponent;
@@ -19,7 +19,7 @@ describe('BundleSelectionComponent', () => {
     const fb = new FormBuilder();
     bundleForm = fb.group({ selectedBundle: '' });
     fixture.componentRef.setInput('bundleForm', bundleForm);
-    fixture.componentRef.setInput('bundles', biocommonsBundles);
+    fixture.componentRef.setInput('bundles', BIOCOMMONS_BUNDLES);
     fixture.detectChanges();
   });
 
