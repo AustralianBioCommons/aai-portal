@@ -1,13 +1,34 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
+  FormGroup,
+} from '@angular/forms';
 
 export function fullNameLengthValidator(maxLength = 255): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const value = (control.value ?? '').toString().trim();
-
-    if (!value) {
+  return (group: AbstractControl): ValidationErrors | null => {
+    if (!(group instanceof FormGroup)) {
       return null;
     }
 
-    return value.length > maxLength ? { fullNameTooLong: true } : null;
+    const firstNameControl = group.get('firstName');
+    const lastNameControl = group.get('lastName');
+
+    if (!firstNameControl || !lastNameControl) {
+      return null;
+    }
+
+    const sanitize = (value: string | null | undefined): string =>
+      (value ?? '').trim();
+
+    const firstName = sanitize(firstNameControl.value);
+    const lastName = sanitize(lastNameControl.value);
+    const combined = [firstName, lastName].filter(Boolean).join(' ');
+
+    if (combined.length > maxLength) {
+      return { fullNameTooLong: true };
+    }
+
+    return null;
   };
 }

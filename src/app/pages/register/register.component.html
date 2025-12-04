@@ -340,11 +340,7 @@
           </form>
 
           <!-- Bundle Selection Section -->
-          <form
-            id="add-bundle"
-            [formGroup]="bundleForm"
-            class="flex scroll-mt-24 flex-col gap-6"
-          >
+          <div id="add-bundle" class="flex scroll-mt-24 flex-col gap-6">
             <h2 class="text-left text-3xl font-semibold text-gray-900">
               Add a bundle (Optional)
             </h2>
@@ -353,7 +349,7 @@
             </p>
             <div class="flex flex-wrap items-stretch justify-center gap-6">
               <!-- Bundle selection cards -->
-              @for (bundle of BIOCOMMONS_BUNDLES; track bundle.id) {
+              @for (bundle of bundles; track bundle.id) {
                 <div
                   tabindex="0"
                   class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
@@ -363,10 +359,10 @@
                     'cursor-not-allowed opacity-50': bundle.disabled,
                     group: !bundle.disabled,
                     'ring-2 ring-sky-400':
-                      bundleForm.get('selectedBundle')?.value === bundle.id,
+                      registrationForm.get('bundle')?.value === bundle.id,
                   }"
-                  (click)="!bundle.disabled && toggleBundle(bundle.id)"
-                  (keyup.enter)="!bundle.disabled && toggleBundle(bundle.id)"
+                  (click)="toggleBundle(bundle.id)"
+                  (keyup.enter)="toggleBundle(bundle.id)"
                 >
                   <!-- Bundle content -->
                   <div class="flex flex-col gap-6">
@@ -383,13 +379,13 @@
                       <div
                         class="flex h-7 w-7 items-center justify-center rounded-lg border p-1 transition-all"
                         [ngClass]="
-                          bundleForm.get('selectedBundle')?.value === bundle.id
+                          registrationForm.get('bundle')?.value === bundle.id
                             ? 'border-biocommons-primary bg-biocommons-primary'
                             : 'border-gray-300'
                         "
                       >
                         @if (
-                          bundleForm.get("selectedBundle")?.value === bundle.id
+                          registrationForm.get("bundle")?.value === bundle.id
                         ) {
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -410,7 +406,7 @@
                       <input
                         type="checkbox"
                         [checked]="
-                          bundleForm.get('selectedBundle')?.value === bundle.id
+                          registrationForm.get('bundle')?.value === bundle.id
                         "
                         class="sr-only"
                       />
@@ -445,77 +441,73 @@
                 </div>
               }
             </div>
-          </form>
+          </div>
 
           <!-- Terms & Conditions Section -->
-          <form
-            id="terms"
-            [formGroup]="termsForm"
-            class="flex scroll-mt-24 flex-col gap-12"
-          >
-            <!-- BioCommons Access T&Cs -->
-            <div class="space-y-6">
-              <h2 class="text-3xl font-semibold text-gray-900">
-                BioCommons Access terms & conditions
-              </h2>
-              <p class="font-light text-gray-600">
-                You must accept the terms & conditions before you proceed.
-              </p>
-              <div
-                tabindex="0"
-                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                [class.ring-transparent]="
-                  termsForm.get('biocommonsAccess')?.value !==
-                  (!termsForm.get('biocommonsAccess')?.invalid ||
-                    !termsForm.get('biocommonsAccess')?.touched)
-                "
-                [class.ring-red-500]="
-                  termsForm.get('biocommonsAccess')?.value !== true &&
-                  termsForm.get('biocommonsAccess')?.invalid &&
-                  termsForm.get('biocommonsAccess')?.touched
-                "
-                [class.ring-sky-400]="
-                  termsForm.get('biocommonsAccess')?.value === true
-                "
-                (click)="toggleTermsAcceptance('biocommonsAccess')"
-                (keyup.enter)="toggleTermsAcceptance('biocommonsAccess')"
+          <div id="terms" class="flex scroll-mt-24 flex-col gap-6">
+            <h2 class="text-3xl font-semibold text-gray-900">
+              BioCommons Access terms & conditions
+            </h2>
+            <p class="font-light text-gray-600">
+              You must accept the terms & conditions before you proceed.
+            </p>
+            <div
+              tabindex="0"
+              class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              [class.ring-transparent]="
+                registrationForm.get('terms')?.value !==
+                (!registrationForm.get('terms')?.invalid ||
+                  !registrationForm.get('terms')?.touched)
+              "
+              [class.ring-red-500]="
+                registrationForm.get('terms')?.value !== true &&
+                registrationForm.get('terms')?.invalid &&
+                registrationForm.get('terms')?.touched
+              "
+              [class.ring-sky-400]="
+                registrationForm.get('terms')?.value === true
+              "
+              (click)="toggleTermsAcceptance()"
+              (keyup.enter)="toggleTermsAcceptance()"
+            >
+              <a
+                href=""
+                target="_blank"
+                class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
+                (click)="$event.stopPropagation()"
               >
-                <a
-                  href=""
-                  target="_blank"
-                  class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
-                  (click)="$event.stopPropagation()"
+                BioCommons Access terms & conditions
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="size-4 min-h-4 min-w-4"
                 >
-                  BioCommons Access terms & conditions
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-4 min-h-4 min-w-4"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                    />
-                  </svg>
-                </a>
-                <input
-                  type="checkbox"
-                  formControlName="biocommonsAccess"
-                  class="pointer-events-none h-4 w-4 accent-biocommons-primary"
-                />
-              </div>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                  />
+                </svg>
+              </a>
+              <input
+                type="checkbox"
+                [formControl]="registrationForm.controls.terms"
+                class="pointer-events-none h-4 w-4 accent-biocommons-primary"
+              />
             </div>
 
-            @if (termsForm.invalid && termsForm.touched) {
+            @if (
+              registrationForm.get("terms")?.invalid &&
+              registrationForm.get("terms")?.touched
+            ) {
               <div class="text-sm text-red-500">
-                Please accept all terms & conditions to continue
+                Please accept the terms & conditions to continue
               </div>
             }
-          </form>
+          </div>
 
           <!-- reCAPTCHA -->
 
