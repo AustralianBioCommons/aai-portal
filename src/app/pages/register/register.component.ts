@@ -262,7 +262,7 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   toggleBundle(bundleId: string): void {
-    const selected = this.bundles.find(b => b.id === bundleId);
+    const selected = this.bundles.find((b) => b.id === bundleId);
     if (selected?.disabled) return;
 
     const current = this.registrationForm.get('bundle')?.value;
@@ -303,9 +303,7 @@ export class RegisterComponent implements AfterViewInit {
       password: formValue.password,
     };
 
-    if (formValue.bundle) 
-      requestBody.bundle = formValue.bundle;
-    
+    if (formValue.bundle) requestBody.bundle = formValue.bundle;
 
     this.http
       .post(`${environment.auth0.backend}/biocommons/register`, requestBody)

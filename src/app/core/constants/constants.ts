@@ -58,7 +58,6 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
   },
 ];
 
-
 /**
  * Allowed email domains for SBP (Structural Biology Platform) registration
  */

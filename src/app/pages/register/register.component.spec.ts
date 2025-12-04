@@ -216,7 +216,9 @@ describe('RegisterComponent', () => {
         lastName: longName,
       });
 
-      expect(component.registrationForm.hasError('fullNameTooLong')).toBeTruthy();
+      expect(
+        component.registrationForm.hasError('fullNameTooLong'),
+      ).toBeTruthy();
     });
 
     it('should clear fullNameTooLong error when combined length is valid', () => {
@@ -226,14 +228,18 @@ describe('RegisterComponent', () => {
         lastName: longName,
       });
 
-      expect(component.registrationForm.hasError('fullNameTooLong')).toBeTruthy();
+      expect(
+        component.registrationForm.hasError('fullNameTooLong'),
+      ).toBeTruthy();
 
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
       });
 
-      expect(component.registrationForm.hasError('fullNameTooLong')).toBeFalsy();
+      expect(
+        component.registrationForm.hasError('fullNameTooLong'),
+      ).toBeFalsy();
     });
   });
 
@@ -250,8 +256,6 @@ describe('RegisterComponent', () => {
       component.toggleBundle('tsi');
       expect(component.registrationForm.get('bundle')?.value).toBe('');
     });
-
-
 
     it('should not toggle disabled bundle', () => {
       component.toggleBundle('fungi');
