@@ -85,8 +85,8 @@ describe('RegisterComponent', () => {
       expect(component.sections[3].id).toBe('terms');
     });
 
-    it('should initialize bundle form with empty selection', () => {
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe('');
+    it('should initialize bundle field with empty selection', () => {
+      expect(component.registrationForm.get('bundle')?.value).toBe('');
     });
 
     it('should initialize registration form with empty values', () => {
@@ -126,6 +126,7 @@ describe('RegisterComponent', () => {
         username: 'johndoe',
         password: 'Password123!',
         confirmPassword: 'Password123!',
+        terms: true,
       });
       expect(component.registrationForm.valid).toBe(true);
     });
@@ -215,11 +216,9 @@ describe('RegisterComponent', () => {
         lastName: longName,
       });
 
-      const firstNameControl = component.registrationForm.get('firstName');
-      const lastNameControl = component.registrationForm.get('lastName');
-
-      expect(firstNameControl?.errors?.['fullNameTooLong']).toBeTruthy();
-      expect(lastNameControl?.errors?.['fullNameTooLong']).toBeTruthy();
+      expect(
+        component.registrationForm.hasError('fullNameTooLong'),
+      ).toBeTruthy();
     });
 
     it('should clear fullNameTooLong error when combined length is valid', () => {
@@ -230,9 +229,7 @@ describe('RegisterComponent', () => {
       });
 
       expect(
-        component.registrationForm.get('firstName')?.errors?.[
-          'fullNameTooLong'
-        ],
+        component.registrationForm.hasError('fullNameTooLong'),
       ).toBeTruthy();
 
       component.registrationForm.patchValue({
@@ -241,12 +238,7 @@ describe('RegisterComponent', () => {
       });
 
       expect(
-        component.registrationForm.get('firstName')?.errors?.[
-          'fullNameTooLong'
-        ],
-      ).toBeFalsy();
-      expect(
-        component.registrationForm.get('lastName')?.errors?.['fullNameTooLong'],
+        component.registrationForm.hasError('fullNameTooLong'),
       ).toBeFalsy();
     });
   });
@@ -254,33 +246,20 @@ describe('RegisterComponent', () => {
   describe('Bundle Selection', () => {
     it('should select bundle', () => {
       component.toggleBundle('tsi');
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe('tsi');
+      expect(component.registrationForm.get('bundle')?.value).toBe('tsi');
     });
 
     it('should toggle bundle selection off when clicking same bundle', () => {
       component.toggleBundle('tsi');
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe('tsi');
+      expect(component.registrationForm.get('bundle')?.value).toBe('tsi');
 
       component.toggleBundle('tsi');
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe('');
-    });
-
-    it('should return selected bundle object', () => {
-      component.toggleBundle('tsi');
-      const selectedBundle = component.getSelectedBundle();
-      expect(selectedBundle?.id).toBe('tsi');
-      expect(selectedBundle?.name).toBe('Threatened Species Initiative (TSI)');
-    });
-
-    it('should return undefined for no selection', () => {
-      component.bundleForm.get('selectedBundle')?.setValue('');
-      const selectedBundle = component.getSelectedBundle();
-      expect(selectedBundle).toBeUndefined();
+      expect(component.registrationForm.get('bundle')?.value).toBe('');
     });
 
     it('should not toggle disabled bundle', () => {
       component.toggleBundle('fungi');
-      expect(component.bundleForm.get('selectedBundle')?.value).toBe('');
+      expect(component.registrationForm.get('bundle')?.value).toBe('');
     });
 
     describe('Bundle Data', () => {
@@ -288,14 +267,6 @@ describe('RegisterComponent', () => {
         expect(component.bundles.length).toBe(2);
         expect(component.bundles[0].id).toBe('tsi');
         expect(component.bundles[1].id).toBe('fungi');
-      });
-
-      it('should have services for each bundle', () => {
-        const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
-        const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
-
-        expect(tsiBundle?.services.length).toBe(2);
-        expect(fungiBundle?.services.length).toBe(0);
       });
 
       it('should have logoUrls for each bundle', () => {
@@ -310,58 +281,27 @@ describe('RegisterComponent', () => {
         const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
         expect(fungiBundle?.disabled).toBe(true);
       });
-
-      it('should include Fgenesh++ terms for the TSI bundle with the expected URL', () => {
-        const tsiBundle = component.bundles.find(
-          (bundle) => bundle.id === 'tsi',
-        );
-        const fgeneshService = tsiBundle?.services.find(
-          (service) => service.id === 'fgenesh',
-        );
-
-        expect(tsiBundle).toBeTruthy();
-        expect(fgeneshService).toBeTruthy();
-        expect(fgeneshService?.termsTitle).toBe(
-          'Fgenesh++ Terms and Conditions',
-        );
-        expect(fgeneshService?.termsUrl).toBe(
-          'https://site.usegalaxy.org.au/fgenesh-terms.html',
-        );
-      });
     });
   });
 
   describe('Terms & Conditions', () => {
-    beforeEach(() => {
-      // Trigger terms form initialization through bundle selection
-      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
-      fixture.detectChanges();
-    });
-
-    it('should initialize terms form based on selected bundle', () => {
-      expect(component.termsForm.get('biocommonsAccess')).toBeTruthy();
-      expect(component.termsForm.get('tsi')).toBeTruthy();
-    });
-
-    it('should initialize TSI terms form correctly', () => {
-      expect(component.termsForm.get('biocommonsAccess')).toBeTruthy();
-      expect(component.termsForm.get('tsi')).toBeTruthy();
-      expect(component.termsForm.get('fgenesh')).toBeTruthy();
+    it('should initialize terms field with false', () => {
+      expect(component.registrationForm.get('terms')?.value).toBe(false);
     });
 
     it('should toggle terms acceptance', () => {
-      expect(component.termsForm.get('biocommonsAccess')?.value).toBe(false);
-      component.toggleTermsAcceptance('biocommonsAccess');
-      expect(component.termsForm.get('biocommonsAccess')?.value).toBe(true);
+      expect(component.registrationForm.get('terms')?.value).toBe(false);
+      component.toggleTermsAcceptance();
+      expect(component.registrationForm.get('terms')?.value).toBe(true);
     });
 
     it('should toggle terms acceptance back to false', () => {
-      component.termsForm.get('biocommonsAccess')?.setValue(true);
-      component.toggleTermsAcceptance('biocommonsAccess');
-      expect(component.termsForm.get('biocommonsAccess')?.value).toBe(false);
+      component.registrationForm.patchValue({ terms: true });
+      component.toggleTermsAcceptance();
+      expect(component.registrationForm.get('terms')?.value).toBe(false);
     });
 
-    it('should not submit with invalid terms form', () => {
+    it('should not submit with invalid terms', () => {
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -369,20 +309,19 @@ describe('RegisterComponent', () => {
         username: 'johndoe',
         password: 'Password123!',
         confirmPassword: 'Password123!',
+        terms: false,
       });
       component.recaptchaToken.set('test-token');
 
-      // Terms not accepted
       component.submitRegistration();
 
-      expect(component.termsForm.get('biocommonsAccess')?.touched).toBe(true);
+      expect(component.registrationForm.get('terms')?.touched).toBe(true);
       httpMock.expectNone(`${environment.auth0.backend}/biocommons/register`);
     });
   });
 
   describe('Registration Submission', () => {
     beforeEach(() => {
-      component.bundleForm.patchValue({ selectedBundle: 'tsi' });
       component.registrationForm.patchValue({
         firstName: 'John',
         lastName: 'Doe',
@@ -390,11 +329,8 @@ describe('RegisterComponent', () => {
         username: 'johndoe',
         password: 'Password123!',
         confirmPassword: 'Password123!',
-      });
-      component.termsForm.patchValue({
-        biocommonsAccess: true,
-        tsi: true,
-        fgenesh: true,
+        bundle: 'tsi',
+        terms: true,
       });
       component.recaptchaToken.set('test-recaptcha-token');
     });
@@ -479,8 +415,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should handle registration without bundle', () => {
-      component.bundleForm.patchValue({ selectedBundle: '' });
-      component.termsForm.patchValue({ biocommonsAccess: true });
+      component.registrationForm.patchValue({ bundle: '', terms: true });
 
       component.submitRegistration();
 
