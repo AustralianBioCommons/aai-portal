@@ -15,8 +15,8 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import {
-  PlatformId,
   PLATFORMS,
+  PlatformId,
   BIOCOMMONS_BUNDLES,
 } from '../../../core/constants/constants';
 import { environment } from '../../../../environments/environment';
@@ -57,8 +57,8 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private validationService = inject(ValidationService);
 
-  protected readonly platforms = PLATFORMS;
-  protected readonly bundles = BIOCOMMONS_BUNDLES;
+  protected readonly PLATFORMS = PLATFORMS;
+  protected readonly BIOCOMMONS_BUNDLES = BIOCOMMONS_BUNDLES;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
     bpa_data_portal: environment.platformUrls.bpaPlatform,
     galaxy: environment.platformUrls.galaxyPlatform,
@@ -463,11 +463,11 @@ export class ProfileComponent implements OnInit {
 
   protected getBundleLogoUrls(groupId: string): string[] {
     const bundleId = groupId.split('/').pop() || '';
-    const bundle = this.bundles.find((b) => b.id === bundleId);
+    const bundle = this.BIOCOMMONS_BUNDLES.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
   }
 
-  reloadPage(): void {
+  public reloadPage(): void {
     this.document.location.reload();
   }
 }

@@ -431,27 +431,26 @@ describe('UserDetailsComponent', () => {
     it('should open revoke modal for platform', () => {
       fixture.detectChanges();
 
-      component.revokePlatform('galaxy');
+      component.openRevokeModal('galaxy');
 
-      expect(component.actionModalData()).toBeTruthy();
-      expect(component.actionModalData()?.type).toBe('platform');
-      expect(component.actionModalData()?.id).toBe('galaxy');
+      expect(component.revokeModalData()).toBeTruthy();
+      expect(component.revokeModalData()?.type).toBe('platform');
+      expect(component.revokeModalData()?.id).toBe('galaxy');
     });
 
     it('should close revoke modal and reset form', () => {
-      component.actionModalData.set({
-        action: 'revoke',
+      component.revokeModalData.set({
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.reasonControl.setValue('test reason');
+      component.revokeReasonControl.setValue('test reason');
 
-      component.closeActionModal();
+      component.closeRevokeModal();
 
-      expect(component.actionModalData()).toBeNull();
-      expect(component.reasonControl.value).toBe('');
+      expect(component.revokeModalData()).toBeNull();
+      expect(component.revokeReasonControl.value).toBe('');
     });
 
     it('should revoke platform access with reason', () => {
@@ -461,39 +460,37 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.actionModalData.set({
-        action: 'revoke',
+      component.revokeModalData.set({
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.reasonControl.setValue('Security violation');
+      component.revokeReasonControl.setValue('Security violation');
 
-      component.confirmActionModal();
+      component.confirmRevoke();
 
       expect(mockApiService.revokePlatformAccess).toHaveBeenCalledWith(
         '123',
         'galaxy',
         'Security violation',
       );
-      expect(component.actionModalData()).toBeNull();
+      expect(component.revokeModalData()).toBeNull();
     });
 
     it('should not revoke without reason', () => {
-      component.actionModalData.set({
-        action: 'revoke',
+      component.revokeModalData.set({
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.reasonControl.setValue('');
+      component.revokeReasonControl.setValue('');
 
-      component.confirmActionModal();
+      component.confirmRevoke();
 
       expect(mockApiService.revokePlatformAccess).not.toHaveBeenCalled();
-      expect(component.reasonControl.touched).toBeTrue();
+      expect(component.revokeReasonControl.touched).toBeTrue();
     });
 
     it('should handle approve platform error', () => {
@@ -537,28 +534,26 @@ describe('UserDetailsComponent', () => {
       spyOn(console, 'error');
       fixture.detectChanges();
 
-      component.actionModalData.set({
-        action: 'revoke',
+      component.revokeModalData.set({
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.reasonControl.setValue('Test reason');
+      component.revokeReasonControl.setValue('Test reason');
 
-      component.confirmActionModal();
+      component.confirmRevoke();
 
       expect(console.error).toHaveBeenCalledWith(
         'Failed to revoke platform access:',
         jasmine.any(Error),
       );
       expect(component.alert()?.type).toBe('error');
-      expect(component.actionModalData()).toBeNull();
+      expect(component.revokeModalData()).toBeNull();
     });
 
     it('should show revoke modal in DOM when open', () => {
-      component.actionModalData.set({
-        action: 'revoke',
+      component.revokeModalData.set({
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
@@ -624,10 +619,10 @@ describe('UserDetailsComponent', () => {
 
       component.revokeGroup('gm');
 
-      expect(component.actionModalData()).toBeTruthy();
-      expect(component.actionModalData()?.type).toBe('group');
-      expect(component.actionModalData()?.id).toBe('tsi');
-      expect(component.actionModalData()?.name).toBe(
+      expect(component.revokeModalData()).toBeTruthy();
+      expect(component.revokeModalData()?.type).toBe('group');
+      expect(component.revokeModalData()?.id).toBe('tsi');
+      expect(component.revokeModalData()?.name).toBe(
         'Threatened Species Initiative',
       );
     });
@@ -637,24 +632,22 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.actionModalData.set({
-        action: 'revoke',
+      component.revokeModalData.set({
         type: 'group',
         id: 'tsi',
-        membershipId: 'gm',
         name: 'Threatened Species Initiative',
         email: 'test@example.com',
       });
-      component.reasonControl.setValue('No longer needed');
+      component.revokeReasonControl.setValue('No longer needed');
 
-      component.confirmActionModal();
+      component.confirmRevoke();
 
       expect(mockApiService.revokeGroupAccess).toHaveBeenCalledWith(
         '123',
         'tsi',
         'No longer needed',
       );
-      expect(component.actionModalData()).toBeNull();
+      expect(component.revokeModalData()).toBeNull();
     });
   });
 });

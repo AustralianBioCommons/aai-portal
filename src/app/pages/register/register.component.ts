@@ -77,7 +77,6 @@ export class RegisterComponent implements AfterViewInit {
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
   private readonly galaxyPlatformUrl =
     environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
-
   readonly bundles = BIOCOMMONS_BUNDLES;
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   readonly sections: Section[] = [
