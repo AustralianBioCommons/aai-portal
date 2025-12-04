@@ -454,19 +454,17 @@
             <div
               tabindex="0"
               class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-              [class.ring-transparent]="
-                registrationForm.get('terms')?.value !==
-                (!registrationForm.get('terms')?.invalid ||
-                  !registrationForm.get('terms')?.touched)
-              "
-              [class.ring-red-500]="
-                registrationForm.get('terms')?.value !== true &&
-                registrationForm.get('terms')?.invalid &&
-                registrationForm.get('terms')?.touched
-              "
-              [class.ring-sky-400]="
-                registrationForm.get('terms')?.value === true
-              "
+              [ngClass]="{
+                'ring-transparent':
+                  registrationForm.get('terms')?.value !==
+                  (!registrationForm.get('terms')?.invalid ||
+                    !registrationForm.get('terms')?.touched),
+                'ring-red-500':
+                  registrationForm.get('terms')?.value !== true &&
+                  registrationForm.get('terms')?.invalid &&
+                  registrationForm.get('terms')?.touched,
+                'ring-sky-400': registrationForm.get('terms')?.value === true,
+              }"
               (click)="toggleTermsAcceptance()"
               (keyup.enter)="toggleTermsAcceptance()"
             >
