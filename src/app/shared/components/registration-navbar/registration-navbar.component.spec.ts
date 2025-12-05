@@ -18,4 +18,10 @@ describe('RegistrationNavbarComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('points logo link to the current host', () => {
+    const link: HTMLAnchorElement | null =
+      fixture.nativeElement.querySelector('a');
+    expect(link?.getAttribute('href')).toBe(`${window.location.origin}/`);
+  });
 });
