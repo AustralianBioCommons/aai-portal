@@ -72,7 +72,6 @@ export class BundlesComponent implements OnInit {
           const shortId = g.group_id.replace('biocommons/group/', '');
           return { ...g, id: shortId };
         });
-        console.log(groupsWithIds);
         const updatedBundles = BIOCOMMONS_BUNDLES.map((bundle) => {
           const groupStatus = groupsWithIds.find((g) => g.id === bundle.id);
           if (groupStatus?.approval_status === 'approved') {
