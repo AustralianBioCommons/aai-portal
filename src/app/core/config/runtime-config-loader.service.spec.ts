@@ -63,7 +63,7 @@ describe('RuntimeConfigLoaderService', () => {
     const config = authConfig.get();
     expect(config?.clientId).toEqual('runtime-client');
     expect(config?.domain).toEqual('example.auth0.com');
-    expect(config?.authorizationParams?.redirect_uri).toEqual(
+    expect(config?.authorizationParams?.['redirect_uri']).toEqual(
       'https://runtime.example.com',
     );
   });
@@ -92,7 +92,7 @@ describe('RuntimeConfigLoaderService', () => {
     await service.load();
 
     const config = authConfig.get();
-    expect(config?.authorizationParams?.redirect_uri).toEqual(
+    expect(config?.authorizationParams?.['redirect_uri']).toEqual(
       window.location.origin,
     );
   });

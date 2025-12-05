@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -92,6 +93,16 @@ describe('ProfileComponent', () => {
       providers: [
         { provide: ApiService, useValue: apiSpy },
         { provide: AuthService, useValue: authSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              data: {},
+              paramMap: { get: () => null },
+            },
+            firstChild: null,
+          },
+        },
       ],
     }).compileComponents();
 

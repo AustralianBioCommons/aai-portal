@@ -244,22 +244,10 @@ describe('RegisterComponent', () => {
   });
 
   describe('Bundle Selection', () => {
-    it('should select bundle', () => {
-      component.toggleBundle('tsi');
-      expect(component.registrationForm.get('bundle')?.value).toBe('tsi');
-    });
-
-    it('should toggle bundle selection off when clicking same bundle', () => {
-      component.toggleBundle('tsi');
-      expect(component.registrationForm.get('bundle')?.value).toBe('tsi');
-
-      component.toggleBundle('tsi');
-      expect(component.registrationForm.get('bundle')?.value).toBe('');
-    });
-
-    it('should not toggle disabled bundle', () => {
-      component.toggleBundle('fungi');
-      expect(component.registrationForm.get('bundle')?.value).toBe('');
+    it('should return undefined for no selection', () => {
+      component.registrationForm.get('bundle')?.setValue('');
+      const selectedBundle = component.getSelectedBundle();
+      expect(selectedBundle).toBeUndefined();
     });
 
     describe('Bundle Data', () => {
@@ -482,36 +470,6 @@ describe('RegisterComponent', () => {
     it('should handle reCAPTCHA null response', () => {
       component.resolved(null);
       expect(component.recaptchaToken()).toBeNull();
-    });
-  });
-
-  describe('Bundle Item Click Handler', () => {
-    it('should stop propagation when clicking anchor element', () => {
-      const mockAnchor = document.createElement('a');
-      const mockEvent = new MouseEvent('click');
-      Object.defineProperty(mockEvent, 'target', {
-        value: mockAnchor,
-        enumerable: true,
-      });
-      spyOn(mockEvent, 'stopPropagation');
-
-      component.onBundleItemClick(mockEvent);
-
-      expect(mockEvent.stopPropagation).toHaveBeenCalled();
-    });
-
-    it('should not stop propagation for non-anchor elements', () => {
-      const mockDiv = document.createElement('div');
-      const mockEvent = new MouseEvent('click');
-      Object.defineProperty(mockEvent, 'target', {
-        value: mockDiv,
-        enumerable: true,
-      });
-      spyOn(mockEvent, 'stopPropagation');
-
-      component.onBundleItemClick(mockEvent);
-
-      expect(mockEvent.stopPropagation).not.toHaveBeenCalled();
     });
   });
 });

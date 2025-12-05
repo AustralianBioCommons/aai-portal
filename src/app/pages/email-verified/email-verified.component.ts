@@ -3,12 +3,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrandingService } from '../../core/services/branding.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroCheckCircle, heroXCircle } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-email-verified',
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, NgIcon],
   templateUrl: './email-verified.component.html',
   styleUrl: './email-verified.component.css',
+  viewProviders: [provideIcons({ heroCheckCircle, heroXCircle })],
 })
 export class EmailVerifiedComponent {
   private readonly route = inject(ActivatedRoute);

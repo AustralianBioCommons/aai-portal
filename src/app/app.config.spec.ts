@@ -53,7 +53,7 @@ describe('AppConfig Auth0 bootstrap', () => {
     const config = authConfig.get();
     expect(config?.clientId).toBe(runtimeConfig.auth0.clientId);
     expect(config?.domain).toBe(runtimeConfig.auth0.domain);
-    expect(config?.authorizationParams?.redirect_uri).toBe(
+    expect(config?.authorizationParams?.['redirect_uri']).toBe(
       runtimeConfig.auth0.redirectUri,
     );
   });

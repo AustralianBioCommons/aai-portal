@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
 import { PlatformId } from '../constants/constants';
 
-export type Status = 'approved' | 'revoked' | 'pending';
+export type Status = 'approved' | 'revoked' | 'pending' | 'rejected';
 
 // Platform membership data for user profile: shouldn't include
 // revoked platforms
@@ -40,6 +40,12 @@ export interface UserProfileData {
   updated_at: string;
   platform_memberships: UserProfilePlatformData[];
   group_memberships: UserProfileGroupData[];
+}
+
+export interface UserGroupStatus {
+  group_id: string;
+  approval_status: Status;
+  group_name: string;
 }
 
 /**
@@ -136,6 +142,22 @@ export class ApiService {
   getUserProfile(): Observable<UserProfileData> {
     return this.http.get<UserProfileData>(
       `${environment.auth0.backend}/me/profile`,
+    );
+  }
+
+  /**
+   * Return the status of the current user's group memberships
+   */
+  getUserGroups(): Observable<UserGroupStatus[]> {
+    return this.http.get<UserGroupStatus[]>(
+      `${environment.auth0.backend}/me/groups`,
+    );
+  }
+
+  requestGroupAccess(groupId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/me/groups/request`,
+      { group_id: groupId },
     );
   }
 
