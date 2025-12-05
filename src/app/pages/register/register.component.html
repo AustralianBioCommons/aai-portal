@@ -113,8 +113,9 @@
                   @if (index < sections.length - 1) {
                     <div
                       class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
-                      [class.bg-biocommons-primary]="completed"
-                      [class.bg-gray-300]="!completed"
+                      [class]="
+                        completed ? 'bg-biocommons-primary' : 'bg-gray-300'
+                      "
                     ></div>
                   }
                 </div>
@@ -123,11 +124,10 @@
                 <a
                   [href]="'#' + section.id"
                   class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
-                  [class.text-biocommons-primary]="
-                    activeSection() === section.id || completed
-                  "
-                  [class.text-gray-900]="
-                    activeSection() !== section.id && !completed
+                  [class]="
+                    active || completed
+                      ? 'text-biocommons-primary'
+                      : 'text-gray-900'
                   "
                   (click)="scrollToSection($event, section.id)"
                 >
@@ -142,9 +142,12 @@
         </div>
       </div>
 
+      <!-- Main Content -->
       <div class="w-full p-12 sm:px-24">
-        <!-- Main Content -->
-        <div class="mx-auto flex max-w-6xl flex-1 flex-col gap-24">
+        <form
+          [formGroup]="registrationForm"
+          class="mx-auto flex max-w-6xl flex-1 flex-col gap-24"
+        >
           <!-- Introduction Section -->
           <div id="introduction" class="flex scroll-mt-24 flex-col gap-6">
             <h1 class="text-left text-3xl font-semibold text-gray-900">
@@ -169,11 +172,7 @@
           </div>
 
           <!-- Your Details Section -->
-          <form
-            id="your-details"
-            [formGroup]="registrationForm"
-            class="flex scroll-mt-24 flex-col gap-6"
-          >
+          <div id="your-details" class="flex scroll-mt-24 flex-col gap-6">
             <h2 class="text-3xl font-semibold text-gray-900">Your details</h2>
             <p class="font-light text-gray-600">
               To create your BioCommons Access account, simply provide your full
@@ -337,7 +336,7 @@
                 </div>
               }
             </div>
-          </form>
+          </div>
 
           <!-- Bundle Selection Section -->
           <div id="add-bundle" class="flex scroll-mt-24 flex-col gap-6">
@@ -378,7 +377,7 @@
                       </div>
                       <div
                         class="flex h-7 w-7 items-center justify-center rounded-lg border p-1 transition-all"
-                        [ngClass]="
+                        [class]="
                           registrationForm.get('bundle')?.value === bundle.id
                             ? 'border-biocommons-primary bg-biocommons-primary'
                             : 'border-gray-300'
@@ -405,10 +404,10 @@
                       </div>
                       <input
                         type="checkbox"
+                        class="sr-only"
                         [checked]="
                           registrationForm.get('bundle')?.value === bundle.id
                         "
-                        class="sr-only"
                       />
                     </div>
                     <div class="text-3xl font-semibold">{{ bundle.name }}</div>
@@ -492,24 +491,22 @@
               </a>
               <input
                 type="checkbox"
-                [formControl]="registrationForm.controls.terms"
+                formControlName="terms"
                 class="pointer-events-none h-4 w-4 accent-biocommons-primary"
               />
             </div>
-
             @if (
               registrationForm.get("terms")?.invalid &&
               registrationForm.get("terms")?.touched
             ) {
-              <div class="text-sm text-red-500">
+              <div class="-mt-4 text-xs text-red-500">
                 Please accept the terms & conditions to continue
               </div>
             }
           </div>
 
-          <!-- reCAPTCHA -->
-
           <div class="flex flex-col items-center justify-center gap-6">
+            <!-- reCAPTCHA -->
             <div class="flex flex-col items-center gap-0.5">
               <re-captcha
                 (resolved)="resolved($event)"
@@ -532,7 +529,7 @@
               Submit
             </app-button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   }
@@ -547,32 +544,25 @@
       </div>
       <div class="verification-message font-light text-gray-600">
         @if (registrationEmail()) {
-          <ng-container>
-            We've sent a verification email to
-            <span class="font-semibold text-gray-950">{{
-              registrationEmail()
-            }}</span
-            >. Please open that email and click the link inside to finish
-            setting up your account and log in.
-          </ng-container>
+          We've sent a verification email to
+          <span class="font-medium text-gray-900">
+            {{ registrationEmail() }} </span
+          >. Please open that email and click the link inside to finish setting
+          up your account and log in.
         } @else {
-          <ng-container>
-            We've sent a verification email to the email address you provided.
-            Please open that email and click the link inside to finish setting
-            up your account and log in.
-          </ng-container>
+          We've sent a verification email to the email address you provided.
+          Please open that email and click the link inside to finish setting up
+          your account and log in.
         }
       </div>
-      <div class="text-center">
-        <app-button
-          type="button"
-          variant="primary"
-          widthClass="w-auto"
-          (click)="getFinalPageButton().action()"
-        >
-          {{ getFinalPageButton().text }}
-        </app-button>
-      </div>
+      <app-button
+        type="button"
+        variant="primary"
+        widthClass="w-auto"
+        (click)="getFinalPageButton().action()"
+      >
+        {{ getFinalPageButton().text }}
+      </app-button>
     </div>
   }
 </div>
