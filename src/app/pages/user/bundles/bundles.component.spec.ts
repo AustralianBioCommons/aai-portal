@@ -65,7 +65,7 @@ describe('BundlesComponent', () => {
     fixture.detectChanges();
 
     const bundleId = 'tsi';
-    component.bundleForm.patchValue({ selectedBundle: bundleId });
+    component.bundleForm.patchValue({ bundle: bundleId });
 
     apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
     const routerSpy = spyOn(router, 'navigate');

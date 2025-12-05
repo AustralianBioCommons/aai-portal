@@ -319,7 +319,7 @@
           </form>
 
           <!-- Bundle Selection Section -->
-          <div class="flex scroll-mt-24 flex-col gap-6">
+          <div id="add-bundle" class="flex scroll-mt-24 flex-col gap-6">
             <h2 class="text-left text-3xl font-semibold text-gray-900">
               Add a bundle (Optional)
             </h2>
@@ -328,124 +328,61 @@
             </p>
 
             <app-bundle-selection
-              [bundleForm]="bundleForm"
+              [form]="registrationForm"
               [bundles]="bundles"
             ></app-bundle-selection>
           </div>
 
           <!-- Terms & Conditions Section -->
-          <form
-            id="terms"
-            [formGroup]="termsForm"
-            class="flex scroll-mt-24 flex-col gap-12"
-          >
-            <!-- BioCommons Access T&Cs -->
-            <div class="space-y-6">
-              <h2 class="text-3xl font-semibold text-gray-900">
-                BioCommons Access terms & conditions
-              </h2>
-              <p class="font-light text-gray-600">
-                You must accept the terms & conditions before you proceed.
-              </p>
-              <div
-                tabindex="0"
-                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                [class.ring-transparent]="
-                  termsForm.get('biocommonsAccess')?.value !==
-                  (!termsForm.get('biocommonsAccess')?.invalid ||
-                    !termsForm.get('biocommonsAccess')?.touched)
-                "
-                [class.ring-red-500]="
-                  termsForm.get('biocommonsAccess')?.value !== true &&
-                  termsForm.get('biocommonsAccess')?.invalid &&
-                  termsForm.get('biocommonsAccess')?.touched
-                "
-                [class.ring-sky-400]="
-                  termsForm.get('biocommonsAccess')?.value === true
-                "
-                (click)="toggleTermsAcceptance('biocommonsAccess')"
-                (keyup.enter)="toggleTermsAcceptance('biocommonsAccess')"
+          <div id="terms" class="flex scroll-mt-24 flex-col gap-6">
+            <h2 class="text-3xl font-semibold text-gray-900">
+              BioCommons Access terms & conditions
+            </h2>
+            <p class="font-light text-gray-600">
+              You must accept the terms & conditions before you proceed.
+            </p>
+            <div
+              tabindex="0"
+              class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              [ngClass]="{
+                'ring-transparent':
+                  registrationForm.get('terms')?.value !==
+                  (!registrationForm.get('terms')?.invalid ||
+                    !registrationForm.get('terms')?.touched),
+                'ring-red-500':
+                  registrationForm.get('terms')?.value !== true &&
+                  registrationForm.get('terms')?.invalid &&
+                  registrationForm.get('terms')?.touched,
+                'ring-sky-400': registrationForm.get('terms')?.value === true,
+              }"
+              (click)="toggleTermsAcceptance()"
+              (keyup.enter)="toggleTermsAcceptance()"
+            >
+              <a
+                href=""
+                target="_blank"
+                class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
+                (click)="$event.stopPropagation()"
               >
-                <a
-                  href=""
-                  target="_blank"
-                  class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
-                  (click)="$event.stopPropagation()"
-                >
-                  BioCommons Access terms & conditions
-                  <ng-icon name="heroArrowTopRightOnSquare" size="16"></ng-icon>
-                </a>
-                <input
-                  type="checkbox"
-                  formControlName="biocommonsAccess"
-                  class="pointer-events-none h-4 w-4 accent-biocommons-primary"
-                />
-              </div>
+                BioCommons Access terms & conditions
+                <ng-icon name="heroArrowTopRightOnSquare" size="16"></ng-icon>
+              </a>
+              <input
+                type="checkbox"
+                [formControl]="registrationForm.controls.terms"
+                class="pointer-events-none h-4 w-4 accent-biocommons-primary"
+              />
             </div>
 
-            <!-- Bundle T&Cs -->
-            @if (getSelectedBundle()) {
-              <div class="space-y-6">
-                <h2 class="text-3xl font-semibold text-gray-900">
-                  {{ getSelectedBundle()?.name }} Bundle terms & conditions
-                </h2>
-                <p class="font-light text-gray-600">
-                  Please review the terms & conditions for each associated
-                  service and tick all boxes below to accept the complete bundle
-                  agreement.
-                </p>
-
-                @for (
-                  service of getSelectedBundle()?.services || [];
-                  track service.id
-                ) {
-                  <div
-                    tabindex="0"
-                    class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                    [class.ring-transparent]="
-                      termsForm.get(service.id)?.value !== true &&
-                      (!termsForm.get(service.id)?.invalid ||
-                        !termsForm.get(service.id)?.touched)
-                    "
-                    [class.ring-red-500]="
-                      termsForm.get(service.id)?.value !== true &&
-                      termsForm.get(service.id)?.invalid &&
-                      termsForm.get(service.id)?.touched
-                    "
-                    [class.ring-sky-400]="
-                      termsForm.get(service.id)?.value === true
-                    "
-                    (click)="toggleTermsAcceptance(service.id)"
-                    (keyup.enter)="toggleTermsAcceptance(service.id)"
-                  >
-                    <a
-                      [href]="service.termsUrl"
-                      target="_blank"
-                      class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
-                      (click)="$event.stopPropagation()"
-                    >
-                      {{ service.termsTitle }}
-                      <ng-icon
-                        name="heroArrowTopRightOnSquare"
-                        size="16"
-                      ></ng-icon>
-                    </a>
-                    <input
-                      type="checkbox"
-                      [formControlName]="service.id"
-                      class="pointer-events-none h-4 w-4 accent-biocommons-primary"
-                    />
-                  </div>
-                }
-              </div>
-            }
-
-            @if (termsForm.invalid && termsForm.touched) {
+            @if (
+              registrationForm.get("terms")?.invalid &&
+              registrationForm.get("terms")?.touched
+            ) {
               <div class="text-sm text-red-500">
-                Please accept all terms & conditions to continue
+                Please accept the terms & conditions to continue
               </div>
             }
-          </form>
+          </div>
 
           <!-- reCAPTCHA -->
 

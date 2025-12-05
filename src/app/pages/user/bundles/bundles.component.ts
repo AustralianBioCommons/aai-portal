@@ -28,7 +28,7 @@ export class BundlesComponent implements OnInit {
   private apiService = inject(ApiService);
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
-    selectedBundle: [''],
+    bundle: [''],
   });
 
   errorAlert = signal<string | null>(null);
@@ -40,13 +40,13 @@ export class BundlesComponent implements OnInit {
   }
 
   getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.bundleForm.get('selectedBundle')?.value;
+    const selectedId = this.bundleForm.get('bundle')?.value;
     return this.bundles().find((bundle) => bundle.id === selectedId);
   }
 
   submit() {
     this.isSubmitting.set(true);
-    const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
+    const selectedBundle = this.bundleForm.get('bundle')?.value;
     const groupId = `biocommons/group/${selectedBundle}`;
 
     this.apiService.requestGroupAccess(groupId).subscribe({

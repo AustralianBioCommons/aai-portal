@@ -11,6 +11,7 @@ export interface RecaptchaConfig {
 
 export interface PlatformUrlsConfig {
   bpaPlatform: string;
+  bpaPlatformLogin?: string;
   galaxyPlatform: string;
   sbpPlatform?: string;
 }

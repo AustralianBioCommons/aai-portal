@@ -13,17 +13,17 @@ import { heroCheck, heroPlus } from '@ng-icons/heroicons/outline';
   viewProviders: [provideIcons({ heroCheck, heroPlus })],
 })
 export class BundleSelectionComponent {
-  bundleForm = input.required<FormGroup>();
+  form = input.required<FormGroup>();
   bundles = input.required<Bundle[]>();
 
   toggleBundle(value: string) {
     const bundle = this.bundles().find((bundle) => bundle.id === value);
     if (!bundle?.disabled) {
-      const currentValue = this.bundleForm().get('selectedBundle')?.value;
+      const currentValue = this.form().get('bundle')?.value;
       if (currentValue === value) {
-        this.bundleForm().patchValue({ selectedBundle: '' });
+        this.form().patchValue({ bundle: '' });
       } else {
-        this.bundleForm().patchValue({ selectedBundle: value });
+        this.form().patchValue({ bundle: value });
       }
     }
   }
@@ -35,11 +35,11 @@ export class BundleSelectionComponent {
   }
 
   getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.bundleForm().get('selectedBundle')?.value;
+    const selectedId = this.form().get('bundle')?.value;
     return this.bundles().find((bundle) => bundle.id === selectedId);
   }
 
   isSelectedBundle(bundle: Bundle) {
-    return bundle.id === this.bundleForm().get('selectedBundle')?.value;
+    return bundle.id === this.form().get('bundle')?.value;
   }
 }

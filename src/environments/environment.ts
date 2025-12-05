@@ -17,6 +17,7 @@ const defaults: EnvironmentConfig = {
   },
   platformUrls: {
     bpaPlatform: 'https://aaidemo.bioplatforms.com',
+    bpaPlatformLogin: 'https://aaidemo.bioplatforms.com/user/login',
     galaxyPlatform: 'https://dev.gvl.org.au',
     sbpPlatform: 'https://dev.sbp.test.biocommons.org.au',
   },

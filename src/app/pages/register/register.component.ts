@@ -1,30 +1,27 @@
-import { Component, inject, signal, AfterViewInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, ActivatedRoute } from '@angular/router';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-  FormControl,
-} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, of, fromEvent } from 'rxjs';
-import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
-import { passwordRequirements } from '../../shared/validators/passwords';
-import { usernameRequirements } from '../../shared/validators/usernames';
-import { ValidationService } from '../../core/services/validation.service';
-import { environment } from '../../../environments/environment';
+import { AfterViewInit, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, fromEvent, of } from 'rxjs';
 import { RecaptchaModule } from 'ng-recaptcha-2';
+import { environment } from '../../../environments/environment';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
+import { ValidationService } from '../../core/services/validation.service';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import {
+  emailLengthValidator,
   internationalEmailValidator,
   toAsciiEmail,
 } from '../../shared/validators/emails';
-import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
 import { BundleSelectionComponent } from '../../shared/components/bundle-selection/bundle-selection.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -32,6 +29,9 @@ import {
   heroCheck,
   heroArrowTopRightOnSquare,
 } from '@ng-icons/heroicons/outline';
+import { fullNameLengthValidator } from '../../shared/validators/full-name';
+import { passwordRequirements } from '../../shared/validators/passwords';
+import { usernameRequirements } from '../../shared/validators/usernames';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -40,6 +40,8 @@ export interface RegistrationForm {
   username: FormControl<string>;
   password: FormControl<string>;
   confirmPassword: FormControl<string>;
+  bundle: FormControl<string>;
+  terms: FormControl<boolean>;
 }
 
 interface RegistrationRequest {
@@ -74,89 +76,79 @@ interface Section {
   viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],
 })
 export class RegisterComponent implements AfterViewInit {
-  public router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private formBuilder = inject(FormBuilder);
-  private validationService = inject(ValidationService);
-  private http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly validationService = inject(ValidationService);
+  private readonly http = inject(HttpClient);
+
   private readonly bpaPlatformUrl =
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
   private readonly galaxyPlatformUrl =
     environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
 
-  recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
-  recaptchaToken = signal<string | null>(null);
-  recaptchaAttempted = signal(false);
-
-  errorAlert = signal<string | null>(null);
-  isSubmitting = signal<boolean>(false);
-  registrationEmail = signal<string | null>(null);
-  isRegistrationComplete = signal<boolean>(false);
-
-  activeSection = signal<string>('introduction');
-  visitedSections = signal<Set<string>>(new Set(['introduction']));
-  sections: Section[] = [
+  readonly bundles = BIOCOMMONS_BUNDLES;
+  readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
+  readonly sections: Section[] = [
     { id: 'introduction', label: 'Introduction', mobileLabel: 'Introduction' },
     { id: 'your-details', label: 'Your Details', mobileLabel: 'Details' },
     { id: 'add-bundle', label: 'Add a Bundle', mobileLabel: 'Bundle' },
     { id: 'terms', label: 'Accept T&Cs', mobileLabel: 'T&Cs' },
   ];
 
-  bundles: Bundle[] = BIOCOMMONS_BUNDLES;
+  recaptchaToken = signal<string | null>(null);
+  recaptchaAttempted = signal(false);
 
-  bundleForm: FormGroup = this.formBuilder.nonNullable.group({
-    selectedBundle: [''],
-  });
+  errorAlert = signal<string | null>(null);
+  registrationEmail = signal<string | null>(null);
+  isSubmitting = signal(false);
+  isRegistrationComplete = signal(false);
+
+  activeSection = signal<string>('introduction');
+  visitedSections = signal<Set<string>>(new Set(['introduction']));
 
   registrationForm: FormGroup<RegistrationForm> =
-    this.formBuilder.nonNullable.group({
-      firstName: ['', [Validators.required, Validators.maxLength(255)]],
-      lastName: ['', [Validators.required, Validators.maxLength(255)]],
-      email: [
-        '',
-        [
-          Validators.required,
-          internationalEmailValidator,
-          emailLengthValidator,
+    this.formBuilder.nonNullable.group(
+      {
+        firstName: ['', [Validators.required, Validators.maxLength(255)]],
+        lastName: ['', [Validators.required, Validators.maxLength(255)]],
+        email: [
+          '',
+          [
+            Validators.required,
+            internationalEmailValidator,
+            emailLengthValidator,
+          ],
         ],
-      ],
-      username: ['', usernameRequirements],
-      password: ['', passwordRequirements],
-      confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
-    });
-
-  termsForm: FormGroup = this.formBuilder.nonNullable.group({});
+        username: ['', usernameRequirements],
+        password: ['', passwordRequirements],
+        confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
+        bundle: [''],
+        terms: [false, Validators.requiredTrue],
+      },
+      { validators: fullNameLengthValidator() },
+    );
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
       this.registrationForm,
     );
 
-    this.registrationForm.valueChanges
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        this.applyFullNameLengthValidation();
-      });
-
     this.registrationForm
       .get('username')
       ?.valueChanges.pipe(takeUntilDestroyed())
       .subscribe(() => {
-        if (this.validationService.hasFieldBackendError('username')) {
+        if (this.validationService.hasFieldBackendError('username'))
           this.validationService.clearFieldBackendError('username');
-        }
       });
 
     this.registrationForm
       .get('email')
       ?.valueChanges.pipe(takeUntilDestroyed())
       .subscribe(() => {
-        if (this.validationService.hasFieldBackendError('email')) {
+        if (this.validationService.hasFieldBackendError('email'))
           this.validationService.clearFieldBackendError('email');
-        }
       });
-
-    this.initializeTermsForm();
 
     fromEvent(window, 'scroll')
       .pipe(takeUntilDestroyed())
@@ -183,8 +175,6 @@ export class RegisterComponent implements AfterViewInit {
     if (scrollPosition + windowHeight >= documentHeight - 50) {
       currentSectionIndex = this.sections.length - 1;
       this.activeSection.set(this.sections[currentSectionIndex].id);
-
-      // Mark all sections as visited
       this.visitedSections.update(
         () => new Set(this.sections.map((s) => s.id)),
       );
@@ -198,8 +188,6 @@ export class RegisterComponent implements AfterViewInit {
       if (element && element.offsetTop <= scrollThreshold) {
         currentSectionIndex = i;
         this.activeSection.set(section.id);
-
-        // Mark this section and all previous sections as visited
         this.visitedSections.update((visited) => {
           const newVisited = new Set(visited);
           for (let j = 0; j <= i; j++) {
@@ -225,10 +213,6 @@ export class RegisterComponent implements AfterViewInit {
     }
   }
 
-  getActiveStepObject(): Section | undefined {
-    return this.sections.find((s) => s.id === this.activeSection());
-  }
-
   isSectionCompleted(sectionId: string): boolean {
     const currentIndex = this.sections.findIndex(
       (s) => s.id === this.activeSection(),
@@ -251,96 +235,28 @@ export class RegisterComponent implements AfterViewInit {
         return true;
       case 'your-details':
         return (
-          this.registrationForm.valid &&
+          this.areDetailsFieldsValid() &&
           !this.validationService.hasBackendErrors()
         );
       case 'add-bundle':
         return true;
       case 'terms':
-        return this.termsForm.valid;
+        return this.registrationForm.get('terms')?.valid ?? false;
       default:
         return false;
     }
   }
 
-  private applyFullNameLengthValidation(): void {
-    const firstNameControl = this.registrationForm.get('firstName');
-    const lastNameControl = this.registrationForm.get('lastName');
-
-    if (!firstNameControl || !lastNameControl) {
-      return;
-    }
-
-    const sanitize = (value: string | null | undefined): string =>
-      (value ?? '').trim();
-
-    const firstName = sanitize(firstNameControl.value);
-    const lastName = sanitize(lastNameControl.value);
-    const combined = [firstName, lastName].filter(Boolean).join(' ');
-    const exceedsLimit = combined.length > 255;
-
-    const updateControlError = (
-      control: AbstractControl<string>,
-      hasError: boolean,
-    ) => {
-      const existingErrors = control.errors ?? {};
-      if (hasError) {
-        if (!existingErrors['fullNameTooLong']) {
-          control.setErrors({ ...existingErrors, fullNameTooLong: true });
-        }
-      } else if (existingErrors['fullNameTooLong']) {
-        const remaining = { ...existingErrors };
-        delete remaining['fullNameTooLong'];
-        const nextErrors = Object.keys(remaining).length ? remaining : null;
-        control.setErrors(nextErrors);
-      }
-    };
-    updateControlError(firstNameControl, exceedsLimit);
-    updateControlError(lastNameControl, exceedsLimit);
-  }
-
-  private initializeTermsForm() {
-    // Always include BioCommons Access terms
-    const termsControls: Record<string, FormControl<boolean>> = {
-      biocommonsAccess: this.formBuilder.nonNullable.control(
-        false,
-        Validators.requiredTrue,
-      ),
-    };
-
-    this.termsForm = this.formBuilder.nonNullable.group(termsControls);
-
-    // Watch for bundle selection changes to update terms form
-    this.bundleForm
-      .get('selectedBundle')
-      ?.valueChanges.pipe(takeUntilDestroyed())
-      .subscribe((selectedBundle) => {
-        this.updateTermsFormForBundle(selectedBundle);
-      });
-  }
-
-  private updateTermsFormForBundle(bundleId: string) {
-    const bundle = this.bundles.find((b) => b.id === bundleId);
-
-    // Always include BioCommons Access terms
-    const termsControls: Record<string, FormControl<boolean>> = {
-      biocommonsAccess: this.formBuilder.nonNullable.control(
-        this.termsForm.get('biocommonsAccess')?.value ?? false,
-        Validators.requiredTrue,
-      ),
-    };
-
-    // Add bundle-specific terms if a bundle is selected
-    if (bundle) {
-      bundle.services.forEach((service) => {
-        termsControls[service.id] = this.formBuilder.nonNullable.control(
-          this.termsForm.get(service.id)?.value ?? false,
-          Validators.requiredTrue,
-        );
-      });
-    }
-
-    this.termsForm = this.formBuilder.nonNullable.group(termsControls);
+  private areDetailsFieldsValid(): boolean {
+    const fields: (keyof RegistrationForm)[] = [
+      'firstName',
+      'lastName',
+      'email',
+      'username',
+      'password',
+      'confirmPassword',
+    ];
+    return fields.every((field) => this.registrationForm.get(field)?.valid);
   }
 
   resolved(captchaResponse: string | null): void {
@@ -348,7 +264,7 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.bundleForm.get('selectedBundle')?.value;
+    const selectedId = this.registrationForm.get('selectedBundle')?.value;
     return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
@@ -356,13 +272,11 @@ export class RegisterComponent implements AfterViewInit {
     this.errorAlert.set(null);
     this.recaptchaAttempted.set(true);
     this.registrationForm.markAllAsTouched();
-    this.termsForm.markAllAsTouched();
 
     if (
       !this.recaptchaToken() ||
       !this.registrationForm.valid ||
-      this.validationService.hasBackendErrors() ||
-      !this.termsForm.valid
+      this.validationService.hasBackendErrors()
     ) {
       this.scrollToFirstError();
       return;
@@ -370,20 +284,17 @@ export class RegisterComponent implements AfterViewInit {
 
     this.isSubmitting.set(true);
 
-    const formValue = this.registrationForm.value;
-    const selectedBundle = this.bundleForm.get('selectedBundle')?.value;
+    const formValue = this.registrationForm.getRawValue();
 
     const requestBody: RegistrationRequest = {
-      first_name: formValue.firstName!,
-      last_name: formValue.lastName!,
-      email: toAsciiEmail(formValue.email!),
-      username: formValue.username!,
-      password: formValue.password!,
+      first_name: formValue.firstName,
+      last_name: formValue.lastName,
+      email: toAsciiEmail(formValue.email),
+      username: formValue.username,
+      password: formValue.password,
     };
 
-    if (selectedBundle) {
-      requestBody.bundle = selectedBundle;
-    }
+    if (formValue.bundle) requestBody.bundle = formValue.bundle;
 
     this.http
       .post(`${environment.auth0.backend}/biocommons/register`, requestBody)
@@ -424,21 +335,22 @@ export class RegisterComponent implements AfterViewInit {
         }
       }
     }
-
-    if (this.termsForm.invalid) {
-      const termsElement = document.getElementById('terms');
-      if (termsElement) {
-        termsElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
   }
 
-  toggleTermsAcceptance(serviceId: string) {
-    const currentValue = this.termsForm.get(serviceId)?.value;
-    this.termsForm.patchValue({ [serviceId]: !currentValue });
+  toggleTermsAcceptance(): void {
+    const currentValue = this.registrationForm.get('terms')?.value;
+    this.registrationForm.patchValue({ terms: !currentValue });
   }
 
   isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
+    if (
+      (fieldName === 'firstName' || fieldName === 'lastName') &&
+      this.registrationForm.hasError('fullNameTooLong') &&
+      this.registrationForm.get(fieldName)?.touched
+    ) {
+      return true;
+    }
+
     return this.validationService.isFieldInvalid(
       this.registrationForm,
       fieldName,
@@ -446,6 +358,20 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   getErrorMessages(fieldName: keyof RegistrationForm): string[] {
+    if (
+      (fieldName === 'firstName' || fieldName === 'lastName') &&
+      this.registrationForm.hasError('fullNameTooLong') &&
+      this.registrationForm.get(fieldName)?.touched
+    ) {
+      return [
+        ...this.validationService.getErrorMessages(
+          this.registrationForm,
+          fieldName,
+        ),
+        'Full name must not exceed 255 characters',
+      ];
+    }
+
     return this.validationService.getErrorMessages(
       this.registrationForm,
       fieldName,

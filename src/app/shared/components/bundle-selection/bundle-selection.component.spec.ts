@@ -17,8 +17,8 @@ describe('BundleSelectionComponent', () => {
     fixture = TestBed.createComponent(BundleSelectionComponent);
     component = fixture.componentInstance;
     const fb = new FormBuilder();
-    bundleForm = fb.group({ selectedBundle: '' });
-    fixture.componentRef.setInput('bundleForm', bundleForm);
+    bundleForm = fb.group({ bundle: '' });
+    fixture.componentRef.setInput('form', bundleForm);
     fixture.componentRef.setInput('bundles', BIOCOMMONS_BUNDLES);
     fixture.detectChanges();
   });
@@ -29,15 +29,15 @@ describe('BundleSelectionComponent', () => {
 
   it('should select bundle', () => {
     component.toggleBundle('tsi');
-    expect(component.bundleForm().get('selectedBundle')?.value).toBe('tsi');
+    expect(component.form().get('bundle')?.value).toBe('tsi');
   });
 
   it('should toggle bundle selection off when clicking same bundle', () => {
     component.toggleBundle('tsi');
-    expect(component.bundleForm().get('selectedBundle')?.value).toBe('tsi');
+    expect(component.form().get('bundle')?.value).toBe('tsi');
 
     component.toggleBundle('tsi');
-    expect(component.bundleForm().get('selectedBundle')?.value).toBe('');
+    expect(component.form().get('bundle')?.value).toBe('');
   });
 
   it('should return selected bundle object', () => {
@@ -49,7 +49,7 @@ describe('BundleSelectionComponent', () => {
 
   it('should not toggle disabled bundle', () => {
     component.toggleBundle('fungi');
-    expect(component.bundleForm().get('selectedBundle')?.value).toBe('');
+    expect(component.form().get('bundle')?.value).toBe('');
   });
 
   describe('Bundle Item Click Handler', () => {
