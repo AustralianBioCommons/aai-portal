@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -19,16 +19,10 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 import { AuthService } from '../../../core/services/auth.service';
 import { DropdownMenuComponent } from '../../../shared/components/dropdown-menu/dropdown-menu.component';
 
-type RevokeModalData = {
+type ActionModalData = {
+  action: 'revoke' | 'reject';
   type: 'platform' | 'group';
   id: string;
-  name: string;
-  email: string;
-} | null;
-
-type RejectModalData = {
-  membershipId: string;
-  groupId: string;
   name: string;
   email: string;
 } | null;
@@ -46,17 +40,19 @@ type RejectModalData = {
     ModalComponent,
     DropdownMenuComponent,
   ],
+  providers: [DatePipe],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
 })
 export class UserDetailsComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private apiService = inject(ApiService);
-  private authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
+  private readonly datePipe = inject(DatePipe);
 
-  protected readonly PLATFORMS = PLATFORMS;
-  protected readonly BIOCOMMONS_BUNDLES = BIOCOMMONS_BUNDLES;
+  protected readonly platforms = PLATFORMS;
+  protected readonly bundles = BIOCOMMONS_BUNDLES;
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
@@ -69,42 +65,27 @@ export class UserDetailsComponent implements OnInit {
   openMenuGroupId = signal<string | null>(null);
   openMenuPlatformId = signal<string | null>(null);
 
-  revokeModalData = signal<RevokeModalData>(null);
-  rejectModalData = signal<RejectModalData>(null);
-
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
-  readonly isSbpAdmin = computed(
-    () =>
-      this.adminType() === 'platform' &&
-      this.adminPlatforms().some((p) => p?.id === 'sbp'),
-  );
+  actionModalData = signal<ActionModalData>(null);
 
-  // Form controls
-  revokeReasonControl = new FormControl('', {
-    nonNullable: true,
-    validators: [Validators.required],
-  });
-
-  rejectReasonControl = new FormControl('', {
+  // Form control
+  reasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(255)],
   });
 
   ngOnInit() {
-    const userId = this.route.snapshot.paramMap.get('id');
-
-    // Get returnUrl from navigation state
     const navigation = this.router.getCurrentNavigation();
     const stateReturnUrl =
       navigation?.extras?.state?.['returnUrl'] || history.state?.returnUrl;
-
     if (stateReturnUrl) {
       this.returnUrl.set(stateReturnUrl);
     }
 
+    const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
       this.apiService.getUserDetails(userId).subscribe({
         next: (user) => {
@@ -145,13 +126,23 @@ export class UserDetailsComponent implements OnInit {
   }
 
   getPlatformName(platformId: string): string {
-    return this.PLATFORMS[platformId as PlatformId]?.name || platformId;
+    return this.platforms[platformId as PlatformId]?.name || platformId;
   }
 
   getBundleLogoUrls(groupId: string): string[] {
     const bundleId = groupId.split('/').pop() || '';
-    const bundle = this.BIOCOMMONS_BUNDLES.find((b) => b.id === bundleId);
+    const bundle = this.bundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
+  }
+
+  getTooltipMessage(
+    reason: string | undefined,
+    updatedBy: string,
+    updatedAt: string,
+    action = 'Revoked',
+  ): string {
+    const formattedDate = this.datePipe.transform(updatedAt, 'MMM d y, h:mm a');
+    return `${reason || action}\n\n(${action} by ${updatedBy} on ${formattedDate})`;
   }
 
   canManagePlatform(platformId: string): boolean {
@@ -190,152 +181,152 @@ export class UserDetailsComponent implements OnInit {
     return this.openMenuGroupId() === groupId;
   }
 
-  approvePlatform(platformId: PlatformId) {
+  approvePlatform(platformId: PlatformId): void {
     const userId = this.user()!.user_id;
+    this.openMenuPlatformId.set(null);
     this.alert.set(null);
-
     this.apiService.approvePlatformAccess(userId, platformId).subscribe({
       next: () => {
         this.refreshUserDetails(userId);
         this.alert.set({
           type: 'success',
-          message: 'Platform access approved successfully',
+          message: 'Service access approved successfully',
         });
       },
       error: (error) => {
-        console.error('Failed to approve platform access:', error);
+        console.error('Failed to approve service access:', error);
         this.alert.set({
           type: 'error',
-          message: 'Failed to approve platform access',
+          message: 'Failed to approve service access',
         });
       },
     });
   }
 
-  approveGroup(membershipId: string): void {
-    this.openMenuGroupId.set(null);
+  approveGroup(groupId: string): void {
     const userId = this.user()!.user_id;
-    const membership = this.user()!.group_memberships.find(
-      (m) => m.id === membershipId,
-    );
-    if (!membership) {
-      return;
-    }
-
+    this.openMenuGroupId.set(null);
     this.alert.set(null);
-    this.apiService.approveGroupAccess(userId, membership.group_id).subscribe({
+    this.apiService.approveGroupAccess(userId, groupId).subscribe({
       next: () => {
         this.refreshUserDetails(userId);
         this.alert.set({
           type: 'success',
-          message: 'Group access approved successfully',
+          message: 'Bundle access approved successfully',
         });
       },
       error: (error) => {
-        console.error('Failed to approve group access:', error);
+        console.error('Failed to approve bundle access:', error);
         this.alert.set({
           type: 'error',
-          message: 'Failed to approve group access',
+          message: 'Failed to approve bundle access',
         });
       },
     });
   }
 
-  rejectGroup(membershipId: string): void {
-    this.openMenuGroupId.set(null);
-    const membership = this.user()?.group_memberships.find(
-      (m) => m.id === membershipId,
+  revokePlatform(platformId: PlatformId): void {
+    this.openActionModal(
+      'revoke',
+      'platform',
+      platformId,
+      this.getPlatformName(platformId),
     );
-    if (!membership || !this.user()) {
-      return;
-    }
-
-    this.rejectModalData.set({
-      membershipId,
-      groupId: membership.group_id,
-      name: membership.group_name,
-      email: this.user()!.email,
-    });
-    this.rejectReasonControl.reset();
   }
 
-  revokeGroup(membershipId: string): void {
-    this.openMenuGroupId.set(null);
-    const membership = this.user()!.group_memberships.find(
-      (m) => m.id === membershipId,
-    );
-    if (!membership) {
-      return;
-    }
-    this.revokeModalData.set({
-      type: 'group',
-      id: membership.group_id,
-      name: membership.group_name,
-      email: this.user()!.email,
-    });
-    this.revokeReasonControl.reset();
+  revokeGroup(groupId: string, groupName: string): void {
+    this.openActionModal('revoke', 'group', groupId, groupName);
   }
 
-  getRevokeModalTitle(): string {
-    const modalData = this.revokeModalData();
+  rejectGroup(groupId: string, groupName: string): void {
+    this.openActionModal('reject', 'group', groupId, groupName);
+  }
+
+  private openActionModal(
+    action: 'revoke' | 'reject',
+    type: 'platform' | 'group',
+    id: string,
+    name: string,
+  ): void {
+    this.openMenuGroupId.set(null);
+    this.openMenuPlatformId.set(null);
+    this.openMenuAction.set(false);
+    this.actionModalData.set({
+      action,
+      type,
+      id,
+      name,
+      email: this.user()!.email,
+    });
+    this.reasonControl.reset();
+  }
+
+  getActionModalTitle(): string {
+    const modalData = this.actionModalData();
     if (!modalData) return '';
-    if (modalData.type === 'platform') {
-      return `Do you want to revoke this user?`;
-    } else {
-      return `Do you want to revoke this user from ${modalData.name}?`;
-    }
+    if (modalData.action === 'reject')
+      return 'Do you want to reject this user?';
+    if (modalData.type === 'platform')
+      return 'Do you want to revoke this user?';
+    return `Do you want to revoke this user from ${modalData.name}?`;
   }
 
-  openRevokeModal(platformId: PlatformId): void {
-    this.revokeModalData.set({
-      type: 'platform',
-      id: platformId,
-      name: this.getPlatformName(platformId),
-      email: this.user()!.email,
-    });
-    this.revokeReasonControl.reset();
+  closeActionModal(): void {
+    this.actionModalData.set(null);
+    this.reasonControl.reset();
   }
 
-  closeRevokeModal(): void {
-    this.revokeModalData.set(null);
-    this.revokeReasonControl.reset();
-  }
+  confirmActionModal(): void {
+    const modalData = this.actionModalData();
+    this.reasonControl.markAsTouched();
 
-  closeRejectModal(): void {
-    this.rejectModalData.set(null);
-    this.rejectReasonControl.reset();
-  }
-
-  confirmRevoke(): void {
-    const modalData = this.revokeModalData();
-    this.revokeReasonControl.markAsTouched();
-
-    if (!modalData || this.revokeReasonControl.invalid) {
+    if (!modalData || this.reasonControl.invalid) {
       return;
     }
 
     const userId = this.user()!.user_id;
-    const reason = this.revokeReasonControl.value.trim();
+    const reason = this.reasonControl.value.trim();
     this.alert.set(null);
 
-    if (modalData.type === 'platform') {
+    if (modalData.action === 'reject') {
+      this.apiService
+        .rejectGroupAccess(userId, modalData.id, reason)
+        .subscribe({
+          next: () => {
+            this.refreshUserDetails(userId);
+            this.closeActionModal();
+            this.alert.set({
+              type: 'success',
+              message: 'Bundle access rejected successfully',
+            });
+          },
+          error: (error) => {
+            this.closeActionModal();
+            console.error('Failed to reject bundle access:', error);
+            this.alert.set({
+              type: 'error',
+              message: 'Failed to reject bundle access',
+            });
+          },
+        });
+    } else if (modalData.type === 'platform') {
       this.apiService
         .revokePlatformAccess(userId, modalData.id as PlatformId, reason)
         .subscribe({
           next: () => {
             this.refreshUserDetails(userId);
-            this.closeRevokeModal();
+            this.closeActionModal();
             this.alert.set({
               type: 'success',
-              message: 'Platform access revoked successfully',
+              message: 'Service access revoked successfully',
             });
           },
           error: (error) => {
-            this.closeRevokeModal();
-            console.error('Failed to revoke platform access:', error);
+            this.closeActionModal();
+            console.error('Failed to revoke service access:', error);
             this.alert.set({
               type: 'error',
-              message: 'Failed to revoke platform access',
+              message: 'Failed to revoke service access',
             });
           },
         });
@@ -345,59 +336,21 @@ export class UserDetailsComponent implements OnInit {
         .subscribe({
           next: () => {
             this.refreshUserDetails(userId);
-            this.closeRevokeModal();
+            this.closeActionModal();
             this.alert.set({
               type: 'success',
-              message: 'Group access revoked successfully',
+              message: 'Bundle access revoked successfully',
             });
           },
           error: (error) => {
-            this.closeRevokeModal();
-            console.error('Failed to revoke group access:', error);
+            this.closeActionModal();
+            console.error('Failed to revoke bundle access:', error);
             this.alert.set({
               type: 'error',
-              message: 'Failed to revoke group access',
+              message: 'Failed to revoke bundle access',
             });
           },
         });
     }
-  }
-
-  confirmReject(): void {
-    const modalData = this.rejectModalData();
-    this.rejectReasonControl.markAsTouched();
-
-    if (!modalData || this.rejectReasonControl.invalid) {
-      return;
-    }
-
-    const reason = this.rejectReasonControl.value.trim();
-    if (!reason) {
-      this.rejectReasonControl.setErrors({ required: true });
-      return;
-    }
-
-    const userId = this.user()!.user_id;
-    this.alert.set(null);
-    this.apiService
-      .rejectGroupAccess(userId, modalData.groupId, reason)
-      .subscribe({
-        next: () => {
-          this.alert.set({
-            type: 'success',
-            message: 'Group access rejected successfully',
-          });
-          this.closeRejectModal();
-          this.refreshUserDetails(userId);
-        },
-        error: (error) => {
-          console.error('Failed to reject group access:', error);
-          this.alert.set({
-            type: 'error',
-            message: 'Failed to reject group access',
-          });
-          this.closeRejectModal();
-        },
-      });
   }
 }

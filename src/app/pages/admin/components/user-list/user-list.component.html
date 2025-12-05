@@ -84,8 +84,8 @@
           id="filter-select"
           class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light outline outline-1 outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
           [(ngModel)]="selectedFilter"
-          (change)="onFilterChange()"
           [disabled]="loading()"
+          (change)="onFilterChange()"
         >
           <option value="">All</option>
           @for (option of filterOptions(); track option.id) {
@@ -131,7 +131,7 @@
                   ? "Services"
                   : adminType() === "platform"
                     ? adminPlatforms()[0].name + " Access"
-                    : ""
+                    : "Access"
               }}
             </div>
           }
@@ -183,10 +183,7 @@
                   } @else {
                     <!-- Show approval status only for bundle admins -->
                     @for (group of user.group_memberships; track group.id) {
-                      @if (
-                        adminType() === "bundle" &&
-                        canManageGroup(group.group_id)
-                      ) {
+                      @if (canManageGroup(group.group_id)) {
                         <div
                           class="flex items-center gap-2 text-sm font-medium"
                           [ngClass]="{
@@ -208,11 +205,15 @@
                           ) {
                             <app-tooltip
                               [message]="
-                                group.rejection_reason ||
-                                group.revocation_reason ||
-                                (group.approval_status === 'rejected'
-                                  ? 'Rejected'
-                                  : 'Revoked')
+                                getTooltipMessage(
+                                  group.revocation_reason ||
+                                    group.rejection_reason,
+                                  group.updated_by,
+                                  group.updated_at,
+                                  group.approval_status === 'rejected'
+                                    ? 'Rejected'
+                                    : 'Revoked'
+                                )
                               "
                             />
                           }
@@ -221,7 +222,7 @@
                     }
                   }
                 } @else {
-                  None
+                  <div class="text-sm text-gray-500">None</div>
                 }
               </div>
               @if (adminType() !== "bundle") {
@@ -248,7 +249,13 @@
                         </span>
                         @if (platform.approval_status === "revoked") {
                           <app-tooltip
-                            [message]="platform.revocation_reason || 'Revoked'"
+                            [message]="
+                              getTooltipMessage(
+                                platform.revocation_reason,
+                                platform.updated_by,
+                                platform.updated_at
+                              )
+                            "
                           />
                         }
                       </div>
@@ -280,7 +287,11 @@
                           @if (platform.approval_status === "revoked") {
                             <app-tooltip
                               [message]="
-                                platform.revocation_reason || 'Revoked'
+                                getTooltipMessage(
+                                  platform.revocation_reason,
+                                  platform.updated_by,
+                                  platform.updated_at
+                                )
                               "
                             />
                           }

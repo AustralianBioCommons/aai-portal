@@ -15,7 +15,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgClass, TitleCasePipe } from '@angular/common';
+import { NgClass, TitleCasePipe, DatePipe } from '@angular/common';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -61,6 +61,7 @@ export const DEFAULT_PAGE_SIZE = 50;
     ModalComponent,
     DropdownMenuComponent,
   ],
+  providers: [DatePipe],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
 })
@@ -70,6 +71,7 @@ export class UserListComponent implements OnInit {
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
   private destroyRef = inject(DestroyRef);
+  private datePipe = inject(DatePipe);
 
   // Cleanup subject for search
   private searchSubject$ = new Subject<string>();
@@ -172,6 +174,16 @@ export class UserListComponent implements OnInit {
 
   canManageGroup(groupId: string): boolean {
     return this.adminGroups().some((g) => g.id === groupId);
+  }
+
+  getTooltipMessage(
+    reason: string | undefined,
+    updatedBy: string,
+    updatedAt: string,
+    action = 'Revoked',
+  ): string {
+    const formattedDate = this.datePipe.transform(updatedAt, 'MMM d y, h:mm a');
+    return `${reason || action}\n\n(${action} by ${updatedBy} on ${formattedDate})`;
   }
 
   openRevokeModal(userId: string, email: string, platformId: string): void {

@@ -8,33 +8,15 @@
   ></app-alert>
 }
 
-<!-- Revoke Modal -->
-@if (revokeModalData()) {
+<!-- Action Modal (Revoke/Reject) -->
+@if (actionModalData()) {
   <app-modal
-    [title]="getRevokeModalTitle()"
-    [description]="revokeModalData()?.email ?? ''"
-    type="revoke"
-    [textareaControl]="revokeReasonControl"
-    textareaLabel="Revocation reason"
-    primaryButtonText="Yes"
-    secondaryButtonText="No"
-    (primaryOutput)="confirmRevoke()"
-    (secondaryOutput)="closeRevokeModal()"
-  />
-}
-
-@if (rejectModalData()) {
-  <app-modal
-    [title]="'Do you want to reject this user?'"
-    [description]="rejectModalData()!.email"
-    type="revoke"
-    [textareaControl]="rejectReasonControl"
-    textareaLabel="Rejection reason"
-    [textareaMaxLength]="255"
-    primaryButtonText="Reject"
-    secondaryButtonText="Cancel"
-    (primaryOutput)="confirmReject()"
-    (secondaryOutput)="closeRejectModal()"
+    [title]="getActionModalTitle()"
+    [description]="actionModalData()?.email ?? ''"
+    [type]="actionModalData()!.action"
+    [textareaControl]="reasonControl"
+    (primaryOutput)="confirmActionModal()"
+    (secondaryOutput)="closeActionModal()"
   />
 }
 
@@ -157,16 +139,16 @@
             <div class="space-y-6">
               <div>
                 <div class="text-sm font-light text-gray-500">Name</div>
-                <div>{{ user()?.name }}</div>
+                <div class="break-all">{{ user()?.name }}</div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Username</div>
-                <div>{{ user()?.username }}</div>
+                <div class="break-all">{{ user()?.username }}</div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Email</div>
-                <div class="flex items-center gap-2">
-                  <div>{{ user()?.email }}</div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="break-all">{{ user()?.email }}</div>
                   <span
                     class="rounded px-2 py-1 text-xs font-semibold uppercase"
                     [class]="
@@ -181,7 +163,9 @@
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Signed Up</div>
-                <div>{{ user()?.created_at | date: "medium" }}</div>
+                <div>
+                  {{ user()?.created_at | date: "medium" }}
+                </div>
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Latest Login</div>
@@ -195,7 +179,9 @@
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Last Updated</div>
-                <div>{{ user()?.updated_at | date: "medium" }}</div>
+                <div>
+                  {{ user()?.updated_at | date: "medium" }}
+                </div>
               </div>
             </div>
           </div>
@@ -210,43 +196,49 @@
               <div class="text-2xl font-semibold">Services</div>
               <div class="space-y-4">
                 @for (
-                  membership of user()!.platform_memberships;
-                  track membership.id
+                  platform of user()!.platform_memberships;
+                  track platform.id
                 ) {
                   <div class="flex items-center justify-between gap-6">
                     <div class="flex items-center gap-2">
                       <img
-                        [src]="PLATFORMS[membership.platform_id].logoUrl"
-                        [alt]="getPlatformName(membership.platform_id)"
+                        [src]="platforms[platform.platform_id].logoUrl"
+                        [alt]="getPlatformName(platform.platform_id)"
                         class="mr-4 h-16 min-h-16 w-16 min-w-16 object-contain"
                       />
                       <div class="font-medium">
-                        {{ getPlatformName(membership.platform_id) }}
+                        {{ getPlatformName(platform.platform_id) }}
                       </div>
                       <span
                         class="rounded px-2 py-1 text-xs font-semibold uppercase"
                         [class]="
-                          membership.approval_status === 'approved'
+                          platform.approval_status === 'approved'
                             ? 'bg-green-100 text-green-800'
-                            : membership.approval_status === 'pending'
+                            : platform.approval_status === 'pending'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-red-100 text-red-800'
                         "
                       >
-                        {{ membership.approval_status }}
+                        {{ platform.approval_status }}
                       </span>
-                      @if (membership.approval_status === "revoked") {
+                      @if (platform.approval_status === "revoked") {
                         <app-tooltip
-                          [message]="membership.revocation_reason || 'Revoked'"
+                          [message]="
+                            getTooltipMessage(
+                              platform.revocation_reason,
+                              platform.updated_by,
+                              platform.updated_at
+                            )
+                          "
                         />
                       }
                     </div>
-                    @if (canManagePlatform(membership.platform_id)) {
+                    @if (canManagePlatform(platform.platform_id)) {
                       <app-dropdown-menu
-                        [isOpen]="isPlatformMenuOpen(membership.platform_id)"
+                        [isOpen]="isPlatformMenuOpen(platform.platform_id)"
                         (isOpenChange)="
                           $event
-                            ? openMenuPlatformId.set(membership.platform_id)
+                            ? openMenuPlatformId.set(platform.platform_id)
                             : openMenuPlatformId.set(null)
                         "
                       >
@@ -256,9 +248,9 @@
                             class="rounded-full p-1 transition-all hover:bg-gray-200"
                             (click)="
                               openMenuPlatformId.set(
-                                isPlatformMenuOpen(membership.platform_id)
+                                isPlatformMenuOpen(platform.platform_id)
                                   ? null
-                                  : membership.platform_id
+                                  : platform.platform_id
                               )
                             "
                           >
@@ -279,17 +271,14 @@
                           </button>
                         </ng-template>
                         <ng-template #menu>
-                          @switch (membership.approval_status) {
+                          @switch (platform.approval_status) {
                             @case ("pending") {
                               <button
                                 type="button"
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="
-                                  openMenuPlatformId.set(null);
-                                  approvePlatform(membership.platform_id)
-                                "
+                                (click)="approvePlatform(platform.platform_id)"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -307,6 +296,28 @@
                                 </svg>
                                 Approve
                               </button>
+                              <button
+                                type="button"
+                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                                role="menuitem"
+                                tabindex="-1"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke-width="1.5"
+                                  stroke="currentColor"
+                                  class="size-5"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                  />
+                                </svg>
+                                Reject
+                              </button>
                             }
                             @case ("approved") {
                               <button
@@ -314,10 +325,7 @@
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="
-                                  openMenuPlatformId.set(null);
-                                  openRevokeModal(membership.platform_id)
-                                "
+                                (click)="revokePlatform(platform.platform_id)"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -342,10 +350,7 @@
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="
-                                  openMenuPlatformId.set(null);
-                                  approvePlatform(membership.platform_id)
-                                "
+                                (click)="approvePlatform(platform.platform_id)"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -380,8 +385,8 @@
               <div class="text-2xl font-semibold">Bundles</div>
               <div class="space-y-4">
                 @for (
-                  membership of user()!.group_memberships;
-                  track membership.id
+                  group of user()!.group_memberships;
+                  track group.group_id
                 ) {
                   <div class="flex items-center justify-between gap-6">
                     <div class="flex items-center gap-2">
@@ -389,52 +394,55 @@
                         class="mr-4 flex h-16 min-h-16 w-16 min-w-16 items-center justify-center gap-1"
                       >
                         @for (
-                          logoUrl of getBundleLogoUrls(membership.group_id);
+                          logoUrl of getBundleLogoUrls(group.group_id);
                           track logoUrl
                         ) {
                           <img
                             [src]="logoUrl"
-                            [alt]="membership.group_name"
+                            [alt]="group.group_name"
                             class="h-full w-full object-contain"
                           />
                         }
                       </div>
                       <div class="font-medium">
-                        {{ membership.group_name }}
+                        {{ group.group_name }}
                       </div>
                       @if (
-                        membership.approval_status === "revoked" ||
-                        membership.approval_status === "rejected"
+                        group.approval_status === "revoked" ||
+                        group.approval_status === "rejected"
                       ) {
                         <app-tooltip
                           [message]="
-                            membership.rejection_reason ||
-                            membership.revocation_reason ||
-                            (membership.approval_status === 'rejected'
-                              ? 'Rejected'
-                              : 'Revoked')
+                            getTooltipMessage(
+                              group.revocation_reason || group.rejection_reason,
+                              group.updated_by,
+                              group.updated_at,
+                              group.approval_status === 'rejected'
+                                ? 'Rejected'
+                                : 'Revoked'
+                            )
                           "
                         />
                       }
                       <span
                         class="rounded px-2 py-1 text-xs font-semibold uppercase"
                         [class]="
-                          membership.approval_status === 'approved'
+                          group.approval_status === 'approved'
                             ? 'bg-green-100 text-green-800'
-                            : membership.approval_status === 'pending'
+                            : group.approval_status === 'pending'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-red-100 text-red-800'
                         "
                       >
-                        {{ membership.approval_status }}
+                        {{ group.approval_status }}
                       </span>
                     </div>
-                    @if (canManageGroup(membership.group_id)) {
+                    @if (canManageGroup(group.group_id)) {
                       <app-dropdown-menu
-                        [isOpen]="isGroupMenuOpen(membership.id)"
+                        [isOpen]="isGroupMenuOpen(group.group_id)"
                         (isOpenChange)="
                           $event
-                            ? openMenuGroupId.set(membership.id)
+                            ? openMenuGroupId.set(group.group_id)
                             : openMenuGroupId.set(null)
                         "
                       >
@@ -444,9 +452,9 @@
                             class="rounded-full p-1 transition-all hover:bg-gray-200"
                             (click)="
                               openMenuGroupId.set(
-                                isGroupMenuOpen(membership.id)
+                                isGroupMenuOpen(group.group_id)
                                   ? null
-                                  : membership.id
+                                  : group.group_id
                               )
                             "
                           >
@@ -467,14 +475,14 @@
                           </button>
                         </ng-template>
                         <ng-template #menu>
-                          @switch (membership.approval_status) {
+                          @switch (group.approval_status) {
                             @case ("pending") {
                               <button
                                 type="button"
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="approveGroup(membership.id)"
+                                (click)="approveGroup(group.group_id)"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -497,7 +505,9 @@
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="rejectGroup(membership.id)"
+                                (click)="
+                                  rejectGroup(group.group_id, group.group_name)
+                                "
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -523,7 +533,9 @@
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="revokeGroup(membership.id)"
+                                (click)="
+                                  revokeGroup(group.group_id, group.group_name)
+                                "
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -548,7 +560,7 @@
                                 class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
-                                (click)="approveGroup(membership.id)"
+                                (click)="approveGroup(group.group_id)"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -567,9 +579,7 @@
                                 Approve
                               </button>
                             }
-                            @default {
-                              <!-- No admin actions for rejected or other terminal states -->
-                            }
+                            @default {}
                           }
                         </ng-template>
                       </app-dropdown-menu>
