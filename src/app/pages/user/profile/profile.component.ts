@@ -60,7 +60,9 @@ export class ProfileComponent implements OnInit {
   protected readonly PLATFORMS = PLATFORMS;
   protected readonly BIOCOMMONS_BUNDLES = BIOCOMMONS_BUNDLES;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
-    bpa_data_portal: environment.platformUrls.bpaPlatform,
+    bpa_data_portal:
+      environment.platformUrls.bpaPlatformLogin ??
+      environment.platformUrls.bpaPlatform,
     galaxy: environment.platformUrls.galaxyPlatform,
     sbp: environment.platformUrls.sbpPlatform,
   };
