@@ -40,20 +40,11 @@
               "
             >
               @if (isSelectedBundle(bundle)) {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="2"
-                  stroke="currentColor"
-                  class="size-6 text-white"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m4.5 12.75 6 6 9-13.5"
-                  />
-                </svg>
+                <ng-icon
+                  name="heroCheck"
+                  size="24"
+                  class="text-white"
+                ></ng-icon>
               }
             </div>
             <input
@@ -71,16 +62,11 @@
                     <div
                       class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
-                      >
-                        <path
-                          d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
-                        />
-                      </svg>
+                      <ng-icon
+                        name="heroPlus"
+                        size="20"
+                        class="mt-1 min-h-5 min-w-5 text-sky-600"
+                      ></ng-icon>
                       <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
                       <div
                         [innerHTML]="item"

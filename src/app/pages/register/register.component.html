@@ -58,50 +58,29 @@
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
                         } @else if (last && active && valid) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="z-10 size-5 text-white"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <ng-icon
+                            name="heroCheck"
+                            size="20"
+                            class="z-10 text-white"
+                          ></ng-icon>
                         } @else if (active) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
                         } @else if (completed && valid) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-5 text-white"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <ng-icon
+                            name="heroCheck"
+                            size="20"
+                            class="z-10 text-white"
+                          ></ng-icon>
                         } @else if (completed && !valid) {
                           <span class="text-white">!</span>
                         } @else if (visited && valid) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-5 text-biocommons-primary"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <ng-icon
+                            name="heroCheck"
+                            size="20"
+                            class="text-biocommons-primary"
+                          ></ng-icon>
                         } @else if (visited && !valid) {
                           <span class="text-red-600">!</span>
                         }
@@ -394,20 +373,7 @@
                   (click)="$event.stopPropagation()"
                 >
                   BioCommons Access terms & conditions
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-4 min-h-4 min-w-4"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                    />
-                  </svg>
+                  <ng-icon name="heroArrowTopRightOnSquare" size="16"></ng-icon>
                 </a>
                 <input
                   type="checkbox"
@@ -459,20 +425,10 @@
                       (click)="$event.stopPropagation()"
                     >
                       {{ service.termsTitle }}
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-4 min-h-4 min-w-4"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                        />
-                      </svg>
+                      <ng-icon
+                        name="heroArrowTopRightOnSquare"
+                        size="16"
+                      ></ng-icon>
                     </a>
                     <input
                       type="checkbox"

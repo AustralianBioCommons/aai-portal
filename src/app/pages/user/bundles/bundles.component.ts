@@ -4,13 +4,23 @@ import { ApiService } from '../../../core/services/api.service';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
 import { BundleSelectionComponent } from '../../../shared/components/bundle-selection/bundle-selection.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroArrowLeft } from '@ng-icons/heroicons/outline';
+import { AlertComponent } from '../../../shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-bundles',
-  imports: [BundleSelectionComponent, ButtonComponent],
+  imports: [
+    RouterLink,
+    AlertComponent,
+    BundleSelectionComponent,
+    ButtonComponent,
+    NgIcon,
+  ],
   templateUrl: './bundles.component.html',
   styleUrl: './bundles.component.css',
+  viewProviders: [provideIcons({ heroArrowLeft })],
 })
 export class BundlesComponent implements OnInit {
   public router = inject(Router);
@@ -21,6 +31,7 @@ export class BundlesComponent implements OnInit {
     selectedBundle: [''],
   });
 
+  errorAlert = signal<string | null>(null);
   bundles = signal<Bundle[]>(BIOCOMMONS_BUNDLES);
   isSubmitting = signal<boolean>(false);
 

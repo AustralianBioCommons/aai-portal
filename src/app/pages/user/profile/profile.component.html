@@ -228,20 +228,7 @@
             routerLink="/"
             class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="size-4"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-              />
-            </svg>
+            <ng-icon name="heroArrowLeft" size="16"></ng-icon>
             Return to Dashboard
           </a>
         </div>
@@ -399,53 +386,60 @@
             </div>
           }
 
-          @if (user()?.group_memberships && user()!.group_memberships.length) {
-            <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
-              <div class="text-2xl font-semibold">Bundles</div>
-              <div class="space-y-4">
-                @for (
-                  membership of user()!.group_memberships;
-                  track membership.group_id
-                ) {
-                  <div class="flex items-center justify-between gap-6">
-                    <div class="flex items-center gap-6">
-                      <div
-                        class="flex h-16 w-16 items-center justify-center gap-1"
-                      >
-                        @for (
-                          logoUrl of getBundleLogoUrls(membership.group_id);
-                          track logoUrl
-                        ) {
-                          <img
-                            [src]="logoUrl"
-                            [alt]="membership.group_name"
-                            class="h-full w-full object-contain"
-                          />
-                        }
-                      </div>
-                      <div class="font-medium">
-                        {{ membership.group_name }}
-                      </div>
+          <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-semibold">Bundles</h2>
+              <a
+                class="flex items-center gap-1 text-sm text-biocommons-primary"
+                routerLink="/bundles"
+              >
+                Choose more
+                <ng-icon name="heroPlusCircle" size="24"></ng-icon>
+              </a>
+            </div>
+            <div class="space-y-4">
+              @for (
+                membership of user()!.group_memberships;
+                track membership.group_id
+              ) {
+                <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center gap-6">
+                    <div
+                      class="flex h-16 w-16 items-center justify-center gap-1"
+                    >
+                      @for (
+                        logoUrl of getBundleLogoUrls(membership.group_id);
+                        track logoUrl
+                      ) {
+                        <img
+                          [src]="logoUrl"
+                          [alt]="membership.group_name"
+                          class="h-full w-full object-contain"
+                        />
+                      }
                     </div>
-                    <div class="flex items-center gap-4">
-                      <span
-                        class="rounded px-2 py-1 text-xs font-semibold uppercase"
-                        [class]="
-                          membership.approval_status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : membership.approval_status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                        "
-                      >
-                        {{ membership.approval_status }}
-                      </span>
+                    <div class="font-medium">
+                      {{ membership.group_name }}
                     </div>
                   </div>
-                }
-              </div>
+                  <div class="flex items-center gap-4">
+                    <span
+                      class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                      [class]="
+                        membership.approval_status === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : membership.approval_status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      "
+                    >
+                      {{ membership.approval_status }}
+                    </span>
+                  </div>
+                </div>
+              }
             </div>
-          }
+          </div>
         </div>
       </div>
     </div>

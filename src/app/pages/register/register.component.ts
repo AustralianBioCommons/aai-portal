@@ -27,6 +27,11 @@ import {
 import { emailLengthValidator } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
 import { BundleSelectionComponent } from '../../shared/components/bundle-selection/bundle-selection.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroCheck,
+  heroArrowTopRightOnSquare,
+} from '@ng-icons/heroicons/outline';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -63,8 +68,10 @@ interface Section {
     ButtonComponent,
     RegistrationNavbarComponent,
     BundleSelectionComponent,
+    NgIcon,
   ],
   styleUrl: './register.component.css',
+  viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],
 })
 export class RegisterComponent implements AfterViewInit {
   public router = inject(Router);

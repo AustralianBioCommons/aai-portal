@@ -52,20 +52,7 @@
           [routerLink]="returnUrl()"
           class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="size-4"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
-            />
-          </svg>
+          <ng-icon name="heroArrowLeft" size="16"></ng-icon>
           Back to Users
         </a>
 
@@ -82,20 +69,7 @@
               >
                 <div class="flex items-center justify-center gap-2">
                   Actions
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-4"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
+                  <ng-icon name="heroChevronDown" size="16"></ng-icon>
                 </div>
               </app-button>
             </ng-template>
@@ -106,20 +80,7 @@
                 tabindex="-1"
                 (click)="resendVerificationEmail()"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="size-5"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07 1.916V6.75"
-                  />
-                </svg>
+                <ng-icon name="heroEnvelope" size="20"></ng-icon>
                 Resend Verification Email
               </button>
             </ng-template>
@@ -253,7 +214,7 @@
                         <ng-template #trigger>
                           <button
                             type="button"
-                            class="rounded-full p-1 transition-all hover:bg-gray-200"
+                            class="rounded-full p-1 align-middle transition-all hover:bg-gray-200"
                             (click)="
                               openMenuPlatformId.set(
                                 isPlatformMenuOpen(membership.platform_id)
@@ -262,20 +223,10 @@
                               )
                             "
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="1.5"
-                              stroke="currentColor"
-                              class="size-5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                              />
-                            </svg>
+                            <ng-icon
+                              name="heroEllipsisHorizontal"
+                              size="20"
+                            ></ng-icon>
                           </button>
                         </ng-template>
                         <ng-template #menu>
@@ -291,20 +242,10 @@
                                   approvePlatform(membership.platform_id)
                                 "
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
+                                <ng-icon
+                                  name="heroCheckCircle"
+                                  size="20"
+                                ></ng-icon>
                                 Approve
                               </button>
                             }
@@ -319,20 +260,7 @@
                                   openRevokeModal(membership.platform_id)
                                 "
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
+                                <ng-icon name="heroXCircle" size="20"></ng-icon>
                                 Revoke
                               </button>
                             }
@@ -347,20 +275,10 @@
                                   approvePlatform(membership.platform_id)
                                 "
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
+                                <ng-icon
+                                  name="heroCheckCircle"
+                                  size="20"
+                                ></ng-icon>
                                 Approve
                               </button>
                             }
@@ -450,20 +368,10 @@
                               )
                             "
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke-width="1.5"
-                              stroke="currentColor"
-                              class="size-5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                              />
-                            </svg>
+                            <ng-icon
+                              name="heroEllipsisHorizontal"
+                              size="20"
+                            ></ng-icon>
                           </button>
                         </ng-template>
                         <ng-template #menu>
@@ -476,20 +384,10 @@
                                 tabindex="-1"
                                 (click)="approveGroup(membership.id)"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
+                                <ng-icon
+                                  name="heroCheckCircle"
+                                  size="20"
+                                ></ng-icon>
                                 Approve
                               </button>
                               <button
@@ -499,21 +397,7 @@
                                 tabindex="-1"
                                 (click)="rejectGroup(membership.id)"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
-
+                                <ng-icon name="heroXCircle" size="20"></ng-icon>
                                 Reject
                               </button>
                             }
@@ -525,20 +409,7 @@
                                 tabindex="-1"
                                 (click)="revokeGroup(membership.id)"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
+                                <ng-icon name="heroXCircle" size="20"></ng-icon>
                                 Revoke
                               </button>
                             }
@@ -550,20 +421,10 @@
                                 tabindex="-1"
                                 (click)="approveGroup(membership.id)"
                               >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
+                                <ng-icon
+                                  name="heroCheckCircle"
+                                  size="20"
+                                ></ng-icon>
                                 Approve
                               </button>
                             }

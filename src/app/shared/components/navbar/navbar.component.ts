@@ -22,12 +22,31 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
 import { filter } from 'rxjs';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroBars3,
+  heroUserCircle,
+  heroArrowRightStartOnRectangle,
+} from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, CommonModule, DropdownMenuComponent],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    CommonModule,
+    NgIcon,
+    DropdownMenuComponent,
+  ],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
+  viewProviders: [
+    provideIcons({
+      heroBars3,
+      heroUserCircle,
+      logOut: heroArrowRightStartOnRectangle,
+    }),
+  ],
 })
 export class NavbarComponent {
   private authService = inject(AuthService);

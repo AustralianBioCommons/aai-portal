@@ -2,12 +2,15 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Bundle } from '../../../core/constants/constants';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroCheck, heroPlus } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-bundle-selection',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgIcon],
   templateUrl: './bundle-selection.component.html',
   styleUrl: './bundle-selection.component.css',
+  viewProviders: [provideIcons({ heroCheck, heroPlus })],
 })
 export class BundleSelectionComponent {
   bundleForm = input.required<FormGroup>();

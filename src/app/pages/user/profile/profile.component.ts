@@ -33,6 +33,8 @@ import {
   toAsciiEmail,
 } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -47,9 +49,11 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
     ButtonComponent,
     ReactiveFormsModule,
     RouterLink,
+    NgIcon,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
+  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle })],
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
