@@ -47,6 +47,7 @@ describe('UserDetailsComponent', () => {
         user_id: '123',
         approval_status: 'approved',
         updated_by: 'admin',
+        updated_at: '2023-01-01T00:00:00Z',
       },
     ],
     group_memberships: [
@@ -57,6 +58,7 @@ describe('UserDetailsComponent', () => {
         group_short_name: 'TSI',
         approval_status: 'pending',
         updated_by: 'admin',
+        updated_at: '2023-01-01T00:00:00Z',
       },
     ],
   };
@@ -410,6 +412,7 @@ describe('UserDetailsComponent', () => {
             user_id: '123',
             approval_status: 'pending',
             updated_by: 'admin',
+            updated_at: '2023-01-01T00:00:00Z',
           },
         ],
       };
@@ -431,26 +434,27 @@ describe('UserDetailsComponent', () => {
     it('should open revoke modal for platform', () => {
       fixture.detectChanges();
 
-      component.openRevokeModal('galaxy');
+      component.revokePlatform('galaxy');
 
-      expect(component.revokeModalData()).toBeTruthy();
-      expect(component.revokeModalData()?.type).toBe('platform');
-      expect(component.revokeModalData()?.id).toBe('galaxy');
+      expect(component.actionModalData()).toBeTruthy();
+      expect(component.actionModalData()?.type).toBe('platform');
+      expect(component.actionModalData()?.id).toBe('galaxy');
     });
 
     it('should close revoke modal and reset form', () => {
-      component.revokeModalData.set({
+      component.actionModalData.set({
+        action: 'revoke',
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.revokeReasonControl.setValue('test reason');
+      component.reasonControl.setValue('test reason');
 
-      component.closeRevokeModal();
+      component.closeActionModal();
 
-      expect(component.revokeModalData()).toBeNull();
-      expect(component.revokeReasonControl.value).toBe('');
+      expect(component.actionModalData()).toBeNull();
+      expect(component.reasonControl.value).toBe('');
     });
 
     it('should revoke platform access with reason', () => {
@@ -460,37 +464,39 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.revokeModalData.set({
+      component.actionModalData.set({
+        action: 'revoke',
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.revokeReasonControl.setValue('Security violation');
+      component.reasonControl.setValue('Security violation');
 
-      component.confirmRevoke();
+      component.confirmActionModal();
 
       expect(mockApiService.revokePlatformAccess).toHaveBeenCalledWith(
         '123',
         'galaxy',
         'Security violation',
       );
-      expect(component.revokeModalData()).toBeNull();
+      expect(component.actionModalData()).toBeNull();
     });
 
     it('should not revoke without reason', () => {
-      component.revokeModalData.set({
+      component.actionModalData.set({
+        action: 'revoke',
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.revokeReasonControl.setValue('');
+      component.reasonControl.setValue('');
 
-      component.confirmRevoke();
+      component.confirmActionModal();
 
       expect(mockApiService.revokePlatformAccess).not.toHaveBeenCalled();
-      expect(component.revokeReasonControl.touched).toBeTrue();
+      expect(component.reasonControl.touched).toBeTrue();
     });
 
     it('should handle approve platform error', () => {
@@ -504,6 +510,7 @@ describe('UserDetailsComponent', () => {
             user_id: '123',
             approval_status: 'pending',
             updated_by: 'admin',
+            updated_at: '2023-01-01T00:00:00Z',
           },
         ],
       };
@@ -518,12 +525,12 @@ describe('UserDetailsComponent', () => {
       component.approvePlatform('galaxy');
 
       expect(console.error).toHaveBeenCalledWith(
-        'Failed to approve platform access:',
+        'Failed to approve service access:',
         jasmine.any(Error),
       );
       expect(component.alert()?.type).toBe('error');
       expect(component.alert()?.message).toBe(
-        'Failed to approve platform access',
+        'Failed to approve service access',
       );
     });
 
@@ -534,26 +541,28 @@ describe('UserDetailsComponent', () => {
       spyOn(console, 'error');
       fixture.detectChanges();
 
-      component.revokeModalData.set({
+      component.actionModalData.set({
+        action: 'revoke',
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
         email: 'test@example.com',
       });
-      component.revokeReasonControl.setValue('Test reason');
+      component.reasonControl.setValue('Test reason');
 
-      component.confirmRevoke();
+      component.confirmActionModal();
 
       expect(console.error).toHaveBeenCalledWith(
-        'Failed to revoke platform access:',
+        'Failed to revoke service access:',
         jasmine.any(Error),
       );
       expect(component.alert()?.type).toBe('error');
-      expect(component.revokeModalData()).toBeNull();
+      expect(component.actionModalData()).toBeNull();
     });
 
     it('should show revoke modal in DOM when open', () => {
-      component.revokeModalData.set({
+      component.actionModalData.set({
+        action: 'revoke',
         type: 'platform',
         id: 'galaxy',
         name: 'Galaxy Australia',
@@ -582,6 +591,7 @@ describe('UserDetailsComponent', () => {
             user_id: '123',
             approval_status: 'revoked',
             updated_by: 'admin',
+            updated_at: '2023-01-01T00:00:00Z',
             revocation_reason: 'Access expired',
           },
         ],
@@ -602,7 +612,7 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.approveGroup('gm');
+      component.approveGroup('tsi');
 
       expect(mockApiService.approveGroupAccess).toHaveBeenCalledWith(
         '123',
@@ -610,19 +620,19 @@ describe('UserDetailsComponent', () => {
       );
       expect(component.alert()?.type).toBe('success');
       expect(component.alert()?.message).toBe(
-        'Group access approved successfully',
+        'Bundle access approved successfully',
       );
     });
 
     it('should open revoke modal for group membership', () => {
       fixture.detectChanges();
 
-      component.revokeGroup('gm');
+      component.revokeGroup('tsi', 'Threatened Species Initiative');
 
-      expect(component.revokeModalData()).toBeTruthy();
-      expect(component.revokeModalData()?.type).toBe('group');
-      expect(component.revokeModalData()?.id).toBe('tsi');
-      expect(component.revokeModalData()?.name).toBe(
+      expect(component.actionModalData()).toBeTruthy();
+      expect(component.actionModalData()?.type).toBe('group');
+      expect(component.actionModalData()?.id).toBe('tsi');
+      expect(component.actionModalData()?.name).toBe(
         'Threatened Species Initiative',
       );
     });
@@ -632,22 +642,23 @@ describe('UserDetailsComponent', () => {
       mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
       fixture.detectChanges();
 
-      component.revokeModalData.set({
+      component.actionModalData.set({
+        action: 'revoke',
         type: 'group',
         id: 'tsi',
         name: 'Threatened Species Initiative',
         email: 'test@example.com',
       });
-      component.revokeReasonControl.setValue('No longer needed');
+      component.reasonControl.setValue('No longer needed');
 
-      component.confirmRevoke();
+      component.confirmActionModal();
 
       expect(mockApiService.revokeGroupAccess).toHaveBeenCalledWith(
         '123',
         'tsi',
         'No longer needed',
       );
-      expect(component.revokeModalData()).toBeNull();
+      expect(component.actionModalData()).toBeNull();
     });
   });
 });
