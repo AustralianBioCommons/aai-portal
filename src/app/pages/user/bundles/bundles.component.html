@@ -39,6 +39,7 @@
         variant="primary"
         (click)="submit()"
         [loading]="isSubmitting()"
+        [disabled]="selected() === undefined || isSubmitting()"
       >
         Submit
       </app-button>

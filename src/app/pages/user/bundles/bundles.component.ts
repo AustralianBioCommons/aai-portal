@@ -34,9 +34,14 @@ export class BundlesComponent implements OnInit {
   errorAlert = signal<string | null>(null);
   bundles = signal<Bundle[]>(BIOCOMMONS_BUNDLES);
   isSubmitting = signal<boolean>(false);
+  selected = signal<Bundle | undefined>(undefined);
 
   ngOnInit() {
     this.loadCurrentBundles();
+    // Update selected signal
+    this.bundleForm.get('bundle')?.valueChanges.subscribe(() => {
+      this.selected.set(this.getSelectedBundle());
+    });
   }
 
   getSelectedBundle(): Bundle | undefined {
