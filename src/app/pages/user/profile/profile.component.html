@@ -398,6 +398,13 @@
               </a>
             </div>
             <div class="space-y-4">
+              @if (
+                !user()!.group_memberships || !user()!.group_memberships.length
+              ) {
+                <div class="text-sm font-medium text-gray-500">
+                  You are not a member of any bundles.
+                </div>
+              }
               @for (
                 membership of user()!.group_memberships;
                 track membership.group_id
