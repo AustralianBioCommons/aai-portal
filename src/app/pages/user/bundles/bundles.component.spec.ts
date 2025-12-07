@@ -9,6 +9,8 @@ import {
   UserGroupStatus,
 } from '../../../core/services/api.service';
 import { of } from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { ButtonComponent } from '../../../shared/components/button/button.component';
 
 describe('BundlesComponent', () => {
   let component: BundlesComponent;
@@ -77,5 +79,46 @@ describe('BundlesComponent', () => {
       `biocommons/group/${bundleId}`,
     );
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
+  });
+
+  it('should disable submit button when no bundle is selected', () => {
+    apiService.getUserGroups.and.returnValue(of([]));
+    fixture.detectChanges();
+
+    // Initially no bundle is selected
+    expect(component.selected()).toBeUndefined();
+
+    const buttonDebugEl = fixture.debugElement.query(
+      By.directive(ButtonComponent),
+    );
+    expect(buttonDebugEl).withContext('app-button not found').toBeTruthy();
+
+    const buttonCmp = buttonDebugEl.componentInstance as ButtonComponent;
+    expect(buttonCmp.disabled()).toBeTrue();
+  });
+
+  it('should enable submit button when bundle is selected and disable when deselected', () => {
+    fixture.detectChanges();
+    const buttonDebugEl = fixture.debugElement.query(
+      By.directive(ButtonComponent),
+    );
+    expect(buttonDebugEl).withContext('app-button not found').toBeTruthy();
+
+    const buttonCmp = buttonDebugEl.componentInstance as ButtonComponent;
+
+    // Select a bundle
+    component.bundleForm.patchValue({ bundle: 'tsi' });
+    fixture.detectChanges();
+
+    expect(component.selected()).toBeDefined();
+    expect(component.selected()?.id).toBe('tsi');
+    expect(buttonCmp.disabled()).toBe(false);
+
+    // Deselect the bundle
+    component.bundleForm.patchValue({ bundle: '' });
+    fixture.detectChanges();
+
+    expect(component.selected()).toBeUndefined();
+    expect(buttonCmp.disabled()).toBe(true);
   });
 });
