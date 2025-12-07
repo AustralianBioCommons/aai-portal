@@ -264,7 +264,7 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.registrationForm.get('selectedBundle')?.value;
+    const selectedId = this.registrationForm.get('bundle')?.value;
     return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
