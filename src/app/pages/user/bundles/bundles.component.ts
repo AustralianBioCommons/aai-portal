@@ -60,7 +60,7 @@ export class BundlesComponent implements OnInit {
         this.router.navigate(['/profile']);
       },
       error: (error) => {
-        console.log('Requestion bundle failed:', error);
+        console.log('Requesting bundle failed:', error);
         this.errorAlert.set(error?.error?.detail || 'Failed to request access');
         this.isSubmitting.set(false);
       },
