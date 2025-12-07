@@ -36,6 +36,7 @@ describe('BundlesComponent', () => {
     component = fixture.componentInstance;
     apiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     router = TestBed.inject(Router);
+    apiService.getUserGroups.and.returnValue(of([]));
   });
 
   it('should create', () => {
