@@ -18,6 +18,15 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { DropdownMenuComponent } from '../../../shared/components/dropdown-menu/dropdown-menu.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroArrowLeft,
+  heroCheckCircle,
+  heroChevronDown,
+  heroEllipsisHorizontal,
+  heroEnvelope,
+  heroXCircle,
+} from '@ng-icons/heroicons/outline';
 
 type ActionModalData = {
   action: 'revoke' | 'reject';
@@ -39,10 +48,21 @@ type ActionModalData = {
     ReactiveFormsModule,
     ModalComponent,
     DropdownMenuComponent,
+    NgIcon,
   ],
   providers: [DatePipe],
   templateUrl: './user-details.component.html',
   styleUrl: './user-details.component.css',
+  viewProviders: [
+    provideIcons({
+      heroArrowLeft,
+      heroCheckCircle,
+      heroChevronDown,
+      heroEnvelope,
+      heroEllipsisHorizontal,
+      heroXCircle,
+    }),
+  ],
 })
 export class UserDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

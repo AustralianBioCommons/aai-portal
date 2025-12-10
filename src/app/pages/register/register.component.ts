@@ -13,16 +13,22 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, fromEvent, of } from 'rxjs';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
-import { BIOCOMMONS_BUNDLES } from '../../core/constants/constants';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
 import { ValidationService } from '../../core/services/validation.service';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
 import {
   emailLengthValidator,
   internationalEmailValidator,
   toAsciiEmail,
 } from '../../shared/validators/emails';
+import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
+import { BundleSelectionComponent } from '../../shared/components/bundle-selection/bundle-selection.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroCheck,
+  heroArrowTopRightOnSquare,
+} from '@ng-icons/heroicons/outline';
 import { fullNameLengthValidator } from '../../shared/validators/full-name';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
@@ -63,8 +69,11 @@ interface Section {
     AlertComponent,
     ButtonComponent,
     RegistrationNavbarComponent,
+    BundleSelectionComponent,
+    NgIcon,
   ],
   styleUrl: './register.component.css',
+  viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],
 })
 export class RegisterComponent implements AfterViewInit {
   private readonly router = inject(Router);
@@ -204,10 +213,6 @@ export class RegisterComponent implements AfterViewInit {
     }
   }
 
-  getActiveStepObject(): Section | undefined {
-    return this.sections.find((s) => s.id === this.activeSection());
-  }
-
   isSectionCompleted(sectionId: string): boolean {
     const currentIndex = this.sections.findIndex(
       (s) => s.id === this.activeSection(),
@@ -258,21 +263,12 @@ export class RegisterComponent implements AfterViewInit {
     this.recaptchaToken.set(captchaResponse);
   }
 
-  toggleBundle(bundleId: string): void {
-    const selected = this.bundles.find((b) => b.id === bundleId);
-    if (selected?.disabled) return;
-
-    const current = this.registrationForm.get('bundle')?.value;
-    this.registrationForm.patchValue({
-      bundle: current === bundleId ? '' : bundleId,
-    });
+  getSelectedBundle(): Bundle | undefined {
+    const selectedId = this.registrationForm.get('bundle')?.value;
+    return this.bundles.find((bundle) => bundle.id === selectedId);
   }
 
-  onBundleItemClick(event: Event): void {
-    if (event.target instanceof HTMLAnchorElement) event.stopPropagation();
-  }
-
-  submitRegistration(): void {
+  submitRegistration() {
     this.errorAlert.set(null);
     this.recaptchaAttempted.set(true);
     this.registrationForm.markAllAsTouched();

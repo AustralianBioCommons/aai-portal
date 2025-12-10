@@ -58,50 +58,29 @@
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
                         } @else if (last && active && valid) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="z-10 size-5 text-white"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <ng-icon
+                            name="heroCheck"
+                            size="20"
+                            class="z-10 text-white"
+                          ></ng-icon>
                         } @else if (active) {
                           <div
                             class="h-2 w-2 rounded-full bg-biocommons-primary"
                           ></div>
                         } @else if (completed && valid) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-5 text-white"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <ng-icon
+                            name="heroCheck"
+                            size="20"
+                            class="z-10 text-white"
+                          ></ng-icon>
                         } @else if (completed && !valid) {
                           <span class="text-white">!</span>
                         } @else if (visited && valid) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="size-5 text-biocommons-primary"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <ng-icon
+                            name="heroCheck"
+                            size="20"
+                            class="text-biocommons-primary"
+                          ></ng-icon>
                         } @else if (visited && !valid) {
                           <span class="text-red-600">!</span>
                         }
@@ -346,100 +325,11 @@
             <p class="text-left font-light text-gray-600">
               Request access to a bundle you need for your research
             </p>
-            <div class="flex flex-wrap items-stretch justify-center gap-6">
-              <!-- Bundle selection cards -->
-              @for (bundle of bundles; track bundle.id) {
-                <div
-                  tabindex="0"
-                  class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
-                  [ngClass]="{
-                    'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
-                      !bundle.disabled,
-                    'cursor-not-allowed opacity-50': bundle.disabled,
-                    group: !bundle.disabled,
-                    'ring-2 ring-sky-400':
-                      registrationForm.get('bundle')?.value === bundle.id,
-                  }"
-                  (click)="toggleBundle(bundle.id)"
-                  (keyup.enter)="toggleBundle(bundle.id)"
-                >
-                  <!-- Bundle content -->
-                  <div class="flex flex-col gap-6">
-                    <div class="flex items-start justify-between">
-                      <div class="flex gap-6">
-                        @for (logo of bundle.logoUrls; track logo) {
-                          <img
-                            [src]="logo"
-                            [alt]="bundle.name + ' logo'"
-                            class="h-16 w-auto"
-                          />
-                        }
-                      </div>
-                      <div
-                        class="flex h-7 w-7 items-center justify-center rounded-lg border p-1 transition-all"
-                        [class]="
-                          registrationForm.get('bundle')?.value === bundle.id
-                            ? 'border-biocommons-primary bg-biocommons-primary'
-                            : 'border-gray-300'
-                        "
-                      >
-                        @if (
-                          registrationForm.get("bundle")?.value === bundle.id
-                        ) {
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="2"
-                            stroke="currentColor"
-                            class="size-6 text-white"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="m4.5 12.75 6 6 9-13.5"
-                            />
-                          </svg>
-                        }
-                      </div>
-                      <input
-                        type="checkbox"
-                        class="sr-only"
-                        [checked]="
-                          registrationForm.get('bundle')?.value === bundle.id
-                        "
-                      />
-                    </div>
-                    <div class="text-3xl font-semibold">{{ bundle.name }}</div>
-                    @if (bundle.listItems.length) {
-                      <div class="text-sm/6 font-light text-gray-600">
-                        @for (item of bundle.listItems; track item) {
-                          <div
-                            class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                              class="mt-1 size-5 min-h-5 min-w-5 text-sky-600"
-                            >
-                              <path
-                                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
-                              />
-                            </svg>
-                            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-                            <div
-                              [innerHTML]="item"
-                              (click)="onBundleItemClick($event)"
-                            ></div>
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
+
+            <app-bundle-selection
+              [form]="registrationForm"
+              [bundles]="bundles"
+            ></app-bundle-selection>
           </div>
 
           <!-- Terms & Conditions Section -->
@@ -474,20 +364,7 @@
                 (click)="$event.stopPropagation()"
               >
                 BioCommons Access terms & conditions
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  class="size-4 min-h-4 min-w-4"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                  />
-                </svg>
+                <ng-icon name="heroArrowTopRightOnSquare" size="16"></ng-icon>
               </a>
               <input
                 type="checkbox"
@@ -532,10 +409,8 @@
         </form>
       </div>
     </div>
-  }
-
-  <!-- Success Page -->
-  @else {
+  } @else {
+    <!-- Success Page -->
     <div
       class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
     >

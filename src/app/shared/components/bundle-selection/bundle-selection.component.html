@@ -1,0 +1,85 @@
+<form
+  id="add-bundle"
+  [formGroup]="form()"
+  class="flex scroll-mt-24 flex-col gap-6"
+>
+  <div class="flex flex-wrap items-stretch justify-center gap-6">
+    <!-- Bundle selection cards -->
+    @for (bundle of bundles(); track bundle.id) {
+      <div
+        tabindex="0"
+        class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col justify-between gap-12 rounded-xl border bg-white p-12 shadow-md transition-all"
+        [ngClass]="{
+          'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
+            !bundle.disabled,
+          'cursor-not-allowed opacity-50': bundle.disabled,
+          group: !bundle.disabled,
+          'ring-2 ring-sky-400': isSelectedBundle(bundle),
+        }"
+        (click)="!bundle.disabled && toggleBundle(bundle.id)"
+        (keyup.enter)="!bundle.disabled && toggleBundle(bundle.id)"
+      >
+        <!-- Bundle content -->
+        <div class="flex flex-col gap-6">
+          <div class="flex items-start justify-between">
+            <div class="flex gap-6">
+              @for (logo of bundle.logoUrls; track logo) {
+                <img
+                  [src]="logo"
+                  [alt]="bundle.name + ' logo'"
+                  class="h-16 w-auto"
+                />
+              }
+            </div>
+            <div
+              class="flex h-7 w-7 items-center justify-center rounded-full border p-1 transition-all"
+              [ngClass]="
+                isSelectedBundle(bundle)
+                  ? 'border-biocommons-primary bg-biocommons-primary'
+                  : 'border-gray-300'
+              "
+            >
+              @if (isSelectedBundle(bundle)) {
+                <ng-icon
+                  name="heroCheck"
+                  size="24"
+                  class="min-h-5 min-w-5 text-white"
+                ></ng-icon>
+              }
+            </div>
+            <input
+              type="checkbox"
+              [checked]="isSelectedBundle(bundle)"
+              class="sr-only"
+            />
+          </div>
+          <div class="text-3xl font-semibold">{{ bundle.name }}</div>
+          @if (bundle.listItems.length) {
+            <div>
+              @if (bundle.listItems.length > 0) {
+                <div class="text-sm/6 font-light text-gray-600">
+                  @for (item of bundle.listItems; track item) {
+                    <div
+                      class="flex items-start gap-4 py-1 first:pt-0 last:pb-0"
+                    >
+                      <ng-icon
+                        name="heroPlus"
+                        size="20"
+                        class="mt-1 min-h-5 min-w-5 text-sky-600"
+                      ></ng-icon>
+                      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+                      <div
+                        [innerHTML]="item"
+                        (click)="onBundleItemClick($event)"
+                      ></div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</form>

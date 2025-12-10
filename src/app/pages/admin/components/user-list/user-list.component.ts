@@ -33,6 +33,14 @@ import { DataRefreshService } from '../../../../core/services/data-refresh.servi
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { DropdownMenuComponent } from '../../../../shared/components/dropdown-menu/dropdown-menu.component';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  heroMagnifyingGlass,
+  heroEllipsisHorizontal,
+  heroEnvelope,
+  heroUserCircle,
+  heroXCircle,
+} from '@ng-icons/heroicons/outline';
 
 export const DEFAULT_PAGE_SIZE = 50;
 
@@ -60,10 +68,20 @@ export const DEFAULT_PAGE_SIZE = 50;
     AlertComponent,
     ModalComponent,
     DropdownMenuComponent,
+    NgIcon,
   ],
   providers: [DatePipe],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
+  viewProviders: [
+    provideIcons({
+      heroMagnifyingGlass,
+      heroEllipsisHorizontal,
+      heroEnvelope,
+      heroUserCircle,
+      heroXCircle,
+    }),
+  ],
 })
 export class UserListComponent implements OnInit {
   private router = inject(Router);

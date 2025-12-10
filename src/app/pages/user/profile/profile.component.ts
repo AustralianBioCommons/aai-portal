@@ -33,6 +33,8 @@ import {
   toAsciiEmail,
 } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -47,9 +49,11 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
     ButtonComponent,
     ReactiveFormsModule,
     RouterLink,
+    NgIcon,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
+  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle })],
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
@@ -60,7 +64,9 @@ export class ProfileComponent implements OnInit {
   protected readonly platforms = PLATFORMS;
   protected readonly bundles = BIOCOMMONS_BUNDLES;
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
-    bpa_data_portal: environment.platformUrls.bpaPlatform,
+    bpa_data_portal:
+      environment.platformUrls.bpaPlatformLogin ??
+      environment.platformUrls.bpaPlatform,
     galaxy: environment.platformUrls.galaxyPlatform,
     sbp: environment.platformUrls.sbpPlatform,
   };
@@ -226,7 +232,7 @@ export class ProfileComponent implements OnInit {
   protected modalDescription(): string {
     switch (this.activeModal()) {
       case 'email':
-        return 'To verify your email, we will send an one-time-password to your new email address.';
+        return 'To verify your email, we will send a one-time-password (OTP) to your new email address.';
       default:
         return '';
     }
