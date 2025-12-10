@@ -30,8 +30,10 @@ export class ModalComponent {
   });
 
   readonly computedTextareaLabel = computed(() => {
-    if (this.textareaLabel()) return this.textareaLabel();
-    return this.type() === 'reject' ? 'Rejection reason' : 'Revocation reason';
+    return (
+      this.textareaLabel() ??
+      (this.type() === 'reject' ? 'Rejection reason' : 'Revocation reason')
+    );
   });
 
   readonly computedPrimaryButtonText = computed(() => {

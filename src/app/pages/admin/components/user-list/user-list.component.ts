@@ -200,7 +200,8 @@ export class UserListComponent implements OnInit {
     updatedAt: string,
     action = 'Revoked',
   ): string {
-    const formattedDate = this.datePipe.transform(updatedAt, 'MMM d y, h:mm a');
+    const formattedDate =
+      this.datePipe.transform(updatedAt, 'MMM d y, h:mm a') || 'Unknown date';
     return `${reason || action}\n\n(${action} by ${updatedBy} on ${formattedDate})`;
   }
 
