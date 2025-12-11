@@ -390,7 +390,7 @@
             <div class="flex items-center justify-between">
               <h2 class="text-2xl font-semibold">Bundles</h2>
               <a
-                class="flex items-center gap-1 text-sm text-biocommons-primary"
+                class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
                 routerLink="/bundles"
               >
                 Choose more
@@ -401,8 +401,8 @@
               @if (
                 !user()!.group_memberships || !user()!.group_memberships.length
               ) {
-                <div class="text-sm font-medium text-gray-500">
-                  You are not a member of any bundles.
+                <div class="font-light text-gray-500">
+                  You are not a member of any bundles
                 </div>
               }
               @for (
