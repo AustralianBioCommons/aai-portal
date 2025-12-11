@@ -50,7 +50,7 @@
         />
         <button
           type="button"
-          class="rounded-full p-2 transition-all hover:bg-gray-200"
+          class="flex items-center justify-center rounded-full p-2 transition-all hover:bg-gray-200"
           (click)="onSearchSubmit()"
         >
           <ng-icon
@@ -301,7 +301,7 @@
                   <ng-template #trigger>
                     <button
                       type="button"
-                      class="rounded-full p-1 transition-all hover:bg-gray-200"
+                      class="flex flex-col items-center justify-center rounded-full p-1 transition-all hover:bg-gray-200"
                       (click)="
                         openMenuUserId.set(isMenuOpen(user.id) ? null : user.id)
                       "

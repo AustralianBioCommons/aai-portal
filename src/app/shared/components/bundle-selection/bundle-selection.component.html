@@ -32,8 +32,8 @@
               }
             </div>
             <div
-              class="flex h-7 w-7 items-center justify-center rounded-full border p-1 transition-all"
-              [ngClass]="
+              class="flex h-7 w-7 items-center justify-center rounded-lg border transition-all"
+              [class]="
                 isSelectedBundle(bundle)
                   ? 'border-biocommons-primary bg-biocommons-primary'
                   : 'border-gray-300'
@@ -43,7 +43,7 @@
                 <ng-icon
                   name="heroCheck"
                   size="24"
-                  class="min-h-5 min-w-5 text-white"
+                  class="text-white"
                 ></ng-icon>
               }
             </div>

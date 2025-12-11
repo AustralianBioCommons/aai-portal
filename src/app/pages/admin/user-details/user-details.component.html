@@ -206,7 +206,7 @@
                         <ng-template #trigger>
                           <button
                             type="button"
-                            class="rounded-full p-1 align-middle transition-all hover:bg-gray-200"
+                            class="flex items-center justify-center rounded-full p-1 transition-all hover:bg-gray-200"
                             (click)="
                               openMenuPlatformId.set(
                                 isPlatformMenuOpen(platform.platform_id)
@@ -367,7 +367,7 @@
                         <ng-template #trigger>
                           <button
                             type="button"
-                            class="rounded-full p-1 transition-all hover:bg-gray-200"
+                            class="flex items-center justify-center rounded-full p-1 transition-all hover:bg-gray-200"
                             (click)="
                               openMenuGroupId.set(
                                 isGroupMenuOpen(group.group_id)
