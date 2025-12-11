@@ -1,11 +1,4 @@
-import {
-  Component,
-  inject,
-  signal,
-  effect,
-  computed,
-  untracked,
-} from '@angular/core';
+import { Component, inject, signal, effect, untracked } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   ApiService,
@@ -81,21 +74,6 @@ export class NavbarComponent {
     { initialValue: null },
   );
 
-  // Computed signal for the navigation title
-  navTitle = computed(() => {
-    if (!this.isGeneralAdmin()) {
-      return 'My BioCommons Access';
-    }
-
-    const platforms = this.adminPlatforms();
-    if (this.adminType() === 'biocommons') {
-      return 'BioCommons Admin Dashboard';
-    } else if (this.adminType() === 'platform') {
-      return `${platforms[0].name} Admin Dashboard`;
-    }
-    return `${this.adminGroups()[0]?.short_name || ''} Bundle Admin Dashboard`;
-  });
-
   navigationPages = [
     { label: 'All', route: '/all-users' },
     { label: 'Pending', route: '/pending-users' },
@@ -133,6 +111,24 @@ export class NavbarComponent {
         onCleanup(() => subscription.unsubscribe());
       });
     });
+  }
+
+  navTitle(): string {
+    if (!this.isGeneralAdmin()) {
+      return 'My BioCommons Access';
+    }
+
+    const suffix = this.router.url.includes('/profile')
+      ? 'Profile'
+      : 'Dashboard';
+
+    if (this.adminType() === 'biocommons') {
+      return `BioCommons Admin ${suffix}`;
+    } else if (this.adminType() === 'platform') {
+      return `${this.adminPlatforms()[0].name} Admin ${suffix}`;
+    }
+
+    return `${this.adminGroups()[0]?.short_name || ''} Bundle Admin ${suffix}`;
   }
 
   isNavigationPage(): boolean {

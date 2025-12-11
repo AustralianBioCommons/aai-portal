@@ -239,10 +239,8 @@
           [alt]="user()?.name || 'User profile'"
           class="h-16 w-16 rounded-full bg-gray-200 object-cover"
         />
-        <div class="space-y-2">
-          <div id="user-name" class="text-3xl font-semibold text-gray-900">
-            {{ user()?.name }}
-          </div>
+        <div id="user-name" class="text-3xl font-semibold text-gray-900">
+          {{ user()?.name }}
         </div>
       </div>
 
