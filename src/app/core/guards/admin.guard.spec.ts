@@ -3,6 +3,7 @@ import {
   Router,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
+  UrlTree,
 } from '@angular/router';
 import { adminGuard } from './admin.guard';
 import { AuthService } from '../services/auth.service';
@@ -65,14 +66,14 @@ describe('adminGuard', () => {
       value: of(false),
       writable: true,
     });
-    const urlTree = {} as any;
+    const urlTree = {} as UrlTree;
     mockRouter.createUrlTree.and.returnValue(urlTree);
 
     const result = TestBed.runInInjectionContext(() =>
       adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
 
-    (result as Observable<any>).subscribe((value) => {
+    (result as Observable<boolean | UrlTree>).subscribe((value) => {
       expect(value).toBe(urlTree);
       expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/']);
       done();
