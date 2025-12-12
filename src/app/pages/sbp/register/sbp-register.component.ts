@@ -89,19 +89,19 @@ export class SbpRegisterComponent {
     );
 
     this.registrationForm
-      .get('username')
-      ?.valueChanges.pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        if (this.validationService.hasFieldBackendError('username'))
-          this.validationService.clearFieldBackendError('username');
-      });
-
-    this.registrationForm
       .get('email')
       ?.valueChanges.pipe(takeUntilDestroyed())
       .subscribe(() => {
         if (this.validationService.hasFieldBackendError('email'))
           this.validationService.clearFieldBackendError('email');
+      });
+
+    this.registrationForm
+      .get('username')
+      ?.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.validationService.hasFieldBackendError('username'))
+          this.validationService.clearFieldBackendError('username');
       });
   }
 

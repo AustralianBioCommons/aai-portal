@@ -6,7 +6,6 @@ import {
   input,
   inject,
   computed,
-  DestroyRef,
 } from '@angular/core';
 import {
   FormsModule,
@@ -88,7 +87,6 @@ export class UserListComponent implements OnInit {
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
-  private destroyRef = inject(DestroyRef);
   private datePipe = inject(DatePipe);
 
   // Cleanup subject for search
@@ -134,18 +132,26 @@ export class UserListComponent implements OnInit {
     validators: [Validators.required],
   });
 
+  constructor() {
+    this.searchSubject$
+      .pipe(debounceTime(500), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.page() > 1) {
+          this.page.set(1);
+        }
+        this.resetAndReloadUsers();
+        this.loadUserCounts();
+      });
+
+    fromEvent(window, 'scroll', { passive: true })
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.loadNextPage());
+  }
+
   ngOnInit(): void {
     this.loadUserCounts();
     this.loadUsers(true);
     this.loadFilterOptions();
-    this.setupSearchDebounce();
-    this.setupScrollListener();
-  }
-
-  private setupScrollListener(): void {
-    fromEvent(window, 'scroll', { passive: true })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.loadNextPage());
   }
 
   toggleUserMenu(userId: string): void {
@@ -252,22 +258,6 @@ export class UserListComponent implements OnInit {
           });
           this.closeRevokeModal();
         },
-      });
-  }
-
-  private setupSearchDebounce(): void {
-    this.searchSubject$
-      .pipe(
-        debounceTime(500),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        if (this.page() > 1) {
-          this.page.set(1);
-        }
-        this.resetAndReloadUsers();
-        this.loadUserCounts();
       });
   }
 
