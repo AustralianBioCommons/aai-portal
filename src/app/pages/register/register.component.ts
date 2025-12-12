@@ -10,7 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, fromEvent, of } from 'rxjs';
+import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
@@ -150,8 +151,8 @@ export class RegisterComponent implements AfterViewInit {
           this.validationService.clearFieldBackendError('email');
       });
 
-    fromEvent(window, 'scroll')
-      .pipe(takeUntilDestroyed())
+    fromEvent(window, 'scroll', { passive: true })
+      .pipe(auditTime(0, animationFrameScheduler), takeUntilDestroyed())
       .subscribe(() => {
         this.updateActiveSection();
       });

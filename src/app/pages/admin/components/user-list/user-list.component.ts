@@ -16,7 +16,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgClass, TitleCasePipe, DatePipe } from '@angular/common';
-import { Subject } from 'rxjs';
+import { Subject, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -143,11 +143,9 @@ export class UserListComponent implements OnInit {
   }
 
   private setupScrollListener(): void {
-    const scrollHandler = () => this.maybeLoadNextPage();
-    window.addEventListener('scroll', scrollHandler, { passive: true });
-    this.destroyRef.onDestroy(() =>
-      window.removeEventListener('scroll', scrollHandler),
-    );
+    fromEvent(window, 'scroll', { passive: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadNextPage());
   }
 
   toggleUserMenu(userId: string): void {
@@ -357,7 +355,7 @@ export class UserListComponent implements OnInit {
     this.loadUsers();
   }
 
-  maybeLoadNextPage(): void {
+  loadNextPage(): void {
     if (this.loading()) {
       return;
     }
