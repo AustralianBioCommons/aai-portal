@@ -77,6 +77,7 @@ export interface PlatformMembership {
   user_id: string;
   approval_status: string;
   updated_by: string;
+  updated_at: string;
   revocation_reason?: string;
   rejection_reason?: string;
 }
@@ -88,6 +89,7 @@ export interface GroupMembership {
   group_short_name: string;
   approval_status: string;
   updated_by: string;
+  updated_at: string;
   revocation_reason?: string;
   rejection_reason?: string;
 }

@@ -8,6 +8,7 @@
   ></app-alert>
 }
 
+<!-- Modals -->
 @if (activeModal()) {
   <app-modal
     [title]="modalTitle()"
@@ -213,6 +214,7 @@
   </app-modal>
 }
 
+<!-- Main content -->
 <div
   class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
 >
@@ -239,10 +241,8 @@
           [alt]="user()?.name || 'User profile'"
           class="h-16 w-16 rounded-full bg-gray-200 object-cover"
         />
-        <div class="space-y-2">
-          <div id="user-name" class="text-3xl font-semibold text-gray-900">
-            {{ user()?.name }}
-          </div>
+        <div id="user-name" class="text-3xl font-semibold text-gray-900">
+          {{ user()?.name }}
         </div>
       </div>
 
@@ -337,7 +337,7 @@
                   <div class="flex items-center justify-between gap-6">
                     <div class="flex items-center gap-6">
                       <img
-                        [src]="PLATFORMS[membership.platform_id].logoUrl"
+                        [src]="platforms[membership.platform_id].logoUrl"
                         [alt]="membership.platform_name"
                         class="h-16 w-16 object-contain"
                       />
@@ -390,7 +390,7 @@
             <div class="flex items-center justify-between">
               <h2 class="text-2xl font-semibold">Bundles</h2>
               <a
-                class="flex items-center gap-1 text-sm text-biocommons-primary"
+                class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
                 routerLink="/bundles"
               >
                 Choose more
@@ -401,8 +401,8 @@
               @if (
                 !user()!.group_memberships || !user()!.group_memberships.length
               ) {
-                <div class="text-sm font-medium text-gray-500">
-                  You are not a member of any bundles.
+                <div class="font-light text-gray-500">
+                  You are not a member of any bundles
                 </div>
               }
               @for (

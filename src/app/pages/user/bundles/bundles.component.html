@@ -8,10 +8,10 @@
   </app-alert>
 }
 
-<div class="flex h-full w-full flex-col">
-  <div
-    class="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-start gap-4 bg-gray-50 px-6 pb-6 pt-8"
-  >
+<div
+  class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
+>
+  <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
     <a
       routerLink="/profile"
       class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
@@ -19,16 +19,14 @@
       <ng-icon name="heroArrowLeft" size="16"></ng-icon>
       Back to Profile
     </a>
-    <div>
-      <h2 class="text-left text-3xl font-semibold text-gray-900">
-        Request a bundle
-      </h2>
-      <p class="text-left font-light text-gray-600">
-        Request access to a bundle you need for your research
-      </p>
-    </div>
+    <h2 class="text-left text-3xl font-semibold text-gray-900">
+      Request a bundle
+    </h2>
+    <p class="text-left font-light text-gray-600">
+      Request access to a bundle you need for your research
+    </p>
     <app-bundle-selection
-      class="mx-auto max-w-4xl px-6 pb-6 pt-8"
+      class="my-6"
       [form]="bundleForm"
       [bundles]="bundles()"
     >
