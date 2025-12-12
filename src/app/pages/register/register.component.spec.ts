@@ -351,6 +351,7 @@ describe('RegisterComponent', () => {
         username: 'johndoe',
         password: 'Password123!',
         bundle: 'tsi',
+        recaptcha_token: 'test-recaptcha-token',
       });
 
       req.flush({ success: true });

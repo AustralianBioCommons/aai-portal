@@ -51,6 +51,7 @@ interface RegistrationRequest {
   username: string;
   password: string;
   bundle?: string;
+  recaptcha_token: string;
 }
 
 interface Section {
@@ -292,6 +293,7 @@ export class RegisterComponent implements AfterViewInit {
       email: toAsciiEmail(formValue.email),
       username: formValue.username,
       password: formValue.password,
+      recaptcha_token: this.recaptchaToken()!,
     };
 
     if (formValue.bundle) requestBody.bundle = formValue.bundle;
