@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 
-export const adminGuard: CanActivateFn = () => {
+export const rootRedirectGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -14,7 +14,9 @@ export const adminGuard: CanActivateFn = () => {
     switchMap(() =>
       authService.isGeneralAdmin$.pipe(
         take(1),
-        map((isAdmin) => (isAdmin ? true : router.createUrlTree(['/']))),
+        map((isAdmin) =>
+          router.createUrlTree([isAdmin ? '/all-users' : '/profile']),
+        ),
       ),
     ),
   );

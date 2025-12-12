@@ -3,6 +3,7 @@ import {
   Router,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
+  UrlTree,
 } from '@angular/router';
 import { adminGuard } from './admin.guard';
 import { AuthService } from '../services/auth.service';
@@ -18,7 +19,10 @@ describe('adminGuard', () => {
       isLoading: signal(false),
       isGeneralAdmin$: of(false),
     });
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const routerSpy = jasmine.createSpyObj('Router', [
+      'navigate',
+      'createUrlTree',
+    ]);
 
     TestBed.configureTestingModule({
       providers: [
@@ -56,34 +60,22 @@ describe('adminGuard', () => {
     });
   });
 
-  it('should return false and navigate to home when user is not admin', (done) => {
+  it('should return UrlTree and redirect to home when user is not admin', (done) => {
     mockAuthService.isAuthenticated.and.returnValue(true);
     Object.defineProperty(mockAuthService, 'isGeneralAdmin$', {
       value: of(false),
       writable: true,
     });
+    const urlTree = {} as UrlTree;
+    mockRouter.createUrlTree.and.returnValue(urlTree);
 
     const result = TestBed.runInInjectionContext(() =>
       adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
     );
 
-    (result as Observable<boolean>).subscribe((value) => {
-      expect(value).toBe(false);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
-      done();
-    });
-  });
-
-  it('should return false and navigate to home when user is not authenticated', (done) => {
-    mockAuthService.isAuthenticated.and.returnValue(false);
-
-    const result = TestBed.runInInjectionContext(() =>
-      adminGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot),
-    );
-
-    (result as Observable<boolean>).subscribe((value) => {
-      expect(value).toBe(false);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/']);
+    (result as Observable<boolean | UrlTree>).subscribe((value) => {
+      expect(value).toBe(urlTree);
+      expect(mockRouter.createUrlTree).toHaveBeenCalledWith(['/']);
       done();
     });
   });
