@@ -2,10 +2,16 @@ import { Injectable } from '@angular/core';
 import { FormGroup, ValidationErrors } from '@angular/forms';
 import { ALLOWED_SPECIAL_CHARACTERS } from '../../shared/validators/passwords';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  RegistrationErrorResponse,
-  RegistrationFieldError,
-} from '../../shared/types/backend.types';
+
+export interface RegistrationFieldError {
+  field: string;
+  message: string;
+}
+
+export interface RegistrationErrorResponse {
+  message: string;
+  field_errors: RegistrationFieldError[];
+}
 
 /**
  * Form validation service to reuse across our registration forms.
