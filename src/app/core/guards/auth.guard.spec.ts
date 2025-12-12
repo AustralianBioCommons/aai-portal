@@ -14,6 +14,7 @@ describe('authGuard', () => {
       ['ensureAuthenticated', 'login'],
       {
         isLoading: signal(false),
+        authError: signal(null),
       },
     );
 

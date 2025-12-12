@@ -206,8 +206,8 @@ export class AuthService {
   ensureAuthenticated(): Observable<boolean> {
     return this.auth0Service.isAuthenticated$.pipe(
       take(1),
-      switchMap((isAuth) => {
-        if (isAuth) {
+      switchMap((isAuthenticated) => {
+        if (isAuthenticated) {
           return of(true);
         }
 

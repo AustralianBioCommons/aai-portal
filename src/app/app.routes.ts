@@ -9,6 +9,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { loginGuard } from './core/guards/login.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { rootRedirectGuard } from './core/guards/root-redirect.guard';
 import { RegisterComponent } from './pages/register/register.component';
 import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
 import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
@@ -70,6 +71,12 @@ export const routes: Routes = [
     component: DefaultLayoutComponent,
     canActivate: [authGuard],
     children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        canActivate: [rootRedirectGuard],
+        children: [],
+      },
       {
         path: 'profile',
         component: ProfileComponent,
