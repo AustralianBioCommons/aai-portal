@@ -51,16 +51,16 @@ export class ValidationService {
       domainPartTooLong: 'Email domain cannot exceed 254 characters',
     },
     firstName: {
-      maxlength: 'First name cannot be longer than 255 characters',
-      fullNameTooLong: 'Full name cannot be longer than 255 characters',
+      maxlength: 'First name cannot be longer than 150 characters',
+      fullNameTooLong: 'Full name cannot be longer than 300 characters',
     },
     lastName: {
-      maxlength: 'Last name cannot be longer than 255 characters',
-      fullNameTooLong: 'Full name cannot be longer than 255 characters',
+      maxlength: 'Last name cannot be longer than 150 characters',
+      fullNameTooLong: 'Full name cannot be longer than 300 characters',
     },
-    fullname: {
-      maxlength: 'Full name cannot be longer than 255 characters',
-      fullNameTooLong: 'Full name cannot be longer than 255 characters',
+    fullName: {
+      maxlength: 'Full name cannot be longer than 300 characters',
+      fullNameTooLong: 'Full name cannot be longer than 300 characters',
     },
     reason: {
       maxlength: 'Reason for request cannot be longer than 255 characters',
@@ -143,7 +143,8 @@ export class ValidationService {
     const control = form.get(fieldName)!;
     const inputValid = !control?.errors;
     const backendValid = !this.backendErrorMessages[fieldName];
-    if (inputValid && backendValid) return [];
+    const formValid = !form.errors;
+    if (inputValid && backendValid && formValid) return [];
 
     // Return all error messages that apply to this control
     const inputErrors = Object.keys(control.errors || {})
@@ -158,6 +159,19 @@ export class ValidationService {
           this.defaultErrorMessages[key] ||
           `Error: ${key}`,
       );
+
+    // Check form-level errors that apply to this field
+    if (form.errors) {
+      Object.keys(form.errors)
+        .filter((key) => this.fieldSpecificErrorMessages[fieldName]?.[key])
+        .forEach((key) => {
+          const message = this.fieldSpecificErrorMessages[fieldName]?.[key];
+          if (message) {
+            inputErrors.push(message);
+          }
+        });
+    }
+
     if (this.backendErrorMessages[fieldName]) {
       inputErrors.push(this.backendErrorMessages[fieldName]);
     }
@@ -173,7 +187,21 @@ export class ValidationService {
   isFieldInvalid(form: FormGroup, fieldName: string): boolean {
     const field = form.get(fieldName);
     const invalidInput = !!(field?.invalid && (field?.dirty || field?.touched));
-    return invalidInput || !!this.backendErrorMessages[fieldName];
+
+    // Check if there are form-level errors that apply to this field
+    const hasFormLevelError = !!(
+      form.errors &&
+      field?.touched &&
+      Object.keys(form.errors).some(
+        (key) => this.fieldSpecificErrorMessages[fieldName]?.[key],
+      )
+    );
+
+    return (
+      invalidInput ||
+      hasFormLevelError ||
+      !!this.backendErrorMessages[fieldName]
+    );
   }
 
   /**

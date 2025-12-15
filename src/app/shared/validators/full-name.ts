@@ -5,7 +5,7 @@ import {
   FormGroup,
 } from '@angular/forms';
 
-export function fullNameLengthValidator(maxLength = 255): ValidatorFn {
+export function fullNameLengthValidator(maxLength = 300): ValidatorFn {
   return (group: AbstractControl): ValidationErrors | null => {
     if (!(group instanceof FormGroup)) {
       return null;

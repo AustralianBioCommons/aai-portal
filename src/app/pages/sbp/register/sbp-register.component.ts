@@ -72,8 +72,8 @@ export class SbpRegisterComponent {
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group(
       {
-        firstName: ['', [Validators.required, Validators.maxLength(255)]],
-        lastName: ['', [Validators.required, Validators.maxLength(255)]],
+        firstName: ['', [Validators.required, Validators.maxLength(150)]],
+        lastName: ['', [Validators.required, Validators.maxLength(150)]],
         email: ['', sbpEmailRequirements],
         username: ['', usernameRequirements],
         reason: ['', [Validators.required, Validators.maxLength(255)]],

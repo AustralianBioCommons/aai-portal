@@ -111,8 +111,8 @@ export class RegisterComponent implements AfterViewInit {
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group(
       {
-        firstName: ['', [Validators.required, Validators.maxLength(255)]],
-        lastName: ['', [Validators.required, Validators.maxLength(255)]],
+        firstName: ['', [Validators.required, Validators.maxLength(150)]],
+        lastName: ['', [Validators.required, Validators.maxLength(150)]],
         email: [
           '',
           [
@@ -344,14 +344,6 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
-    if (
-      (fieldName === 'firstName' || fieldName === 'lastName') &&
-      this.registrationForm.hasError('fullNameTooLong') &&
-      this.registrationForm.get(fieldName)?.touched
-    ) {
-      return true;
-    }
-
     return this.validationService.isFieldInvalid(
       this.registrationForm,
       fieldName,
@@ -359,20 +351,6 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   getErrorMessages(fieldName: keyof RegistrationForm): string[] {
-    if (
-      (fieldName === 'firstName' || fieldName === 'lastName') &&
-      this.registrationForm.hasError('fullNameTooLong') &&
-      this.registrationForm.get(fieldName)?.touched
-    ) {
-      return [
-        ...this.validationService.getErrorMessages(
-          this.registrationForm,
-          fieldName,
-        ),
-        'Full name must not exceed 255 characters',
-      ];
-    }
-
     return this.validationService.getErrorMessages(
       this.registrationForm,
       fieldName,
