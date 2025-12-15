@@ -105,7 +105,7 @@ export class ProfileComponent implements OnInit {
   activeModal = signal<ProfileModal | null>(null);
   nameControl = new FormControl<string>('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(255)],
+    validators: [Validators.required, Validators.maxLength(300)],
   });
   usernameControl = new FormControl<string>('', {
     nonNullable: true,

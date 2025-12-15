@@ -209,7 +209,7 @@ describe('RegisterComponent', () => {
       );
     });
 
-    it('should validate combined first and last name length not exceeding 255 characters', () => {
+    it('should validate combined first and last name length not exceeding 300 characters', () => {
       const longName = 'a'.repeat(200);
       component.registrationForm.patchValue({
         firstName: longName,
