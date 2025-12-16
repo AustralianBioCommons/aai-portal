@@ -6,7 +6,6 @@ import {
   input,
   inject,
   computed,
-  DestroyRef,
 } from '@angular/core';
 import {
   FormsModule,
@@ -16,7 +15,7 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgClass, TitleCasePipe, DatePipe } from '@angular/common';
-import { Subject } from 'rxjs';
+import { Subject, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -88,7 +87,6 @@ export class UserListComponent implements OnInit {
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
-  private destroyRef = inject(DestroyRef);
   private datePipe = inject(DatePipe);
 
   // Cleanup subject for search
@@ -134,20 +132,26 @@ export class UserListComponent implements OnInit {
     validators: [Validators.required],
   });
 
+  constructor() {
+    this.searchSubject$
+      .pipe(debounceTime(500), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.page() > 1) {
+          this.page.set(1);
+        }
+        this.resetAndReloadUsers();
+        this.loadUserCounts();
+      });
+
+    fromEvent(window, 'scroll', { passive: true })
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.loadNextPage());
+  }
+
   ngOnInit(): void {
     this.loadUserCounts();
     this.loadUsers(true);
     this.loadFilterOptions();
-    this.setupSearchDebounce();
-    this.setupScrollListener();
-  }
-
-  private setupScrollListener(): void {
-    const scrollHandler = () => this.maybeLoadNextPage();
-    window.addEventListener('scroll', scrollHandler, { passive: true });
-    this.destroyRef.onDestroy(() =>
-      window.removeEventListener('scroll', scrollHandler),
-    );
   }
 
   toggleUserMenu(userId: string): void {
@@ -257,22 +261,6 @@ export class UserListComponent implements OnInit {
       });
   }
 
-  private setupSearchDebounce(): void {
-    this.searchSubject$
-      .pipe(
-        debounceTime(500),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        if (this.page() > 1) {
-          this.page.set(1);
-        }
-        this.resetAndReloadUsers();
-        this.loadUserCounts();
-      });
-  }
-
   private loadFilterOptions(): void {
     this.apiService.getFilterOptions().subscribe({
       next: (options: FilterOption[]) => {
@@ -357,7 +345,7 @@ export class UserListComponent implements OnInit {
     this.loadUsers();
   }
 
-  maybeLoadNextPage(): void {
+  loadNextPage(): void {
     if (this.loading()) {
       return;
     }

@@ -452,7 +452,7 @@ describe('UserListComponent', () => {
         configurable: true,
       });
 
-      component.maybeLoadNextPage();
+      component.loadNextPage();
       expect(component.loadingMore()).toBeTrue();
       tick(250);
 
@@ -469,7 +469,7 @@ describe('UserListComponent', () => {
       tick(250);
 
       mockApiService.getAdminAllUsers.calls.reset();
-      component.maybeLoadNextPage();
+      component.loadNextPage();
       tick(250);
 
       expect(mockApiService.getAdminAllUsers).not.toHaveBeenCalled();

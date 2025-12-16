@@ -10,7 +10,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, fromEvent, of } from 'rxjs';
+import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
+import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
@@ -111,8 +112,8 @@ export class RegisterComponent implements AfterViewInit {
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group(
       {
-        firstName: ['', [Validators.required, Validators.maxLength(255)]],
-        lastName: ['', [Validators.required, Validators.maxLength(255)]],
+        firstName: ['', [Validators.required, Validators.maxLength(150)]],
+        lastName: ['', [Validators.required, Validators.maxLength(150)]],
         email: [
           '',
           [
@@ -136,14 +137,6 @@ export class RegisterComponent implements AfterViewInit {
     );
 
     this.registrationForm
-      .get('username')
-      ?.valueChanges.pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        if (this.validationService.hasFieldBackendError('username'))
-          this.validationService.clearFieldBackendError('username');
-      });
-
-    this.registrationForm
       .get('email')
       ?.valueChanges.pipe(takeUntilDestroyed())
       .subscribe(() => {
@@ -151,8 +144,16 @@ export class RegisterComponent implements AfterViewInit {
           this.validationService.clearFieldBackendError('email');
       });
 
-    fromEvent(window, 'scroll')
-      .pipe(takeUntilDestroyed())
+    this.registrationForm
+      .get('username')
+      ?.valueChanges.pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.validationService.hasFieldBackendError('username'))
+          this.validationService.clearFieldBackendError('username');
+      });
+
+    fromEvent(window, 'scroll', { passive: true })
+      .pipe(auditTime(0, animationFrameScheduler), takeUntilDestroyed())
       .subscribe(() => {
         this.updateActiveSection();
       });
@@ -345,14 +346,6 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   isFieldInvalid(fieldName: keyof RegistrationForm): boolean {
-    if (
-      (fieldName === 'firstName' || fieldName === 'lastName') &&
-      this.registrationForm.hasError('fullNameTooLong') &&
-      this.registrationForm.get(fieldName)?.touched
-    ) {
-      return true;
-    }
-
     return this.validationService.isFieldInvalid(
       this.registrationForm,
       fieldName,
@@ -360,20 +353,6 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   getErrorMessages(fieldName: keyof RegistrationForm): string[] {
-    if (
-      (fieldName === 'firstName' || fieldName === 'lastName') &&
-      this.registrationForm.hasError('fullNameTooLong') &&
-      this.registrationForm.get(fieldName)?.touched
-    ) {
-      return [
-        ...this.validationService.getErrorMessages(
-          this.registrationForm,
-          fieldName,
-        ),
-        'Full name must not exceed 255 characters',
-      ];
-    }
-
     return this.validationService.getErrorMessages(
       this.registrationForm,
       fieldName,
