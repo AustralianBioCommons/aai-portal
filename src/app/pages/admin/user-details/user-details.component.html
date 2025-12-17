@@ -23,7 +23,7 @@
 <div
   class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
 >
-  @if (loading()) {
+  @if (pageLoading()) {
     <app-loading-spinner />
   } @else if (pageError()) {
     <div class="text-red-500">{{ pageError() }}</div>

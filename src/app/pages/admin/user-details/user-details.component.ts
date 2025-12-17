@@ -76,7 +76,7 @@ export class UserDetailsComponent implements OnInit {
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
-  loading = signal(true);
+  pageLoading = signal(true);
   pageError = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
@@ -110,17 +110,17 @@ export class UserDetailsComponent implements OnInit {
       this.apiService.getUserDetails(userId).subscribe({
         next: (user) => {
           this.user.set(user);
-          this.loading.set(false);
+          this.pageLoading.set(false);
         },
         error: (err) => {
           console.error('Failed to load user details:', err);
           this.pageError.set('Failed to load user details');
-          this.loading.set(false);
+          this.pageLoading.set(false);
         },
       });
     } else {
       this.pageError.set('No user ID provided');
-      this.loading.set(false);
+      this.pageLoading.set(false);
     }
   }
 
