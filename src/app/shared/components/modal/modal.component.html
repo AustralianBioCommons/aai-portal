@@ -46,7 +46,7 @@
           [formControl]="textareaControl()!"
         ></textarea>
         <div
-          class="mt-1 flex text-xs"
+          class="mt-0.5 flex text-xs"
           [class]="
             textareaControl()!.invalid && textareaControl()!.touched
               ? 'justify-between'
@@ -72,6 +72,7 @@
         variant="primary"
         (click)="onPrimary()"
         [disabled]="primaryButtonDisabled()"
+        [loading]="primaryButtonLoading()"
       >
         {{ computedPrimaryButtonText() }}
       </app-button>
