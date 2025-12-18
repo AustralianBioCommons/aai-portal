@@ -163,20 +163,6 @@ export class ApiService {
     );
   }
 
-  requestEmailChange(email: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${environment.auth0.backend}/me/profile/email/update`,
-      { email },
-    );
-  }
-
-  continueEmailChange(otp: string): Observable<void> {
-    return this.http.post<void>(
-      `${environment.auth0.backend}/me/profile/email/continue`,
-      { otp },
-    );
-  }
-
   getFilterOptions(): Observable<FilterOption[]> {
     return this.http.get<FilterOption[]>(
       `${environment.auth0.backend}/admin/filters`,
@@ -332,17 +318,31 @@ export class ApiService {
     );
   }
 
-  updateUserUsername(username: string) {
+  updateFullName(fullName: string) {
+    return this.http.post<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/me/profile/full-name/update`,
+      { full_name: fullName },
+    );
+  }
+
+  updateUsername(username: string) {
     return this.http.post<BiocommonsUserDetails>(
       `${environment.auth0.backend}/me/profile/username/update`,
       { username: username },
     );
   }
 
-  updateFullName(fullName: string) {
-    return this.http.post<BiocommonsUserDetails>(
-      `${environment.auth0.backend}/me/profile/full-name/update`,
-      { full_name: fullName },
+  requestEmailChange(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/me/profile/email/update`,
+      { email },
+    );
+  }
+
+  continueEmailChange(otp: string): Observable<void> {
+    return this.http.post<void>(
+      `${environment.auth0.backend}/me/profile/email/continue`,
+      { otp },
     );
   }
 

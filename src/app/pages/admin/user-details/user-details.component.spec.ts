@@ -132,7 +132,7 @@ describe('UserDetailsComponent', () => {
 
     expect(mockApiService.getUserDetails).toHaveBeenCalledWith('123');
     expect(component.user()).toEqual(mockUserDetails);
-    expect(component.loading()).toBeFalse();
+    expect(component.pageLoading()).toBeFalse();
     expect(component.pageError()).toBeNull();
   });
 
@@ -145,7 +145,7 @@ describe('UserDetailsComponent', () => {
     fixture.detectChanges();
 
     expect(component.pageError()).toBe('Failed to load user details');
-    expect(component.loading()).toBeFalse();
+    expect(component.pageLoading()).toBeFalse();
     expect(component.user()).toBeNull();
     expect(console.error).toHaveBeenCalledWith(
       'Failed to load user details:',
@@ -159,7 +159,7 @@ describe('UserDetailsComponent', () => {
     fixture.detectChanges();
 
     expect(component.pageError()).toBe('No user ID provided');
-    expect(component.loading()).toBeFalse();
+    expect(component.pageLoading()).toBeFalse();
     expect(mockApiService.getUserDetails).not.toHaveBeenCalled();
   });
 
@@ -347,7 +347,7 @@ describe('UserDetailsComponent', () => {
 
   it('should display error message when there is an error', () => {
     component.pageError.set('Test error message');
-    component.loading.set(false);
+    component.pageLoading.set(false);
     component.user.set(null);
     fixture.detectChanges();
 
