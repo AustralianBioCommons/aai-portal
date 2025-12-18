@@ -27,6 +27,8 @@ export class ValidationService {
     required: 'This field is required',
     email: 'Please enter a valid email address',
     passwordMismatch: 'Passwords do not match',
+    passwordMustBeDifferent:
+      'New password must be different from current password',
   };
 
   private fieldSpecificErrorMessages: Record<string, Record<string, string>> = {
@@ -60,7 +62,6 @@ export class ValidationService {
     },
     fullName: {
       maxlength: 'Full name cannot be longer than 300 characters',
-      fullNameTooLong: 'Full name cannot be longer than 300 characters',
     },
     reason: {
       maxlength: 'Reason for request cannot be longer than 255 characters',
@@ -70,6 +71,14 @@ export class ValidationService {
     },
     projectOfInterest: {
       maxlength: 'Project of interest cannot be longer than 255 characters',
+    },
+    newPassword: {
+      minlength: 'Password must be at least 8 characters',
+      maxlength: 'Password cannot be longer than 72 characters',
+      lowercaseRequired: 'Password must contain at least one lowercase letter',
+      uppercaseRequired: 'Password must contain at least one uppercase letter',
+      digitRequired: 'Password must contain at least one digit',
+      specialCharacterRequired: `Password must contain at least one special character (${ALLOWED_SPECIAL_CHARACTERS})`,
     },
   };
 
@@ -247,6 +256,31 @@ export class ValidationService {
       const confirm = formGroup?.get(confirmFieldName)?.value;
       return password === confirm ? null : { passwordMismatch: true };
     };
+  }
+
+  /**
+   * Sets up validation to ensure new password is different from current password
+   * @param form The form group containing password fields
+   * @param currentPasswordFieldName Name of the current password field
+   * @param newPasswordFieldName Name of the new password field
+   */
+  setupPasswordDifferentValidation(
+    form: FormGroup,
+    currentPasswordFieldName = 'currentPassword',
+    newPasswordFieldName = 'newPassword',
+  ): void {
+    const validator = (): ValidationErrors | null => {
+      const current = form?.get(currentPasswordFieldName)?.value;
+      const newPass = form?.get(newPasswordFieldName)?.value;
+      if (!current || !newPass) return null;
+      return current !== newPass ? null : { passwordMustBeDifferent: true };
+    };
+
+    form.get(newPasswordFieldName)?.addValidators(validator);
+
+    form.get(currentPasswordFieldName)?.valueChanges.subscribe(() => {
+      form.get(newPasswordFieldName)?.updateValueAndValidity();
+    });
   }
 
   /**
