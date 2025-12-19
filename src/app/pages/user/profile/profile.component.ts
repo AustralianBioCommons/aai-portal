@@ -1,10 +1,10 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
-  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  FormBuilder,
 } from '@angular/forms';
 import {
   ApiService,
@@ -21,10 +21,7 @@ import {
 } from '../../../core/constants/constants';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
-import {
-  passwordRequirements,
-  ALLOWED_SPECIAL_CHARACTERS,
-} from '../../../shared/validators/passwords';
+import { passwordRequirements } from '../../../shared/validators/passwords';
 import { AuthService } from '../../../core/services/auth.service';
 import { RouterLink } from '@angular/router';
 import {
@@ -57,9 +54,9 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
-  private document = inject(DOCUMENT);
   private authService = inject(AuthService);
   private validationService = inject(ValidationService);
+  private formBuilder = inject(FormBuilder);
 
   protected readonly platforms = PLATFORMS;
   protected readonly bundles = BIOCOMMONS_BUNDLES;
@@ -72,132 +69,94 @@ export class ProfileComponent implements OnInit {
   };
 
   user = signal<UserProfileData | null>(null);
-  loading = signal(true);
-  error = signal<string | null>(null);
+  pageLoading = signal(true);
+  pageError = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
-  savingField = signal<string | null>(null);
 
-  emailControl = new FormControl<string>('', {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-      internationalEmailValidator,
-      emailLengthValidator,
-    ],
+  isGeneralAdmin = this.authService.isGeneralAdmin;
+
+  nameForm = this.formBuilder.nonNullable.group({
+    fullName: ['', [Validators.required, Validators.maxLength(300)]],
   });
-  emailForm = new FormGroup({
-    email: this.emailControl,
+
+  usernameForm = this.formBuilder.nonNullable.group({
+    username: ['', usernameRequirements],
+  });
+
+  emailForm = this.formBuilder.nonNullable.group({
+    email: [
+      '',
+      [Validators.required, internationalEmailValidator, emailLengthValidator],
+    ],
   });
   emailFlowState = signal<'idle' | 'otp-sent'>('idle');
   emailOtp = signal('');
   emailLoading = signal(false);
   otpLoading = signal(false);
-  emailError = signal<string | null>(null);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
   emailOtpLocked = signal(false);
-  currentPasswordControl = new FormControl<string>('', {
-    nonNullable: true,
-    validators: [Validators.required],
-  });
-  passwordError = signal<string | null>(null);
-  passwordAttempted = signal(false);
-  activeModal = signal<ProfileModal | null>(null);
-  nameControl = new FormControl<string>('', {
-    nonNullable: true,
-    validators: [Validators.required, Validators.maxLength(300)],
-  });
-  usernameControl = new FormControl<string>('', {
-    nonNullable: true,
-    validators: [usernameRequirements],
-  });
-  usernameError = signal<string | null>(null);
-  newPasswordControl = new FormControl<string>('', {
-    nonNullable: true,
-    validators: [passwordRequirements],
-  });
-  protected readonly passwordSpecialCharacters = ALLOWED_SPECIAL_CHARACTERS;
 
-  isGeneralAdmin = this.authService.isGeneralAdmin;
+  passwordForm = this.formBuilder.nonNullable.group({
+    currentPassword: ['', Validators.required],
+    newPassword: ['', passwordRequirements],
+  });
+
+  activeModal = signal<ProfileModal | null>(null);
+  modalLoading = signal(false);
 
   ngOnInit(): void {
     this.loadUserProfile();
-    this.showMessageFromStorage();
-    this.usernameControl.valueChanges.subscribe(() => {
-      this.usernameError.set(null);
+    this.validationService.setupPasswordDifferentValidation(this.passwordForm);
+    this.usernameForm.get('username')?.valueChanges.subscribe(() => {
+      if (this.validationService.hasFieldBackendError('username')) {
+        this.validationService.clearFieldBackendError('username');
+      }
     });
   }
 
-  protected showMessageFromStorage(): void {
-    const flashMessage = sessionStorage.getItem('profile_flash_message');
-    if (flashMessage) {
-      const { type, message } = JSON.parse(flashMessage);
-      this.alert.set({ type, message });
-      sessionStorage.removeItem('profile_flash_message');
-    }
-  }
-
   protected openModal(type: ProfileModal): void {
-    if (!this.user()) {
-      return;
-    }
+    const user = this.user();
+    if (!user) return;
+
     this.alert.set(null);
-    if (type === 'name') {
-      this.nameControl.setValue(this.user()!.name);
-    } else if (type === 'username') {
-      this.usernameControl.setValue(this.user()!.username);
-      this.usernameError.set(null);
-    } else if (type === 'email') {
-      this.emailControl.setValue(this.user()!.email);
-      this.emailControl.markAsUntouched();
-      this.emailControl.markAsPristine();
-      this.emailFlowState.set('idle');
-      this.emailOtp.set('');
-      this.emailError.set(null);
-      this.otpError.set(null);
-      this.emailLoading.set(false);
-      this.otpLoading.set(false);
-      this.emailModalNotice.set(null);
-      this.emailOtpLocked.set(false);
-    } else if (type === 'password') {
-      this.currentPasswordControl.reset('');
-      this.newPasswordControl.setValue('');
-      this.passwordError.set(null);
-      this.passwordAttempted.set(false);
+
+    switch (type) {
+      case 'name':
+        this.nameForm.reset({ fullName: user.name });
+        break;
+      case 'username':
+        this.usernameForm.reset({ username: user.username });
+        this.validationService.clearFieldBackendError('username');
+        break;
+      case 'email':
+        this.emailForm.reset({ email: user.email });
+        this.resetEmailFlowState();
+        this.validationService.clearFieldBackendError('email');
+        break;
+      case 'password':
+        this.passwordForm.reset({ currentPassword: '', newPassword: '' });
+        break;
     }
     this.activeModal.set(type);
   }
 
-  protected closeModal(): void {
-    const current = this.activeModal();
-    this.activeModal.set(null);
-    if (current === 'email') {
-      this.emailFlowState.set('idle');
-      this.emailOtp.set('');
-      this.emailError.set(null);
-      this.otpError.set(null);
-      this.emailLoading.set(false);
-      this.otpLoading.set(false);
-      this.emailModalNotice.set(null);
-      this.emailOtpLocked.set(false);
-    }
+  private resetEmailFlowState(): void {
+    this.emailFlowState.set('idle');
+    this.emailOtp.set('');
+    this.otpError.set(null);
+    this.emailLoading.set(false);
+    this.otpLoading.set(false);
+    this.emailModalNotice.set(null);
+    this.emailOtpLocked.set(false);
   }
 
-  protected handleModalPrimary(): void {
-    const type = this.activeModal();
-    if (type === 'name') {
-      this.updateName();
-    } else if (type === 'username') {
-      this.updateUsername();
-    } else if (type === 'email') {
-      if (this.emailFlowState() === 'otp-sent') {
-        this.confirmEmailChange();
-      } else {
-        this.sendEmailOtp();
-      }
-    } else if (type === 'password') {
-      this.submitPasswordChange();
+  protected closeModal(): void {
+    if (this.activeModal() === 'email') {
+      this.resetEmailFlowState();
+      this.validationService.clearFieldBackendError('email');
     }
+    this.activeModal.set(null);
   }
 
   protected modalTitle(): string {
@@ -215,150 +174,149 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  protected modalPrimaryText(): string {
-    const type = this.activeModal();
-    if (type === 'email') {
-      if (this.emailLoading()) {
-        return 'Sending...';
-      }
-      if (this.otpLoading()) {
-        return 'Verifying...';
-      }
-      return this.emailFlowState() === 'otp-sent' ? 'Confirm OTP' : 'Send OTP';
-    }
-    return this.savingField() === type ? 'Saving...' : 'Save';
+  protected modalDescription(): string {
+    return this.activeModal() === 'email'
+      ? 'To verify your email, we will send a one-time-password (OTP) to your new email address.'
+      : '';
   }
 
-  protected modalDescription(): string {
+  protected modalPrimaryButtonText(): string {
+    return this.activeModal() === 'email'
+      ? this.emailFlowState() === 'idle'
+        ? 'Send OTP'
+        : 'Confirm OTP'
+      : 'Save';
+  }
+
+  protected onModalPrimaryButtonClick(): void {
     switch (this.activeModal()) {
+      case 'name':
+        this.updateName();
+        break;
+      case 'username':
+        this.updateUsername();
+        break;
       case 'email':
-        return 'To verify your email, we will send a one-time-password (OTP) to your new email address.';
+        if (this.emailFlowState() === 'idle') {
+          this.sendEmailOtp();
+        } else {
+          this.confirmEmailChange();
+        }
+        break;
+      case 'password':
+        this.updatePassword();
+        break;
       default:
-        return '';
+        break;
     }
   }
 
   protected updateName(): void {
-    const next = this.nameControl.value.trim();
-    if (!next) {
-      this.alert.set({ type: 'error', message: 'Name cannot be empty.' });
+    this.nameForm.markAllAsTouched();
+    if (this.nameForm.invalid) {
       return;
     }
-    this.savingField.set('name');
-    this.apiService.updateFullName(next).subscribe({
+    const name = this.nameForm.value.fullName!.trim();
+    this.modalLoading.set(true);
+    this.apiService.updateFullName(name).subscribe({
       next: () => {
-        this.savingField.set(null);
+        this.modalLoading.set(false);
         this.alert.set({
           type: 'success',
-          message: 'Name updated successfully.',
+          message: 'Name updated successfully',
         });
         this.closeModal();
         this.loadUserProfile();
       },
       error: (err) => {
-        console.error('Failed to update name:', err);
-        const detail = err.error?.detail || 'Failed to update name.';
-        this.savingField.set(null);
+        this.modalLoading.set(false);
+        console.error('Failed to update name: ', err);
+        this.alert.set({
+          type: 'error',
+          message: err.error?.detail || 'Failed to update name',
+        });
         this.closeModal();
-        this.alert.set({ type: 'error', message: detail });
       },
     });
   }
 
   protected updateUsername(): void {
-    this.usernameControl.markAsTouched();
-    if (this.usernameControl.invalid) {
-      this.usernameError.set('Please enter a valid username before saving.');
+    this.usernameForm.markAllAsTouched();
+    if (this.usernameForm.invalid) {
       return;
     }
-    const username = this.usernameControl.value.trim();
-    if (!username) {
-      this.usernameError.set('Username cannot be empty.');
-      return;
-    }
-    this.savingField.set('username');
-    this.apiService.updateUserUsername(username).subscribe({
+    const username = this.usernameForm.value.username!.trim();
+    this.modalLoading.set(true);
+    this.apiService.updateUsername(username).subscribe({
       next: () => {
-        this.savingField.set(null);
+        this.modalLoading.set(false);
         this.alert.set({
           type: 'success',
-          message: 'Username updated successfully.',
+          message: 'Username updated successfully',
         });
         this.closeModal();
         this.loadUserProfile();
       },
       error: (err) => {
-        console.error('Failed to update username:', err);
-        const detail = err.error?.detail || 'Failed to update username.';
-        this.savingField.set(null);
-        this.closeModal();
-        this.usernameError.set(detail);
-        this.alert.set({ type: 'error', message: detail });
+        this.modalLoading.set(false);
+        console.error('Failed to update username: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.usernameForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('username')) {
+          this.alert.set({
+            type: 'error',
+            message: err.error?.detail || 'Failed to update username',
+          });
+          this.closeModal();
+        }
       },
     });
   }
 
-  protected submitPasswordChange(): void {
-    this.currentPasswordControl.markAsTouched();
-    const current = this.currentPasswordControl.value.trim();
-    this.newPasswordControl.markAsTouched();
-    const next = this.newPasswordControl.value.trim();
-    this.passwordAttempted.set(true);
-    if (!current || !next) {
-      this.passwordError.set('Both current and new passwords are required.');
+  protected updatePassword(): void {
+    this.passwordForm.markAllAsTouched();
+    if (this.passwordForm.invalid) {
       return;
     }
-    if (this.newPasswordControl.invalid) {
-      this.passwordError.set('New password does not meet the requirements.');
-      return;
-    }
-    if (current === next) {
-      this.passwordError.set(
-        'New password must be different from current password.',
-      );
-      return;
-    }
-    this.passwordError.set(null);
-    this.savingField.set('password');
-    this.apiService.updatePassword(current, next).subscribe({
+    const currentPassword = this.passwordForm.value.currentPassword!.trim();
+    const newPassword = this.passwordForm.value.newPassword!.trim();
+    this.modalLoading.set(true);
+    this.apiService.updatePassword(currentPassword, newPassword).subscribe({
       next: () => {
-        this.savingField.set(null);
-        const flashMessage = {
+        this.modalLoading.set(false);
+        this.alert.set({
           type: 'success',
-          message: 'Password changed successfully.',
-        };
-        sessionStorage.setItem(
-          'profile_flash_message',
-          JSON.stringify(flashMessage),
-        );
+          message: 'Password changed successfully',
+        });
         this.closeModal();
-        this.reloadPage();
       },
       error: (err) => {
-        console.error('Failed to update password:', err);
-        this.savingField.set(null);
-        this.passwordError.set(
-          'Failed to update password. Please check your current password and try again.',
-        );
-        this.closeModal();
-        this.alert.set({
-          type: 'error',
-          message:
-            'Failed to update password. Please check your current password and try again.',
-        });
+        this.modalLoading.set(false);
+        console.error('Failed to update password: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.passwordForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('currentPassword')) {
+          this.alert.set({
+            type: 'error',
+            message:
+              'Failed to update password. Please check your current password and try again.',
+          });
+          this.closeModal();
+        }
       },
     });
   }
 
   protected sendEmailOtp(): void {
-    this.emailControl.markAsTouched();
-    if (this.emailControl.invalid) {
-      this.emailError.set('Please correct the highlighted email errors.');
+    this.emailForm.markAllAsTouched();
+    if (this.emailForm.invalid) {
       return;
     }
-    const email = toAsciiEmail(this.emailControl.value.trim());
+    const email = toAsciiEmail(this.emailForm.value.email?.trim() || '');
     this.emailLoading.set(true);
-    this.emailError.set(null);
+    this.validationService.clearFieldBackendError('email');
     this.alert.set(null);
     this.emailOtpLocked.set(false);
     this.apiService.requestEmailChange(email).subscribe({
@@ -371,11 +329,13 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         this.emailLoading.set(false);
-        const detail = err.error?.detail;
-        this.emailError.set(
-          detail ??
+        this.alert.set({
+          type: 'error',
+          message:
+            err.error?.detail ??
             'Failed to send OTP. If this issue persists contact the administrators.',
-        );
+        });
+        this.closeModal();
       },
     });
   }
@@ -411,58 +371,37 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  protected getEmailValidationMessages(): string[] {
-    return this.validationService.getErrorMessages(this.emailForm, 'email');
+  protected isFieldInvalid(form: FormGroup, fieldName: string): boolean {
+    return this.validationService.isFieldInvalid(form, fieldName);
   }
 
-  protected shouldShowEmailValidationMessages(): boolean {
-    return (
-      this.emailControl.invalid &&
-      (this.emailControl.dirty || this.emailControl.touched)
-    );
-  }
-
-  protected shouldShowPasswordFeedback(): boolean {
-    return (
-      this.newPasswordControl.invalid &&
-      (this.newPasswordControl.dirty ||
-        this.newPasswordControl.touched ||
-        this.passwordAttempted())
-    );
-  }
-
-  protected hasPasswordRequirementError(condition: string): boolean {
-    return (
-      this.shouldShowPasswordFeedback() &&
-      this.newPasswordControl.hasError(condition)
-    );
+  protected getErrorMessages(form: FormGroup, fieldName: string): string[] {
+    return this.validationService.getErrorMessages(form, fieldName);
   }
 
   protected shouldDisableModalPrimary(): boolean {
-    const modal = this.activeModal();
-    if (modal === 'email') {
-      return this.emailControl.invalid || this.emailOtpLocked();
-    }
-    if (modal === 'password') {
-      return (
-        this.newPasswordControl.invalid || this.currentPasswordControl.invalid
-      );
+    if (this.activeModal() === 'email') {
+      return this.emailForm.invalid || this.emailOtpLocked();
     }
     return false;
   }
 
+  protected isModalLoading(): boolean {
+    return this.modalLoading() || this.emailLoading() || this.otpLoading();
+  }
+
   private loadUserProfile(): void {
-    this.loading.set(true);
-    this.error.set(null);
+    this.pageLoading.set(true);
+    this.pageError.set(null);
     this.apiService.getUserProfile().subscribe({
       next: (user) => {
         this.user.set(user);
-        this.loading.set(false);
+        this.pageLoading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load user profile:', err);
-        this.error.set('Failed to load user profile');
-        this.loading.set(false);
+        console.error('Failed to load user profile: ', err);
+        this.pageError.set('Failed to load user profile');
+        this.pageLoading.set(false);
       },
     });
   }
@@ -471,9 +410,5 @@ export class ProfileComponent implements OnInit {
     const bundleId = groupId.split('/').pop() || '';
     const bundle = this.bundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
-  }
-
-  reloadPage(): void {
-    this.document.location.reload();
   }
 }
