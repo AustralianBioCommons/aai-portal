@@ -18,4 +18,8 @@ export class UnverifiedUsersComponent {
   defaultQueryParams: Partial<AdminGetUsersApiParams> = {
     emailVerified: false,
   };
+
+  refreshPage() {
+    window.location.reload();
+  }
 }
