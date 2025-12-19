@@ -15,13 +15,12 @@ describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
-  let reloadSpy: jasmine.Spy;
 
   type ProfileTestHarness = ProfileComponent & {
     openModal(type: 'username' | 'password' | 'name' | 'email'): void;
     updateUsername(): void;
     updateName(): void;
-    submitPasswordChange(): void;
+    updatePassword(): void;
     sendEmailOtp(): void;
     confirmEmailChange(): void;
   };
@@ -78,7 +77,7 @@ describe('ProfileComponent', () => {
   beforeEach(async () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserProfile',
-      'updateUserUsername',
+      'updateUsername',
       'updatePassword',
       'updateFullName',
       'requestEmailChange',
@@ -111,22 +110,20 @@ describe('ProfileComponent', () => {
     harness = component as ProfileTestHarness;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
-    mockApiService.updateUserUsername.and.returnValue(of(mockAuth0User));
+    mockApiService.updateUsername.and.returnValue(of(mockAuth0User));
     mockApiService.updatePassword.and.returnValue(of(true));
     mockApiService.updateFullName.and.returnValue(of(mockAuth0User));
     mockApiService.requestEmailChange.and.returnValue(
       of({ message: 'OTP sent to the requested email address.' }),
     );
     mockApiService.continueEmailChange.and.returnValue(of(void 0));
-    reloadSpy = spyOn(component, 'reloadPage').and.stub();
-    sessionStorage.removeItem('profile_flash_message');
   });
 
   const openModal = (type: 'username' | 'password' | 'name' | 'email') =>
     harness.openModal(type);
   const updateUsername = () => harness.updateUsername();
   const updateName = () => harness.updateName();
-  const submitPasswordChange = () => harness.submitPasswordChange();
+  const updatePassword = () => harness.updatePassword();
   const sendEmailOtp = () => harness.sendEmailOtp();
   const confirmEmailChange = () => harness.confirmEmailChange();
 
@@ -139,8 +136,8 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
     expect(mockApiService.getUserProfile).toHaveBeenCalled();
     expect(component.user()).toEqual(mockUser);
-    expect(component.loading()).toBeFalse();
-    expect(component.error()).toBeNull();
+    expect(component.pageLoading()).toBeFalse();
+    expect(component.pageError()).toBeNull();
   });
 
   it('should display user info correctly', () => {
@@ -159,14 +156,14 @@ describe('ProfileComponent', () => {
     ).and.callThrough();
 
     openModal('name');
-    component.nameControl.setValue('Updated Name');
+    component.nameForm.controls.fullName.setValue('Updated Name');
     updateName();
     fixture.detectChanges();
 
     expect(mockApiService.updateFullName).toHaveBeenCalledWith('Updated Name');
     expect(component.alert()).toEqual({
       type: 'success',
-      message: 'Name updated successfully.',
+      message: 'Name updated successfully',
     });
     expect(loadSpy).toHaveBeenCalled();
   });
@@ -180,7 +177,7 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     openModal('name');
-    component.nameControl.setValue('Bad Name');
+    component.nameForm.controls.fullName.setValue('Bad Name');
     updateName();
     fixture.detectChanges();
 
@@ -188,29 +185,28 @@ describe('ProfileComponent', () => {
       type: 'error',
       message: 'Unable to update name',
     });
-    expect(component.savingField()).toBeNull();
   });
 
   it('updates the username when a valid value is entered', () => {
-    mockApiService.updateUserUsername.and.returnValue(of(mockAuth0User));
+    mockApiService.updateUsername.and.returnValue(of(mockAuth0User));
     fixture.detectChanges();
     mockApiService.getUserProfile.and.returnValue(of(updatedProfile));
 
     openModal('username');
     fixture.detectChanges();
 
-    component.usernameControl.setValue('valid-username');
-    component.usernameControl.markAsTouched();
+    component.usernameForm.controls.username.setValue('valid-username');
+    component.usernameForm.controls.username.markAsTouched();
     updateUsername();
     fixture.detectChanges();
 
-    expect(mockApiService.updateUserUsername).toHaveBeenCalledWith(
+    expect(mockApiService.updateUsername).toHaveBeenCalledWith(
       'valid-username',
     );
     expect(component.user()).toEqual(updatedProfile);
     expect(component.alert()).toEqual({
       type: 'success',
-      message: 'Username updated successfully.',
+      message: 'Username updated successfully',
     });
   });
 
@@ -220,23 +216,20 @@ describe('ProfileComponent', () => {
     openModal('username');
     fixture.detectChanges();
 
-    component.usernameControl.setValue('Ab');
-    component.usernameControl.markAsTouched();
+    component.usernameForm.controls.username.setValue('Ab');
+    component.usernameForm.controls.username.markAsTouched();
     updateUsername();
     fixture.detectChanges();
 
-    expect(mockApiService.updateUserUsername).not.toHaveBeenCalled();
+    expect(mockApiService.updateUsername).not.toHaveBeenCalled();
     const validationError = fixture.debugElement
-      .queryAll(By.css('div.text-xs.text-red-600'))
+      .queryAll(By.css('div.text-xs.text-red-500'))
       .some((el) =>
         el.nativeElement.textContent
           .trim()
-          .includes('Please enter a valid username'),
+          .includes('needs at least 3 characters'),
       );
     expect(validationError).toBeTrue();
-    expect(component.usernameError()).toBe(
-      'Please enter a valid username before saving.',
-    );
     expect(component.alert()).toBeNull();
   });
 
@@ -245,7 +238,7 @@ describe('ProfileComponent', () => {
       status: 400,
       error: { detail: 'Username already taken' },
     };
-    mockApiService.updateUserUsername.and.returnValue(
+    mockApiService.updateUsername.and.returnValue(
       throwError(() => errorResponse),
     );
 
@@ -254,12 +247,11 @@ describe('ProfileComponent', () => {
     openModal('username');
     fixture.detectChanges();
 
-    component.usernameControl.setValue('already-in-use');
-    component.usernameControl.markAsTouched();
+    component.usernameForm.controls.username.setValue('already-in-use');
+    component.usernameForm.controls.username.markAsTouched();
     updateUsername();
     fixture.detectChanges();
 
-    expect(component.usernameError()).toBe('Username already taken');
     expect(component.alert()).toEqual({
       type: 'error',
       message: 'Username already taken',
@@ -274,7 +266,7 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     openModal('email');
-    component.emailControl.setValue('new@example.com');
+    component.emailForm.controls.email.setValue('new@example.com');
     fixture.detectChanges();
 
     sendEmailOtp();
@@ -285,7 +277,6 @@ describe('ProfileComponent', () => {
     );
     expect(component.emailFlowState()).toBe('otp-sent');
     expect(component.emailModalNotice()).toBe('Please check your inbox');
-    expect(component.emailError()).toBeNull();
   });
 
   it('shows an inline error when the email OTP request fails', () => {
@@ -296,13 +287,12 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     openModal('email');
-    component.emailControl.setValue('new@example.com');
+    component.emailForm.controls.email.setValue('new@example.com');
     fixture.detectChanges();
 
     sendEmailOtp();
     fixture.detectChanges();
 
-    expect(component.emailError()).toBe('Rate limited');
     expect(component.emailFlowState()).toBe('idle');
   });
 
@@ -381,83 +371,63 @@ describe('ProfileComponent', () => {
   });
 
   it('handles a successful password change', () => {
-    sessionStorage.removeItem('profile_flash_message');
-    component.currentPasswordControl.setValue('Current123!');
-    component.newPasswordControl.setValue('NewPassword1!');
+    component.passwordForm.controls.currentPassword.setValue('Current123!');
+    component.passwordForm.controls.newPassword.setValue('NewPassword1!');
 
     fixture.detectChanges();
-    submitPasswordChange();
+    updatePassword();
     fixture.detectChanges();
 
     expect(mockApiService.updatePassword).toHaveBeenCalledWith(
       'Current123!',
       'NewPassword1!',
     );
-    expect(sessionStorage.getItem('profile_flash_message')).toBe(
-      JSON.stringify({
-        type: 'success',
-        message: 'Password changed successfully.',
-      }),
-    );
-    expect(component.alert()).toBeNull();
-    expect(reloadSpy).toHaveBeenCalled();
-    expect(component.savingField()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Password changed successfully',
+    });
   });
 
   it('shows inline password error when password update fails', () => {
-    sessionStorage.removeItem('profile_flash_message');
     const errorResponse = new Error('New password rejected');
     mockApiService.updatePassword.and.returnValue(
       throwError(() => errorResponse),
     );
 
-    component.currentPasswordControl.setValue('Current123!');
-    component.newPasswordControl.setValue('InvalidPassword1!');
+    component.passwordForm.controls.currentPassword.setValue('Current123!');
+    component.passwordForm.controls.newPassword.setValue('InvalidPassword1!');
 
     fixture.detectChanges();
-    submitPasswordChange();
+    updatePassword();
     fixture.detectChanges();
 
     expect(mockApiService.updatePassword).toHaveBeenCalled();
-    expect(component.passwordError()).toBe(
-      'Failed to update password. Please check your current password and try again.',
-    );
     expect(component.alert()).toEqual({
       type: 'error',
       message:
         'Failed to update password. Please check your current password and try again.',
     });
-    expect(reloadSpy).not.toHaveBeenCalled();
-    expect(sessionStorage.getItem('profile_flash_message')).toBeNull();
-    expect(component.savingField()).toBeNull();
   });
 
   it('shows inline password error when the current password is incorrect', () => {
-    sessionStorage.removeItem('profile_flash_message');
     const errorResponse = new Error('Current password incorrect');
     mockApiService.updatePassword.and.returnValue(
       throwError(() => errorResponse),
     );
 
-    component.currentPasswordControl.setValue('WrongPassword1!');
-    component.newPasswordControl.setValue('NewValid1!');
+    component.passwordForm.controls.currentPassword.setValue('WrongPassword1!');
+    component.passwordForm.controls.newPassword.setValue('NewValid1!');
 
     fixture.detectChanges();
-    submitPasswordChange();
+    updatePassword();
     fixture.detectChanges();
 
     expect(mockApiService.updatePassword).toHaveBeenCalled();
-    expect(component.passwordError()).toBe(
-      'Failed to update password. Please check your current password and try again.',
-    );
     expect(component.alert()).toEqual({
       type: 'error',
       message:
         'Failed to update password. Please check your current password and try again.',
     });
-    expect(reloadSpy).not.toHaveBeenCalled();
-    expect(sessionStorage.getItem('profile_flash_message')).toBeNull();
-    expect(component.savingField()).toBeNull();
   });
 
   it('should display platform memberships correctly', () => {
@@ -500,7 +470,7 @@ describe('ProfileComponent', () => {
     expect(errorElement.nativeElement.textContent.trim()).toBe(
       'Failed to load user profile',
     );
-    expect(component.loading()).toBeFalse();
+    expect(component.pageLoading()).toBeFalse();
   });
 
   it('shows a message when a launch URL is unavailable', () => {

@@ -19,6 +19,7 @@ export class ModalComponent {
   primaryButtonText = input<string>('Confirm');
   secondaryButtonText = input<string>('Cancel');
   primaryButtonDisabled = input<boolean>(false);
+  primaryButtonLoading = input<boolean>(false);
   textareaLabel = input<string | undefined>();
   textareaControl = input<FormControl<string> | null>(null);
   textareaMaxLength = input<number>(255);
