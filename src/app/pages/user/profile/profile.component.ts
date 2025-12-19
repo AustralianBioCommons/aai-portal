@@ -238,6 +238,47 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  protected launchPlatform(platformId: PlatformId): void {
+    const launchUrl = this.platformLaunchUrls[platformId];
+    const windowRef = this.document.defaultView;
+
+    if (!launchUrl || !windowRef) {
+      return;
+    }
+
+    if (platformId !== 'galaxy') {
+      windowRef.location.href = launchUrl;
+      return;
+    }
+
+    const normalizedBase = launchUrl.endsWith('/')
+      ? launchUrl
+      : `${launchUrl}/`;
+    const loginEndpoint = `${normalizedBase}authnz/oidc/login`;
+
+    windowRef
+      .fetch(loginEndpoint)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const redirect = data?.redirect_uri;
+        if (redirect) {
+          windowRef.location.href = redirect;
+        } else {
+          console.error('No redirect_uri found in response:', data);
+          windowRef.location.href = launchUrl;
+        }
+      })
+      .catch((err) => {
+        console.error('Galaxy launch request failed:', err);
+        windowRef.location.href = launchUrl;
+      });
+  }
+
   protected updateName(): void {
     const next = this.nameControl.value.trim();
     if (!next) {
