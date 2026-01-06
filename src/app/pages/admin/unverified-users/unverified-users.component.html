@@ -6,7 +6,11 @@
   <div class="mt-1 max-w-lg text-sm text-gray-500">
     Email verification status can take time to sync from Auth0 to our database -
     try
-    <button class="text-biocommons-primary underline" (click)="refreshPage()">
+    <button
+      class="text-biocommons-primary underline"
+      (click)="refreshPage()"
+      id="refresh-page-button"
+    >
       refreshing this page
     </button>
     after a minute or two to check for updates.
