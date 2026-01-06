@@ -10,6 +10,7 @@ import {
 } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DEFAULT_PAGE_SIZE } from '../components/user-list/user-list.component';
+import { By } from '@angular/platform-browser';
 
 describe('UnverifiedUsersComponent', () => {
   let component: UnverifiedUsersComponent;
@@ -69,5 +70,14 @@ describe('UnverifiedUsersComponent', () => {
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
       expectedParams,
     );
+  });
+
+  it('should refresh the page when refresh button is clicked', () => {
+    const refreshSpy = spyOn(component, 'refreshPage');
+    const refreshButton = fixture.debugElement.query(
+      By.css('#refresh-page-button'),
+    );
+    refreshButton.triggerEventHandler('click', null);
+    expect(refreshSpy).toHaveBeenCalled();
   });
 });

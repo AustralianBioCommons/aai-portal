@@ -4,6 +4,7 @@ import {
   ApiService,
 } from '../../../core/services/api.service';
 import { UserListComponent } from '../components/user-list/user-list.component';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-unverified-users',
@@ -13,9 +14,14 @@ import { UserListComponent } from '../components/user-list/user-list.component';
 })
 export class UnverifiedUsersComponent {
   private apiService = inject(ApiService);
+  private document = inject(DOCUMENT);
 
   title = 'Unverified Users';
   defaultQueryParams: Partial<AdminGetUsersApiParams> = {
     emailVerified: false,
   };
+
+  refreshPage() {
+    this.document.location.reload();
+  }
 }

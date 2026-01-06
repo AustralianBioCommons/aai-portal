@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   FormGroup,
   ReactiveFormsModule,
@@ -55,6 +55,7 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
 
