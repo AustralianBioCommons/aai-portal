@@ -5,6 +5,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   ApiService,
   BiocommonsUserDetails,
+  Status,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
@@ -25,8 +26,17 @@ import {
   heroChevronDown,
   heroEllipsisHorizontal,
   heroEnvelope,
+  heroArrowUturnLeft as heroUturnLeft,
   heroXCircle,
 } from '@ng-icons/heroicons/outline';
+
+// Define the structure for an action
+interface StatusAction {
+  label: string;
+  icon: string;
+  onClick: (id: string, name: string) => void;
+  class?: string;
+}
 
 type ActionModalData = {
   action: 'revoke' | 'reject';
@@ -61,6 +71,7 @@ type ActionModalData = {
       heroEnvelope,
       heroEllipsisHorizontal,
       heroXCircle,
+      heroUturnLeft,
     }),
   ],
 })
@@ -73,6 +84,81 @@ export class UserDetailsComponent implements OnInit {
 
   protected readonly platforms = PLATFORMS;
   protected readonly bundles = BIOCOMMONS_BUNDLES;
+  // Map from current approval state to the actions admins can take
+  protected readonly GROUP_ACTIONS: Readonly<Record<Status, StatusAction[]>> = {
+    pending: [
+      {
+        label: 'Approve',
+        icon: 'heroCheckCircle',
+        onClick: (id) => this.approveGroup(id),
+      },
+      {
+        label: 'Reject',
+        icon: 'heroXCircle',
+        onClick: (id, name) => this.rejectGroup(id, name),
+      },
+    ],
+    approved: [
+      {
+        label: 'Revoke',
+        icon: 'heroXCircle',
+        onClick: (id, name) => this.revokeGroup(id, name),
+      },
+    ],
+    revoked: [
+      {
+        label: 'Approve',
+        icon: 'heroCheckCircle',
+        onClick: (id) => this.approveGroup(id),
+      },
+    ],
+    rejected: [
+      {
+        label: 'Unreject',
+        icon: 'heroUturnLeft',
+        onClick: (id) => this.unrejectGroup(id),
+      },
+    ],
+  };
+
+  protected readonly PLATFORM_ACTIONS: Readonly<
+    Record<Status, StatusAction[]>
+  > = {
+    pending: [
+      {
+        label: 'Approve',
+        icon: 'heroCheckCircle',
+        onClick: (id) => this.approvePlatform(id as PlatformId),
+      },
+      {
+        label: 'Reject',
+        icon: 'heroXCircle',
+        // TODO: not implemented yet
+        onClick: () => null,
+      },
+    ],
+    approved: [
+      {
+        label: 'Revoke',
+        icon: 'heroXCircle',
+        onClick: (id) => this.revokePlatform(id as PlatformId),
+      },
+    ],
+    revoked: [
+      {
+        label: 'Approve',
+        icon: 'heroCheckCircle',
+        onClick: (id) => this.approvePlatform(id as PlatformId),
+      },
+    ],
+    rejected: [
+      {
+        label: 'Approve',
+        icon: 'heroCheckCircle',
+        onClick: (id) => this.approvePlatform(id as PlatformId),
+      },
+    ],
+  };
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
