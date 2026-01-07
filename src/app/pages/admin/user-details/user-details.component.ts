@@ -34,7 +34,7 @@ import {
 interface StatusAction {
   label: string;
   icon: string;
-  onClick: (id: string, name: string) => void;
+  onClick: (id: string, name?: string) => void;
   class?: string;
 }
 
