@@ -236,7 +236,12 @@ describe('ProfileComponent', () => {
   it('shows inline username error when API rejects the username', () => {
     const errorResponse = {
       status: 400,
-      error: { detail: 'Username already taken' },
+      error: {
+        message: 'Username is already taken',
+        field_errors: [
+          { field: 'username', message: 'Username is already taken' },
+        ],
+      },
     };
     mockApiService.updateUsername.and.returnValue(
       throwError(() => errorResponse),
@@ -252,10 +257,8 @@ describe('ProfileComponent', () => {
     updateUsername();
     fixture.detectChanges();
 
-    expect(component.alert()).toEqual({
-      type: 'error',
-      message: 'Username already taken',
-    });
+    expect(component.alert()).toBeNull();
+    expect(component.activeModal()).toBe('username');
   });
 
   it('sends an OTP when a new email address is entered', () => {
@@ -388,33 +391,54 @@ describe('ProfileComponent', () => {
     });
   });
 
-  it('shows inline password error when password update fails', () => {
-    const errorResponse = new Error('New password rejected');
+  it('shows general alert when password update fails', () => {
+    const errorResponse = {
+      status: 400,
+      error: {
+        message: 'Failed to update password',
+      },
+    };
     mockApiService.updatePassword.and.returnValue(
       throwError(() => errorResponse),
     );
 
+    fixture.detectChanges();
+
+    openModal('password');
     component.passwordForm.controls.currentPassword.setValue('Current123!');
-    component.passwordForm.controls.newPassword.setValue('InvalidPassword1!');
+    component.passwordForm.controls.newPassword.setValue('ValidPassword1!');
 
     fixture.detectChanges();
     updatePassword();
     fixture.detectChanges();
 
     expect(mockApiService.updatePassword).toHaveBeenCalled();
+    expect(component.activeModal()).toBeNull();
     expect(component.alert()).toEqual({
       type: 'error',
-      message:
-        'Failed to update password. Please check your current password and try again.',
+      message: 'Failed to update password',
     });
   });
 
   it('shows inline password error when the current password is incorrect', () => {
-    const errorResponse = new Error('Current password incorrect');
+    const errorResponse = {
+      status: 400,
+      error: {
+        message: 'Current password is incorrect',
+        field_errors: [
+          {
+            field: 'currentPassword',
+            message: 'Current password is incorrect',
+          },
+        ],
+      },
+    };
     mockApiService.updatePassword.and.returnValue(
       throwError(() => errorResponse),
     );
 
+    fixture.detectChanges();
+    openModal('password');
     component.passwordForm.controls.currentPassword.setValue('WrongPassword1!');
     component.passwordForm.controls.newPassword.setValue('NewValid1!');
 
@@ -423,11 +447,13 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     expect(mockApiService.updatePassword).toHaveBeenCalled();
-    expect(component.alert()).toEqual({
-      type: 'error',
-      message:
-        'Failed to update password. Please check your current password and try again.',
-    });
+    expect(component.activeModal()).toBe('password');
+    expect(component.alert()).toBeNull();
+    const currentPasswordErrors = component['getErrorMessages'](
+      component.passwordForm,
+      'currentPassword',
+    );
+    expect(currentPasswordErrors).toContain('Current password is incorrect');
   });
 
   it('should display platform memberships correctly', () => {

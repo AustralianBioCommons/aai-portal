@@ -157,6 +157,12 @@ export class ProfileComponent implements OnInit {
       this.resetEmailFlowState();
       this.validationService.clearFieldBackendError('email');
     }
+    if (this.activeModal() === 'username') {
+      this.validationService.clearFieldBackendError('username');
+    }
+    if (this.activeModal() === 'password') {
+      this.validationService.clearFieldBackendError('currentPassword');
+    }
     this.activeModal.set(null);
   }
 
@@ -308,7 +314,7 @@ export class ProfileComponent implements OnInit {
         if (!this.validationService.hasFieldBackendError('username')) {
           this.alert.set({
             type: 'error',
-            message: err.error?.detail || 'Failed to update username',
+            message: err.error?.message || 'Failed to update username',
           });
           this.closeModal();
         }
@@ -343,7 +349,8 @@ export class ProfileComponent implements OnInit {
           this.alert.set({
             type: 'error',
             message:
-              'Failed to update password. Please check your current password and try again.',
+              err.error?.message ||
+              'Failed to update password. Please try again.',
           });
           this.closeModal();
         }
