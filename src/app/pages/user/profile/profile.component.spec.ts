@@ -424,11 +424,11 @@ describe('ProfileComponent', () => {
     const errorResponse = {
       status: 400,
       error: {
-        message: 'Current password is incorrect.',
+        message: 'Current password is incorrect',
         field_errors: [
           {
             field: 'currentPassword',
-            message: 'Current password is incorrect.',
+            message: 'Current password is incorrect',
           },
         ],
       },
@@ -449,6 +449,11 @@ describe('ProfileComponent', () => {
     expect(mockApiService.updatePassword).toHaveBeenCalled();
     expect(component.activeModal()).toBe('password');
     expect(component.alert()).toBeNull();
+    const currentPasswordErrors = component['getErrorMessages'](
+      component.passwordForm,
+      'currentPassword',
+    );
+    expect(currentPasswordErrors).toContain('Current password is incorrect');
   });
 
   it('should display platform memberships correctly', () => {
