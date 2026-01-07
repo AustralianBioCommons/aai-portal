@@ -71,6 +71,7 @@ describe('UserDetailsComponent', () => {
       'revokePlatformAccess',
       'approveGroupAccess',
       'revokeGroupAccess',
+      'unrejectGroupAccess',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -621,6 +622,22 @@ describe('UserDetailsComponent', () => {
       expect(component.alert()?.type).toBe('success');
       expect(component.alert()?.message).toBe(
         'Bundle access approved successfully',
+      );
+    });
+
+    it('should unreject group membership', () => {
+      mockApiService.unrejectGroupAccess.and.returnValue(of({ updated: true }));
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.unrejectGroup('tsi');
+      expect(mockApiService.unrejectGroupAccess).toHaveBeenCalledWith(
+        '123',
+        'tsi',
+      );
+      expect(component.alert()?.type).toBe('success');
+      expect(component.alert()?.message).toBe(
+        'Bundle access unrejected successfully',
       );
     });
 

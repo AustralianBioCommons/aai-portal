@@ -75,7 +75,7 @@ export interface PlatformMembership {
   platform_id: PlatformId;
   platform_name: string;
   user_id: string;
-  approval_status: string;
+  approval_status: Status;
   updated_by: string;
   updated_at: string;
   revocation_reason?: string;
@@ -87,7 +87,7 @@ export interface GroupMembership {
   group_id: string;
   group_name: string;
   group_short_name: string;
-  approval_status: string;
+  approval_status: Status;
   updated_by: string;
   updated_at: string;
   revocation_reason?: string;
@@ -308,6 +308,16 @@ export class ApiService {
     return this.http.post<{ updated: boolean }>(
       `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/reject`,
       { reason },
+    );
+  }
+
+  unrejectGroupAccess(
+    userId: string,
+    groupId: string,
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/unreject`,
+      {},
     );
   }
 

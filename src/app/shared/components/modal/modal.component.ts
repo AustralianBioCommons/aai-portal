@@ -38,13 +38,13 @@ export class ModalComponent {
   });
 
   readonly computedPrimaryButtonText = computed(() => {
-    return this.type() === 'reject' || this.type() === 'revoke'
+    return ['reject', 'revoke'].includes(this.type())
       ? 'Yes'
       : this.primaryButtonText();
   });
 
   readonly computedSecondaryButtonText = computed(() => {
-    return this.type() === 'reject' || this.type() === 'revoke'
+    return ['reject', 'revoke'].includes(this.type())
       ? 'No'
       : this.secondaryButtonText();
   });
