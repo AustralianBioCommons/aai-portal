@@ -397,7 +397,7 @@ describe('ProfileComponent', () => {
       error: {
         message: 'Failed to update password',
       },
-    } as any;
+    };
     mockApiService.updatePassword.and.returnValue(
       throwError(() => errorResponse),
     );
@@ -432,7 +432,7 @@ describe('ProfileComponent', () => {
           },
         ],
       },
-    } as any;
+    };
     mockApiService.updatePassword.and.returnValue(
       throwError(() => errorResponse),
     );
