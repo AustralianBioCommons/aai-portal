@@ -222,72 +222,27 @@
                           </button>
                         </ng-template>
                         <ng-template #menu>
-                          @switch (platform.approval_status) {
-                            @case ("pending") {
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="approvePlatform(platform.platform_id)"
-                              >
-                                <ng-icon
-                                  name="heroCheckCircle"
-                                  size="20"
-                                ></ng-icon>
-                                Approve
-                              </button>
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke-width="1.5"
-                                  stroke="currentColor"
-                                  class="size-5"
-                                >
-                                  <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                  />
-                                </svg>
-                                Reject
-                              </button>
-                            }
-                            @case ("approved") {
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="revokePlatform(platform.platform_id)"
-                              >
-                                <ng-icon name="heroXCircle" size="20"></ng-icon>
-                                Revoke
-                              </button>
-                            }
-                            @case ("revoked") {
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="approvePlatform(platform.platform_id)"
-                              >
-                                <ng-icon
-                                  name="heroCheckCircle"
-                                  size="20"
-                                ></ng-icon>
-                                Approve
-                              </button>
-                            }
-                            @default {}
+                          @for (
+                            action of PLATFORM_ACTIONS[
+                              platform.approval_status
+                            ];
+                            track action.label
+                          ) {
+                            <button
+                              type="button"
+                              class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                              role="menuitem"
+                              tabindex="-1"
+                              (click)="
+                                action.onClick(
+                                  platform.platform_id,
+                                  getPlatformName(platform.platform_id)
+                                )
+                              "
+                            >
+                              <ng-icon [name]="action.icon" size="20"></ng-icon>
+                              {{ action.label }}
+                            </button>
                           }
                         </ng-template>
                       </app-dropdown-menu>
@@ -383,64 +338,21 @@
                           </button>
                         </ng-template>
                         <ng-template #menu>
-                          @switch (group.approval_status) {
-                            @case ("pending") {
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="approveGroup(group.group_id)"
-                              >
-                                <ng-icon
-                                  name="heroCheckCircle"
-                                  size="20"
-                                ></ng-icon>
-                                Approve
-                              </button>
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="
-                                  rejectGroup(group.group_id, group.group_name)
-                                "
-                              >
-                                <ng-icon name="heroXCircle" size="20"></ng-icon>
-                                Reject
-                              </button>
-                            }
-                            @case ("approved") {
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="
-                                  revokeGroup(group.group_id, group.group_name)
-                                "
-                              >
-                                <ng-icon name="heroXCircle" size="20"></ng-icon>
-                                Revoke
-                              </button>
-                            }
-                            @case ("revoked") {
-                              <button
-                                type="button"
-                                class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                                role="menuitem"
-                                tabindex="-1"
-                                (click)="approveGroup(group.group_id)"
-                              >
-                                <ng-icon
-                                  name="heroCheckCircle"
-                                  size="20"
-                                ></ng-icon>
-                                Approve
-                              </button>
-                            }
-                            @default {}
+                          @for (
+                            action of GROUP_ACTIONS[group.approval_status];
+                            track action.label
+                          ) {
+                            <button
+                              type="button"
+                              class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                              role="menuitem"
+                              (click)="
+                                action.onClick(group.group_id, group.group_name)
+                              "
+                            >
+                              <ng-icon [name]="action.icon" size="20"></ng-icon>
+                              {{ action.label }}
+                            </button>
                           }
                         </ng-template>
                       </app-dropdown-menu>
