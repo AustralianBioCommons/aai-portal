@@ -349,6 +349,28 @@ export class UserDetailsComponent implements OnInit {
     this.openActionModal('reject', 'group', groupId, groupName);
   }
 
+  unrejectGroup(groupId: string): void {
+    const userId = this.user()!.user_id;
+    this.openMenuGroupId.set(null);
+    this.alert.set(null);
+    this.apiService.unrejectGroupAccess(userId, groupId).subscribe({
+      next: () => {
+        this.refreshUserDetails(userId);
+        this.alert.set({
+          type: 'success',
+          message: 'Bundle access unrejected successfully',
+        });
+      },
+      error: (error) => {
+        console.error('Failed to unreject bundle access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to unreject bundle access',
+        });
+      },
+    });
+  }
+
   private openActionModal(
     action: 'revoke' | 'reject',
     type: 'platform' | 'group',
