@@ -311,6 +311,16 @@ export class ApiService {
     );
   }
 
+  unrejectGroupAccess(
+    userId: string,
+    groupId: string,
+  ): Observable<{ updated: boolean }> {
+    return this.http.post<{ updated: boolean }>(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/unreject`,
+      {},
+    );
+  }
+
   resendVerificationEmail(userId: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/admin/users/${userId}/verification-email/resend`,
