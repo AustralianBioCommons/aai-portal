@@ -95,14 +95,14 @@ export class UserDetailsComponent implements OnInit {
       {
         label: 'Reject',
         icon: 'heroXCircle',
-        onClick: (id, name) => this.rejectGroup(id, name),
+        onClick: (id, name) => this.rejectGroup(id, name!),
       },
     ],
     approved: [
       {
         label: 'Revoke',
         icon: 'heroXCircle',
-        onClick: (id, name) => this.revokeGroup(id, name),
+        onClick: (id, name) => this.revokeGroup(id, name!),
       },
     ],
     revoked: [
