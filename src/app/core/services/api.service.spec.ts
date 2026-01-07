@@ -128,4 +128,19 @@ describe('ApiService', () => {
     expect(req.request.body).toEqual({ reason });
     req.flush({ updated: true });
   });
+
+  it('should call unreject group endpoint', () => {
+    const userId = 'auth0|123';
+    const groupId = 'tsi';
+    service.unrejectGroupAccess(userId, groupId).subscribe((response) => {
+      expect(response).toEqual({ updated: true });
+    });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/groups/${groupId}/unreject`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({});
+    req.flush({ updated: true });
+  });
 });
