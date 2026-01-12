@@ -72,6 +72,7 @@ describe('UserDetailsComponent', () => {
       'approveGroupAccess',
       'revokeGroupAccess',
       'unrejectGroupAccess',
+      'deleteUser',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -699,6 +700,70 @@ describe('UserDetailsComponent', () => {
         'tsi',
         'No longer needed',
       );
+      expect(component.actionModalData()).toBeNull();
+    });
+  });
+
+  describe('User Deletion', () => {
+    it('should open delete modal', () => {
+      fixture.detectChanges();
+      component.deleteUserBegin();
+      expect(component.actionModalData()).toBeTruthy();
+      expect(component.actionModalData()?.type).toBe('user');
+      expect(component.actionModalData()?.action).toBe('delete');
+    });
+
+    it('should delete user with reason', () => {
+      mockApiService.deleteUser.and.returnValue(
+        of('User deleted successfully'),
+      );
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.actionModalData.set({
+        action: 'delete',
+        type: 'user',
+        id: '123',
+        name: 'user@example.com',
+        email: 'user@example.com',
+      });
+      component.reasonControl.setValue('Deleting user');
+
+      component.confirmActionModal();
+
+      expect(mockApiService.deleteUser).toHaveBeenCalledWith(
+        '123',
+        'Deleting user',
+      );
+      expect(component.actionModalData()).toBeNull();
+    });
+
+    it('should handle error when deleting user', () => {
+      mockApiService.deleteUser.and.returnValue(
+        throwError(() => new Error('API Error')),
+      );
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.actionModalData.set({
+        action: 'delete',
+        type: 'user',
+        id: '123',
+        name: 'user@example.com',
+        email: 'user@example.com',
+      });
+      component.reasonControl.setValue('Deleting user');
+
+      component.confirmActionModal();
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to delete user:',
+        jasmine.any(Error),
+      );
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to delete user',
+      });
       expect(component.actionModalData()).toBeNull();
     });
   });
