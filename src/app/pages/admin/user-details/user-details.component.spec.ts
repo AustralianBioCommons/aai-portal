@@ -80,7 +80,7 @@ describe('UserDetailsComponent', () => {
     ]);
     const routerSpy = jasmine.createSpyObj(
       'Router',
-      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl'],
+      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl', 'navigate'],
       {
         events: EMPTY,
       },
