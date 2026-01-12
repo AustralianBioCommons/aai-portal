@@ -39,7 +39,9 @@
         </a>
 
         @let showActionButton =
-          !user()?.email_verified || adminType() === "platform";
+          !user()?.email_verified ||
+          adminType() === "platform" ||
+          adminType() === "biocommons";
         @if (showActionButton) {
           <app-dropdown-menu
             [isOpen]="openMenuAction()"
@@ -69,7 +71,7 @@
                   Resend Verification Email
                 </button>
               }
-              @if (adminType() === "platform") {
+              @if (adminType() === "platform" || adminType() === "biocommons") {
                 <button
                   class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
                   role="menuitem"
