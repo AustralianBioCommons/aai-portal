@@ -2,7 +2,7 @@ import { Component, input, output, computed } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '../button/button.component';
 
-export type ModalType = 'default' | 'revoke' | 'reject';
+export type ModalType = 'default' | 'revoke' | 'reject' | 'delete';
 
 @Component({
   selector: 'app-modal',
@@ -27,14 +27,28 @@ export class ModalComponent {
   // Computed values
   readonly showTextarea = computed(() => {
     const type = this.type();
-    return (type === 'revoke' || type === 'reject') && this.textareaControl();
+    return (
+      (type === 'revoke' || type === 'reject' || type === 'delete') &&
+      this.textareaControl()
+    );
   });
 
   readonly computedTextareaLabel = computed(() => {
-    return (
-      this.textareaLabel() ??
-      (this.type() === 'reject' ? 'Rejection reason' : 'Revocation reason')
-    );
+    let label: string;
+    switch (this.type()) {
+      case 'revoke':
+        label = 'Revocation reason';
+        break;
+      case 'reject':
+        label = 'Rejection reason';
+        break;
+      case 'delete':
+        label = 'Deletion reason';
+        break;
+      default:
+        label = 'Reason';
+    }
+    return this.textareaLabel() ?? label;
   });
 
   readonly computedPrimaryButtonText = computed(() => {
