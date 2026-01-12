@@ -461,6 +461,18 @@ export class UserDetailsComponent implements OnInit {
             return;
           case 'reject':
             this.confirmRejectGroup(userId, modalData.id, reason);
+            break;
+          default:
+            console.error('Invalid action for group:', modalData.action);
+        }
+        break;
+      case 'user':
+        switch (modalData.action) {
+          case 'delete':
+            this.confirmDeleteUser(userId, reason);
+            break;
+          default:
+            console.error('Invalid action for user:', modalData.action);
         }
     }
   }
@@ -481,6 +493,27 @@ export class UserDetailsComponent implements OnInit {
         this.alert.set({
           type: 'error',
           message: 'Failed to reject bundle access',
+        });
+      },
+    });
+  }
+
+  private confirmDeleteUser(userId: string, reason: string) {
+    this.apiService.deleteUser(userId, reason).subscribe({
+      next: () => {
+        this.closeActionModal();
+        this.alert.set({
+          type: 'success',
+          message: 'User deleted successfully: returning to dashboard',
+        });
+        setTimeout(() => this.router.navigate(['/all-users']), 2000);
+      },
+      error: (error) => {
+        this.closeActionModal();
+        console.error('Failed to delete user:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to delete user',
         });
       },
     });
