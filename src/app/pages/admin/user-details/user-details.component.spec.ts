@@ -195,7 +195,7 @@ describe('UserDetailsComponent', () => {
     expect(unverifiedBadge.nativeElement.textContent.trim()).toBe('Unverified');
   });
 
-  it('should show Actions button only for unverified users', () => {
+  it('should show Actions button for unverified users', () => {
     const unverifiedUser = { ...mockUserDetails, email_verified: false };
     mockApiService.getUserDetails.and.returnValue(of(unverifiedUser));
 
@@ -214,6 +214,30 @@ describe('UserDetailsComponent', () => {
       btn.nativeElement.textContent?.includes('Actions'),
     );
     expect(actionsButton).toBeFalsy();
+  });
+
+  const deleteAdminTypes = ['platform', 'biocommons'] as const;
+  deleteAdminTypes.forEach((type) => {
+    it(`should show Actions button for ${type} admins`, () => {
+      const authService = TestBed.inject(
+        AuthService,
+      ) as jasmine.SpyObj<AuthService>;
+      const adminSignal = signal(type);
+
+      Object.defineProperty(authService, 'adminType', {
+        get: () => adminSignal,
+        configurable: true,
+      });
+      component.adminType = adminSignal;
+
+      fixture.detectChanges();
+
+      const buttons = fixture.debugElement.queryAll(By.css('button'));
+      const actionsButton = buttons.find((btn) =>
+        btn.nativeElement.textContent?.includes('Actions'),
+      );
+      expect(actionsButton).toBeTruthy();
+    });
   });
 
   it('should display platform memberships correctly', () => {
