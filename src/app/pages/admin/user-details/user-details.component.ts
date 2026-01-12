@@ -26,6 +26,7 @@ import {
   heroChevronDown,
   heroEllipsisHorizontal,
   heroEnvelope,
+  heroTrash,
   heroArrowUturnLeft as heroUturnLeft,
   heroXCircle,
 } from '@ng-icons/heroicons/outline';
@@ -71,6 +72,7 @@ interface ActionModalData {
       heroEnvelope,
       heroEllipsisHorizontal,
       heroXCircle,
+      heroTrash,
       heroUturnLeft,
     }),
   ],
