@@ -328,6 +328,13 @@ export class ApiService {
     );
   }
 
+  deleteUser(userId: string, reason: string): Observable<string> {
+    return this.http.post<string>(
+      `${environment.auth0.backend}/admin/users/${userId}/delete`,
+      { reason },
+    );
+  }
+
   updateFullName(fullName: string) {
     return this.http.post<BiocommonsUserDetails>(
       `${environment.auth0.backend}/me/profile/full-name/update`,

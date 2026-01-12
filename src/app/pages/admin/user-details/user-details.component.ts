@@ -26,6 +26,7 @@ import {
   heroChevronDown,
   heroEllipsisHorizontal,
   heroEnvelope,
+  heroTrash,
   heroArrowUturnLeft as heroUturnLeft,
   heroXCircle,
 } from '@ng-icons/heroicons/outline';
@@ -38,13 +39,13 @@ interface StatusAction {
   class?: string;
 }
 
-type ActionModalData = {
-  action: 'revoke' | 'reject';
-  type: 'platform' | 'group';
+interface ActionModalData {
+  action: 'revoke' | 'reject' | 'delete';
+  type: 'platform' | 'group' | 'user';
   id: string;
   name: string;
   email: string;
-} | null;
+}
 
 @Component({
   selector: 'app-user-details',
@@ -71,6 +72,7 @@ type ActionModalData = {
       heroEnvelope,
       heroEllipsisHorizontal,
       heroXCircle,
+      heroTrash,
       heroUturnLeft,
     }),
   ],
@@ -175,7 +177,7 @@ export class UserDetailsComponent implements OnInit {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
-  actionModalData = signal<ActionModalData>(null);
+  actionModalData = signal<ActionModalData | null>(null);
 
   // Form control
   reasonControl = new FormControl('', {
@@ -349,6 +351,15 @@ export class UserDetailsComponent implements OnInit {
     this.openActionModal('reject', 'group', groupId, groupName);
   }
 
+  deleteUserBegin(): void {
+    this.openActionModal(
+      'delete',
+      'user',
+      this.user()!.user_id,
+      this.user()!.email,
+    );
+  }
+
   unrejectGroup(groupId: string): void {
     const userId = this.user()!.user_id;
     this.openMenuGroupId.set(null);
@@ -372,8 +383,8 @@ export class UserDetailsComponent implements OnInit {
   }
 
   private openActionModal(
-    action: 'revoke' | 'reject',
-    type: 'platform' | 'group',
+    action: 'revoke' | 'reject' | 'delete',
+    type: 'platform' | 'group' | 'user',
     id: string,
     name: string,
   ): void {
@@ -393,11 +404,23 @@ export class UserDetailsComponent implements OnInit {
   getActionModalTitle(): string {
     const modalData = this.actionModalData();
     if (!modalData) return '';
-    if (modalData.action === 'reject')
-      return 'Do you want to reject this user?';
-    if (modalData.type === 'platform')
-      return 'Do you want to revoke this user?';
-    return `Do you want to revoke this user from ${modalData.name}?`;
+    const titleLookup: Record<
+      ActionModalData['type'],
+      Partial<Record<ActionModalData['action'], string>>
+    > = {
+      platform: {
+        revoke: 'Do you want to revoke this user?',
+        reject: 'Do you want to reject this user?',
+      },
+      group: {
+        revoke: `Do you want to revoke this user from ${modalData!.name}?`,
+        reject: 'Do you want to reject this user?',
+      },
+      user: {
+        delete: 'Do you want to delete this user?',
+      },
+    };
+    return titleLookup[modalData.type]![modalData.action]!;
   }
 
   closeActionModal(): void {
@@ -417,69 +440,129 @@ export class UserDetailsComponent implements OnInit {
     const reason = this.reasonControl.value.trim();
     this.alert.set(null);
 
-    if (modalData.action === 'reject') {
-      this.apiService
-        .rejectGroupAccess(userId, modalData.id, reason)
-        .subscribe({
-          next: () => {
-            this.refreshUserDetails(userId);
-            this.closeActionModal();
-            this.alert.set({
-              type: 'success',
-              message: 'Bundle access rejected successfully',
-            });
-          },
-          error: (error) => {
-            this.closeActionModal();
-            console.error('Failed to reject bundle access:', error);
-            this.alert.set({
-              type: 'error',
-              message: 'Failed to reject bundle access',
-            });
-          },
-        });
-    } else if (modalData.type === 'platform') {
-      this.apiService
-        .revokePlatformAccess(userId, modalData.id as PlatformId, reason)
-        .subscribe({
-          next: () => {
-            this.refreshUserDetails(userId);
-            this.closeActionModal();
-            this.alert.set({
-              type: 'success',
-              message: 'Service access revoked successfully',
-            });
-          },
-          error: (error) => {
-            this.closeActionModal();
-            console.error('Failed to revoke service access:', error);
-            this.alert.set({
-              type: 'error',
-              message: 'Failed to revoke service access',
-            });
-          },
-        });
-    } else {
-      this.apiService
-        .revokeGroupAccess(userId, modalData.id, reason)
-        .subscribe({
-          next: () => {
-            this.refreshUserDetails(userId);
-            this.closeActionModal();
-            this.alert.set({
-              type: 'success',
-              message: 'Bundle access revoked successfully',
-            });
-          },
-          error: (error) => {
-            this.closeActionModal();
-            console.error('Failed to revoke bundle access:', error);
-            this.alert.set({
-              type: 'error',
-              message: 'Failed to revoke bundle access',
-            });
-          },
-        });
+    switch (modalData.type) {
+      case 'platform':
+        switch (modalData.action) {
+          case 'revoke':
+            this.confirmRevokePlatform(
+              userId,
+              modalData.id as PlatformId,
+              reason,
+            );
+            return;
+          default:
+            console.error('Invalid action for platform:', modalData.action);
+        }
+        break;
+      case 'group':
+        switch (modalData.action) {
+          case 'revoke':
+            this.confirmRevokeGroup(userId, modalData.id, reason);
+            return;
+          case 'reject':
+            this.confirmRejectGroup(userId, modalData.id, reason);
+            return;
+          default:
+            console.error('Invalid action for group:', modalData.action);
+            return;
+        }
+        break;
+      case 'user':
+        switch (modalData.action) {
+          case 'delete':
+            this.confirmDeleteUser(userId, reason);
+            break;
+          default:
+            console.error('Invalid action for user:', modalData.action);
+            return;
+        }
     }
+  }
+
+  private confirmRejectGroup(userId: string, groupId: string, reason: string) {
+    this.apiService.rejectGroupAccess(userId, groupId, reason).subscribe({
+      next: () => {
+        this.refreshUserDetails(userId);
+        this.closeActionModal();
+        this.alert.set({
+          type: 'success',
+          message: 'Bundle access rejected successfully',
+        });
+      },
+      error: (error) => {
+        this.closeActionModal();
+        console.error('Failed to reject bundle access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to reject bundle access',
+        });
+      },
+    });
+  }
+
+  private confirmDeleteUser(userId: string, reason: string) {
+    this.apiService.deleteUser(userId, reason).subscribe({
+      next: () => {
+        this.closeActionModal();
+        this.alert.set({
+          type: 'success',
+          message: 'User deleted successfully, returning to dashboard',
+        });
+        setTimeout(() => this.router.navigate(['/all-users']), 2000);
+      },
+      error: (error) => {
+        this.closeActionModal();
+        console.error('Failed to delete user:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to delete user',
+        });
+      },
+    });
+  }
+
+  private confirmRevokePlatform(
+    userId: string,
+    platformId: PlatformId,
+    reason: string,
+  ) {
+    this.apiService.revokePlatformAccess(userId, platformId, reason).subscribe({
+      next: () => {
+        this.refreshUserDetails(userId);
+        this.closeActionModal();
+        this.alert.set({
+          type: 'success',
+          message: 'Service access revoked successfully',
+        });
+      },
+      error: (error) => {
+        this.closeActionModal();
+        console.error('Failed to revoke service access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to revoke service access',
+        });
+      },
+    });
+  }
+  private confirmRevokeGroup(userId: string, groupId: string, reason: string) {
+    this.apiService.revokeGroupAccess(userId, groupId, reason).subscribe({
+      next: () => {
+        this.refreshUserDetails(userId);
+        this.closeActionModal();
+        this.alert.set({
+          type: 'success',
+          message: 'Bundle access revoked successfully',
+        });
+      },
+      error: (error) => {
+        this.closeActionModal();
+        console.error('Failed to revoke bundle access:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to revoke bundle access',
+        });
+      },
+    });
   }
 }

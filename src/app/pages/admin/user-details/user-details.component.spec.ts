@@ -72,6 +72,7 @@ describe('UserDetailsComponent', () => {
       'approveGroupAccess',
       'revokeGroupAccess',
       'unrejectGroupAccess',
+      'deleteUser',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -79,7 +80,7 @@ describe('UserDetailsComponent', () => {
     ]);
     const routerSpy = jasmine.createSpyObj(
       'Router',
-      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl'],
+      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl', 'navigate'],
       {
         events: EMPTY,
       },
@@ -195,7 +196,7 @@ describe('UserDetailsComponent', () => {
     expect(unverifiedBadge.nativeElement.textContent.trim()).toBe('Unverified');
   });
 
-  it('should show Actions button only for unverified users', () => {
+  it('should show Actions button for unverified users', () => {
     const unverifiedUser = { ...mockUserDetails, email_verified: false };
     mockApiService.getUserDetails.and.returnValue(of(unverifiedUser));
 
@@ -214,6 +215,30 @@ describe('UserDetailsComponent', () => {
       btn.nativeElement.textContent?.includes('Actions'),
     );
     expect(actionsButton).toBeFalsy();
+  });
+
+  const deleteAdminTypes = ['platform', 'biocommons'] as const;
+  deleteAdminTypes.forEach((type) => {
+    it(`should show Actions button for ${type} admins`, () => {
+      const authService = TestBed.inject(
+        AuthService,
+      ) as jasmine.SpyObj<AuthService>;
+      const adminSignal = signal(type);
+
+      Object.defineProperty(authService, 'adminType', {
+        get: () => adminSignal,
+        configurable: true,
+      });
+      component.adminType = adminSignal;
+
+      fixture.detectChanges();
+
+      const buttons = fixture.debugElement.queryAll(By.css('button'));
+      const actionsButton = buttons.find((btn) =>
+        btn.nativeElement.textContent?.includes('Actions'),
+      );
+      expect(actionsButton).toBeTruthy();
+    });
   });
 
   it('should display platform memberships correctly', () => {
@@ -675,6 +700,70 @@ describe('UserDetailsComponent', () => {
         'tsi',
         'No longer needed',
       );
+      expect(component.actionModalData()).toBeNull();
+    });
+  });
+
+  describe('User Deletion', () => {
+    it('should open delete modal', () => {
+      fixture.detectChanges();
+      component.deleteUserBegin();
+      expect(component.actionModalData()).toBeTruthy();
+      expect(component.actionModalData()?.type).toBe('user');
+      expect(component.actionModalData()?.action).toBe('delete');
+    });
+
+    it('should delete user with reason', () => {
+      mockApiService.deleteUser.and.returnValue(
+        of('User deleted successfully'),
+      );
+      mockApiService.getUserDetails.and.returnValue(of(mockUserDetails));
+      fixture.detectChanges();
+
+      component.actionModalData.set({
+        action: 'delete',
+        type: 'user',
+        id: '123',
+        name: 'user@example.com',
+        email: 'user@example.com',
+      });
+      component.reasonControl.setValue('Deleting user');
+
+      component.confirmActionModal();
+
+      expect(mockApiService.deleteUser).toHaveBeenCalledWith(
+        '123',
+        'Deleting user',
+      );
+      expect(component.actionModalData()).toBeNull();
+    });
+
+    it('should handle error when deleting user', () => {
+      mockApiService.deleteUser.and.returnValue(
+        throwError(() => new Error('API Error')),
+      );
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.actionModalData.set({
+        action: 'delete',
+        type: 'user',
+        id: '123',
+        name: 'user@example.com',
+        email: 'user@example.com',
+      });
+      component.reasonControl.setValue('Deleting user');
+
+      component.confirmActionModal();
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to delete user:',
+        jasmine.any(Error),
+      );
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to delete user',
+      });
       expect(component.actionModalData()).toBeNull();
     });
   });

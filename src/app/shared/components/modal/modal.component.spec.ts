@@ -34,11 +34,13 @@ describe('ModalComponent', () => {
     expect(component.secondaryOutput.emit).toHaveBeenCalled();
   });
 
-  it('should show textarea when type is revoke and textareaControl is provided', () => {
-    fixture.componentRef.setInput('type', 'revoke');
-    fixture.componentRef.setInput('textareaControl', new FormControl(''));
-    fixture.detectChanges();
-    const textarea = fixture.nativeElement.querySelector('#modal-textarea');
-    expect(textarea).toBeTruthy();
+  ['revoke', 'reject', 'delete'].forEach((action) => {
+    it(`should show textarea when action is ${action} and textareaControl is provided`, () => {
+      fixture.componentRef.setInput('type', action);
+      fixture.componentRef.setInput('textareaControl', new FormControl(''));
+      fixture.detectChanges();
+      const textarea = fixture.nativeElement.querySelector('#modal-textarea');
+      expect(textarea).toBeTruthy();
+    });
   });
 });
