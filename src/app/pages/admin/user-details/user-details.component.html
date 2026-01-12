@@ -38,7 +38,11 @@
           Back to Users
         </a>
 
-        @if (!user()?.email_verified) {
+        @let showActionButton =
+          !user()?.email_verified ||
+          adminType() === "platform" ||
+          adminType() === "biocommons";
+        @if (showActionButton) {
           <app-dropdown-menu
             [isOpen]="openMenuAction()"
             (isOpenChange)="openMenuAction.set($event)"
@@ -56,15 +60,28 @@
               </app-button>
             </ng-template>
             <ng-template #menu>
-              <button
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                role="menuitem"
-                tabindex="-1"
-                (click)="resendVerificationEmail()"
-              >
-                <ng-icon name="heroEnvelope" size="20"></ng-icon>
-                Resend Verification Email
-              </button>
+              @if (!user()?.email_verified) {
+                <button
+                  class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                  role="menuitem"
+                  tabindex="-1"
+                  (click)="resendVerificationEmail()"
+                >
+                  <ng-icon name="heroEnvelope" size="20"></ng-icon>
+                  Resend Verification Email
+                </button>
+              }
+              @if (adminType() === "platform" || adminType() === "biocommons") {
+                <button
+                  class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
+                  role="menuitem"
+                  tabindex="-1"
+                  (click)="deleteUserBegin()"
+                >
+                  <ng-icon name="heroTrash" size="20"></ng-icon>
+                  Delete User
+                </button>
+              }
             </ng-template>
           </app-dropdown-menu>
         }

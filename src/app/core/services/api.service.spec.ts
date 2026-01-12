@@ -143,4 +143,19 @@ describe('ApiService', () => {
     expect(req.request.body).toEqual({});
     req.flush({ updated: true });
   });
+
+  it('should call delete user endpoint with reason', () => {
+    const userId = 'auth0|123';
+    const reason = 'Removing user';
+
+    service.deleteUser(userId, reason).subscribe((response) => {
+      expect(response).toEqual('User deleted successfully');
+    });
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/admin/users/${userId}/delete`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ reason });
+    req.flush('User deleted successfully');
+  });
 });
