@@ -404,7 +404,7 @@ export class UserDetailsComponent implements OnInit {
   getActionModalTitle(): string {
     const modalData = this.actionModalData();
     if (!modalData) return '';
-    const title_lookup: Record<
+    const titleLookup: Record<
       ActionModalData['type'],
       Partial<Record<ActionModalData['action'], string>>
     > = {
@@ -420,7 +420,7 @@ export class UserDetailsComponent implements OnInit {
         delete: 'Do you want to delete this user?',
       },
     };
-    return title_lookup[modalData.type]![modalData.action]!;
+    return titleLookup[modalData.type]![modalData.action]!;
   }
 
   closeActionModal(): void {
