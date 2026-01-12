@@ -461,9 +461,10 @@ export class UserDetailsComponent implements OnInit {
             return;
           case 'reject':
             this.confirmRejectGroup(userId, modalData.id, reason);
-            break;
+            return;
           default:
             console.error('Invalid action for group:', modalData.action);
+            return;
         }
         break;
       case 'user':
@@ -473,6 +474,7 @@ export class UserDetailsComponent implements OnInit {
             break;
           default:
             console.error('Invalid action for user:', modalData.action);
+            return;
         }
     }
   }
