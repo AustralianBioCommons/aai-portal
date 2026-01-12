@@ -504,7 +504,7 @@ export class UserDetailsComponent implements OnInit {
         this.closeActionModal();
         this.alert.set({
           type: 'success',
-          message: 'User deleted successfully: returning to dashboard',
+          message: 'User deleted successfully, returning to dashboard',
         });
         setTimeout(() => this.router.navigate(['/all-users']), 2000);
       },
