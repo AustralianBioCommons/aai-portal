@@ -351,6 +351,15 @@ export class UserDetailsComponent implements OnInit {
     this.openActionModal('reject', 'group', groupId, groupName);
   }
 
+  deleteUserBegin(): void {
+    this.openActionModal(
+      'delete',
+      'user',
+      this.user()!.user_id,
+      this.user()!.email,
+    );
+  }
+
   unrejectGroup(groupId: string): void {
     const userId = this.user()!.user_id;
     this.openMenuGroupId.set(null);

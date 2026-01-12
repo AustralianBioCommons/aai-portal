@@ -38,47 +38,51 @@
           Back to Users
         </a>
 
-        <app-dropdown-menu
-          [isOpen]="openMenuAction()"
-          (isOpenChange)="openMenuAction.set($event)"
-        >
-          <ng-template #trigger>
-            <app-button
-              type="button"
-              variant="primary"
-              (click)="openMenuAction.set(!openMenuAction())"
-            >
-              <div class="flex items-center justify-center gap-2">
-                Actions
-                <ng-icon name="heroChevronDown" size="16"></ng-icon>
-              </div>
-            </app-button>
-          </ng-template>
-          <ng-template #menu>
-            @if (!user()?.email_verified) {
-              <button
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                role="menuitem"
-                tabindex="-1"
-                (click)="resendVerificationEmail()"
+        @let showActionButton =
+          !user()?.email_verified || adminType() === "platform";
+        @if (showActionButton) {
+          <app-dropdown-menu
+            [isOpen]="openMenuAction()"
+            (isOpenChange)="openMenuAction.set($event)"
+          >
+            <ng-template #trigger>
+              <app-button
+                type="button"
+                variant="primary"
+                (click)="openMenuAction.set(!openMenuAction())"
               >
-                <ng-icon name="heroEnvelope" size="20"></ng-icon>
-                Resend Verification Email
-              </button>
-            }
-            @if (adminType() === "platform") {
-              <button
-                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
-                role="menuitem"
-                tabindex="-1"
-                (click)="deleteUser()"
-              >
-                <ng-icon name="heroTrash" size="20"></ng-icon>
-                Delete User
-              </button>
-            }
-          </ng-template>
-        </app-dropdown-menu>
+                <div class="flex items-center justify-center gap-2">
+                  Actions
+                  <ng-icon name="heroChevronDown" size="16"></ng-icon>
+                </div>
+              </app-button>
+            </ng-template>
+            <ng-template #menu>
+              @if (!user()?.email_verified) {
+                <button
+                  class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                  role="menuitem"
+                  tabindex="-1"
+                  (click)="resendVerificationEmail()"
+                >
+                  <ng-icon name="heroEnvelope" size="20"></ng-icon>
+                  Resend Verification Email
+                </button>
+              }
+              @if (adminType() === "platform") {
+                <button
+                  class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
+                  role="menuitem"
+                  tabindex="-1"
+                  (click)="deleteUserBegin()"
+                >
+                  <ng-icon name="heroTrash" size="20"></ng-icon>
+                  Delete User
+                </button>
+              }
+            </ng-template>
+          </app-dropdown-menu>
+        }
       </div>
 
       <div class="flex items-center gap-6">
