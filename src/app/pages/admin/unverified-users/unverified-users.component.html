@@ -3,11 +3,11 @@
   [defaultQueryParams]="defaultQueryParams"
   [returnUrl]="'/unverified-users'"
 >
-  <div class="mt-1 max-w-lg text-sm text-gray-500">
+  <div class="text-sm text-gray-500">
     Email verification status can take time to sync from Auth0 to our database -
     try
     <button
-      class="text-biocommons-primary underline"
+      class="text-biocommons-primary underline hover:text-sky-900"
       (click)="refreshPage()"
       id="refresh-page-button"
     >

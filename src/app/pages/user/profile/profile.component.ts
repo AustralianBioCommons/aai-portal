@@ -32,6 +32,8 @@ import {
 import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
+import { HttpClient } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -55,6 +57,7 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
@@ -227,7 +230,7 @@ export class ProfileComponent implements OnInit {
     }
 
     if (platformId !== 'galaxy') {
-      windowRef.location.href = launchUrl;
+      windowRef.open(launchUrl, '_blank');
       return;
     }
 
@@ -236,26 +239,24 @@ export class ProfileComponent implements OnInit {
       : `${launchUrl}/`;
     const loginEndpoint = `${normalizedBase}authnz/oidc/login`;
 
-    windowRef
-      .fetch(loginEndpoint)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
+    this.httpClient
+      .get<{ redirect_uri?: string }>(loginEndpoint)
+      .pipe(
+        catchError((err) => {
+          console.error('Galaxy launch request failed:', err);
+          windowRef.open(launchUrl, '_blank');
+          return of(null);
+        }),
+      )
+      .subscribe((data) => {
         const redirect = data?.redirect_uri;
+
         if (redirect) {
-          windowRef.location.href = redirect;
+          windowRef.open(redirect, '_blank');
         } else {
           console.error('No redirect_uri found in response:', data);
-          windowRef.location.href = launchUrl;
+          windowRef.open(launchUrl, '_blank');
         }
-      })
-      .catch((err) => {
-        console.error('Galaxy launch request failed:', err);
-        windowRef.location.href = launchUrl;
       });
   }
 

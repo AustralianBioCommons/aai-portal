@@ -357,30 +357,14 @@
                     </div>
                     <div class="flex items-center gap-3">
                       @if (launchUrl) {
-                        @if (membership.platform_id === "galaxy") {
-                          <app-button
-                            type="button"
-                            variant="secondary"
-                            widthClass="w-auto"
-                            (click)="launchPlatform('galaxy')"
-                          >
-                            Launch
-                          </app-button>
-                        } @else {
-                          <a
-                            [href]="launchUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <app-button
-                              type="button"
-                              variant="secondary"
-                              widthClass="w-auto"
-                            >
-                              Launch
-                            </app-button>
-                          </a>
-                        }
+                        <app-button
+                          type="button"
+                          variant="secondary"
+                          widthClass="w-auto"
+                          (click)="launchPlatform(membership.platform_id)"
+                        >
+                          Launch
+                        </app-button>
                       } @else {
                         <span class="text-sm font-medium text-red-500">
                           Launch link unavailable
