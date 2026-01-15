@@ -115,8 +115,8 @@ describe('Password Validators', () => {
         expect(result).toBeNull();
       }
 
-      // Test for a non-allowed special character
-      const control = new FormControl('Test123~');
+      // Test for a non-allowed special character (not in OWASP list)
+      const control = new FormControl('Test123🙂');
       const result = specialCharacterRequired(control);
       expect(result).toEqual({ specialCharacterRequired: true });
     });
