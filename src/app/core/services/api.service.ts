@@ -31,6 +31,8 @@ export interface UserProfileGroupData {
 export interface UserProfileData {
   user_id: string;
   name: string;
+  given_name?: string;
+  family_name?: string;
   email: string;
   email_verified: boolean;
   username: string;
@@ -335,10 +337,20 @@ export class ApiService {
     );
   }
 
-  updateFullName(fullName: string) {
+  updateFullName(fullName?: string, firstName?: string, lastName?: string) {
+    const payload: {
+      full_name?: string;
+      first_name?: string;
+      last_name?: string;
+    } = {};
+
+    if (fullName) payload.full_name = fullName;
+    if (firstName) payload.first_name = firstName;
+    if (lastName) payload.last_name = lastName;
+
     return this.http.post<BiocommonsUserDetails>(
       `${environment.auth0.backend}/me/profile/full-name/update`,
-      { full_name: fullName },
+      payload,
     );
   }
 
