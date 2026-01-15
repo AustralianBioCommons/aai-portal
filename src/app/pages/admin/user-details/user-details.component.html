@@ -297,6 +297,18 @@
                       <div class="font-medium">
                         {{ group.group_name }}
                       </div>
+                      <span
+                        class="rounded px-2 py-1 text-xs font-semibold uppercase"
+                        [class]="
+                          group.approval_status === 'approved'
+                            ? 'bg-green-100 text-green-800'
+                            : group.approval_status === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                        "
+                      >
+                        {{ group.approval_status }}
+                      </span>
                       @if (
                         group.approval_status === "revoked" ||
                         group.approval_status === "rejected"
@@ -314,18 +326,6 @@
                           "
                         />
                       }
-                      <span
-                        class="rounded px-2 py-1 text-xs font-semibold uppercase"
-                        [class]="
-                          group.approval_status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : group.approval_status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                        "
-                      >
-                        {{ group.approval_status }}
-                      </span>
                     </div>
                     @if (canManageGroup(group.group_id)) {
                       <app-dropdown-menu

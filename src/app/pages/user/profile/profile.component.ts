@@ -22,6 +22,7 @@ import {
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
 import { passwordRequirements } from '../../../shared/validators/passwords';
+import { fullNameLengthValidator } from '../../../shared/validators/full-name';
 import { AuthService } from '../../../core/services/auth.service';
 import { RouterLink } from '@angular/router';
 import {
@@ -32,6 +33,8 @@ import {
 import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -40,6 +43,7 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   standalone: true,
   imports: [
     CommonModule,
+    HttpClientModule,
     LoadingSpinnerComponent,
     AlertComponent,
     ModalComponent,
@@ -55,6 +59,7 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
@@ -76,9 +81,14 @@ export class ProfileComponent implements OnInit {
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
-  nameForm = this.formBuilder.nonNullable.group({
-    fullName: ['', [Validators.required, Validators.maxLength(300)]],
-  });
+  nameForm = this.formBuilder.nonNullable.group(
+    {
+      fullName: ['', [Validators.required, Validators.maxLength(300)]],
+      firstName: ['', [Validators.required, Validators.maxLength(150)]],
+      lastName: ['', [Validators.required, Validators.maxLength(150)]],
+    },
+    { validators: fullNameLengthValidator() },
+  );
 
   usernameForm = this.formBuilder.nonNullable.group({
     username: ['', usernameRequirements],
@@ -124,7 +134,19 @@ export class ProfileComponent implements OnInit {
 
     switch (type) {
       case 'name':
-        this.nameForm.reset({ fullName: user.name });
+        if (user.given_name && user.family_name) {
+          this.nameForm.reset({
+            fullName: '',
+            firstName: user.given_name,
+            lastName: user.family_name,
+          });
+        } else {
+          this.nameForm.reset({
+            fullName: user.name,
+            firstName: '',
+            lastName: '',
+          });
+        }
         break;
       case 'username':
         this.usernameForm.reset({ username: user.username });
@@ -169,9 +191,9 @@ export class ProfileComponent implements OnInit {
   protected modalTitle(): string {
     switch (this.activeModal()) {
       case 'name':
-        return 'Edit my name';
+        return 'Change my name';
       case 'username':
-        return 'Edit my username';
+        return 'Change my username';
       case 'email':
         return 'Change my email address';
       case 'password':
@@ -227,7 +249,7 @@ export class ProfileComponent implements OnInit {
     }
 
     if (platformId !== 'galaxy') {
-      windowRef.location.href = launchUrl;
+      windowRef.open(launchUrl, '_blank');
       return;
     }
 
@@ -236,37 +258,59 @@ export class ProfileComponent implements OnInit {
       : `${launchUrl}/`;
     const loginEndpoint = `${normalizedBase}authnz/oidc/login`;
 
-    windowRef
-      .fetch(loginEndpoint)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
+    this.httpClient
+      .get<{ redirect_uri?: string }>(loginEndpoint)
+      .pipe(
+        catchError((err) => {
+          console.error('Galaxy launch request failed:', err);
+          windowRef.open(launchUrl, '_blank');
+          return of(null);
+        }),
+      )
+      .subscribe((data) => {
         const redirect = data?.redirect_uri;
+
         if (redirect) {
-          windowRef.location.href = redirect;
+          windowRef.open(redirect, '_blank');
         } else {
           console.error('No redirect_uri found in response:', data);
-          windowRef.location.href = launchUrl;
+          windowRef.open(launchUrl, '_blank');
         }
-      })
-      .catch((err) => {
-        console.error('Galaxy launch request failed:', err);
-        windowRef.location.href = launchUrl;
       });
   }
 
   protected updateName(): void {
+    const user = this.user();
+
+    let fullName: string | undefined;
+    let firstName: string | undefined;
+    let lastName: string | undefined;
+
+    // Disable fields that aren't being used before validation
+    if (user?.given_name && user?.family_name) {
+      this.nameForm.get('fullName')?.disable();
+      this.nameForm.get('firstName')?.enable();
+      this.nameForm.get('lastName')?.enable();
+    } else {
+      this.nameForm.get('fullName')?.enable();
+      this.nameForm.get('firstName')?.disable();
+      this.nameForm.get('lastName')?.disable();
+    }
+
     this.nameForm.markAllAsTouched();
     if (this.nameForm.invalid) {
       return;
     }
-    const name = this.nameForm.value.fullName!.trim();
+
+    if (user?.given_name && user?.family_name) {
+      firstName = this.nameForm.value.firstName!.trim();
+      lastName = this.nameForm.value.lastName!.trim();
+    } else {
+      fullName = this.nameForm.value.fullName!.trim();
+    }
+
     this.modalLoading.set(true);
-    this.apiService.updateFullName(name).subscribe({
+    this.apiService.updateFullName(fullName, firstName, lastName).subscribe({
       next: () => {
         this.modalLoading.set(false);
         this.alert.set({

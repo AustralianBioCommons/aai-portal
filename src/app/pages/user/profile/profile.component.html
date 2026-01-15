@@ -23,26 +23,79 @@
     <div modal-content>
       @switch (activeModal()) {
         @case ("name") {
-          <form [formGroup]="nameForm">
-            <label
-              class="block text-sm font-medium text-gray-900"
-              for="modal-name"
-            >
-              Full name
-            </label>
-            <input
-              id="modal-name"
-              formControlName="fullName"
-              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-              [class.border-red-500]="isFieldInvalid(nameForm, 'fullName')"
-            />
-            @if (isFieldInvalid(nameForm, "fullName")) {
-              <div class="mt-0.5 text-xs text-red-500">
-                @for (
-                  error of getErrorMessages(nameForm, "fullName");
-                  track error
-                ) {
-                  {{ error }}<br />
+          <form class="space-y-6" [formGroup]="nameForm">
+            @if (user()?.given_name && user()?.family_name) {
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-900"
+                  for="modal-firstName"
+                >
+                  First Name
+                </label>
+                <input
+                  id="modal-firstName"
+                  formControlName="firstName"
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="isFieldInvalid(nameForm, 'firstName')"
+                />
+                @if (isFieldInvalid(nameForm, "firstName")) {
+                  <div class="mt-0.5 text-xs text-red-500">
+                    @for (
+                      error of getErrorMessages(nameForm, "firstName");
+                      track error
+                    ) {
+                      {{ error }}<br />
+                    }
+                  </div>
+                }
+              </div>
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-900"
+                  for="modal-lastName"
+                >
+                  Last Name
+                </label>
+                <input
+                  id="modal-lastName"
+                  formControlName="lastName"
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="isFieldInvalid(nameForm, 'lastName')"
+                />
+                @if (isFieldInvalid(nameForm, "lastName")) {
+                  <div class="mt-0.5 text-xs text-red-500">
+                    @for (
+                      error of getErrorMessages(nameForm, "lastName");
+                      track error
+                    ) {
+                      {{ error }}<br />
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-900"
+                  for="modal-name"
+                >
+                  Full name
+                </label>
+                <input
+                  id="modal-name"
+                  formControlName="fullName"
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="isFieldInvalid(nameForm, 'fullName')"
+                />
+                @if (isFieldInvalid(nameForm, "fullName")) {
+                  <div class="mt-0.5 text-xs text-red-500">
+                    @for (
+                      error of getErrorMessages(nameForm, "fullName");
+                      track error
+                    ) {
+                      {{ error }}<br />
+                    }
+                  </div>
                 }
               </div>
             }
@@ -75,71 +128,79 @@
           </form>
         }
         @case ("email") {
-          <form [formGroup]="emailForm">
-            <label
-              class="block text-sm font-medium text-gray-900"
-              for="modal-email"
-            >
-              New email
-            </label>
-            <input
-              id="modal-email"
-              type="email"
-              formControlName="email"
-              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-              [class.border-red-500]="isFieldInvalid(emailForm, 'email')"
-            />
-            @if (isFieldInvalid(emailForm, "email")) {
-              <div class="mt-0.5 text-xs text-red-500" role="alert">
-                @for (
-                  error of getErrorMessages(emailForm, "email");
-                  track error
-                ) {
-                  {{ error }}<br />
+          <form [formGroup]="emailForm" class="space-y-6">
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-900"
+                for="modal-email"
+              >
+                New email
+              </label>
+              <input
+                id="modal-email"
+                type="email"
+                formControlName="email"
+                class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                [class.border-red-500]="isFieldInvalid(emailForm, 'email')"
+              />
+              @if (emailLoading()) {
+                <div class="mt-1 text-xs text-gray-600">Sending OTP...</div>
+              }
+              @if (isFieldInvalid(emailForm, "email")) {
+                <div class="mt-0.5 text-xs text-red-500" role="alert">
+                  @for (
+                    error of getErrorMessages(emailForm, "email");
+                    track error
+                  ) {
+                    {{ error }}<br />
+                  }
+                </div>
+              }
+            </div>
+            @if (emailFlowState() === "otp-sent") {
+              <div>
+                <label
+                  class="block text-sm font-medium text-gray-900"
+                  for="modal-otp"
+                >
+                  Verification code
+                </label>
+                <input
+                  id="modal-otp"
+                  type="text"
+                  maxlength="6"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  [value]="emailOtp()"
+                  (input)="emailOtp.set($any($event.target).value)"
+                  [attr.aria-describedby]="
+                    otpError() ? 'modal-otp-error' : null
+                  "
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="otpError()"
+                />
+                @if (otpLoading()) {
+                  <div class="mt-1 text-xs text-gray-600">
+                    Verifying code...
+                  </div>
+                }
+                @if (otpError()) {
+                  <div
+                    id="modal-otp-error"
+                    class="mt-0.5 text-xs text-red-500"
+                    role="alert"
+                  >
+                    {{ otpError() }}
+                  </div>
+                }
+                @if (emailModalNotice()) {
+                  <div class="mt-1 text-xs text-green-600">
+                    {{ emailModalNotice() }}
+                  </div>
                 }
               </div>
             }
           </form>
-          @if (emailFlowState() === "otp-sent") {
-            <div>
-              <label
-                class="block text-sm font-medium text-gray-900"
-                for="modal-otp"
-              >
-                Verification code
-              </label>
-              <input
-                id="modal-otp"
-                type="text"
-                maxlength="6"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-                [value]="emailOtp()"
-                (input)="emailOtp.set($any($event.target).value)"
-                [attr.aria-describedby]="otpError() ? 'modal-otp-error' : null"
-                class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-                [class.border-red-500]="otpError()"
-              />
-              @if (otpError()) {
-                <div
-                  id="modal-otp-error"
-                  class="mt-0.5 text-xs text-red-500"
-                  role="alert"
-                >
-                  {{ otpError() }}
-                </div>
-              }
-            </div>
-          }
-          @if (emailLoading()) {
-            <div class="text-sm text-gray-500">Sending OTP...</div>
-          }
-          @if (otpLoading()) {
-            <div class="text-sm text-gray-500">Verifying code...</div>
-          }
-          @if (emailModalNotice()) {
-            <div class="text-sm text-green-600">{{ emailModalNotice() }}</div>
-          }
         }
         @case ("password") {
           <form class="space-y-6" [formGroup]="passwordForm">
@@ -237,7 +298,10 @@
           [alt]="user()?.name || 'User profile'"
           class="h-16 w-16 rounded-full bg-gray-200 object-cover"
         />
-        <div id="user-name" class="text-3xl font-semibold text-gray-900">
+        <div
+          id="user-name"
+          class="break-all text-3xl font-semibold text-gray-900"
+        >
           {{ user()?.name }}
         </div>
       </div>
@@ -248,23 +312,50 @@
             <div class="mb-6 text-2xl font-semibold">My details</div>
             <div class="space-y-6">
               <div>
-                <div class="text-sm font-light text-gray-500">Name</div>
-                <div class="flex items-center justify-between gap-6">
-                  <div>{{ user()?.name }}</div>
-                  <button
-                    type="button"
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
-                    (click)="openModal('name')"
-                  >
-                    Edit
-                  </button>
-                </div>
+                @if (user()?.given_name && user()?.family_name) {
+                  <div class="grid grid-cols-9 gap-6">
+                    <div class="col-span-4 text-sm font-light text-gray-500">
+                      First Name
+                    </div>
+                    <div class="col-span-4 text-sm font-light text-gray-500">
+                      Last Name
+                    </div>
+                    <div></div>
+                  </div>
+                  <div class="grid grid-cols-9 gap-6">
+                    <div class="col-span-4 break-all">
+                      {{ user()?.given_name }}
+                    </div>
+                    <div class="col-span-4 break-all">
+                      {{ user()?.family_name }}
+                    </div>
+                    <button
+                      type="button"
+                      class="justify-self-end text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                      (click)="openModal('name')"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                } @else {
+                  <div class="text-sm font-light text-gray-500">Name</div>
+                  <div class="flex items-center justify-between gap-6">
+                    <div class="break-all">{{ user()?.name }}</div>
+                    <button
+                      type="button"
+                      class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                      (click)="openModal('name')"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                }
               </div>
 
               <div>
                 <div class="text-sm font-light text-gray-500">Username</div>
                 <div class="flex items-center justify-between gap-6">
-                  <div>{{ user()?.username }}</div>
+                  <div class="break-all">{{ user()?.username }}</div>
                   <button
                     type="button"
                     class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
@@ -279,7 +370,9 @@
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-2">
-                    <div id="user-email">{{ user()?.email }}</div>
+                    <div id="user-email" class="break-all">
+                      {{ user()?.email }}
+                    </div>
                     <span
                       class="rounded px-2 py-1 text-xs font-semibold uppercase"
                       [class]="
@@ -357,30 +450,14 @@
                     </div>
                     <div class="flex items-center gap-3">
                       @if (launchUrl) {
-                        @if (membership.platform_id === "galaxy") {
-                          <app-button
-                            type="button"
-                            variant="secondary"
-                            widthClass="w-auto"
-                            (click)="launchPlatform('galaxy')"
-                          >
-                            Launch
-                          </app-button>
-                        } @else {
-                          <a
-                            [href]="launchUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <app-button
-                              type="button"
-                              variant="secondary"
-                              widthClass="w-auto"
-                            >
-                              Launch
-                            </app-button>
-                          </a>
-                        }
+                        <app-button
+                          type="button"
+                          variant="secondary"
+                          widthClass="w-auto"
+                          (click)="launchPlatform(membership.platform_id)"
+                        >
+                          Launch
+                        </app-button>
                       } @else {
                         <span class="text-sm font-medium text-red-500">
                           Launch link unavailable

@@ -118,9 +118,11 @@ export class NavbarComponent {
       return 'My BioCommons Access';
     }
 
-    const suffix = this.router.url.includes('/profile')
-      ? 'Profile'
-      : 'Dashboard';
+    const suffix =
+      this.router.url.includes('/profile') ||
+      this.router.url.includes('/bundles')
+        ? 'Profile'
+        : 'Dashboard';
 
     if (this.adminType() === 'biocommons') {
       return `BioCommons Admin ${suffix}`;

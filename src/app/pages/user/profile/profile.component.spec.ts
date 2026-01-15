@@ -160,7 +160,45 @@ describe('ProfileComponent', () => {
     updateName();
     fixture.detectChanges();
 
-    expect(mockApiService.updateFullName).toHaveBeenCalledWith('Updated Name');
+    expect(mockApiService.updateFullName).toHaveBeenCalledWith(
+      'Updated Name',
+      undefined,
+      undefined,
+    );
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Name updated successfully',
+    });
+    expect(loadSpy).toHaveBeenCalled();
+  });
+
+  it('updates firstName and lastName when user has given_name and family_name', () => {
+    const userWithNames: UserProfileData = {
+      ...mockAuth0User,
+      given_name: 'John',
+      family_name: 'Doe',
+      last_login: '2024-01-04T00:00:00Z',
+    };
+    mockApiService.getUserProfile.and.returnValue(of(userWithNames));
+    mockApiService.updateFullName.and.returnValue(of(mockAuth0User));
+
+    fixture.detectChanges();
+    const loadSpy = spyOn(
+      component as unknown as { loadUserProfile(): void },
+      'loadUserProfile',
+    ).and.callThrough();
+
+    openModal('name');
+    component.nameForm.controls.firstName.setValue('Jane');
+    component.nameForm.controls.lastName.setValue('Smith');
+    updateName();
+    fixture.detectChanges();
+
+    expect(mockApiService.updateFullName).toHaveBeenCalledWith(
+      undefined,
+      'Jane',
+      'Smith',
+    );
     expect(component.alert()).toEqual({
       type: 'success',
       message: 'Name updated successfully',
