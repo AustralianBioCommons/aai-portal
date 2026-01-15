@@ -1,6 +1,8 @@
 import { AbstractControl, ValidationErrors, Validators } from '@angular/forms';
 
 const PASSWORD_MIN_LENGTH = 8;
+// Auth0 'allows' passwords longer than 72, but silently ignores any chars beyond 72.
+// Make the max length explicit
 const PASSWORD_MAX_LENGTH = 72;
 // Characters that count as special characters in passwords, used
 // in Auth0's requirements, from OWASP: https://owasp.org/www-community/password-special-characters
