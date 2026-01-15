@@ -1,6 +1,13 @@
 import { AbstractControl, ValidationErrors, Validators } from '@angular/forms';
 
-export const ALLOWED_SPECIAL_CHARACTERS = '!@#$%^&*';
+const PASSWORD_MIN_LENGTH = 8;
+const PASSWORD_MAX_LENGTH = 72;
+// Characters that count as special characters in passwords, used
+// in Auth0's requirements, from OWASP: https://owasp.org/www-community/password-special-characters
+export const ALLOWED_SPECIAL_CHARACTERS = ' !"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+// Escaping is tricky here so manually define the regex
+export const SPECIAL_CHARACTERS_REGEX =
+  /[ !"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/;
 
 interface PasswordErrors {
   required?: boolean;
@@ -36,8 +43,7 @@ export function digitRequired(
 export function specialCharacterRequired(
   control: AbstractControl,
 ): ValidationErrors | null {
-  const regex = new RegExp(`[${ALLOWED_SPECIAL_CHARACTERS}]`);
-  const ok = regex.test(control.value);
+  const ok = SPECIAL_CHARACTERS_REGEX.test(control.value);
   return ok ? null : { specialCharacterRequired: true };
 }
 
@@ -46,8 +52,8 @@ export function passwordRequirements(
 ): PasswordErrors | null {
   const combined_validator = Validators.compose([
     Validators.required,
-    Validators.minLength(8),
-    Validators.maxLength(72),
+    Validators.minLength(PASSWORD_MIN_LENGTH),
+    Validators.maxLength(PASSWORD_MAX_LENGTH),
     lowercaseRequired,
     uppercaseRequired,
     digitRequired,
