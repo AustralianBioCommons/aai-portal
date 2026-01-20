@@ -18,6 +18,7 @@ import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-succes
 import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
+import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -76,6 +77,10 @@ export const routes: Routes = [
         pathMatch: 'full',
         canActivate: [rootRedirectGuard],
         children: [],
+      },
+      {
+        path: 'migration',
+        component: FirstMigrationComponent,
       },
       {
         path: 'profile',
