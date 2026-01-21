@@ -1,7 +1,7 @@
 <div
   class="mx-auto flex h-full max-w-4xl flex-1 flex-col items-start justify-center gap-6 bg-gray-50 p-12"
 >
-  @if (state() === "idle") {
+  @if (state() === "loading") {
     <app-loading-spinner></app-loading-spinner>
   } @else if (state() === "error") {
     <ng-icon

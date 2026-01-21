@@ -21,7 +21,11 @@ describe('FirstMigrationComponent', () => {
     };
 
     const mockActivatedRoute = {
-      queryParams: of({}),
+      snapshot: {
+        queryParamMap: {
+          get: jasmine.createSpy('get').and.returnValue(null),
+        },
+      },
     };
 
     await TestBed.configureTestingModule({

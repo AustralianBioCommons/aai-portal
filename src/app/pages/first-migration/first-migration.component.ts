@@ -24,27 +24,26 @@ export class FirstMigrationComponent implements OnInit {
 
   user = this.authService.user;
   sessionToken = signal<string | null>(null);
-  state = signal<'success' | 'error' | 'idle'>('idle');
+  state = signal<'success' | 'error' | 'loading'>('loading');
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      const token = params['session_token'];
-      if (token) {
-        this.sessionToken.set(token);
-        this.apiService
-          .sendMigrationResetPassword(token, environment.auth0.clientId)
-          .subscribe({
-            next: () => {
-              this.state.set('success');
-            },
-            error: (err) => {
-              this.state.set('error');
-              console.error('Error: ', err);
-            },
-          });
-      } else {
-        this.state.set('error');
-      }
-    });
+    const token = this.route.snapshot.queryParamMap.get('session_token');
+
+    if (!token) {
+      this.state.set('error');
+      return;
+    }
+
+    this.sessionToken.set(token);
+
+    this.apiService
+      .sendMigrationResetPassword(token, environment.auth0.clientId)
+      .subscribe({
+        next: () => this.state.set('success'),
+        error: (err) => {
+          this.state.set('error');
+          console.error('Error:', err);
+        },
+      });
   }
 }
