@@ -337,20 +337,10 @@ export class ApiService {
     );
   }
 
-  updateFullName(fullName?: string, firstName?: string, lastName?: string) {
-    const payload: {
-      full_name?: string;
-      first_name?: string;
-      last_name?: string;
-    } = {};
-
-    if (fullName) payload.full_name = fullName;
-    if (firstName) payload.first_name = firstName;
-    if (lastName) payload.last_name = lastName;
-
+  updateName(firstName: string, lastName: string) {
     return this.http.post<BiocommonsUserDetails>(
-      `${environment.auth0.backend}/me/profile/full-name/update`,
-      payload,
+      `${environment.auth0.backend}/me/profile/name/update`,
+      { first_name: firstName, last_name: lastName },
     );
   }
 
@@ -379,6 +369,13 @@ export class ApiService {
     return this.http.post<boolean>(
       `${environment.auth0.backend}/me/profile/password/update`,
       { current_password: currentPassword, new_password: newPassword },
+    );
+  }
+
+  sendMigrationResetPassword(sessionToken: string, clientId: string) {
+    return this.http.post<boolean>(
+      `${environment.auth0.backend}/me/migration/update-password`,
+      { session_token: sessionToken, client_id: clientId },
     );
   }
 }

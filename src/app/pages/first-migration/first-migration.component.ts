@@ -1,17 +1,50 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { heroShieldCheck } from '@ng-icons/heroicons/outline';
+import {
+  heroShieldCheck,
+  heroShieldExclamation,
+} from '@ng-icons/heroicons/outline';
 import { NgIcon, provideIcons } from '@ng-icons/core';
+import { ApiService } from '../../core/services/api.service';
+import { environment } from '../../../environments/environment';
+import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-first-migration',
-  imports: [NgIcon],
+  imports: [NgIcon, LoadingSpinnerComponent],
   templateUrl: './first-migration.component.html',
   styleUrl: './first-migration.component.css',
-  viewProviders: [provideIcons({ heroShieldCheck })],
+  viewProviders: [provideIcons({ heroShieldCheck, heroShieldExclamation })],
 })
-export class FirstMigrationComponent {
+export class FirstMigrationComponent implements OnInit {
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private apiService = inject(ApiService);
 
   user = this.authService.user;
+  sessionToken = signal<string | null>(null);
+  state = signal<'success' | 'error' | 'idle'>('idle');
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const token = params['session_token'];
+      if (token) {
+        this.sessionToken.set(token);
+        this.apiService
+          .sendMigrationResetPassword(token, environment.auth0.clientId)
+          .subscribe({
+            next: () => {
+              this.state.set('success');
+            },
+            error: (err) => {
+              this.state.set('error');
+              console.error('Error: ', err);
+            },
+          });
+      } else {
+        this.state.set('error');
+      }
+    });
+  }
 }

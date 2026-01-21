@@ -79,7 +79,7 @@ describe('ProfileComponent', () => {
       'getUserProfile',
       'updateUsername',
       'updatePassword',
-      'updateFullName',
+      'updateName',
       'requestEmailChange',
       'continueEmailChange',
     ]);
@@ -112,7 +112,7 @@ describe('ProfileComponent', () => {
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
     mockApiService.updateUsername.and.returnValue(of(mockAuth0User));
     mockApiService.updatePassword.and.returnValue(of(true));
-    mockApiService.updateFullName.and.returnValue(of(mockAuth0User));
+    mockApiService.updateName.and.returnValue(of(mockAuth0User));
     mockApiService.requestEmailChange.and.returnValue(
       of({ message: 'OTP sent to the requested email address.' }),
     );
@@ -156,15 +156,12 @@ describe('ProfileComponent', () => {
     ).and.callThrough();
 
     openModal('name');
-    component.nameForm.controls.fullName.setValue('Updated Name');
+    component.nameForm.controls.firstName.setValue('Jane');
+    component.nameForm.controls.lastName.setValue('Doe');
     updateName();
     fixture.detectChanges();
 
-    expect(mockApiService.updateFullName).toHaveBeenCalledWith(
-      'Updated Name',
-      undefined,
-      undefined,
-    );
+    expect(mockApiService.updateName).toHaveBeenCalledWith('Jane', 'Doe');
     expect(component.alert()).toEqual({
       type: 'success',
       message: 'Name updated successfully',
@@ -180,7 +177,7 @@ describe('ProfileComponent', () => {
       last_login: '2024-01-04T00:00:00Z',
     };
     mockApiService.getUserProfile.and.returnValue(of(userWithNames));
-    mockApiService.updateFullName.and.returnValue(of(mockAuth0User));
+    mockApiService.updateName.and.returnValue(of(mockAuth0User));
 
     fixture.detectChanges();
     const loadSpy = spyOn(
@@ -194,11 +191,7 @@ describe('ProfileComponent', () => {
     updateName();
     fixture.detectChanges();
 
-    expect(mockApiService.updateFullName).toHaveBeenCalledWith(
-      undefined,
-      'Jane',
-      'Smith',
-    );
+    expect(mockApiService.updateName).toHaveBeenCalledWith('Jane', 'Smith');
     expect(component.alert()).toEqual({
       type: 'success',
       message: 'Name updated successfully',
@@ -208,14 +201,13 @@ describe('ProfileComponent', () => {
 
   it('shows an error alert when updating the name fails', () => {
     const errorResponse = { error: { detail: 'Unable to update name' } };
-    mockApiService.updateFullName.and.returnValue(
-      throwError(() => errorResponse),
-    );
+    mockApiService.updateName.and.returnValue(throwError(() => errorResponse));
 
     fixture.detectChanges();
 
     openModal('name');
-    component.nameForm.controls.fullName.setValue('Bad Name');
+    component.nameForm.controls.firstName.setValue('Bad');
+    component.nameForm.controls.lastName.setValue('Name');
     updateName();
     fixture.detectChanges();
 
