@@ -20,6 +20,7 @@ import {
   BIOCOMMONS_BUNDLES,
 } from '../../../core/constants/constants';
 import { environment } from '../../../../environments/environment';
+import { resolvePlatformUrls } from '../../../core/utils/platform-urls';
 import { usernameRequirements } from '../../../shared/validators/usernames';
 import { passwordRequirements } from '../../../shared/validators/passwords';
 import { fullNameLengthValidator } from '../../../shared/validators/full-name';
@@ -66,12 +67,15 @@ export class ProfileComponent implements OnInit {
 
   protected readonly platforms = PLATFORMS;
   protected readonly bundles = BIOCOMMONS_BUNDLES;
+  private readonly resolvedPlatformUrls = resolvePlatformUrls(
+    environment.platformUrls,
+  );
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
     bpa_data_portal:
-      environment.platformUrls.bpaPlatformLogin ??
-      environment.platformUrls.bpaPlatform,
-    galaxy: environment.platformUrls.galaxyPlatform,
-    sbp: environment.platformUrls.sbpPlatform,
+      this.resolvedPlatformUrls.bpaPlatformLogin ??
+      this.resolvedPlatformUrls.bpaPlatform,
+    galaxy: this.resolvedPlatformUrls.galaxyPlatform,
+    sbp: this.resolvedPlatformUrls.sbpPlatform,
   };
 
   user = signal<UserProfileData | null>(null);

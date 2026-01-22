@@ -30,6 +30,7 @@ import {
   heroCheck,
   heroArrowTopRightOnSquare,
 } from '@ng-icons/heroicons/outline';
+import { resolvePlatformUrls } from '../../core/utils/platform-urls';
 import { fullNameLengthValidator } from '../../shared/validators/full-name';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
@@ -84,10 +85,13 @@ export class RegisterComponent implements AfterViewInit {
   private readonly validationService = inject(ValidationService);
   private readonly http = inject(HttpClient);
 
+  private readonly resolvedPlatformUrls = resolvePlatformUrls(
+    environment.platformUrls,
+  );
   private readonly bpaPlatformUrl =
-    environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
+    this.resolvedPlatformUrls.bpaPlatform.replace(/\/+$/, '');
   private readonly galaxyPlatformUrl =
-    environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
+    this.resolvedPlatformUrls.galaxyPlatform.replace(/\/+$/, '');
 
   readonly bundles = BIOCOMMONS_BUNDLES;
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
