@@ -65,6 +65,11 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'migration',
+    component: FirstMigrationComponent,
+    data: { title: 'Account Migration' },
+  },
 
   // Authenticated routes that use DefaultLayoutComponent
   {
@@ -77,10 +82,6 @@ export const routes: Routes = [
         pathMatch: 'full',
         canActivate: [rootRedirectGuard],
         children: [],
-      },
-      {
-        path: 'migration',
-        component: FirstMigrationComponent,
       },
       {
         path: 'profile',
