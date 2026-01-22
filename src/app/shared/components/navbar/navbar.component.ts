@@ -44,8 +44,8 @@ import {
 export class NavbarComponent {
   private authService = inject(AuthService);
   private apiService = inject(ApiService);
-  private router = inject(Router);
   private dataRefreshService = inject(DataRefreshService);
+  router = inject(Router);
 
   // Auth signals
   isLoading = this.authService.isLoading;

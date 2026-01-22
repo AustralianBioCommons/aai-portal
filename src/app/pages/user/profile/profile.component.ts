@@ -83,7 +83,6 @@ export class ProfileComponent implements OnInit {
 
   nameForm = this.formBuilder.nonNullable.group(
     {
-      fullName: ['', [Validators.required, Validators.maxLength(300)]],
       firstName: ['', [Validators.required, Validators.maxLength(150)]],
       lastName: ['', [Validators.required, Validators.maxLength(150)]],
     },
@@ -136,14 +135,12 @@ export class ProfileComponent implements OnInit {
       case 'name':
         if (user.given_name && user.family_name) {
           this.nameForm.reset({
-            fullName: '',
             firstName: user.given_name,
             lastName: user.family_name,
           });
         } else {
           this.nameForm.reset({
-            fullName: user.name,
-            firstName: '',
+            firstName: user.name,
             lastName: '',
           });
         }
@@ -280,37 +277,17 @@ export class ProfileComponent implements OnInit {
   }
 
   protected updateName(): void {
-    const user = this.user();
-
-    let fullName: string | undefined;
-    let firstName: string | undefined;
-    let lastName: string | undefined;
-
-    // Disable fields that aren't being used before validation
-    if (user?.given_name && user?.family_name) {
-      this.nameForm.get('fullName')?.disable();
-      this.nameForm.get('firstName')?.enable();
-      this.nameForm.get('lastName')?.enable();
-    } else {
-      this.nameForm.get('fullName')?.enable();
-      this.nameForm.get('firstName')?.disable();
-      this.nameForm.get('lastName')?.disable();
-    }
-
     this.nameForm.markAllAsTouched();
+
     if (this.nameForm.invalid) {
       return;
     }
 
-    if (user?.given_name && user?.family_name) {
-      firstName = this.nameForm.value.firstName!.trim();
-      lastName = this.nameForm.value.lastName!.trim();
-    } else {
-      fullName = this.nameForm.value.fullName!.trim();
-    }
+    const firstName = this.nameForm.value.firstName!.trim();
+    const lastName = this.nameForm.value.lastName!.trim();
 
     this.modalLoading.set(true);
-    this.apiService.updateFullName(fullName, firstName, lastName).subscribe({
+    this.apiService.updateName(firstName, lastName).subscribe({
       next: () => {
         this.modalLoading.set(false);
         this.alert.set({

@@ -1,0 +1,56 @@
+<div
+  class="mx-auto flex h-full max-w-4xl flex-1 flex-col items-start justify-center gap-6 bg-gray-50 p-12"
+>
+  @if (state() === "loading") {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (state() === "error") {
+    <ng-icon
+      name="heroShieldExclamation"
+      size="108"
+      class="text-red-500"
+      strokeWidth="0.5"
+    ></ng-icon>
+    <h1 class="mb-6 text-4xl font-semibold text-gray-900">
+      Something went wrong
+    </h1>
+    <div class="space-y-6 font-light text-gray-600">
+      <div>Please contact your platform administrator for more information</div>
+    </div>
+  } @else {
+    <ng-icon
+      name="heroShieldCheck"
+      size="108"
+      class="text-sky-500"
+      strokeWidth="0.5"
+    ></ng-icon>
+    <h1 class="mb-6 text-4xl font-semibold text-gray-900">
+      Good news! Your account has been migrated
+    </h1>
+    <div class="space-y-6 font-light text-gray-600">
+      <div>
+        To start enjoying a seamless service access experience with your
+        BioCommons Access, we need you to reset your password for this upgraded
+        secure log in.
+      </div>
+      <div>
+        We just sent an email to {{ user()?.email }} with everything you need to
+        complete this upgrade.
+      </div>
+      <div>
+        Didn't receive it?
+        <button
+          class="text-sky-600 transition-all hover:text-sky-700 hover:underline"
+        >
+          Resend
+        </button>
+        the secure email link or
+        <a
+          href=""
+          class="text-sky-600 transition-all hover:text-sky-700 hover:underline"
+        >
+          contact support</a
+        >.
+      </div>
+    </div>
+  }
+</div>
