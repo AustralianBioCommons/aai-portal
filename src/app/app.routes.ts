@@ -68,7 +68,7 @@ export const routes: Routes = [
   {
     path: 'migration',
     component: FirstMigrationComponent,
-    data: { title: 'Account Migration' },
+    data: { title: 'Account Migration | AAI Portal' },
   },
 
   // Authenticated routes that use DefaultLayoutComponent
