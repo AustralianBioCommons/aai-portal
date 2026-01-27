@@ -28,6 +28,10 @@ export class FirstMigrationComponent implements OnInit {
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('session_token');
+    // Client ID user logged in via, to be sent to backend
+    const clientId =
+      this.route.snapshot.queryParamMap.get('client_id') ||
+      environment.auth0.clientId;
 
     if (!token) {
       this.state.set('error');
@@ -36,14 +40,12 @@ export class FirstMigrationComponent implements OnInit {
 
     this.sessionToken.set(token);
 
-    this.apiService
-      .sendMigrationResetPassword(token, environment.auth0.clientId)
-      .subscribe({
-        next: () => this.state.set('success'),
-        error: (err) => {
-          this.state.set('error');
-          console.error('Error:', err);
-        },
-      });
+    this.apiService.sendMigrationResetPassword(token, clientId).subscribe({
+      next: () => this.state.set('success'),
+      error: (err) => {
+        this.state.set('error');
+        console.error('Error:', err);
+      },
+    });
   }
 }
