@@ -59,7 +59,7 @@ export interface BiocommonsAuth0User {
   app_metadata?: BiocommonsAppMetadata;
   last_ip?: string;
   last_login?: string;
-  logins_count?: number;
+  show_welcome_message?: boolean;
 }
 
 @Injectable({

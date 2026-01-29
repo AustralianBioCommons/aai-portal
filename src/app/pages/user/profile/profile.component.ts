@@ -10,7 +10,10 @@ import {
   ApiService,
   UserProfileData,
 } from '../../../core/services/api.service';
-import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import {
+  AlertComponent,
+  AlertType,
+} from '../../../shared/components/alert/alert.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
@@ -33,7 +36,7 @@ import {
 import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
@@ -43,7 +46,6 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   standalone: true,
   imports: [
     CommonModule,
-    HttpClientModule,
     LoadingSpinnerComponent,
     AlertComponent,
     ModalComponent,
@@ -77,7 +79,7 @@ export class ProfileComponent implements OnInit {
   user = signal<UserProfileData | null>(null);
   pageLoading = signal(true);
   pageError = signal<string | null>(null);
-  alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  alert = signal<{ type: AlertType; message: string } | null>(null);
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
@@ -466,6 +468,12 @@ export class ProfileComponent implements OnInit {
     this.apiService.getUserProfile().subscribe({
       next: (user) => {
         this.user.set(user);
+        if (this.user()!.show_welcome_message) {
+          this.alert.set({
+            type: 'success',
+            message: 'Password updated. Welcome to your new access profile!',
+          });
+        }
         this.pageLoading.set(false);
       },
       error: (err) => {
