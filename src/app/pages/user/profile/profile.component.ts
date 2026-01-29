@@ -468,10 +468,7 @@ export class ProfileComponent implements OnInit {
     this.apiService.getUserProfile().subscribe({
       next: (user) => {
         this.user.set(user);
-        if (
-          this.user()!.logins_count &&
-          (this.user()!.logins_count as number) === 2 // First login after password reset
-        ) {
+        if (this.user()!.show_welcome_message) {
           this.alert.set({
             type: 'success',
             message: 'Password updated. Welcome to your new access profile!',

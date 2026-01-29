@@ -38,7 +38,7 @@ describe('ProfileComponent', () => {
     created_at: '2024-01-01T00:00:00Z',
     last_login: '2024-01-02T00:00:00Z',
     updated_at: '2024-01-03T00:00:00Z',
-    logins_count: null,
+    show_welcome_message: null,
     platform_memberships: [
       {
         platform_id: 'galaxy',
@@ -145,12 +145,12 @@ describe('ProfileComponent', () => {
     expect(component.pageError()).toBeNull();
   });
 
-  it('should show welcome message when logins_count is 2', () => {
-    const userWithTwoLogins: UserProfileData = {
+  it('should show welcome message when show_welcome_message is true', () => {
+    const userWithWelcomeMessage: UserProfileData = {
       ...mockUser,
-      logins_count: 2,
+      show_welcome_message: true,
     };
-    mockApiService.getUserProfile.and.returnValue(of(userWithTwoLogins));
+    mockApiService.getUserProfile.and.returnValue(of(userWithWelcomeMessage));
 
     fixture.detectChanges();
 
@@ -160,12 +160,14 @@ describe('ProfileComponent', () => {
     });
   });
 
-  it('should not show welcome message when logins_count is not 2', () => {
-    const userWithMultipleLogins: UserProfileData = {
+  it('should not show welcome message when show_welcome_message is false', () => {
+    const userWithoutWelcomeMessage: UserProfileData = {
       ...mockUser,
-      logins_count: 5,
+      show_welcome_message: false,
     };
-    mockApiService.getUserProfile.and.returnValue(of(userWithMultipleLogins));
+    mockApiService.getUserProfile.and.returnValue(
+      of(userWithoutWelcomeMessage),
+    );
 
     fixture.detectChanges();
 
@@ -207,7 +209,7 @@ describe('ProfileComponent', () => {
       given_name: 'John',
       family_name: 'Doe',
       last_login: '2024-01-04T00:00:00Z',
-      logins_count: null,
+      show_welcome_message: null,
     };
     mockApiService.getUserProfile.and.returnValue(of(userWithNames));
     mockApiService.updateName.and.returnValue(of(mockAuth0User));

@@ -40,7 +40,7 @@ export interface UserProfileData {
   created_at: string;
   last_login: string | null;
   updated_at: string;
-  logins_count: number | null;
+  show_welcome_message: boolean | null;
   platform_memberships: UserProfilePlatformData[];
   group_memberships: UserProfileGroupData[];
 }
