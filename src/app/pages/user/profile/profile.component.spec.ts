@@ -10,6 +10,8 @@ import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -36,6 +38,7 @@ describe('ProfileComponent', () => {
     created_at: '2024-01-01T00:00:00Z',
     last_login: '2024-01-02T00:00:00Z',
     updated_at: '2024-01-03T00:00:00Z',
+    show_welcome_message: null,
     platform_memberships: [
       {
         platform_id: 'galaxy',
@@ -90,6 +93,8 @@ describe('ProfileComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ApiService, useValue: apiSpy },
         { provide: AuthService, useValue: authSpy },
         {
@@ -140,6 +145,35 @@ describe('ProfileComponent', () => {
     expect(component.pageError()).toBeNull();
   });
 
+  it('should show welcome message when show_welcome_message is true', () => {
+    const userWithWelcomeMessage: UserProfileData = {
+      ...mockUser,
+      show_welcome_message: true,
+    };
+    mockApiService.getUserProfile.and.returnValue(of(userWithWelcomeMessage));
+
+    fixture.detectChanges();
+
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Password updated. Welcome to your new access profile!',
+    });
+  });
+
+  it('should not show welcome message when show_welcome_message is false', () => {
+    const userWithoutWelcomeMessage: UserProfileData = {
+      ...mockUser,
+      show_welcome_message: false,
+    };
+    mockApiService.getUserProfile.and.returnValue(
+      of(userWithoutWelcomeMessage),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.alert()).toBeNull();
+  });
+
   it('should display user info correctly', () => {
     fixture.detectChanges();
     const userName = fixture.debugElement.query(By.css('#user-name'));
@@ -175,6 +209,7 @@ describe('ProfileComponent', () => {
       given_name: 'John',
       family_name: 'Doe',
       last_login: '2024-01-04T00:00:00Z',
+      show_welcome_message: null,
     };
     mockApiService.getUserProfile.and.returnValue(of(userWithNames));
     mockApiService.updateName.and.returnValue(of(mockAuth0User));

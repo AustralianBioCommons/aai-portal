@@ -375,7 +375,7 @@ export class RegisterComponent implements AfterViewInit {
     } else {
       return {
         text: 'Login',
-        action: () => this.router.navigate(['/login']),
+        action: () => this.router.navigate(['/']),
       };
     }
   }
