@@ -140,27 +140,20 @@ export class AuthService {
 
   // Computed signal that determines the type of admin based on their roles
   adminType = computed<AdminType>(() => {
-    if (!this.isGeneralAdmin()) {
-      return null;
-    }
+    if (!this.isGeneralAdmin()) return null;
 
     const platforms = this.adminPlatforms();
     const groups = this.adminGroups();
 
-    // BioCommons admin: manages multiple platforms
-    if (platforms.length > 1) {
+    // BioCommons admin: manages multiple platforms or both platforms and groups
+    if (platforms.length > 1 || (platforms.length && groups.length))
       return 'biocommons';
-    }
 
     // Platform admin: manages exactly one platform
-    if (platforms.length === 1) {
-      return 'platform';
-    }
+    if (platforms.length === 1) return 'platform';
 
     // Bundle admin: manages groups but no platforms
-    if (groups.length) {
-      return 'bundle';
-    }
+    if (groups.length) return 'bundle';
 
     return null;
   });
