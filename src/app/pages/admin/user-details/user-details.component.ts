@@ -255,19 +255,12 @@ export class UserDetailsComponent implements OnInit {
   }
 
   canManagePlatform(platformId: string): boolean {
-    if (this.adminType() === 'biocommons') {
-      return true;
-    }
+    if (this.adminType() === 'bundle') return false;
     return this.adminPlatforms().some((p) => p.id === platformId);
   }
 
   canManageGroup(groupId: string): boolean {
-    if (this.adminType() === 'biocommons') {
-      return true;
-    }
-    if (this.adminType() !== 'bundle') {
-      return false;
-    }
+    if (this.adminType() === 'platform') return false;
     return this.adminGroups().some((g) => g.id === groupId);
   }
 
