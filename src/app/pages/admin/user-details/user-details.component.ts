@@ -187,7 +187,11 @@ export class UserDetailsComponent implements OnInit {
   });
   emailControl = new FormControl('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.email, Validators.maxLength(320)],
+    validators: [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(320),
+    ],
   });
 
   ngOnInit() {
