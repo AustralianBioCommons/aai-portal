@@ -172,7 +172,7 @@ export class UserDetailsComponent implements OnInit {
   openMenuAction = signal(false);
   openMenuGroupId = signal<string | null>(null);
   openMenuPlatformId = signal<string | null>(null);
-  editingEmail = signal(false);
+  emailModalOpen = signal(false);
 
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -208,7 +208,6 @@ export class UserDetailsComponent implements OnInit {
         next: (user) => {
           this.user.set(user);
           this.emailControl.setValue(user.email);
-          this.editingEmail.set(false);
           this.pageLoading.set(false);
         },
         error: (err) => {
@@ -250,6 +249,7 @@ export class UserDetailsComponent implements OnInit {
 
     const email = this.emailControl.value.trim();
     if (!email || email === user.email || this.emailControl.invalid) {
+      this.emailControl.markAsTouched();
       return;
     }
 
@@ -261,7 +261,7 @@ export class UserDetailsComponent implements OnInit {
           type: 'success',
           message: resp.message || 'Email updated successfully',
         });
-        this.editingEmail.set(false);
+        this.emailModalOpen.set(false);
       },
       error: (error) => {
         console.error('Failed to update email:', error);
@@ -280,18 +280,19 @@ export class UserDetailsComponent implements OnInit {
     return !email || this.emailControl.invalid || email === user.email;
   }
 
-  startEmailEdit(): void {
+  openEmailModal(): void {
     const user = this.user();
     if (!user) return;
     this.emailControl.setValue(user.email);
-    this.editingEmail.set(true);
+    this.emailControl.markAsUntouched();
+    this.emailModalOpen.set(true);
   }
 
-  cancelEmailEdit(): void {
+  closeEmailModal(): void {
     const user = this.user();
     if (!user) return;
     this.emailControl.setValue(user.email);
-    this.editingEmail.set(false);
+    this.emailModalOpen.set(false);
   }
 
   getPlatformName(platformId: string): string {
@@ -337,7 +338,7 @@ export class UserDetailsComponent implements OnInit {
       next: (user) => {
         this.user.set(user);
         this.emailControl.setValue(user.email);
-        this.editingEmail.set(false);
+        this.emailModalOpen.set(false);
       },
       error: (err) => {
         console.error('Failed to refresh user details:', err);
