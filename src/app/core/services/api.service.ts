@@ -331,6 +331,16 @@ export class ApiService {
     );
   }
 
+  updateUserEmail(
+    userId: string,
+    email: string,
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/admin/users/${userId}/email/update`,
+      { email },
+    );
+  }
+
   deleteUser(userId: string, reason: string): Observable<string> {
     return this.http.post<string>(
       `${environment.auth0.backend}/admin/users/${userId}/delete`,

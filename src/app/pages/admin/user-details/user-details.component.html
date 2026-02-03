@@ -127,6 +127,13 @@
                 <div class="text-sm font-light text-gray-500">Email</div>
                 <div class="flex flex-wrap items-center gap-2">
                   <div class="break-all">{{ user()?.email }}</div>
+                  <button
+                    type="button"
+                    class="text-xs font-medium text-blue-700 underline underline-offset-2 hover:text-blue-800"
+                    (click)="startEmailEdit()"
+                  >
+                    Edit
+                  </button>
                   <span
                     class="rounded px-2 py-1 text-xs font-semibold uppercase"
                     [class]="
@@ -138,6 +145,38 @@
                     {{ user()?.email_verified ? "Verified" : "Unverified" }}
                   </span>
                 </div>
+                @if (editingEmail()) {
+                  <form
+                    class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center"
+                    (ngSubmit)="updateUserEmail()"
+                  >
+                    <input
+                      type="email"
+                      class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                      placeholder="Enter new email address"
+                      [formControl]="emailControl"
+                    />
+                    <div class="flex gap-2">
+                      <app-button
+                        type="submit"
+                        variant="secondary"
+                        [disabled]="isEmailUpdateDisabled()"
+                      >
+                        Save
+                      </app-button>
+                      <app-button
+                        type="button"
+                        variant="ghost"
+                        (click)="cancelEmailEdit()"
+                      >
+                        Cancel
+                      </app-button>
+                    </div>
+                  </form>
+                  <div class="mt-1 text-xs text-gray-500">
+                    A verification email will be sent to the new address.
+                  </div>
+                }
               </div>
               <div>
                 <div class="text-sm font-light text-gray-500">Signed Up</div>
