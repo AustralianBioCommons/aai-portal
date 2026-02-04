@@ -220,7 +220,6 @@ export class UserDetailsComponent implements OnInit {
       this.pageError.set('No user ID provided');
       this.pageLoading.set(false);
     }
-
   }
 
   resendVerificationEmail() {
@@ -268,11 +267,17 @@ export class UserDetailsComponent implements OnInit {
         console.error('Failed to update user email:', error);
         const detail =
           error?.error?.detail || error?.error?.message || error?.message;
-        const isEmailInUse =
-          error?.status === 409 ||
-          (typeof detail === 'string' &&
-            detail.toLowerCase().includes('already in use'));
-        if (isEmailInUse) {
+        if (error?.status === 409) {
+          this.alert.set({
+            type: 'error',
+            message: 'This email is already in use.',
+          });
+          return;
+        }
+        if (
+          typeof detail === 'string' &&
+          detail.toLowerCase().includes('already in use')
+        ) {
           this.alert.set({
             type: 'error',
             message: 'This email is already in use.',
@@ -281,7 +286,8 @@ export class UserDetailsComponent implements OnInit {
         }
         this.alert.set({
           type: 'error',
-          message: 'Failed to update user email',
+          message:
+            typeof detail === 'string' ? detail : 'Failed to update user email',
         });
       },
     });
