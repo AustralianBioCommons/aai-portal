@@ -172,6 +172,7 @@ export class UserDetailsComponent implements OnInit {
   openMenuAction = signal(false);
   openMenuGroupId = signal<string | null>(null);
   openMenuPlatformId = signal<string | null>(null);
+  emailModalOpen = signal(false);
 
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -183,6 +184,14 @@ export class UserDetailsComponent implements OnInit {
   reasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(255)],
+  });
+  emailControl = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      Validators.email,
+      Validators.maxLength(320),
+    ],
   });
 
   ngOnInit() {
@@ -198,6 +207,7 @@ export class UserDetailsComponent implements OnInit {
       this.apiService.getUserDetails(userId).subscribe({
         next: (user) => {
           this.user.set(user);
+          this.emailControl.setValue(user.email);
           this.pageLoading.set(false);
         },
         error: (err) => {
@@ -231,6 +241,58 @@ export class UserDetailsComponent implements OnInit {
       },
     });
     this.openMenuAction.set(false);
+  }
+
+  updateUserEmail(): void {
+    const user = this.user();
+    if (!user) return;
+
+    const email = this.emailControl.value.trim();
+    if (!email || email === user.email || this.emailControl.invalid) {
+      this.emailControl.markAsTouched();
+      return;
+    }
+
+    this.alert.set(null);
+    this.apiService.updateUserEmail(user.user_id, email).subscribe({
+      next: (resp) => {
+        this.refreshUserDetails(user.user_id);
+        this.alert.set({
+          type: 'success',
+          message: resp.message || 'Email updated successfully',
+        });
+        this.emailModalOpen.set(false);
+      },
+      error: (error) => {
+        console.error('Failed to update user email:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to update user email',
+        });
+      },
+    });
+  }
+
+  isEmailUpdateDisabled(): boolean {
+    const user = this.user();
+    if (!user) return true;
+    const email = this.emailControl.value.trim();
+    return !email || this.emailControl.invalid || email === user.email;
+  }
+
+  openEmailModal(): void {
+    const user = this.user();
+    if (!user) return;
+    this.emailControl.setValue(user.email);
+    this.emailControl.markAsUntouched();
+    this.emailModalOpen.set(true);
+  }
+
+  closeEmailModal(): void {
+    const user = this.user();
+    if (!user) return;
+    this.emailControl.setValue(user.email);
+    this.emailModalOpen.set(false);
   }
 
   getPlatformName(platformId: string): string {
@@ -268,6 +330,8 @@ export class UserDetailsComponent implements OnInit {
     this.apiService.getUserDetails(userId).subscribe({
       next: (user) => {
         this.user.set(user);
+        this.emailControl.setValue(user.email);
+        this.emailModalOpen.set(false);
       },
       error: (err) => {
         console.error('Failed to refresh user details:', err);
