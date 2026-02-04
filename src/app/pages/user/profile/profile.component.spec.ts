@@ -86,7 +86,7 @@ describe('ProfileComponent', () => {
       'requestEmailChange',
       'continueEmailChange',
     ]);
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser'], {
       isGeneralAdmin: signal(false),
     });
 

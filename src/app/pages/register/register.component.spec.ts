@@ -21,7 +21,9 @@ class MockLoginComponent {}
 })
 class MockHomeComponent {}
 
-class MockAuthService {}
+class MockAuthService {
+  refreshUser() {}
+}
 
 /**
  * RegisterComponent Test Suite

@@ -73,6 +73,7 @@ describe('UserDetailsComponent', () => {
       'revokeGroupAccess',
       'unrejectGroupAccess',
       'deleteUser',
+      'updateUserUsername',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -100,7 +101,7 @@ describe('UserDetailsComponent', () => {
       queryParams: of({}),
     };
 
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser'], {
       adminPlatforms: signal([]),
       adminGroups: signal([]),
       adminType: signal(null),
@@ -765,6 +766,96 @@ describe('UserDetailsComponent', () => {
         message: 'Failed to delete user',
       });
       expect(component.actionModalData()).toBeNull();
+    });
+  });
+
+  describe('Username Update', () => {
+    it('should open username modal', () => {
+      fixture.detectChanges();
+      component['openUsernameModal']();
+      expect(component.activeModal()).toBe('username');
+      expect(component.usernameForm.value.username).toBe('testuser');
+    });
+
+    it('should close username modal', () => {
+      fixture.detectChanges();
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component['closeUsernameModal']();
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('should update username successfully', () => {
+      const updatedUser = { ...mockUserDetails, username: 'newusername' };
+      mockApiService.updateUserUsername.and.returnValue(of(updatedUser));
+      mockApiService.getUserDetails.and.returnValue(of(updatedUser));
+      fixture.detectChanges();
+
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component['updateUsername']();
+
+      expect(mockApiService.updateUserUsername).toHaveBeenCalledWith(
+        '123',
+        'newusername',
+      );
+      expect(component.alert()).toEqual({
+        type: 'success',
+        message: "User's username updated successfully",
+      });
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('should not update username if form is invalid', () => {
+      fixture.detectChanges();
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: '' });
+      component['updateUsername']();
+
+      expect(mockApiService.updateUserUsername).not.toHaveBeenCalled();
+    });
+
+    it('should handle error when updating username', () => {
+      mockApiService.updateUserUsername.and.returnValue(
+        throwError(() => ({ error: { message: 'Username already taken' } })),
+      );
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component['updateUsername']();
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to update username: ',
+        jasmine.any(Object),
+      );
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Username already taken',
+      });
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('should handle field-level validation error', () => {
+      const error = {
+        error: {
+          message: 'Validation failed',
+          field_errors: [{ field: 'username', message: 'Username is taken' }],
+        },
+      };
+      mockApiService.updateUserUsername.and.returnValue(throwError(() => error));
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'takenusername' });
+      component['updateUsername']();
+
+      // Modal should stay open when there's a field-level error
+      expect(component.activeModal()).toBe('username');
+      // No general alert should be shown (error is shown inline on the field)
+      expect(component.alert()).toBeNull();
     });
   });
 });
