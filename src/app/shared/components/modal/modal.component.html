@@ -64,7 +64,12 @@
     }
 
     <div class="flex justify-between gap-6">
-      <app-button type="button" variant="secondary" (click)="onSecondary()">
+      <app-button
+        type="button"
+        variant="secondary"
+        [widthClass]="secondaryButtonWidthClass()"
+        (click)="onSecondary()"
+      >
         {{ computedSecondaryButtonText() }}
       </app-button>
       <app-button
@@ -73,6 +78,7 @@
         (click)="onPrimary()"
         [disabled]="primaryButtonDisabled()"
         [loading]="primaryButtonLoading()"
+        [widthClass]="primaryButtonWidthClass()"
       >
         {{ computedPrimaryButtonText() }}
       </app-button>

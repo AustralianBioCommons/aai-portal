@@ -264,10 +264,10 @@ export class UserDetailsComponent implements OnInit {
         this.emailModalOpen.set(false);
       },
       error: (error) => {
-        console.error('Failed to update email:', error);
+        console.error('Failed to update user email:', error);
         this.alert.set({
           type: 'error',
-          message: 'Failed to update email',
+          message: 'Failed to update user email',
         });
       },
     });

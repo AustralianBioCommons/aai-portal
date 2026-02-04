@@ -26,6 +26,8 @@
     description="The user will receive a verification email to verify their address."
     primaryButtonText="Send verification email"
     secondaryButtonText="Cancel"
+    primaryButtonWidthClass="w-56"
+    secondaryButtonWidthClass="w-56"
     [primaryButtonDisabled]="isEmailUpdateDisabled()"
     (primaryOutput)="updateUserEmail()"
     (secondaryOutput)="closeEmailModal()"
