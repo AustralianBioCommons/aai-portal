@@ -844,7 +844,9 @@ describe('UserDetailsComponent', () => {
           field_errors: [{ field: 'username', message: 'Username is taken' }],
         },
       };
-      mockApiService.updateUserUsername.and.returnValue(throwError(() => error));
+      mockApiService.updateUserUsername.and.returnValue(
+        throwError(() => error),
+      );
       spyOn(console, 'error');
       fixture.detectChanges();
 
