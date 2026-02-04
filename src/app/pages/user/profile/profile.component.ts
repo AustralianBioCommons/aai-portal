@@ -35,9 +35,14 @@ import {
 } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
+import {
+  heroArrowLeft,
+  heroPlusCircle,
+  heroUser,
+} from '@ng-icons/heroicons/outline';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
+import { DataRefreshService } from '../../../core/services/data-refresh.service';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -56,11 +61,12 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
-  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle })],
+  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle, heroUser })],
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private dataRefreshService = inject(DataRefreshService);
   private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
@@ -80,6 +86,7 @@ export class ProfileComponent implements OnInit {
   pageLoading = signal(true);
   pageError = signal<string | null>(null);
   alert = signal<{ type: AlertType; message: string } | null>(null);
+  profileImageLoaded = signal(false);
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
@@ -298,6 +305,12 @@ export class ProfileComponent implements OnInit {
         });
         this.closeModal();
         this.loadUserProfile();
+
+        // Wait for Auth0 to update the picture then trigger a refresh for the navbar
+        setTimeout(() => {
+          this.authService.refreshUser();
+          this.dataRefreshService.triggerRefresh();
+        }, 500);
       },
       error: (err) => {
         this.modalLoading.set(false);

@@ -24,27 +24,6 @@ export interface UserProfileGroupData {
   approval_status: Omit<Status, 'revoked'>;
 }
 
-// Data returned from the API for the user's profile -
-// only includes required information for the UI,
-// omits information on who approves platforms and groups,
-// as well as revoked platforms and groups.
-export interface UserProfileData {
-  user_id: string;
-  name: string;
-  given_name?: string;
-  family_name?: string;
-  email: string;
-  email_verified: boolean;
-  username: string;
-  picture: string;
-  created_at: string;
-  last_login: string | null;
-  updated_at: string;
-  show_welcome_message: boolean | null;
-  platform_memberships: UserProfilePlatformData[];
-  group_memberships: UserProfileGroupData[];
-}
-
 export interface UserGroupStatus {
   group_id: string;
   approval_status: Status;
@@ -107,7 +86,30 @@ export interface BiocommonsUserResponse {
   group_memberships: GroupMembership[];
 }
 
+// Data returned from the API for the user's profile -
+// only includes required information for the UI,
+// omits information on who approves platforms and groups,
+// as well as revoked platforms and groups.
+export interface UserProfileData {
+  user_id: string;
+  name: string;
+  given_name?: string;
+  family_name?: string;
+  email: string;
+  email_verified: boolean;
+  username: string;
+  picture: string;
+  created_at: string;
+  last_login: string | null;
+  updated_at: string;
+  show_welcome_message: boolean | null;
+  platform_memberships: UserProfilePlatformData[];
+  group_memberships: UserProfileGroupData[];
+}
+
 export interface BiocommonsUserDetails extends BiocommonsAuth0User {
+  given_name?: string;
+  family_name?: string;
   platform_memberships: PlatformMembership[];
   group_memberships: GroupMembership[];
 }
@@ -335,6 +337,13 @@ export class ApiService {
     return this.http.post<string>(
       `${environment.auth0.backend}/admin/users/${userId}/delete`,
       { reason },
+    );
+  }
+
+  updateUserUsername(userId: string, username: string) {
+    return this.http.post<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/admin/users/${userId}/username/update`,
+      { username: username },
     );
   }
 

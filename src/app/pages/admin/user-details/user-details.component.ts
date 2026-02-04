@@ -1,7 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { usernameRequirements } from '../../../shared/validators/usernames';
+import { ValidationService } from '../../../core/services/validation.service';
 import {
   ApiService,
   BiocommonsUserDetails,
@@ -29,6 +36,7 @@ import {
   heroTrash,
   heroArrowUturnLeft as heroUturnLeft,
   heroXCircle,
+  heroUser,
 } from '@ng-icons/heroicons/outline';
 
 // Define the structure for an action
@@ -46,6 +54,8 @@ interface ActionModalData {
   name: string;
   email: string;
 }
+
+type UserModal = 'username';
 
 @Component({
   selector: 'app-user-details',
@@ -74,6 +84,7 @@ interface ActionModalData {
       heroXCircle,
       heroTrash,
       heroUturnLeft,
+      heroUser,
     }),
   ],
 })
@@ -83,6 +94,8 @@ export class UserDetailsComponent implements OnInit {
   private readonly apiService = inject(ApiService);
   private readonly authService = inject(AuthService);
   private readonly datePipe = inject(DatePipe);
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly validationService = inject(ValidationService);
 
   protected readonly platforms = PLATFORMS;
   protected readonly bundles = BIOCOMMONS_BUNDLES;
@@ -168,6 +181,7 @@ export class UserDetailsComponent implements OnInit {
   pageError = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
+  profileImageLoaded = signal(false);
 
   openMenuAction = signal(false);
   openMenuGroupId = signal<string | null>(null);
@@ -185,6 +199,13 @@ export class UserDetailsComponent implements OnInit {
     validators: [Validators.required, Validators.maxLength(255)],
   });
 
+  // Username update form and modal
+  usernameForm = this.formBuilder.nonNullable.group({
+    username: ['', usernameRequirements],
+  });
+  activeModal = signal<UserModal | null>(null);
+  modalLoading = signal(false);
+
   ngOnInit() {
     const navigation = this.router.getCurrentNavigation();
     const stateReturnUrl =
@@ -192,6 +213,12 @@ export class UserDetailsComponent implements OnInit {
     if (stateReturnUrl) {
       this.returnUrl.set(stateReturnUrl);
     }
+
+    this.usernameForm.get('username')?.valueChanges.subscribe(() => {
+      if (this.validationService.hasFieldBackendError('username')) {
+        this.validationService.clearFieldBackendError('username');
+      }
+    });
 
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
@@ -265,12 +292,15 @@ export class UserDetailsComponent implements OnInit {
   }
 
   private refreshUserDetails(userId: string) {
+    this.pageLoading.set(true);
     this.apiService.getUserDetails(userId).subscribe({
       next: (user) => {
         this.user.set(user);
+        this.pageLoading.set(false);
       },
       error: (err) => {
         console.error('Failed to refresh user details:', err);
+        this.pageLoading.set(false);
       },
     });
   }
@@ -373,6 +403,67 @@ export class UserDetailsComponent implements OnInit {
         });
       },
     });
+  }
+
+  protected openUsernameModal(): void {
+    const user = this.user();
+    if (!user) return;
+
+    this.alert.set(null);
+    this.usernameForm.reset({ username: user.username });
+    this.validationService.clearFieldBackendError('username');
+    this.activeModal.set('username');
+  }
+
+  protected closeUsernameModal(): void {
+    this.validationService.clearFieldBackendError('username');
+    this.activeModal.set(null);
+  }
+
+  protected updateUsername(): void {
+    this.usernameForm.markAllAsTouched();
+    if (this.usernameForm.invalid) {
+      return;
+    }
+    const username = this.usernameForm.value.username!.trim();
+    const userId = this.user()!.user_id;
+    this.modalLoading.set(true);
+    this.apiService.updateUserUsername(userId, username).subscribe({
+      next: () => {
+        this.modalLoading.set(false);
+        this.alert.set({
+          type: 'success',
+          message: "User's username updated successfully",
+        });
+        this.closeUsernameModal();
+        this.refreshUserDetails(userId);
+      },
+      error: (err) => {
+        this.modalLoading.set(false);
+        console.error('Failed to update username: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.usernameForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('username')) {
+          this.alert.set({
+            type: 'error',
+            message: err.error?.message || "Failed to update user's username",
+          });
+          this.closeUsernameModal();
+        }
+      },
+    });
+  }
+
+  protected isFieldInvalid(fieldName: string): boolean {
+    return this.validationService.isFieldInvalid(this.usernameForm, fieldName);
+  }
+
+  protected getErrorMessages(fieldName: string): string[] {
+    return this.validationService.getErrorMessages(
+      this.usernameForm,
+      fieldName,
+    );
   }
 
   private openActionModal(
