@@ -26,7 +26,6 @@
     [title]="modalTitle()"
     [description]="modalDescription()"
     [primaryButtonText]="modalPrimaryButtonText()"
-    [primaryButtonDisabled]="shouldDisableModalPrimary()"
     [primaryButtonLoading]="modalLoading()"
     [primaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
     [secondaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
@@ -79,7 +78,12 @@
             />
             @if (isFieldInvalid(emailForm, "email")) {
               <div class="mt-0.5 text-xs text-red-500">
-                Please enter a valid email address.
+                @for (
+                  error of getErrorMessages(emailForm, "email");
+                  track error
+                ) {
+                  {{ error }}<br />
+                }
               </div>
             }
           </form>

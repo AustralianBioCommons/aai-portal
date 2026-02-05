@@ -114,7 +114,6 @@ export class ProfileComponent implements OnInit {
   otpLoading = signal(false);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
-  emailOtpLocked = signal(false);
 
   passwordForm = this.formBuilder.nonNullable.group({
     currentPassword: ['', Validators.required],
@@ -156,10 +155,22 @@ export class ProfileComponent implements OnInit {
         break;
       case 'username':
         this.usernameForm.reset({ username: user.username });
+        this.usernameForm
+          .get('username')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.username),
+          );
+        this.usernameForm.updateValueAndValidity();
         this.validationService.clearFieldBackendError('username');
         break;
       case 'email':
         this.emailForm.reset({ email: user.email });
+        this.emailForm
+          .get('email')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.email),
+          );
+        this.emailForm.updateValueAndValidity();
         this.resetEmailFlowState();
         this.validationService.clearFieldBackendError('email');
         break;
@@ -177,15 +188,26 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(false);
     this.otpLoading.set(false);
     this.emailModalNotice.set(null);
-    this.emailOtpLocked.set(false);
   }
 
   protected closeModal(): void {
     if (this.activeModal() === 'email') {
+      this.emailForm.get('email')?.clearValidators();
+      this.emailForm
+        .get('email')
+        ?.setValidators([
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ]);
+      this.emailForm.updateValueAndValidity();
       this.resetEmailFlowState();
       this.validationService.clearFieldBackendError('email');
     }
     if (this.activeModal() === 'username') {
+      this.usernameForm.get('username')?.clearValidators();
+      this.usernameForm.get('username')?.setValidators(usernameRequirements);
+      this.usernameForm.updateValueAndValidity();
       this.validationService.clearFieldBackendError('username');
     }
     if (this.activeModal() === 'password') {
@@ -403,7 +425,6 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(true);
     this.validationService.clearFieldBackendError('email');
     this.alert.set(null);
-    this.emailOtpLocked.set(false);
     this.apiService.requestEmailChange(email).subscribe({
       next: ({ message }) => {
         this.emailLoading.set(false);
@@ -450,7 +471,12 @@ export class ProfileComponent implements OnInit {
             : (detail ?? 'Invalid code. Please try again.');
         this.otpError.set(message);
         if (status === 429) {
-          this.emailOtpLocked.set(true);
+          this.alert.set({
+            type: 'error',
+            message:
+              'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
+          });
+          this.closeModal();
         }
       },
     });
@@ -462,13 +488,6 @@ export class ProfileComponent implements OnInit {
 
   protected getErrorMessages(form: FormGroup, fieldName: string): string[] {
     return this.validationService.getErrorMessages(form, fieldName);
-  }
-
-  protected shouldDisableModalPrimary(): boolean {
-    if (this.activeModal() === 'email') {
-      return this.emailForm.invalid || this.emailOtpLocked();
-    }
-    return false;
   }
 
   protected isModalLoading(): boolean {

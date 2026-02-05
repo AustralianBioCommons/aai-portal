@@ -287,10 +287,22 @@ export class UserDetailsComponent implements OnInit {
     switch (type) {
       case 'username':
         this.usernameForm.reset({ username: user.username });
+        this.usernameForm
+          .get('username')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.username),
+          );
+        this.usernameForm.updateValueAndValidity();
         this.validationService.clearFieldBackendError('username');
         break;
       case 'email':
         this.emailForm.reset({ email: user.email });
+        this.emailForm
+          .get('email')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.email),
+          );
+        this.emailForm.updateValueAndValidity();
         this.validationService.clearFieldBackendError('email');
         break;
     }
@@ -299,9 +311,21 @@ export class UserDetailsComponent implements OnInit {
 
   protected closeModal(): void {
     if (this.activeModal() === 'email') {
+      this.emailForm.get('email')?.clearValidators();
+      this.emailForm
+        .get('email')
+        ?.setValidators([
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ]);
+      this.emailForm.updateValueAndValidity();
       this.validationService.clearFieldBackendError('email');
     }
     if (this.activeModal() === 'username') {
+      this.usernameForm.get('username')?.clearValidators();
+      this.usernameForm.get('username')?.setValidators(usernameRequirements);
+      this.usernameForm.updateValueAndValidity();
       this.validationService.clearFieldBackendError('username');
     }
     this.activeModal.set(null);
@@ -326,16 +350,6 @@ export class UserDetailsComponent implements OnInit {
 
   protected modalPrimaryButtonText(): string {
     return this.activeModal() === 'email' ? 'Send verification email' : 'Save';
-  }
-
-  protected shouldDisableModalPrimary(): boolean {
-    if (this.activeModal() === 'email') {
-      const user = this.user();
-      if (!user) return true;
-      const email = this.emailForm.value.email?.trim() || '';
-      return !email || this.emailForm.invalid || email === user.email;
-    }
-    return false;
   }
 
   protected onModalPrimaryButtonClick(): void {
