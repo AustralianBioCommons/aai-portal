@@ -435,13 +435,19 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         this.emailLoading.set(false);
-        this.alert.set({
-          type: 'error',
-          message:
-            err.error?.detail ??
-            'Failed to send OTP. If this issue persists contact the administrators.',
-        });
-        this.closeModal();
+        console.error('Failed to send OTP: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.emailForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('email')) {
+          this.alert.set({
+            type: 'error',
+            message:
+              err.error?.message ??
+              'Failed to send OTP. If this issue persists contact the administrators.',
+          });
+          this.closeModal();
+        }
       },
     });
   }
