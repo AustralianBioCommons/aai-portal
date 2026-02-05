@@ -67,6 +67,7 @@ describe('UserDetailsComponent', () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserDetails',
       'resendVerificationEmail',
+      'updateUserEmail',
       'approvePlatformAccess',
       'revokePlatformAccess',
       'approveGroupAccess',
@@ -203,9 +204,11 @@ describe('UserDetailsComponent', () => {
 
     fixture.detectChanges();
 
-    const actionsButton = fixture.debugElement.query(By.css('button'));
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const actionsButton = buttons.find((btn) =>
+      btn.nativeElement.textContent?.includes('Actions'),
+    );
     expect(actionsButton).toBeTruthy();
-    expect(actionsButton.nativeElement.textContent.trim()).toContain('Actions');
   });
 
   it('should not show Actions button for verified users', () => {
