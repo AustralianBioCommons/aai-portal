@@ -4,10 +4,15 @@ import { DatePipe } from '@angular/common';
 import {
   FormControl,
   FormBuilder,
+  FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { usernameRequirements } from '../../../shared/validators/usernames';
+import {
+  emailLengthValidator,
+  internationalEmailValidator,
+} from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
 import {
   ApiService,
@@ -55,7 +60,7 @@ interface ActionModalData {
   email: string;
 }
 
-type UserModal = 'username';
+type UserModal = 'username' | 'email';
 
 @Component({
   selector: 'app-user-details',
@@ -186,7 +191,6 @@ export class UserDetailsComponent implements OnInit {
   openMenuAction = signal(false);
   openMenuGroupId = signal<string | null>(null);
   openMenuPlatformId = signal<string | null>(null);
-  emailModalOpen = signal(false);
 
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -194,24 +198,23 @@ export class UserDetailsComponent implements OnInit {
 
   actionModalData = signal<ActionModalData | null>(null);
 
-  // Form control
+  // Forms
   reasonControl = new FormControl('', {
     nonNullable: true,
     validators: [Validators.required, Validators.maxLength(255)],
   });
-  emailControl = new FormControl('', {
-    nonNullable: true,
-    validators: [
-      Validators.required,
-      Validators.email,
-      Validators.maxLength(320),
-    ],
-  });
 
-  // Username update form and modal
   usernameForm = this.formBuilder.nonNullable.group({
     username: ['', usernameRequirements],
   });
+
+  emailForm = this.formBuilder.nonNullable.group({
+    email: [
+      '',
+      [Validators.required, internationalEmailValidator, emailLengthValidator],
+    ],
+  });
+
   activeModal = signal<UserModal | null>(null);
   modalLoading = signal(false);
 
@@ -229,12 +232,17 @@ export class UserDetailsComponent implements OnInit {
       }
     });
 
+    this.emailForm.get('email')?.valueChanges.subscribe(() => {
+      if (this.validationService.hasFieldBackendError('email')) {
+        this.validationService.clearFieldBackendError('email');
+      }
+    });
+
     const userId = this.route.snapshot.paramMap.get('id');
     if (userId) {
       this.apiService.getUserDetails(userId).subscribe({
         next: (user) => {
           this.user.set(user);
-          this.emailControl.setValue(user.email);
           this.pageLoading.set(false);
         },
         error: (err) => {
@@ -270,56 +278,112 @@ export class UserDetailsComponent implements OnInit {
     this.openMenuAction.set(false);
   }
 
-  updateUserEmail(): void {
+  protected openModal(type: UserModal): void {
     const user = this.user();
     if (!user) return;
-
-    const email = this.emailControl.value.trim();
-    if (!email || email === user.email || this.emailControl.invalid) {
-      this.emailControl.markAsTouched();
-      return;
-    }
 
     this.alert.set(null);
-    this.apiService.updateUserEmail(user.user_id, email).subscribe({
+
+    switch (type) {
+      case 'username':
+        this.usernameForm.reset({ username: user.username });
+        this.validationService.clearFieldBackendError('username');
+        break;
+      case 'email':
+        this.emailForm.reset({ email: user.email });
+        this.validationService.clearFieldBackendError('email');
+        break;
+    }
+    this.activeModal.set(type);
+  }
+
+  protected closeModal(): void {
+    if (this.activeModal() === 'email') {
+      this.validationService.clearFieldBackendError('email');
+    }
+    if (this.activeModal() === 'username') {
+      this.validationService.clearFieldBackendError('username');
+    }
+    this.activeModal.set(null);
+  }
+
+  protected modalTitle(): string {
+    switch (this.activeModal()) {
+      case 'username':
+        return "Change user's username";
+      case 'email':
+        return "Change user's email address";
+      default:
+        return '';
+    }
+  }
+
+  protected modalDescription(): string {
+    return this.activeModal() === 'email'
+      ? 'The user will receive a verification email to verify their new email address.'
+      : '';
+  }
+
+  protected modalPrimaryButtonText(): string {
+    return this.activeModal() === 'email' ? 'Send verification email' : 'Save';
+  }
+
+  protected shouldDisableModalPrimary(): boolean {
+    if (this.activeModal() === 'email') {
+      const user = this.user();
+      if (!user) return true;
+      const email = this.emailForm.value.email?.trim() || '';
+      return !email || this.emailForm.invalid || email === user.email;
+    }
+    return false;
+  }
+
+  protected onModalPrimaryButtonClick(): void {
+    switch (this.activeModal()) {
+      case 'username':
+        this.updateUsername();
+        break;
+      case 'email':
+        this.updateEmail();
+        break;
+      default:
+        break;
+    }
+  }
+
+  protected updateEmail(): void {
+    this.emailForm.markAllAsTouched();
+    if (this.emailForm.invalid) {
+      return;
+    }
+    const email = this.emailForm.value.email!.trim();
+    const userId = this.user()!.user_id;
+    this.modalLoading.set(true);
+    this.apiService.updateUserEmail(userId, email).subscribe({
       next: (resp) => {
-        this.refreshUserDetails(user.user_id);
+        this.modalLoading.set(false);
         this.alert.set({
           type: 'success',
-          message: resp.message || 'Email updated successfully',
+          message: resp.message || "User's email updated successfully",
         });
-        this.emailModalOpen.set(false);
+        this.closeModal();
+        this.refreshUserDetails(userId);
       },
-      error: (error) => {
-        console.error('Failed to update user email:', error);
-        this.alert.set({
-          type: 'error',
-          message: 'Failed to update user email',
-        });
+      error: (err) => {
+        this.modalLoading.set(false);
+        console.error('Failed to update email: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.emailForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('email')) {
+          this.alert.set({
+            type: 'error',
+            message: err.error?.message || "Failed to update user's email",
+          });
+          this.closeModal();
+        }
       },
     });
-  }
-
-  isEmailUpdateDisabled(): boolean {
-    const user = this.user();
-    if (!user) return true;
-    const email = this.emailControl.value.trim();
-    return !email || this.emailControl.invalid || email === user.email;
-  }
-
-  openEmailModal(): void {
-    const user = this.user();
-    if (!user) return;
-    this.emailControl.setValue(user.email);
-    this.emailControl.markAsUntouched();
-    this.emailModalOpen.set(true);
-  }
-
-  closeEmailModal(): void {
-    const user = this.user();
-    if (!user) return;
-    this.emailControl.setValue(user.email);
-    this.emailModalOpen.set(false);
   }
 
   getPlatformName(platformId: string): string {
@@ -467,21 +531,6 @@ export class UserDetailsComponent implements OnInit {
     });
   }
 
-  protected openUsernameModal(): void {
-    const user = this.user();
-    if (!user) return;
-
-    this.alert.set(null);
-    this.usernameForm.reset({ username: user.username });
-    this.validationService.clearFieldBackendError('username');
-    this.activeModal.set('username');
-  }
-
-  protected closeUsernameModal(): void {
-    this.validationService.clearFieldBackendError('username');
-    this.activeModal.set(null);
-  }
-
   protected updateUsername(): void {
     this.usernameForm.markAllAsTouched();
     if (this.usernameForm.invalid) {
@@ -497,7 +546,7 @@ export class UserDetailsComponent implements OnInit {
           type: 'success',
           message: "User's username updated successfully",
         });
-        this.closeUsernameModal();
+        this.closeModal();
         this.refreshUserDetails(userId);
       },
       error: (err) => {
@@ -511,21 +560,18 @@ export class UserDetailsComponent implements OnInit {
             type: 'error',
             message: err.error?.message || "Failed to update user's username",
           });
-          this.closeUsernameModal();
+          this.closeModal();
         }
       },
     });
   }
 
-  protected isFieldInvalid(fieldName: string): boolean {
-    return this.validationService.isFieldInvalid(this.usernameForm, fieldName);
+  protected isFieldInvalid(form: FormGroup, fieldName: string): boolean {
+    return this.validationService.isFieldInvalid(form, fieldName);
   }
 
-  protected getErrorMessages(fieldName: string): string[] {
-    return this.validationService.getErrorMessages(
-      this.usernameForm,
-      fieldName,
-    );
+  protected getErrorMessages(form: FormGroup, fieldName: string): string[] {
+    return this.validationService.getErrorMessages(form, fieldName);
   }
 
   private openActionModal(

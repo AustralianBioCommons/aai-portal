@@ -16,6 +16,8 @@
     [primaryButtonText]="modalPrimaryButtonText()"
     [primaryButtonDisabled]="shouldDisableModalPrimary()"
     [primaryButtonLoading]="isModalLoading()"
+    [primaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
+    [secondaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
     secondaryButtonText="Cancel"
     (primaryOutput)="onModalPrimaryButtonClick()"
     (secondaryOutput)="closeModal()"
