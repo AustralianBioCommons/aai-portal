@@ -70,7 +70,7 @@ describe('UserListComponent', () => {
     mockApiService.getAdminAllUsers.and.returnValue(of(mockUsers));
     mockApiService.getAdminUsersPageInfo.and.returnValue(of(mockUserCounts));
 
-    mockAuthService = jasmine.createSpyObj('AuthService', [], {
+    mockAuthService = jasmine.createSpyObj('AuthService', ['refreshUser'], {
       adminPlatforms: signal([]),
       adminGroups: signal([]),
       adminType: signal(null),

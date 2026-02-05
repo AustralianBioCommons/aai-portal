@@ -223,4 +223,8 @@ export class AuthService {
       }),
     );
   }
+
+  refreshUser(): void {
+    this.auth0Service.getAccessTokenSilently({ cacheMode: 'off' }).subscribe();
+  }
 }

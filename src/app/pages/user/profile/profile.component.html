@@ -14,8 +14,9 @@
     [title]="modalTitle()"
     [description]="modalDescription()"
     [primaryButtonText]="modalPrimaryButtonText()"
-    [primaryButtonDisabled]="shouldDisableModalPrimary()"
     [primaryButtonLoading]="isModalLoading()"
+    [primaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
+    [secondaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
     secondaryButtonText="Cancel"
     (primaryOutput)="onModalPrimaryButtonClick()"
     (secondaryOutput)="closeModal()"
@@ -266,11 +267,27 @@
         </div>
       }
       <div class="flex items-center gap-6">
-        <img
-          [src]="user()?.picture"
-          [alt]="user()?.name || 'User profile'"
-          class="h-16 w-16 rounded-full bg-gray-200 object-cover"
-        />
+        <div class="relative h-16 w-16">
+          @if (!profileImageLoaded()) {
+            <div
+              class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200"
+            >
+              <ng-icon
+                name="heroUser"
+                size="32"
+                class="text-gray-600"
+              ></ng-icon>
+            </div>
+          }
+          <img
+            [src]="user()?.picture"
+            [alt]="user()?.name || 'User profile'"
+            class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+            [class.hidden]="!profileImageLoaded()"
+            (load)="profileImageLoaded.set(true)"
+            (error)="profileImageLoaded.set(false)"
+          />
+        </div>
         <div
           id="user-name"
           class="break-all text-3xl font-semibold text-gray-900"
