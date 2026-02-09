@@ -243,6 +243,27 @@ export class UserDetailsComponent implements OnInit {
     this.openMenuAction.set(false);
   }
 
+  sendPasswordResetEmail() {
+    const userId = this.user()!.user_id;
+    this.alert.set(null);
+    this.apiService.sendPasswordResetEmail(userId).subscribe({
+      next: () => {
+        this.alert.set({
+          type: 'success',
+          message: 'Password reset email sent successfully',
+        });
+      },
+      error: (error) => {
+        console.error('Failed to send password reset email:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to send password reset email',
+        });
+      },
+    });
+    this.openMenuAction.set(false);
+  }
+
   updateUserEmail(): void {
     const user = this.user();
     if (!user) return;
