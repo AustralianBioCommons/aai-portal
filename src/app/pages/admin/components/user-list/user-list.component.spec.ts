@@ -5,7 +5,7 @@ import {
   tick,
 } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { signal } from '@angular/core';
 
@@ -24,7 +24,7 @@ describe('UserListComponent', () => {
   let fixture: ComponentFixture<UserListComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let router: Router;
 
   const mockUsers: BiocommonsUserResponse[] = [
     {
@@ -76,19 +76,19 @@ describe('UserListComponent', () => {
       adminType: signal(null),
     });
 
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-
     await TestBed.configureTestingModule({
       imports: [UserListComponent, FormsModule],
       providers: [
+        provideRouter([]),
         { provide: ApiService, useValue: mockApiService },
         { provide: AuthService, useValue: mockAuthService },
-        { provide: Router, useValue: mockRouter },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserListComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
 
     fixture.componentRef.setInput('title', 'Test Users');
     fixture.componentRef.setInput('defaultQueryParams', {});
@@ -278,7 +278,7 @@ describe('UserListComponent', () => {
 
     component.navigateToUserDetails('123');
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/user', '123'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/user', '123'], {
       state: { returnUrl: '/pending-users' },
     });
   });
@@ -288,7 +288,7 @@ describe('UserListComponent', () => {
 
     component.navigateToUserDetails('123');
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/user', '123'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/user', '123'], {
       state: { returnUrl: '' },
     });
   });
