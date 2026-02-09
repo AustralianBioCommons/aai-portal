@@ -86,7 +86,7 @@ describe('ProfileComponent', () => {
       'requestEmailChange',
       'continueEmailChange',
     ]);
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser'], {
       isGeneralAdmin: signal(false),
     });
 
@@ -408,7 +408,7 @@ describe('ProfileComponent', () => {
     expect(component.emailFlowState()).toBe('otp-sent');
   });
 
-  it('locks the email flow after too many OTP attempts', () => {
+  it('shows an error alert and closes modal after too many OTP attempts', () => {
     const errorResponse = {
       status: 429,
       error: { detail: 'Too many verification attempts. Try again later.' },
@@ -427,15 +427,12 @@ describe('ProfileComponent', () => {
     confirmEmailChange();
     fixture.detectChanges();
 
-    expect(component.emailOtpLocked()).toBeTrue();
-    expect(component.otpError()).toBe(errorResponse.error.detail);
-    const shouldDisableModalPrimary = () =>
-      (
-        component as unknown as {
-          shouldDisableModalPrimary(): boolean;
-        }
-      ).shouldDisableModalPrimary();
-    expect(shouldDisableModalPrimary()).toBeTrue();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message:
+        'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
+    });
+    expect(component.activeModal()).toBeNull();
   });
 
   it('handles a successful password change', () => {
@@ -579,5 +576,153 @@ describe('ProfileComponent', () => {
     expect(fallback.nativeElement.textContent.trim()).toBe(
       'Launch link unavailable',
     );
+  });
+
+  describe('valueUnchangedValidator', () => {
+    it('should add valueUnchanged validator when opening username modal', () => {
+      fixture.detectChanges();
+      openModal('username');
+      fixture.detectChanges();
+
+      // Username should have the unchanged value
+      expect(component.usernameForm.value.username).toBe(mockUser.username);
+
+      // Should be invalid if value hasn't changed
+      component.usernameForm.markAllAsTouched();
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+    });
+
+    it('should show error when trying to save unchanged username', () => {
+      fixture.detectChanges();
+      openModal('username');
+      component.usernameForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      const errors = component['getErrorMessages'](
+        component.usernameForm,
+        'username',
+      );
+      expect(errors).toContain(
+        'New username must be different from the current username',
+      );
+    });
+
+    it('should not show error when username is changed', () => {
+      fixture.detectChanges();
+      openModal('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component.usernameForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeFalse();
+    });
+
+    it('should add valueUnchanged validator when opening email modal', () => {
+      fixture.detectChanges();
+      openModal('email');
+      fixture.detectChanges();
+
+      expect(component.emailForm.value.email).toBe(mockUser.email);
+
+      component.emailForm.markAllAsTouched();
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+    });
+
+    it('should show error when trying to save unchanged email', () => {
+      fixture.detectChanges();
+      openModal('email');
+      component.emailForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      const errors = component['getErrorMessages'](
+        component.emailForm,
+        'email',
+      );
+      expect(errors).toContain(
+        'New email must be different from the current email',
+      );
+    });
+
+    it('should not show error when email is changed', () => {
+      fixture.detectChanges();
+      openModal('email');
+      component.emailForm.patchValue({ email: 'newemail@example.com' });
+      component.emailForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeFalse();
+    });
+
+    it('should remove valueUnchanged validator when closing modal', () => {
+      fixture.detectChanges();
+      openModal('username');
+      fixture.detectChanges();
+
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+
+      component['closeModal']();
+      fixture.detectChanges();
+
+      // After closing, the validator should be removed
+      component.usernameForm.patchValue({ username: mockUser.username });
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('setupPasswordDifferentValidation', () => {
+    it('should validate that new password is different from current password', () => {
+      fixture.detectChanges();
+      openModal('password');
+      fixture.detectChanges();
+
+      component.passwordForm.patchValue({
+        currentPassword: 'SamePass123!',
+        newPassword: 'SamePass123!',
+      });
+      component.passwordForm.markAllAsTouched();
+
+      expect(
+        component.passwordForm
+          .get('newPassword')
+          ?.hasError('passwordMustBeDifferent'),
+      ).toBeTrue();
+
+      const errors = component['getErrorMessages'](
+        component.passwordForm,
+        'newPassword',
+      );
+      expect(errors).toContain(
+        'New password must be different from the current password',
+      );
+    });
+
+    it('should allow saving when passwords are different', () => {
+      fixture.detectChanges();
+      openModal('password');
+      fixture.detectChanges();
+
+      component.passwordForm.patchValue({
+        currentPassword: 'OldPass123!',
+        newPassword: 'NewPass123!',
+      });
+
+      expect(
+        component.passwordForm
+          .get('newPassword')
+          ?.hasError('passwordMustBeDifferent'),
+      ).toBeFalsy();
+    });
   });
 });

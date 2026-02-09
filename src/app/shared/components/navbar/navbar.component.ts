@@ -20,6 +20,7 @@ import {
   heroBars3,
   heroUserCircle,
   heroArrowRightStartOnRectangle,
+  heroUser,
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -38,6 +39,7 @@ import {
       heroBars3,
       heroUserCircle,
       logOut: heroArrowRightStartOnRectangle,
+      heroUser,
     }),
   ],
 })
@@ -58,6 +60,7 @@ export class NavbarComponent {
 
   // Component state signals
   userMenuOpen = signal(false);
+  profileImageLoaded = signal(false);
   userCounts = signal<AdminUserCountsResponse>({
     all: 0,
     pending: 0,
@@ -94,6 +97,8 @@ export class NavbarComponent {
         ) {
           return;
         }
+
+        this.user = this.authService.user;
 
         const subscription = this.apiService.getAdminUserCounts().subscribe({
           next: (counts) => this.userCounts.set(counts),

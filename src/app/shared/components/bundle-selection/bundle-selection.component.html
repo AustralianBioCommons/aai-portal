@@ -12,7 +12,7 @@
         [ngClass]="{
           'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
             !bundle.disabled,
-          'cursor-not-allowed opacity-50': bundle.disabled,
+          'pointer-events-none cursor-not-allowed opacity-50': bundle.disabled,
           group: !bundle.disabled,
           'ring-2 ring-sky-400': isSelectedBundle(bundle),
         }"

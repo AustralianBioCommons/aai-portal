@@ -13,7 +13,7 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NgClass, TitleCasePipe, DatePipe } from '@angular/common';
 import { Subject, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -62,6 +62,7 @@ export const DEFAULT_PAGE_SIZE = 50;
     ReactiveFormsModule,
     NgClass,
     TitleCasePipe,
+    RouterLink,
     LoadingSpinnerComponent,
     TooltipComponent,
     AlertComponent,

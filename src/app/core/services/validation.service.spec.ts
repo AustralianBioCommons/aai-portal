@@ -330,4 +330,169 @@ describe('ValidationService', () => {
       expect(emailErrors).toContain('Email is already registered');
     });
   });
+
+  describe('valueUnchangedValidator', () => {
+    it('should return null when value is empty', () => {
+      const validator = service.valueUnchangedValidator('original');
+      const control = { value: '' };
+      expect(validator(control)).toBeNull();
+    });
+
+    it('should return null when value has changed', () => {
+      const validator = service.valueUnchangedValidator('original');
+      const control = { value: 'new-value' };
+      expect(validator(control)).toBeNull();
+    });
+
+    it('should return error when value is unchanged', () => {
+      const validator = service.valueUnchangedValidator('original');
+      const control = { value: 'original' };
+      expect(validator(control)).toEqual({ valueUnchanged: true });
+    });
+
+    it('should trim values before comparison by default', () => {
+      const validator = service.valueUnchangedValidator('original');
+      const control = { value: '  original  ' };
+      expect(validator(control)).toEqual({ valueUnchanged: true });
+    });
+
+    it('should handle null original value', () => {
+      const validator = service.valueUnchangedValidator(null);
+      const control = { value: 'something' };
+      expect(validator(control)).toBeNull();
+    });
+
+    it('should handle undefined original value', () => {
+      const validator = service.valueUnchangedValidator(undefined);
+      const control = { value: 'something' };
+      expect(validator(control)).toBeNull();
+    });
+
+    it('should use custom comparison transform', () => {
+      const validator = service.valueUnchangedValidator('ORIGINAL', (v) =>
+        v.toLowerCase(),
+      );
+      const control = { value: 'original' };
+      expect(validator(control)).toEqual({ valueUnchanged: true });
+    });
+
+    it('should work with form control', () => {
+      const form = formBuilder.group({
+        username: ['testuser'],
+      });
+
+      form
+        .get('username')
+        ?.addValidators(service.valueUnchangedValidator('testuser'));
+      form.get('username')?.updateValueAndValidity();
+
+      expect(form.get('username')?.hasError('valueUnchanged')).toBeTrue();
+
+      form.patchValue({ username: 'newuser' });
+      expect(form.get('username')?.hasError('valueUnchanged')).toBeFalse();
+    });
+  });
+
+  describe('setupPasswordDifferentValidation', () => {
+    let passwordForm: FormGroup;
+
+    beforeEach(() => {
+      passwordForm = formBuilder.group({
+        currentPassword: ['', Validators.required],
+        newPassword: ['', passwordRequirements],
+      });
+    });
+
+    it('should add validator to newPassword field', () => {
+      service.setupPasswordDifferentValidation(passwordForm);
+
+      passwordForm.patchValue({
+        currentPassword: 'OldPass123!',
+        newPassword: 'OldPass123!',
+      });
+
+      expect(
+        passwordForm.get('newPassword')?.hasError('passwordMustBeDifferent'),
+      ).toBeTrue();
+    });
+
+    it('should return null when passwords are different', () => {
+      service.setupPasswordDifferentValidation(passwordForm);
+
+      passwordForm.patchValue({
+        currentPassword: 'OldPass123!',
+        newPassword: 'NewPass123!',
+      });
+
+      expect(
+        passwordForm.get('newPassword')?.hasError('passwordMustBeDifferent'),
+      ).toBeFalsy();
+    });
+
+    it('should return null when either password is empty', () => {
+      service.setupPasswordDifferentValidation(passwordForm);
+
+      passwordForm.patchValue({
+        currentPassword: '',
+        newPassword: 'NewPass123!',
+      });
+
+      expect(
+        passwordForm.get('newPassword')?.hasError('passwordMustBeDifferent'),
+      ).toBeFalsy();
+
+      passwordForm.patchValue({
+        currentPassword: 'OldPass123!',
+        newPassword: '',
+      });
+
+      expect(
+        passwordForm.get('newPassword')?.hasError('passwordMustBeDifferent'),
+      ).toBeFalsy();
+    });
+
+    it('should revalidate newPassword when currentPassword changes', () => {
+      service.setupPasswordDifferentValidation(passwordForm);
+
+      passwordForm.patchValue({
+        currentPassword: 'OldPass123!',
+        newPassword: 'NewPass123!',
+      });
+
+      expect(
+        passwordForm.get('newPassword')?.hasError('passwordMustBeDifferent'),
+      ).toBeFalsy();
+
+      // Change currentPassword to match newPassword
+      passwordForm.patchValue({
+        currentPassword: 'NewPass123!',
+      });
+
+      expect(
+        passwordForm.get('newPassword')?.hasError('passwordMustBeDifferent'),
+      ).toBeTrue();
+    });
+
+    it('should work with custom field names', () => {
+      const customForm = formBuilder.group({
+        oldPass: ['', Validators.required],
+        newPass: ['', passwordRequirements],
+      });
+
+      service.setupPasswordDifferentValidation(
+        customForm,
+        'oldPass',
+        'newPass',
+      );
+
+      customForm.patchValue({
+        oldPass: 'SamePass123!',
+        newPass: 'SamePass123!',
+      });
+
+      expect(
+        customForm.get('newPass')?.hasError('passwordMustBeDifferent'),
+      ).toBeTrue();
+    });
+  });
 });

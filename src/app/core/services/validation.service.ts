@@ -28,7 +28,7 @@ export class ValidationService {
     email: 'Please enter a valid email address',
     passwordMismatch: 'Passwords do not match',
     passwordMustBeDifferent:
-      'New password must be different from current password',
+      'New password must be different from the current password',
   };
 
   private fieldSpecificErrorMessages: Record<string, Record<string, string>> = {
@@ -45,12 +45,15 @@ export class ValidationService {
       maxlength: 'Your username cannot be longer than 128 characters',
       pattern:
         'Your username must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
+      valueUnchanged:
+        'New username must be different from the current username',
     },
     email: {
       invalidSbpEmailDomain:
         'Email must be from an authorized institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
       localPartTooLong: 'Email local part cannot exceed 64 characters',
       domainPartTooLong: 'Email domain cannot exceed 254 characters',
+      valueUnchanged: 'New email must be different from the current email',
     },
     firstName: {
       maxlength: 'First name cannot be longer than 150 characters',
@@ -307,5 +310,29 @@ export class ValidationService {
     form.get(passwordFieldName)?.valueChanges.subscribe(() => {
       form.get(confirmFieldName)?.updateValueAndValidity();
     });
+  }
+
+  /**
+   * Creates a validator that checks if the value has changed from the original
+   * @param originalValue The original value to compare against
+   * @param compareTransform Optional function to transform values before comparison (e.g., trim)
+   * @returns Validator function
+   */
+  valueUnchangedValidator(
+    originalValue: string | null | undefined,
+    compareTransform: (value: string) => string = (v) => v.trim(),
+  ) {
+    return (control: { value: string }): { valueUnchanged: boolean } | null => {
+      if (!control.value) {
+        return null;
+      }
+      const transformedValue = compareTransform(control.value);
+      const transformedOriginal = originalValue
+        ? compareTransform(originalValue)
+        : '';
+      return transformedValue === transformedOriginal
+        ? { valueUnchanged: true }
+        : null;
+    };
   }
 }

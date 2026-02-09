@@ -21,8 +21,6 @@ class MockLoginComponent {}
 })
 class MockHomeComponent {}
 
-class MockAuthService {}
-
 /**
  * RegisterComponent Test Suite
  *
@@ -39,6 +37,8 @@ describe('RegisterComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser']);
+
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
       providers: [
@@ -48,7 +48,7 @@ describe('RegisterComponent', () => {
           { path: 'login', component: MockLoginComponent },
           { path: '', component: MockHomeComponent },
         ]),
-        { provide: AuthService, useClass: MockAuthService },
+        { provide: AuthService, useValue: authSpy },
       ],
     }).compileComponents();
 

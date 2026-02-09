@@ -35,9 +35,14 @@ import {
 } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
+import {
+  heroArrowLeft,
+  heroPlusCircle,
+  heroUser,
+} from '@ng-icons/heroicons/outline';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
+import { DataRefreshService } from '../../../core/services/data-refresh.service';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -56,11 +61,12 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
-  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle })],
+  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle, heroUser })],
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private dataRefreshService = inject(DataRefreshService);
   private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
@@ -80,6 +86,7 @@ export class ProfileComponent implements OnInit {
   pageLoading = signal(true);
   pageError = signal<string | null>(null);
   alert = signal<{ type: AlertType; message: string } | null>(null);
+  profileImageLoaded = signal(false);
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
@@ -107,7 +114,6 @@ export class ProfileComponent implements OnInit {
   otpLoading = signal(false);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
-  emailOtpLocked = signal(false);
 
   passwordForm = this.formBuilder.nonNullable.group({
     currentPassword: ['', Validators.required],
@@ -149,10 +155,22 @@ export class ProfileComponent implements OnInit {
         break;
       case 'username':
         this.usernameForm.reset({ username: user.username });
+        this.usernameForm
+          .get('username')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.username),
+          );
+        this.usernameForm.updateValueAndValidity();
         this.validationService.clearFieldBackendError('username');
         break;
       case 'email':
         this.emailForm.reset({ email: user.email });
+        this.emailForm
+          .get('email')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.email),
+          );
+        this.emailForm.updateValueAndValidity();
         this.resetEmailFlowState();
         this.validationService.clearFieldBackendError('email');
         break;
@@ -170,15 +188,26 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(false);
     this.otpLoading.set(false);
     this.emailModalNotice.set(null);
-    this.emailOtpLocked.set(false);
   }
 
   protected closeModal(): void {
     if (this.activeModal() === 'email') {
+      this.emailForm.get('email')?.clearValidators();
+      this.emailForm
+        .get('email')
+        ?.setValidators([
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ]);
+      this.emailForm.updateValueAndValidity();
       this.resetEmailFlowState();
       this.validationService.clearFieldBackendError('email');
     }
     if (this.activeModal() === 'username') {
+      this.usernameForm.get('username')?.clearValidators();
+      this.usernameForm.get('username')?.setValidators(usernameRequirements);
+      this.usernameForm.updateValueAndValidity();
       this.validationService.clearFieldBackendError('username');
     }
     if (this.activeModal() === 'password') {
@@ -298,6 +327,12 @@ export class ProfileComponent implements OnInit {
         });
         this.closeModal();
         this.loadUserProfile();
+
+        // Wait for Auth0 to update the picture then trigger a refresh for the navbar
+        setTimeout(() => {
+          this.authService.refreshUser();
+          this.dataRefreshService.triggerRefresh();
+        }, 500);
       },
       error: (err) => {
         this.modalLoading.set(false);
@@ -390,7 +425,6 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(true);
     this.validationService.clearFieldBackendError('email');
     this.alert.set(null);
-    this.emailOtpLocked.set(false);
     this.apiService.requestEmailChange(email).subscribe({
       next: ({ message }) => {
         this.emailLoading.set(false);
@@ -401,13 +435,19 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         this.emailLoading.set(false);
-        this.alert.set({
-          type: 'error',
-          message:
-            err.error?.detail ??
-            'Failed to send OTP. If this issue persists contact the administrators.',
-        });
-        this.closeModal();
+        console.error('Failed to send OTP: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.emailForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('email')) {
+          this.alert.set({
+            type: 'error',
+            message:
+              err.error?.message ??
+              'Failed to send OTP. If this issue persists contact the administrators.',
+          });
+          this.closeModal();
+        }
       },
     });
   }
@@ -437,7 +477,12 @@ export class ProfileComponent implements OnInit {
             : (detail ?? 'Invalid code. Please try again.');
         this.otpError.set(message);
         if (status === 429) {
-          this.emailOtpLocked.set(true);
+          this.alert.set({
+            type: 'error',
+            message:
+              'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
+          });
+          this.closeModal();
         }
       },
     });
@@ -449,13 +494,6 @@ export class ProfileComponent implements OnInit {
 
   protected getErrorMessages(form: FormGroup, fieldName: string): string[] {
     return this.validationService.getErrorMessages(form, fieldName);
-  }
-
-  protected shouldDisableModalPrimary(): boolean {
-    if (this.activeModal() === 'email') {
-      return this.emailForm.invalid || this.emailOtpLocked();
-    }
-    return false;
   }
 
   protected isModalLoading(): boolean {
