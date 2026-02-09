@@ -350,6 +350,13 @@ export class ApiService {
     );
   }
 
+  sendPasswordResetEmail(userId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/admin/users/${userId}/password-reset-email`,
+      {},
+    );
+  }
+
   deleteUser(userId: string, reason: string): Observable<string> {
     return this.http.post<string>(
       `${environment.auth0.backend}/admin/users/${userId}/delete`,

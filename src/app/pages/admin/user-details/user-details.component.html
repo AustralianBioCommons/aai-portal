@@ -146,6 +146,15 @@
               }
               @if (adminType() === "platform" || adminType() === "biocommons") {
                 <button
+                  class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                  role="menuitem"
+                  tabindex="-1"
+                  (click)="sendPasswordResetEmail()"
+                >
+                  <ng-icon name="heroEnvelope" size="20"></ng-icon>
+                  Send Password Reset Email
+                </button>
+                <button
                   class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
                   role="menuitem"
                   tabindex="-1"

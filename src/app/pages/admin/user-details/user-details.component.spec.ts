@@ -67,6 +67,7 @@ describe('UserDetailsComponent', () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserDetails',
       'resendVerificationEmail',
+      'sendPasswordResetEmail',
       'updateUserEmail',
       'approvePlatformAccess',
       'revokePlatformAccess',
@@ -372,6 +373,21 @@ describe('UserDetailsComponent', () => {
     expect(component.alert()).toEqual({
       type: 'success',
       message: 'Verification email sent successfully',
+    });
+  });
+
+  it('should send password reset email', () => {
+    const mockResponse = { message: 'Password reset email sent.' };
+    mockApiService.sendPasswordResetEmail.and.returnValue(of(mockResponse));
+
+    component.user.set(mockUserDetails);
+    component.sendPasswordResetEmail();
+
+    expect(mockApiService.sendPasswordResetEmail).toHaveBeenCalledWith('123');
+    expect(component.openMenuAction()).toBeFalse();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Password reset email sent successfully',
     });
   });
 
