@@ -262,7 +262,7 @@
             class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
           >
             <ng-icon name="heroArrowLeft" size="16"></ng-icon>
-            Return to Dashboard
+            Back to Dashboard
           </a>
         </div>
       }
@@ -270,7 +270,7 @@
         <div class="relative h-16 w-16">
           @if (!profileImageLoaded()) {
             <div
-              class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200"
+              class="flex h-16 min-h-16 w-16 min-w-16 items-center justify-center rounded-full bg-gray-200"
             >
               <ng-icon
                 name="heroUser"
@@ -282,7 +282,7 @@
           <img
             [src]="user()?.picture"
             [alt]="user()?.name || 'User profile'"
-            class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+            class="h-16 min-h-16 w-16 min-w-16 rounded-full bg-gray-200 object-cover"
             [class.hidden]="!profileImageLoaded()"
             (load)="profileImageLoaded.set(true)"
             (error)="profileImageLoaded.set(false)"
