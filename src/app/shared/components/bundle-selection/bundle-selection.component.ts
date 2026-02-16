@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Bundle } from '../../../core/constants/constants';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroCheck, heroPlus } from '@ng-icons/heroicons/outline';
+import { heroCheck, heroPlus, heroEye } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
 
 @Component({
@@ -11,7 +11,7 @@ import { ModalComponent } from '../modal/modal.component';
   imports: [CommonModule, ReactiveFormsModule, NgIcon, ModalComponent],
   templateUrl: './bundle-selection.component.html',
   styleUrl: './bundle-selection.component.css',
-  viewProviders: [provideIcons({ heroCheck, heroPlus })],
+  viewProviders: [provideIcons({ heroCheck, heroPlus, heroEye })],
 })
 export class BundleSelectionComponent {
   form = input.required<FormGroup>();
