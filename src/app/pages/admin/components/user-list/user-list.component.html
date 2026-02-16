@@ -14,7 +14,6 @@
     title="Do you want to revoke this user?"
     [description]="selectedUserForRevoke()!.email"
     [textareaControl]="revokeReasonControl"
-    [textareaLabel]="'Revocation reason'"
     primaryButtonText="Yes"
     secondaryButtonText="No"
     (primaryOutput)="confirmRevokePlatformAccess()"
@@ -214,6 +213,15 @@
                               "
                             />
                           }
+                          @if (
+                            group.approval_status === "pending" &&
+                            group.request_reason
+                          ) {
+                            <app-tooltip
+                              [message]="'Reason: ' + group.request_reason"
+                              iconColor="text-yellow-400 hover:text-yellow-500"
+                            />
+                          }
                         </div>
                       }
                     }
@@ -255,6 +263,15 @@
                             "
                           />
                         }
+                        @if (
+                          platform.approval_status === "pending" &&
+                          platform.request_reason
+                        ) {
+                          <app-tooltip
+                            [message]="'Reason: ' + platform.request_reason"
+                            iconColor="text-yellow-400 hover:text-yellow-500"
+                          />
+                        }
                       </div>
                     }
                   } @else {
@@ -290,6 +307,15 @@
                                   platform.updated_at
                                 )
                               "
+                            />
+                          }
+                          @if (
+                            platform.approval_status === "pending" &&
+                            platform.request_reason
+                          ) {
+                            <app-tooltip
+                              [message]="'Reason: ' + platform.request_reason"
+                              iconColor="text-yellow-400 hover:text-yellow-500"
                             />
                           }
                         </div>

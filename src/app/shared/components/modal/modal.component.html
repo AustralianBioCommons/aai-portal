@@ -27,13 +27,13 @@
 
     <ng-content select="[modal-content]"></ng-content>
 
-    @if (showTextarea()) {
+    @if (textareaControl()) {
       <div>
         <label
           for="modal-textarea"
           class="block text-sm font-medium text-gray-900"
         >
-          {{ computedTextareaLabel() }} *
+          {{ computedTextareaLabel() }} <span class="text-red-500">*</span>
         </label>
         <textarea
           id="modal-textarea"

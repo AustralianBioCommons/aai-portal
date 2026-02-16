@@ -77,6 +77,27 @@ describe('BundlesComponent', () => {
 
     expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
       `biocommons/group/${bundleId}`,
+      '',
+    );
+    expect(routerSpy).toHaveBeenCalledWith(['/profile']);
+  });
+
+  it('should submit bundle with reason when provided', () => {
+    apiService.getUserGroups.and.returnValue(of([]));
+    fixture.detectChanges();
+
+    const bundleId = 'tsi';
+    const reason = 'Need access for biodiversity research';
+    component.bundleForm.patchValue({ bundle: bundleId, reason: reason });
+
+    apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
+    const routerSpy = spyOn(router, 'navigate');
+
+    component.submit();
+
+    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
+      `biocommons/group/${bundleId}`,
+      reason,
     );
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
   });

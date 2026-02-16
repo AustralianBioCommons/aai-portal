@@ -11,4 +11,5 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 })
 export class TooltipComponent {
   message = input.required<string>();
+  iconColor = input<string>('text-red-500 hover:text-red-600');
 }

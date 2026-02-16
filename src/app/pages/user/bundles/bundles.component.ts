@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
 import { BundleSelectionComponent } from '../../../shared/components/bundle-selection/bundle-selection.component';
@@ -29,6 +29,10 @@ export class BundlesComponent implements OnInit {
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     bundle: [''],
+    reason: [
+      { value: '', disabled: true },
+      [Validators.required, Validators.maxLength(255)],
+    ],
   });
 
   errorAlert = signal<string | null>(null);
@@ -51,10 +55,12 @@ export class BundlesComponent implements OnInit {
 
   submit() {
     this.isSubmitting.set(true);
-    const selectedBundle = this.bundleForm.get('bundle')?.value;
+    const formValue = this.bundleForm.getRawValue();
+    const selectedBundle = formValue.bundle;
+    const reason = formValue.reason;
     const groupId = `biocommons/group/${selectedBundle}`;
 
-    this.apiService.requestGroupAccess(groupId).subscribe({
+    this.apiService.requestGroupAccess(groupId, reason).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.router.navigate(['/profile']);

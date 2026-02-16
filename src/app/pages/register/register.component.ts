@@ -42,6 +42,7 @@ export interface RegistrationForm {
   password: FormControl<string>;
   confirmPassword: FormControl<string>;
   bundle: FormControl<string>;
+  reason: FormControl<string>;
   terms: FormControl<boolean>;
 }
 
@@ -52,6 +53,7 @@ interface RegistrationRequest {
   username: string;
   password: string;
   bundle?: string;
+  request_reason?: string;
   recaptcha_token: string;
 }
 
@@ -126,6 +128,10 @@ export class RegisterComponent implements AfterViewInit {
         password: ['', passwordRequirements],
         confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
         bundle: [''],
+        reason: [
+          { value: '', disabled: true },
+          [Validators.required, Validators.maxLength(255)],
+        ],
         terms: [false, Validators.requiredTrue],
       },
       { validators: fullNameLengthValidator() },
@@ -297,7 +303,10 @@ export class RegisterComponent implements AfterViewInit {
       recaptcha_token: this.recaptchaToken()!,
     };
 
-    if (formValue.bundle) requestBody.bundle = formValue.bundle;
+    if (formValue.bundle) {
+      requestBody.bundle = formValue.bundle;
+      requestBody.request_reason = formValue.reason;
+    }
 
     this.http
       .post(`${environment.auth0.backend}/biocommons/register`, requestBody)
