@@ -676,7 +676,7 @@ describe('UserDetailsComponent', () => {
         'Reason for request: Need access for genomics research project',
       );
       expect(tooltip.componentInstance.iconColor()).toBe(
-        'text-yellow-400 hover:text-yellow-500',
+        'text-yellow-500 hover:text-yellow-600',
       );
     });
 
@@ -709,7 +709,7 @@ describe('UserDetailsComponent', () => {
       );
       expect(requestReasonTooltip).toBeTruthy();
       expect(requestReasonTooltip?.componentInstance.iconColor()).toBe(
-        'text-yellow-400 hover:text-yellow-500',
+        'text-yellow-500 hover:text-yellow-600',
       );
     });
   });
