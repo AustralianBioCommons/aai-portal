@@ -650,6 +650,68 @@ describe('UserDetailsComponent', () => {
       );
       expect(tooltip).toBeTruthy();
     });
+
+    it('should display request reason tooltip for pending platforms', () => {
+      const pendingMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        platform_memberships: [
+          {
+            id: 'pm1',
+            platform_id: 'galaxy' as const,
+            platform_name: 'Galaxy Australia',
+            user_id: '123',
+            approval_status: 'pending',
+            updated_by: 'user@example.com',
+            updated_at: '2023-01-01T00:00:00Z',
+            request_reason: 'Need access for genomics research project',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingMembership));
+      fixture.detectChanges();
+
+      const tooltip = fixture.debugElement.query(By.css('app-tooltip'));
+      expect(tooltip).toBeTruthy();
+      expect(tooltip.componentInstance.message()).toBe(
+        'Reason: Need access for genomics research project',
+      );
+      expect(tooltip.componentInstance.iconColor()).toBe(
+        'text-yellow-400 hover:text-yellow-500',
+      );
+    });
+
+    it('should display request reason tooltip for pending groups', () => {
+      const pendingGroupMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        group_memberships: [
+          {
+            id: 'gm1',
+            group_id: 'tsi',
+            group_name: 'Threatened Species Initiative',
+            group_short_name: 'TSI',
+            approval_status: 'pending',
+            updated_by: 'user@example.com',
+            updated_at: '2023-01-01T00:00:00Z',
+            request_reason: 'Required for biodiversity conservation work',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingGroupMembership));
+      fixture.detectChanges();
+
+      const tooltips = fixture.debugElement.queryAll(By.css('app-tooltip'));
+      expect(tooltips.length).toBeGreaterThan(0);
+
+      const requestReasonTooltip = tooltips.find((t) =>
+        t.componentInstance
+          .message()
+          .includes('Required for biodiversity conservation work'),
+      );
+      expect(requestReasonTooltip).toBeTruthy();
+      expect(requestReasonTooltip?.componentInstance.iconColor()).toBe(
+        'text-yellow-400 hover:text-yellow-500',
+      );
+    });
   });
 
   describe('Group Membership Actions', () => {
