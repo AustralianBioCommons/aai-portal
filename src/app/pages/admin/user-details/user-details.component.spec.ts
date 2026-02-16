@@ -673,7 +673,7 @@ describe('UserDetailsComponent', () => {
       const tooltip = fixture.debugElement.query(By.css('app-tooltip'));
       expect(tooltip).toBeTruthy();
       expect(tooltip.componentInstance.message()).toBe(
-        'Reason: Need access for genomics research project',
+        'Reason for request: Need access for genomics research project',
       );
       expect(tooltip.componentInstance.iconColor()).toBe(
         'text-yellow-400 hover:text-yellow-500',

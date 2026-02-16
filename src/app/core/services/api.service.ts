@@ -165,14 +165,12 @@ export class ApiService {
 
   requestGroupAccess(
     groupId: string,
-    reason?: string,
+    reason: string,
   ): Observable<{ message: string }> {
-    const body: { group_id: string; request_reason?: string } = {
+    const body: { group_id: string; request_reason: string } = {
       group_id: groupId,
+      request_reason: reason,
     };
-    if (reason) {
-      body.request_reason = reason;
-    }
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/me/groups/request`,
       body,

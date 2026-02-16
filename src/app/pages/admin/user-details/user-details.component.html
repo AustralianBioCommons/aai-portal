@@ -331,7 +331,9 @@
                         platform.request_reason
                       ) {
                         <app-tooltip
-                          [message]="'Reason: ' + platform.request_reason"
+                          [message]="
+                            'Reason for request: ' + platform.request_reason
+                          "
                           iconColor="text-yellow-400 hover:text-yellow-500"
                         />
                       }
@@ -456,7 +458,9 @@
                         group.request_reason
                       ) {
                         <app-tooltip
-                          [message]="'Reason: ' + group.request_reason"
+                          [message]="
+                            'Reason for request: ' + group.request_reason
+                          "
                           iconColor="text-yellow-400 hover:text-yellow-500"
                         />
                       }
