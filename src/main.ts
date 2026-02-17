@@ -4,7 +4,7 @@ import { AppComponent } from './app/app.component';
 import packageJson from '../package.json';
 
 if (packageJson?.version) {
-  console.info('AAI Portal build version:', packageJson.version);
+  console.info('BioCommons Access Portal build version:', packageJson.version);
 }
 
 bootstrapApplication(AppComponent, appConfig).catch((err) =>

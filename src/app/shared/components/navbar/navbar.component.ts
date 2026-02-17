@@ -125,7 +125,7 @@ export class NavbarComponent {
 
     const suffix =
       this.router.url.includes('/profile') ||
-      this.router.url.includes('/bundles')
+      this.router.url.includes('/request-bundle')
         ? 'Profile'
         : 'Dashboard';
 
