@@ -17,6 +17,9 @@ export class BundleSelectionComponent {
   form = input.required<FormGroup>();
   bundles = input.required<Bundle[]>();
 
+  originalReason = signal<string>('');
+  savedReason = signal<string>('');
+
   showReasonModal = signal(false);
   modalBundleId = signal<string | null>(null);
 
@@ -31,12 +34,14 @@ export class BundleSelectionComponent {
       if (currentValue === value) {
         // Unselect bundle
         this.form().patchValue({ bundle: '', reason: '' });
+        this.savedReason.set('');
         this.reasonControl.disable();
         this.reasonControl.markAsUntouched();
         this.reasonControl.markAsPristine();
       } else {
         // Select bundle - open modal
         this.modalBundleId.set(value);
+        this.originalReason.set(this.reasonControl.value || '');
         this.reasonControl.enable();
         this.showReasonModal.set(true);
       }
@@ -48,6 +53,7 @@ export class BundleSelectionComponent {
     const currentBundle = this.form().get('bundle')?.value;
     if (currentBundle) {
       this.modalBundleId.set(currentBundle);
+      this.originalReason.set(this.reasonControl.value || '');
       this.reasonControl.enable();
       this.showReasonModal.set(true);
     }
@@ -61,10 +67,12 @@ export class BundleSelectionComponent {
 
     const bundleId = this.modalBundleId();
     if (bundleId) {
+      const trimmedReason = this.reasonControl.value.trim();
       this.form().patchValue({
         bundle: bundleId,
-        reason: this.reasonControl.value.trim(),
+        reason: trimmedReason,
       });
+      this.savedReason.set(trimmedReason);
     }
     this.closeReasonModal();
   }
@@ -79,6 +87,9 @@ export class BundleSelectionComponent {
       this.reasonControl.disable();
       this.reasonControl.markAsUntouched();
       this.reasonControl.markAsPristine();
+    } else {
+      // Restore the original reason value
+      this.reasonControl.setValue(this.originalReason());
     }
 
     this.closeReasonModal();
@@ -87,6 +98,7 @@ export class BundleSelectionComponent {
   closeReasonModal() {
     this.showReasonModal.set(false);
     this.modalBundleId.set(null);
+    this.originalReason.set('');
     this.reasonControl.markAsUntouched();
     this.reasonControl.markAsPristine();
   }

@@ -111,6 +111,22 @@ describe('BundleSelectionComponent', () => {
     expect(component.form().get('reason')?.value).toBe('Updated reason');
   });
 
+  it('should restore original reason when canceling edit modal', () => {
+    component.toggleBundle('tsi');
+    component.reasonControl.setValue('Initial reason');
+    component.saveReason();
+    expect(component.form().get('reason')?.value).toBe('Initial reason');
+
+    const mockEvent = new MouseEvent('click');
+    component.openReasonModal(mockEvent);
+
+    component.reasonControl.setValue('Changed in modal');
+    component.cancelReason();
+
+    expect(component.form().get('bundle')?.value).toBe('tsi');
+    expect(component.form().get('reason')?.value).toBe('Initial reason');
+  });
+
   describe('Bundle Item Click Handler', () => {
     it('should stop propagation when clicking anchor element', () => {
       const mockAnchor = document.createElement('a');
