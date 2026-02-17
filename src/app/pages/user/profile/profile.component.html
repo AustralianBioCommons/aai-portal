@@ -262,7 +262,7 @@
             class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
           >
             <ng-icon name="heroArrowLeft" size="16"></ng-icon>
-            Return to Dashboard
+            Back to Dashboard
           </a>
         </div>
       }
@@ -270,7 +270,7 @@
         <div class="relative h-16 w-16">
           @if (!profileImageLoaded()) {
             <div
-              class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200"
+              class="flex h-16 min-h-16 w-16 min-w-16 items-center justify-center rounded-full bg-gray-200"
             >
               <ng-icon
                 name="heroUser"
@@ -282,7 +282,7 @@
           <img
             [src]="user()?.picture"
             [alt]="user()?.name || 'User profile'"
-            class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+            class="h-16 min-h-16 w-16 min-w-16 rounded-full bg-gray-200 object-cover"
             [class.hidden]="!profileImageLoaded()"
             (load)="profileImageLoaded.set(true)"
             (error)="profileImageLoaded.set(false)"
@@ -418,7 +418,7 @@
                       <img
                         [src]="platforms[membership.platform_id].logoUrl"
                         [alt]="membership.platform_name"
-                        class="h-16 w-16 object-contain"
+                        class="hidden h-16 w-16 object-contain sm:inline-block"
                       />
                       <div class="flex items-center gap-2">
                         <div class="font-medium">
@@ -465,7 +465,7 @@
               <h2 class="text-2xl font-semibold">Bundles</h2>
               <a
                 class="flex items-center gap-1 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
-                routerLink="/bundles"
+                routerLink="/profile/request-bundle"
               >
                 Request more
                 <ng-icon name="heroPlusCircle" size="24"></ng-icon>
@@ -486,7 +486,7 @@
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-6">
                     <div
-                      class="flex h-16 w-16 items-center justify-center gap-1"
+                      class="hidden h-16 w-16 items-center justify-center gap-1 sm:flex"
                     >
                       @for (
                         logoUrl of getBundleLogoUrls(membership.group_id);

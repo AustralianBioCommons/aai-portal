@@ -131,7 +131,7 @@ describe('UserListComponent', () => {
     );
     fixture.detectChanges();
     const countElement =
-      fixture.debugElement.nativeElement.querySelector('.text-gray-500');
+      fixture.debugElement.nativeElement.querySelector('.text-gray-300');
     expect(countElement.textContent).toContain('57 users');
   });
 

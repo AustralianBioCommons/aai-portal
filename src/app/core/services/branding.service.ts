@@ -18,7 +18,7 @@ export class BrandingService {
   private activatedRoute = inject(ActivatedRoute);
   private document = inject(DOCUMENT);
 
-  private defaultTitle = 'AAI Portal';
+  private defaultTitle = 'BioCommons Access Portal';
   private defaultFavicon: string | null = null;
 
   init() {

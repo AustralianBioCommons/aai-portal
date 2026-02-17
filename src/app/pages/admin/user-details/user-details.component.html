@@ -173,7 +173,7 @@
         <div class="relative h-16 w-16">
           @if (!profileImageLoaded()) {
             <div
-              class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-200"
+              class="flex h-16 min-h-16 w-16 min-w-16 items-center justify-center rounded-full bg-gray-200"
             >
               <ng-icon
                 name="heroUser"
@@ -185,7 +185,7 @@
           <img
             [src]="user()?.picture"
             [alt]="user()?.name || 'User profile'"
-            class="h-16 w-16 rounded-full bg-gray-200 object-cover"
+            class="h-16 min-h-16 w-16 min-w-16 rounded-full bg-gray-200 object-cover"
             [class.hidden]="!profileImageLoaded()"
             (load)="profileImageLoaded.set(true)"
             (error)="profileImageLoaded.set(false)"
@@ -293,12 +293,12 @@
                   platform of user()!.platform_memberships;
                   track platform.id
                 ) {
-                  <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center justify-between gap-4 sm:gap-6">
                     <div class="flex items-center gap-2">
                       <img
                         [src]="platforms[platform.platform_id].logoUrl"
                         [alt]="getPlatformName(platform.platform_id)"
-                        class="mr-4 h-16 min-h-16 w-16 min-w-16 object-contain"
+                        class="mr-4 h-10 min-h-10 w-10 min-w-10 object-contain sm:h-16 sm:min-h-16 sm:w-16 sm:min-w-16"
                       />
                       <div class="font-medium">
                         {{ getPlatformName(platform.platform_id) }}
@@ -324,6 +324,17 @@
                               platform.updated_at
                             )
                           "
+                        />
+                      }
+                      @if (
+                        platform.approval_status === "pending" &&
+                        platform.request_reason
+                      ) {
+                        <app-tooltip
+                          [message]="
+                            'Reason for request: ' + platform.request_reason
+                          "
+                          iconColor="text-yellow-500 hover:text-yellow-600"
                         />
                       }
                     </div>
@@ -394,10 +405,10 @@
                   group of user()!.group_memberships;
                   track group.group_id
                 ) {
-                  <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center justify-between gap-4 sm:gap-6">
                     <div class="flex items-center gap-2">
                       <div
-                        class="mr-4 flex h-16 min-h-16 w-16 min-w-16 items-center justify-center gap-1"
+                        class="mr-4 h-10 min-h-10 w-10 min-w-10 object-contain sm:h-16 sm:min-h-16 sm:w-16 sm:min-w-16"
                       >
                         @for (
                           logoUrl of getBundleLogoUrls(group.group_id);
@@ -440,6 +451,17 @@
                                 : 'Revoked'
                             )
                           "
+                        />
+                      }
+                      @if (
+                        group.approval_status === "pending" &&
+                        group.request_reason
+                      ) {
+                        <app-tooltip
+                          [message]="
+                            'Reason for request: ' + group.request_reason
+                          "
+                          iconColor="text-yellow-500 hover:text-yellow-600"
                         />
                       }
                     </div>

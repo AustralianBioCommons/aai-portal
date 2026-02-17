@@ -62,6 +62,7 @@ export interface PlatformMembership {
   updated_at: string;
   revocation_reason?: string;
   rejection_reason?: string;
+  request_reason?: string;
 }
 
 export interface GroupMembership {
@@ -74,6 +75,7 @@ export interface GroupMembership {
   updated_at: string;
   revocation_reason?: string;
   rejection_reason?: string;
+  request_reason?: string;
 }
 
 export interface BiocommonsUserResponse {
@@ -161,10 +163,17 @@ export class ApiService {
     );
   }
 
-  requestGroupAccess(groupId: string): Observable<{ message: string }> {
+  requestGroupAccess(
+    groupId: string,
+    reason: string,
+  ): Observable<{ message: string }> {
+    const body: { group_id: string; request_reason: string } = {
+      group_id: groupId,
+      request_reason: reason,
+    };
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/me/groups/request`,
-      { group_id: groupId },
+      body,
     );
   }
 
