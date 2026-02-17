@@ -26,13 +26,13 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
     canActivate: [loginGuard],
-    data: { title: 'Login | BioCommons Access Portal' },
+    data: { title: 'Login | BioCommons Access' },
   },
   {
     path: 'register',
     component: RegisterComponent,
     canActivate: [loginGuard],
-    data: { title: 'Register | BioCommons Access Portal' },
+    data: { title: 'Register | BioCommons Access' },
   },
   {
     path: 'user',
@@ -41,7 +41,7 @@ export const routes: Routes = [
       {
         path: 'email-verified',
         component: EmailVerifiedComponent,
-        data: { title: 'Email Verification | BioCommons Access Portal' },
+        data: { title: 'Email Verification | BioCommons Access' },
       },
     ],
   },
