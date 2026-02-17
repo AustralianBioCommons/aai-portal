@@ -82,11 +82,19 @@
         @if (isBundleSelected(bundle)) {
           <button
             type="button"
-            class="flex items-center justify-between rounded-full border py-3 pl-5 pr-3 text-center text-sm font-medium text-biocommons-primary transition-all hover:cursor-pointer hover:bg-gray-100"
+            class="flex items-center justify-between gap-2 rounded-full border py-3 pl-4 pr-3 transition-all hover:cursor-pointer hover:bg-gray-100"
             (click)="openReasonModal($event)"
           >
-            Reason for request provided
-            <ng-icon name="heroEye" size="20" class="text-gray-900"></ng-icon>
+            <span
+              class="truncate text-left text-sm font-medium text-biocommons-primary"
+            >
+              Reason: {{ reasonControl.value }}
+            </span>
+            <ng-icon
+              name="heroEye"
+              size="20"
+              class="min-w-5 text-gray-900"
+            ></ng-icon>
           </button>
         }
       </div>
