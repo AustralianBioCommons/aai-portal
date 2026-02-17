@@ -293,12 +293,12 @@
                   platform of user()!.platform_memberships;
                   track platform.id
                 ) {
-                  <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center justify-between gap-4 sm:gap-6">
                     <div class="flex items-center gap-2">
                       <img
                         [src]="platforms[platform.platform_id].logoUrl"
                         [alt]="getPlatformName(platform.platform_id)"
-                        class="mr-4 h-16 min-h-16 w-16 min-w-16 object-contain"
+                        class="mr-4 h-10 min-h-10 w-10 min-w-10 object-contain sm:h-16 sm:min-h-16 sm:w-16 sm:min-w-16"
                       />
                       <div class="font-medium">
                         {{ getPlatformName(platform.platform_id) }}
@@ -405,10 +405,10 @@
                   group of user()!.group_memberships;
                   track group.group_id
                 ) {
-                  <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center justify-between gap-4 sm:gap-6">
                     <div class="flex items-center gap-2">
                       <div
-                        class="mr-4 flex h-16 min-h-16 w-16 min-w-16 items-center justify-center gap-1"
+                        class="mr-4 h-10 min-h-10 w-10 min-w-10 object-contain sm:h-16 sm:min-h-16 sm:w-16 sm:min-w-16"
                       >
                         @for (
                           logoUrl of getBundleLogoUrls(group.group_id);

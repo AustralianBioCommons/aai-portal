@@ -418,7 +418,7 @@
                       <img
                         [src]="platforms[membership.platform_id].logoUrl"
                         [alt]="membership.platform_name"
-                        class="h-16 w-16 object-contain"
+                        class="hidden h-16 w-16 object-contain sm:inline-block"
                       />
                       <div class="flex items-center gap-2">
                         <div class="font-medium">
@@ -486,7 +486,7 @@
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-6">
                     <div
-                      class="flex h-16 w-16 items-center justify-center gap-1"
+                      class="hidden h-16 w-16 items-center justify-center gap-1 sm:flex"
                     >
                       @for (
                         logoUrl of getBundleLogoUrls(membership.group_id);
