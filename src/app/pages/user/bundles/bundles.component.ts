@@ -8,6 +8,7 @@ import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroArrowLeft } from '@ng-icons/heroicons/outline';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-bundles',
@@ -17,6 +18,7 @@ import { AlertComponent } from '../../../shared/components/alert/alert.component
     BundleSelectionComponent,
     ButtonComponent,
     NgIcon,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './bundles.component.html',
   styleUrl: './bundles.component.css',
@@ -38,6 +40,7 @@ export class BundlesComponent implements OnInit {
   errorAlert = signal<string | null>(null);
   bundles = signal<Bundle[]>(BIOCOMMONS_BUNDLES);
   isSubmitting = signal<boolean>(false);
+  isLoading = signal<boolean>(true);
   selected = signal<Bundle | undefined>(undefined);
 
   ngOnInit() {
@@ -91,6 +94,11 @@ export class BundlesComponent implements OnInit {
           return bundle;
         });
         this.bundles.set(updatedBundles);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.isLoading.set(false);
+        console.error('Failed to load bundles: ', error);
       },
     });
   }
