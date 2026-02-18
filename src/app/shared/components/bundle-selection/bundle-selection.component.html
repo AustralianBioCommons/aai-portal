@@ -19,17 +19,11 @@
     <!-- Bundle selection cards -->
     @for (bundle of bundles(); track bundle.id) {
       <div
-        tabindex="0"
         class="flex min-h-96 min-w-96 max-w-96 flex-1 flex-col gap-6 rounded-xl border bg-white p-12 shadow-md transition-all"
         [ngClass]="{
-          'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg':
-            !bundle.disabled,
           'pointer-events-none cursor-not-allowed opacity-50': bundle.disabled,
-          group: !bundle.disabled,
           'ring-2 ring-sky-400': isBundleSelected(bundle),
         }"
-        (click)="!bundle.disabled && toggleBundle(bundle.id)"
-        (keyup.enter)="!bundle.disabled && toggleBundle(bundle.id)"
       >
         <div class="flex items-start justify-between">
           <div class="flex gap-6">
@@ -41,23 +35,20 @@
               />
             }
           </div>
-          <div
-            class="flex h-7 w-7 items-center justify-center rounded-lg border transition-all"
-            [class]="
+          <app-button
+            type="button"
+            variant="primary"
+            [colorClasses]="
               isBundleSelected(bundle)
-                ? 'border-biocommons-primary bg-biocommons-primary'
-                : 'border-gray-300'
+                ? 'bg-red-600 hover:bg-red-700'
+                : undefined
             "
+            widthClass="w-24"
+            [disabled]="!!bundle.disabled"
+            (click)="toggleBundle(bundle.id)"
           >
-            @if (isBundleSelected(bundle)) {
-              <ng-icon name="heroCheck" size="24" class="text-white"></ng-icon>
-            }
-          </div>
-          <input
-            type="checkbox"
-            [checked]="isBundleSelected(bundle)"
-            class="sr-only"
-          />
+            {{ isBundleSelected(bundle) ? "Remove" : "Add" }}
+          </app-button>
         </div>
         <div class="text-3xl font-semibold">{{ bundle.name }}</div>
         @if (bundle.listItems.length) {
