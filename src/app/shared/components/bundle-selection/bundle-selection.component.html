@@ -35,20 +35,38 @@
               />
             }
           </div>
-          <app-button
-            type="button"
-            variant="primary"
-            [colorClasses]="
-              isBundleSelected(bundle)
-                ? 'bg-red-600 hover:bg-red-700'
-                : undefined
-            "
-            widthClass="w-24"
-            [disabled]="!!bundle.disabled"
-            (click)="toggleBundle(bundle.id)"
-          >
-            {{ isBundleSelected(bundle) ? "Remove" : "Add" }}
-          </app-button>
+          @if (isBundleSelected(bundle)) {
+            <div class="flex items-center justify-center gap-2">
+              <div
+                class="flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-2"
+              >
+                <ng-icon
+                  name="heroCheck"
+                  size="16"
+                  class="text-green-600"
+                ></ng-icon>
+                <span class="text-sm font-medium text-green-700">Added</span>
+              </div>
+              <button
+                type="button"
+                class="flex items-center justify-center text-red-500 transition-colors hover:text-red-700"
+                [disabled]="!!bundle.disabled"
+                (click)="toggleBundle(bundle.id)"
+              >
+                <ng-icon name="heroTrash" size="20"></ng-icon>
+              </button>
+            </div>
+          } @else {
+            <app-button
+              type="button"
+              variant="primary"
+              widthClass="w-24"
+              [disabled]="!!bundle.disabled"
+              (click)="toggleBundle(bundle.id)"
+            >
+              Add
+            </app-button>
+          }
         </div>
         <div class="text-3xl font-semibold">{{ bundle.name }}</div>
         @if (bundle.listItems.length) {
