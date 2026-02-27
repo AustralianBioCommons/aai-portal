@@ -1,10 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { ApiService } from '../../core/services/api.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { environment } from '../../../environments/environment';
+import { ValidationService } from '../../core/services/validation.service';
 
 @Component({
   selector: 'app-recover-email',
@@ -13,6 +20,7 @@ import { environment } from '../../../environments/environment';
     ReactiveFormsModule,
     RecaptchaModule,
     ButtonComponent,
+    RouterLink,
   ],
   templateUrl: './recover-email.component.html',
   styleUrl: './recover-email.component.css',
@@ -20,6 +28,7 @@ import { environment } from '../../../environments/environment';
 export class RecoverEmailComponent {
   private readonly fb = inject(FormBuilder);
   private readonly apiService = inject(ApiService);
+  private readonly validationService = inject(ValidationService);
   readonly supportEmail = 'support@biocommons.org.au';
 
   readonly form = this.fb.nonNullable.group({
@@ -74,5 +83,13 @@ export class RecoverEmailComponent {
           this.isSubmitting.set(false);
         },
       });
+  }
+
+  protected isFieldInvalid(form: FormGroup, fieldName: string): boolean {
+    return this.validationService.isFieldInvalid(form, fieldName);
+  }
+
+  protected getErrorMessages(form: FormGroup, fieldName: string): string[] {
+    return this.validationService.getErrorMessages(form, fieldName);
   }
 }
