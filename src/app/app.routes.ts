@@ -19,6 +19,7 @@ import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
+import { RecoverEmailComponent } from './pages/recover-email/recover-email.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -33,6 +34,12 @@ export const routes: Routes = [
     component: RegisterComponent,
     canActivate: [loginGuard],
     data: { title: 'Register | BioCommons Access' },
+  },
+  {
+    path: 'recover-email',
+    component: RecoverEmailComponent,
+    canActivate: [loginGuard],
+    data: { title: 'Recover Login Email | BioCommons Access' },
   },
   {
     path: 'user',
