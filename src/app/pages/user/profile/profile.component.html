@@ -245,6 +245,40 @@
   </app-modal>
 }
 
+<!-- Action Modal (Delete Account) -->
+@if (showDeleteAccountModal()) {
+  <app-modal
+    title="Delete my account"
+    description='Are you sure you want to delete your account? Please type "delete" to confirm.'
+    primaryButtonText="Delete"
+    primaryButtonColorClass="bg-red-600 hover:bg-red-700"
+    [primaryButtonDisabled]="isDeleteButtonDisabled()"
+    (primaryOutput)="confirmDeleteAccount()"
+    (secondaryOutput)="closeDeleteAccountModal()"
+  >
+    <div modal-content>
+      <div>
+        <input
+          type="text"
+          class="block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+          [class.border-red-500]="
+            deleteConfirmationControl.invalid &&
+            deleteConfirmationControl.touched
+          "
+          [formControl]="deleteConfirmationControl"
+        />
+        @if (
+          deleteConfirmationControl.invalid && deleteConfirmationControl.touched
+        ) {
+          <div class="mt-0.5 text-xs text-red-500">
+            Please type "delete" to confirm
+          </div>
+        }
+      </div>
+    </div>
+  </app-modal>
+}
+
 <!-- Main content -->
 <div
   class="flex flex-1 flex-col items-center justify-center gap-12 p-6 md:p-12 md:px-24"
@@ -255,8 +289,8 @@
     <div class="text-red-500">{{ pageError() }}</div>
   } @else if (user()) {
     <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
-      @if (isGeneralAdmin()) {
-        <div class="flex justify-start">
+      <div class="flex items-center justify-between">
+        @if (isGeneralAdmin()) {
           <a
             routerLink="/"
             class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
@@ -264,8 +298,38 @@
             <ng-icon name="heroArrowLeft" size="16"></ng-icon>
             Back to Dashboard
           </a>
-        </div>
-      }
+        }
+
+        <app-dropdown-menu
+          [isOpen]="openMenuAction()"
+          (isOpenChange)="openMenuAction.set($event)"
+          [class.ml-auto]="!isGeneralAdmin()"
+        >
+          <ng-template #trigger>
+            <app-button
+              type="button"
+              variant="primary"
+              (click)="openMenuAction.set(!openMenuAction())"
+            >
+              <div class="flex items-center justify-center gap-2">
+                Actions
+                <ng-icon name="heroChevronDown" size="16"></ng-icon>
+              </div>
+            </app-button>
+          </ng-template>
+          <ng-template #menu>
+            <button
+              class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
+              role="menuitem"
+              tabindex="-1"
+              (click)="deleteAccountBegin()"
+            >
+              <ng-icon name="heroTrash" size="20"></ng-icon>
+              Delete My Account
+            </button>
+          </ng-template>
+        </app-dropdown-menu>
+      </div>
       <div class="flex items-center gap-6">
         <div class="relative h-16 w-16">
           @if (!profileImageLoaded()) {

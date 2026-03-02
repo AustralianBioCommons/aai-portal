@@ -85,10 +85,15 @@ describe('ProfileComponent', () => {
       'updateName',
       'requestEmailChange',
       'continueEmailChange',
+      'deleteAccount',
     ]);
-    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser'], {
-      isGeneralAdmin: signal(false),
-    });
+    const authSpy = jasmine.createSpyObj(
+      'AuthService',
+      ['refreshUser', 'logout'],
+      {
+        isGeneralAdmin: signal(false),
+      },
+    );
 
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
@@ -122,6 +127,9 @@ describe('ProfileComponent', () => {
       of({ message: 'OTP sent to the requested email address.' }),
     );
     mockApiService.continueEmailChange.and.returnValue(of(void 0));
+    mockApiService.deleteAccount.and.returnValue(
+      of({ message: 'Account deleted successfully' }),
+    );
   });
 
   const openModal = (type: 'username' | 'password' | 'name' | 'email') =>
@@ -723,6 +731,93 @@ describe('ProfileComponent', () => {
           .get('newPassword')
           ?.hasError('passwordMustBeDifferent'),
       ).toBeFalsy();
+    });
+  });
+
+  describe('delete account', () => {
+    let mockAuthService: jasmine.SpyObj<AuthService>;
+
+    beforeEach(() => {
+      fixture.detectChanges();
+      mockAuthService = TestBed.inject(
+        AuthService,
+      ) as jasmine.SpyObj<AuthService>;
+    });
+
+    it('deleteAccountBegin opens modal and resets confirmation control', () => {
+      component.openMenuAction.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.deleteAccountBegin();
+
+      expect(component.openMenuAction()).toBeFalse();
+      expect(component.showDeleteAccountModal()).toBeTrue();
+      expect(component.deleteConfirmationControl.value).toBe('');
+    });
+
+    it('closeDeleteAccountModal closes modal and resets confirmation control', () => {
+      component.showDeleteAccountModal.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.closeDeleteAccountModal();
+
+      expect(component.showDeleteAccountModal()).toBeFalse();
+      expect(component.deleteConfirmationControl.value).toBe('');
+    });
+
+    it('confirmDeleteAccount does nothing if confirmation control is invalid', () => {
+      component.deleteConfirmationControl.setValue('wrong');
+
+      component.confirmDeleteAccount();
+
+      expect(mockApiService.deleteAccount).not.toHaveBeenCalled();
+      expect(component.deleteConfirmationControl.touched).toBeTrue();
+    });
+
+    it('confirmDeleteAccount calls deleteAccount, closes modal and sets success alert', () => {
+      jasmine.clock().install();
+      component.showDeleteAccountModal.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.confirmDeleteAccount();
+
+      expect(mockApiService.deleteAccount).toHaveBeenCalled();
+      expect(component.showDeleteAccountModal()).toBeFalse();
+      expect(component.alert()).toEqual({
+        type: 'success',
+        message: 'Account deleted successfully. You will now be logged out.',
+      });
+
+      jasmine.clock().tick(3000);
+      expect(mockAuthService.logout).toHaveBeenCalled();
+      jasmine.clock().uninstall();
+    });
+
+    it('confirmDeleteAccount closes modal and sets error alert on failure', () => {
+      mockApiService.deleteAccount.and.returnValue(
+        throwError(() => new Error('Server error')),
+      );
+      component.showDeleteAccountModal.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.confirmDeleteAccount();
+
+      expect(component.showDeleteAccountModal()).toBeFalse();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to delete account',
+      });
+    });
+
+    it('isDeleteButtonDisabled returns true unless value is exactly "delete"', () => {
+      component.deleteConfirmationControl.setValue('');
+      expect(component.isDeleteButtonDisabled()).toBeTrue();
+
+      component.deleteConfirmationControl.setValue('delet');
+      expect(component.isDeleteButtonDisabled()).toBeTrue();
+
+      component.deleteConfirmationControl.setValue('delete');
+      expect(component.isDeleteButtonDisabled()).toBeFalse();
     });
   });
 });

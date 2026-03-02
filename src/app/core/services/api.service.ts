@@ -414,6 +414,13 @@ export class ApiService {
     );
   }
 
+  deleteAccount(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/me/profile/delete`,
+      {},
+    );
+  }
+
   sendMigrationResetPassword(sessionToken: string, clientId: string) {
     return this.http.post<boolean>(
       `${environment.auth0.backend}/me/migration/update-password`,
