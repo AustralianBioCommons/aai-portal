@@ -30,8 +30,8 @@ jobs:
         env:
           AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
           AWS_ROLE_FRONTEND: ${{ secrets.AWS_ROLE_FRONTEND }}
+          AWS_ROLE_FRONTEND_DEPLOY_DEV: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_DEV }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_DEV_FRONTEND_SECRET_NAME: ${{ secrets.AWS_DEV_FRONTEND_SECRET_NAME }}
         run: |
           set -euo pipefail
           if [ -z "${AWS_PORTAL_BUILD_BUCKET}" ]; then
@@ -42,12 +42,12 @@ jobs:
             echo "Missing required secret AWS_ROLE_FRONTEND" >&2
             exit 1
           fi
-          if [ -z "${AWS_REGION}" ]; then
-            echo "Missing required secret AWS_REGION" >&2
+          if [ -z "${AWS_ROLE_FRONTEND_DEPLOY_DEV}" ]; then
+            echo "Missing required secret AWS_ROLE_FRONTEND_DEPLOY_DEV" >&2
             exit 1
           fi
-          if [ -z "${AWS_DEV_FRONTEND_SECRET_NAME}" ]; then
-            echo "Missing required secret AWS_DEV_FRONTEND_SECRET_NAME" >&2
+          if [ -z "${AWS_REGION}" ]; then
+            echo "Missing required secret AWS_REGION" >&2
             exit 1
           fi
 
@@ -107,6 +107,14 @@ jobs:
         run: |
           set -euo pipefail
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/dev/" --delete
+
+      - name: Configure AWS credentials for dev release deploy
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_DEV }}
+          role-session-name: portal-dev-release-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-chaining: true
 
       - name: Invoke dev frontend release Lambda
         env:
