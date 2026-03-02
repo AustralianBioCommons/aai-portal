@@ -1,87 +1,85 @@
 <nav class="flex flex-1 flex-col bg-white shadow">
-  <div class="flex items-center justify-between gap-6 bg-white p-6 lg:px-12">
-    <button type="button" class="text-sky-500 hover:cursor-pointer">
-      <ng-icon
-        name="heroBars3"
-        size="32"
-        class="transition-all hover:text-biocommons-primary"
-      ></ng-icon>
-    </button>
+  <div
+    class="grid grid-cols-[1fr_auto_1fr] items-center gap-6 bg-white p-6 lg:px-12"
+  >
+    <div></div>
     <div class="text-center text-2xl font-semibold text-gray-900 sm:text-3xl">
       {{ navTitle() }}
     </div>
-    @if (isGeneralAdmin()) {
-      <app-dropdown-menu
-        [isOpen]="userMenuOpen()"
-        (isOpenChange)="userMenuOpen.set($event)"
-      >
-        <ng-template #trigger>
-          <button
-            type="button"
-            (click)="userMenuOpen.set(!userMenuOpen())"
-            class="focus:outline-hidden relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm hover:cursor-pointer focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sky-200"
-            id="user-menu-button"
-            aria-expanded="false"
-            aria-haspopup="true"
-          >
-            <span class="absolute -inset-1.5"></span>
-            <span class="sr-only">Open user menu</span>
-            @if (user()?.picture) {
-              @if (!profileImageLoaded()) {
-                <ng-icon
-                  name="heroUser"
-                  size="24"
-                  class="text-gray-600"
-                ></ng-icon>
+    <div class="flex justify-end">
+      @if (isGeneralAdmin()) {
+        <app-dropdown-menu
+          [isOpen]="userMenuOpen()"
+          (isOpenChange)="userMenuOpen.set($event)"
+        >
+          <ng-template #trigger>
+            <button
+              type="button"
+              (click)="userMenuOpen.set(!userMenuOpen())"
+              class="focus:outline-hidden relative flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-sm hover:cursor-pointer focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sky-200"
+              id="user-menu-button"
+              aria-expanded="false"
+              aria-haspopup="true"
+            >
+              <span class="absolute -inset-1.5"></span>
+              <span class="sr-only">Open user menu</span>
+              @if (user()?.picture) {
+                @if (!profileImageLoaded()) {
+                  <ng-icon
+                    name="heroUser"
+                    size="24"
+                    class="text-gray-600"
+                  ></ng-icon>
+                }
+                <img
+                  class="h-10 w-10 rounded-full"
+                  [class.hidden]="!profileImageLoaded()"
+                  [src]="user()!.picture"
+                  alt="User"
+                  (load)="profileImageLoaded.set(true)"
+                  (error)="profileImageLoaded.set(false)"
+                />
               }
-              <img
-                class="h-10 w-10 rounded-full"
-                [class.hidden]="!profileImageLoaded()"
-                [src]="user()!.picture"
-                alt="User"
-                (load)="profileImageLoaded.set(true)"
-                (error)="profileImageLoaded.set(false)"
-              />
-            }
-          </button>
-        </ng-template>
-        <ng-template #menu>
-          <button
-            type="button"
-            class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-            role="menuitem"
-            tabindex="-1"
-            routerLink="/profile"
-            (click)="userMenuOpen.set(false)"
-          >
-            <ng-icon name="heroUserCircle" size="20"></ng-icon>
-            My Profile
-          </button>
-          <button
-            type="button"
-            class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-            role="menuitem"
-            tabindex="-1"
-            (click)="logout()"
-          >
-            <ng-icon name="logOut" size="20"></ng-icon>
-            Log out
-          </button>
-        </ng-template>
-      </app-dropdown-menu>
-    } @else {
-      <button
-        type="button"
-        class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
-        role="menuitem"
-        tabindex="-1"
-        id="user-menu-item-2"
-        (click)="logout()"
-      >
-        <ng-icon name="logOut" size="20"></ng-icon>
-        Log out
-      </button>
-    }
+            </button>
+          </ng-template>
+          <ng-template #menu>
+            <button
+              type="button"
+              class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+              role="menuitem"
+              tabindex="-1"
+              routerLink="/profile"
+              (click)="userMenuOpen.set(false)"
+            >
+              <ng-icon name="heroUserCircle" size="20"></ng-icon>
+              My Profile
+            </button>
+            <button
+              type="button"
+              class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+              role="menuitem"
+              tabindex="-1"
+              (click)="logout()"
+            >
+              <ng-icon name="logOut" size="20"></ng-icon>
+              Log out
+            </button>
+          </ng-template>
+        </app-dropdown-menu>
+      } @else {
+        <button
+          type="button"
+          class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+          role="menuitem"
+          tabindex="-1"
+          id="user-menu-item-2"
+          (click)="logout()"
+        >
+          <ng-icon name="logOut" size="20"></ng-icon>
+          Log out
+        </button>
+      }
+    </div>
   </div>
 
   @if (isNavigationPage() && isGeneralAdmin()) {
