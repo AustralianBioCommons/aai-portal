@@ -115,6 +115,7 @@ jobs:
           role-session-name: portal-dev-release-deploy
           aws-region: ${{ secrets.AWS_REGION }}
           role-chaining: true
+          role-skip-session-tagging: true
 
       - name: Invoke dev frontend release Lambda
         env:

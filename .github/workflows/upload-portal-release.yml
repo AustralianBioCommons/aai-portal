@@ -90,6 +90,7 @@ jobs:
           role-session-name: portal-staging-release-deploy
           aws-region: ${{ secrets.AWS_REGION }}
           role-chaining: true
+          role-skip-session-tagging: true
 
       - name: Deploy staging frontend release via Lambda
         env:
