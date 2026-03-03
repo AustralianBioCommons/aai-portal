@@ -142,6 +142,12 @@ export interface AdminUserCountsResponse {
   unverified: number;
 }
 
+export interface RecoverLoginEmailResponse {
+  found: boolean;
+  masked_email: string | null;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -412,6 +418,16 @@ export class ApiService {
     return this.http.post<boolean>(
       `${environment.auth0.backend}/me/migration/update-password`,
       { session_token: sessionToken, client_id: clientId },
+    );
+  }
+
+  recoverLoginEmailByUsername(
+    username: string,
+    recaptchaToken: string,
+  ): Observable<RecoverLoginEmailResponse> {
+    return this.http.post<RecoverLoginEmailResponse>(
+      `${environment.auth0.backend}/utils/login/recover-email`,
+      { username, recaptcha_token: recaptchaToken },
     );
   }
 }

@@ -37,6 +37,7 @@ jobs:
         env:
           AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
           AWS_ROLE_FRONTEND: ${{ secrets.AWS_ROLE_FRONTEND }}
+          AWS_ROLE_FRONTEND_DEPLOY_STAGING: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_STAGING }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           set -euo pipefail
@@ -46,6 +47,10 @@ jobs:
           fi
           if [ -z "${AWS_ROLE_FRONTEND}" ]; then
             echo "Missing required secret AWS_ROLE_FRONTEND" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_ROLE_FRONTEND_DEPLOY_STAGING}" ]; then
+            echo "Missing required secret AWS_ROLE_FRONTEND_DEPLOY_STAGING" >&2
             exit 1
           fi
           if [ -z "${AWS_REGION}" ]; then
@@ -77,3 +82,46 @@ jobs:
           set -euo pipefail
           NORMALIZED_VERSION=${VERSION#v}
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/version/${NORMALIZED_VERSION}/" --delete
+
+      - name: Configure AWS credentials for staging release deploy
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_STAGING }}
+          role-session-name: portal-staging-release-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-chaining: true
+          role-skip-session-tagging: true
+
+      - name: Deploy staging frontend release via Lambda
+        env:
+          VERSION: ${{ github.ref_name }}
+          STAGING_RELEASE_FUNCTION: AaiFrontendStagingReleaseDeployer
+        run: |
+          set -euo pipefail
+          NORMALIZED_VERSION=${VERSION#v}
+          PAYLOAD=$(jq -n --arg version "${NORMALIZED_VERSION}" '{version: $version, variant: "prod", keepExisting: false}')
+          RESPONSE_FILE=$(mktemp)
+
+          INVOKE_METADATA=$(aws lambda invoke \
+            --function-name "${STAGING_RELEASE_FUNCTION}" \
+            --payload "${PAYLOAD}" \
+            --cli-binary-format raw-in-base64-out \
+            --cli-read-timeout 0 \
+            "${RESPONSE_FILE}")
+
+          echo "${INVOKE_METADATA}"
+
+          FUNCTION_ERROR=$(echo "${INVOKE_METADATA}" | jq -r '.FunctionError // empty')
+          if [ -n "${FUNCTION_ERROR}" ]; then
+            echo "Frontend staging release lambda reported an error: ${FUNCTION_ERROR}" >&2
+            cat "${RESPONSE_FILE}" >&2 || true
+            exit 1
+          fi
+
+          cat "${RESPONSE_FILE}"
+
+          STATUS=$(jq -r '.status // empty' "${RESPONSE_FILE}")
+          if [ -n "${STATUS}" ] && [ "${STATUS}" != "SUCCESS" ] && [ "${STATUS}" != "ok" ]; then
+            echo "Frontend staging release lambda returned unexpected status: ${STATUS}" >&2
+            exit 1
+          fi
