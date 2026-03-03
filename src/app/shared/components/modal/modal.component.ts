@@ -38,7 +38,9 @@ export class ModalComponent implements OnInit, OnDestroy {
   secondaryButtonText = input<string>('Cancel');
   primaryButtonWidthClass = input<string>('w-28');
   secondaryButtonWidthClass = input<string>('w-28');
+  primaryButtonColorClass = input<string>('');
   primaryButtonLoading = input<boolean>(false);
+  primaryButtonDisabled = input<boolean>(false);
 
   textareaControl = input<FormControl<string> | null>(null);
   textareaMaxLength = input<number>(255);

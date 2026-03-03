@@ -17,6 +17,7 @@ import {
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { DropdownMenuComponent } from '../../../shared/components/dropdown-menu/dropdown-menu.component';
 import {
   PlatformId,
   PLATFORMS,
@@ -37,12 +38,15 @@ import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroArrowLeft,
+  heroChevronDown,
   heroPlusCircle,
+  heroTrash,
   heroUser,
 } from '@ng-icons/heroicons/outline';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
+import { FormControl } from '@angular/forms';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -58,10 +62,19 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
     ReactiveFormsModule,
     RouterLink,
     NgIcon,
+    DropdownMenuComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
-  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle, heroUser })],
+  viewProviders: [
+    provideIcons({
+      heroArrowLeft,
+      heroChevronDown,
+      heroPlusCircle,
+      heroTrash,
+      heroUser,
+    }),
+  ],
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
@@ -122,6 +135,18 @@ export class ProfileComponent implements OnInit {
 
   activeModal = signal<ProfileModal | null>(null);
   modalLoading = signal(false);
+
+  openMenuAction = signal(false);
+  showDeleteAccountModal = signal(false);
+  deleteConfirmationControl = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      (control) => {
+        return control.value === 'delete' ? null : { confirmDelete: true };
+      },
+    ],
+  });
 
   ngOnInit(): void {
     this.loadUserProfile();
@@ -526,5 +551,49 @@ export class ProfileComponent implements OnInit {
     const bundleId = groupId.split('/').pop() || '';
     const bundle = this.bundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
+  }
+
+  deleteAccountBegin(): void {
+    this.openMenuAction.set(false);
+    this.showDeleteAccountModal.set(true);
+    this.deleteConfirmationControl.reset();
+  }
+
+  closeDeleteAccountModal(): void {
+    this.showDeleteAccountModal.set(false);
+    this.deleteConfirmationControl.reset();
+  }
+
+  confirmDeleteAccount(): void {
+    const user = this.user();
+    this.deleteConfirmationControl.markAsTouched();
+    if (!this.deleteConfirmationControl.valid || !user) {
+      return;
+    }
+
+    this.apiService.deleteAccount().subscribe({
+      next: () => {
+        this.closeDeleteAccountModal();
+        this.alert.set({
+          type: 'success',
+          message: 'Account deleted successfully. You will now be logged out.',
+        });
+        setTimeout(() => {
+          this.authService.logout();
+        }, 3000);
+      },
+      error: (error) => {
+        this.closeDeleteAccountModal();
+        console.error('Failed to delete account:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to delete account',
+        });
+      },
+    });
+  }
+
+  isDeleteButtonDisabled(): boolean {
+    return this.deleteConfirmationControl.value !== 'delete';
   }
 }
