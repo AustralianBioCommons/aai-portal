@@ -7,23 +7,23 @@ import {
   heroCheck,
   heroPlus,
   heroEye,
-  heroTrash,
+  heroMinus,
 } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
-import { ButtonComponent } from '../button/button.component';
 
 @Component({
   selector: 'app-bundle-selection',
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    NgIcon,
-    ModalComponent,
-    ButtonComponent,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, NgIcon, ModalComponent],
   templateUrl: './bundle-selection.component.html',
   styleUrl: './bundle-selection.component.css',
-  viewProviders: [provideIcons({ heroCheck, heroPlus, heroEye, heroTrash })],
+  viewProviders: [
+    provideIcons({
+      heroCheck,
+      heroPlus,
+      heroEye,
+      heroMinus,
+    }),
+  ],
 })
 export class BundleSelectionComponent {
   form = input.required<FormGroup>();

@@ -36,9 +36,9 @@
             }
           </div>
           @if (isBundleSelected(bundle)) {
-            <div class="flex items-center justify-center gap-2">
+            <div class="flex items-center justify-center gap-4">
               <div
-                class="flex items-center justify-center gap-2 rounded-full bg-green-100 px-3 py-2"
+                class="flex items-center justify-center gap-1 rounded-full bg-green-100 px-4 py-2"
               >
                 <ng-icon
                   name="heroCheck"
@@ -49,23 +49,22 @@
               </div>
               <button
                 type="button"
-                class="flex items-center justify-center text-red-500 transition-colors hover:text-red-700"
+                class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-red-600 text-white transition-all hover:bg-red-700"
                 [disabled]="!!bundle.disabled"
                 (click)="toggleBundle(bundle.id)"
               >
-                <ng-icon name="heroTrash" size="20"></ng-icon>
+                <ng-icon name="heroMinus" size="20"></ng-icon>
               </button>
             </div>
           } @else {
-            <app-button
+            <button
               type="button"
-              variant="primary"
-              widthClass="w-24"
+              class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-biocommons-primary text-white transition-all hover:bg-sky-900"
               [disabled]="!!bundle.disabled"
               (click)="toggleBundle(bundle.id)"
             >
-              Add
-            </app-button>
+              <ng-icon name="heroPlus" size="20"></ng-icon>
+            </button>
           }
         </div>
         <div class="text-3xl font-semibold">{{ bundle.name }}</div>
@@ -74,7 +73,7 @@
             @for (item of bundle.listItems; track item) {
               <div class="flex items-start gap-4 py-1 first:pt-0 last:pb-0">
                 <ng-icon
-                  name="heroPlus"
+                  name="heroCheck"
                   size="20"
                   class="mt-1 min-h-5 min-w-5 text-sky-600"
                 ></ng-icon>
