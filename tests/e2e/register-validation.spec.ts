@@ -123,16 +123,16 @@ const multiStepForm: FormConfig = {
     {
       name: 'first name length warning',
       label: 'First Name',
-      invalidValue: repeatPattern('a', 260),
+      invalidValue: repeatPattern('a', 151),
       validValue: 'First',
-      error: 'First name cannot be longer than 255 characters',
+      error: 'First name cannot be longer than 150 characters',
     },
     {
       name: 'last name length warning',
       label: 'Last Name',
-      invalidValue: repeatPattern('a', 260),
+      invalidValue: repeatPattern('a', 151),
       validValue: 'Last',
-      error: 'Last name cannot be longer than 255 characters',
+      error: 'Last name cannot be longer than 150 characters',
     },
     {
       name: 'email local part length warning',
@@ -315,16 +315,16 @@ const sbpForm: FormConfig = {
     {
       name: 'first name length warning',
       label: 'First Name',
-      invalidValue: repeatPattern('a', 260),
+      invalidValue: repeatPattern('a', 151),
       validValue: 'First',
-      error: 'First name cannot be longer than 255 characters',
+      error: 'First name cannot be longer than 150 characters',
     },
     {
       name: 'last name length warning',
       label: 'Last Name',
-      invalidValue: repeatPattern('a', 260),
+      invalidValue: repeatPattern('a', 151),
       validValue: 'Last',
-      error: 'Last name cannot be longer than 255 characters',
+      error: 'Last name cannot be longer than 150 characters',
     },
     {
       name: 'email local part length warning',
