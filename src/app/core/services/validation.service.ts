@@ -44,7 +44,7 @@ export class ValidationService {
       minlength: 'Your username needs at least 3 characters',
       maxlength: 'Your username cannot be longer than 128 characters',
       pattern:
-        'Your username must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
+        'Your username must start with a lowercase letter or number and can only include lowercase letters, numbers, underscores, or dashes',
     },
     email: {
       invalidSbpEmailDomain:
