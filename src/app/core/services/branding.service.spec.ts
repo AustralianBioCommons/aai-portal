@@ -120,7 +120,7 @@ describe('BrandingService', () => {
 
     routerEvents$.next(new NavigationEnd(2, '/default', '/default'));
 
-    expect(titleSpy).toHaveBeenCalledWith('AAI Portal');
+    expect(titleSpy).toHaveBeenCalledWith('BioCommons Access Portal');
     expect(linkElement.getAttribute('href')).toBe('default.ico');
   });
 });

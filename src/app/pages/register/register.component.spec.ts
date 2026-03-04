@@ -21,8 +21,6 @@ class MockLoginComponent {}
 })
 class MockHomeComponent {}
 
-class MockAuthService {}
-
 /**
  * RegisterComponent Test Suite
  *
@@ -39,6 +37,8 @@ describe('RegisterComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser']);
+
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
       providers: [
@@ -48,7 +48,7 @@ describe('RegisterComponent', () => {
           { path: 'login', component: MockLoginComponent },
           { path: '', component: MockHomeComponent },
         ]),
-        { provide: AuthService, useClass: MockAuthService },
+        { provide: AuthService, useValue: authSpy },
       ],
     }).compileComponents();
 
@@ -351,6 +351,7 @@ describe('RegisterComponent', () => {
         username: 'johndoe',
         password: 'Password123!',
         bundle: 'tsi',
+        request_reason: '',
         recaptcha_token: 'test-recaptcha-token',
       });
 
@@ -412,6 +413,34 @@ describe('RegisterComponent', () => {
         `${environment.auth0.backend}/biocommons/register`,
       );
       expect(req.request.body.bundle).toBeUndefined();
+      expect(req.request.body.request_reason).toBeUndefined();
+
+      req.flush({ success: true });
+      expect(component.isRegistrationComplete()).toBe(true);
+    });
+
+    it('should include request_reason when bundle is selected with reason', () => {
+      component.registrationForm.patchValue({
+        bundle: 'tsi',
+        reason: 'Need access for genomics research project',
+        terms: true,
+      });
+
+      component.submitRegistration();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      expect(req.request.body).toEqual({
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+        username: 'johndoe',
+        password: 'Password123!',
+        bundle: 'tsi',
+        request_reason: 'Need access for genomics research project',
+        recaptcha_token: 'test-recaptcha-token',
+      });
 
       req.flush({ success: true });
       expect(component.isRegistrationComplete()).toBe(true);

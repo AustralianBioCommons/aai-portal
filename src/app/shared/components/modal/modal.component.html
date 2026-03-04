@@ -1,11 +1,11 @@
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 hover:cursor-pointer"
   tabindex="-1"
   (click)="onSecondary()"
   (keydown.escape)="onSecondary()"
 >
   <div
-    class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
+    class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg hover:cursor-default"
     tabindex="-1"
     (click)="$event.stopPropagation()"
     (keydown)="$event.stopPropagation()"
@@ -27,18 +27,18 @@
 
     <ng-content select="[modal-content]"></ng-content>
 
-    @if (showTextarea()) {
+    @if (textareaControl()) {
       <div>
         <label
           for="modal-textarea"
           class="block text-sm font-medium text-gray-900"
         >
-          {{ computedTextareaLabel() }} *
+          {{ computedTextareaLabel() }} <span class="text-red-500">*</span>
         </label>
         <textarea
           id="modal-textarea"
           rows="4"
-          class="mt-1 w-full rounded-md border px-3 py-2 font-light focus:outline-none focus:ring-2 focus:ring-sky-100"
+          class="mt-1 max-h-96 min-h-24 w-full resize-y rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
           [class.border-red-500]="
             textareaControl()!.invalid && textareaControl()!.touched
           "
@@ -64,15 +64,22 @@
     }
 
     <div class="flex justify-between gap-6">
-      <app-button type="button" variant="secondary" (click)="onSecondary()">
+      <app-button
+        type="button"
+        variant="secondary"
+        [widthClass]="secondaryButtonWidthClass()"
+        (click)="onSecondary()"
+      >
         {{ computedSecondaryButtonText() }}
       </app-button>
       <app-button
         type="button"
         variant="primary"
         (click)="onPrimary()"
-        [disabled]="primaryButtonDisabled()"
         [loading]="primaryButtonLoading()"
+        [disabled]="primaryButtonDisabled()"
+        [widthClass]="primaryButtonWidthClass()"
+        [colorClasses]="primaryButtonColorClass()"
       >
         {{ computedPrimaryButtonText() }}
       </app-button>

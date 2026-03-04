@@ -1,0 +1,112 @@
+<div class="flex h-full min-h-screen w-full flex-col bg-gray-50">
+  <nav
+    class="flex items-center justify-between gap-4 border-b border-gray-100 bg-white px-6 py-6 sm:px-12"
+  >
+    <img
+      src="/assets/biocommons-logo.png"
+      class="auto h-16 min-w-44"
+      alt="Australian Biocommons Logo"
+    />
+    <div
+      class="flex flex-wrap justify-end gap-6 text-sm text-biocommons-primary sm:gap-12 sm:text-base [&>a:hover]:text-sky-900"
+    >
+      <a href="https://www.biocommons.org.au/about">About</a>
+      <a href="https://www.biocommons.org.au/contact-form">Contact us</a>
+    </div>
+  </nav>
+
+  <div
+    class="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-6 px-6"
+  >
+    @if (maskedEmail()) {
+      <div class="space-y-12">
+        <h1 class="text-4xl font-semibold text-gray-900">
+          Email Recovery Sent
+        </h1>
+        <p class="font-light text-gray-600">
+          We have sent a message to your email address
+          <span class="font-semibold"> {{ maskedEmail() }} </span>. Please check
+          your inbox for instructions on signing in with your email.
+        </p>
+      </div>
+    } @else {
+      <h1 class="text-4xl font-semibold text-gray-900">
+        Recover email address
+      </h1>
+      <p class="font-light text-gray-600">
+        If you have forgotten your email address, please enter your username
+        below.
+      </p>
+      <form
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        class="flex flex-col gap-12"
+      >
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-900">
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            formControlName="username"
+            class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+            [class.border-red-500]="isFieldInvalid(form, 'username')"
+            autocomplete="username"
+          />
+          @if (isFieldInvalid(form, "username")) {
+            <div class="mt-0.5 text-xs text-red-500" role="alert">
+              @for (error of getErrorMessages(form, "username"); track error) {
+                {{ error }}<br />
+              }
+            </div>
+          } @else if (errorMessage() && !usernameNotFound()) {
+            <div class="mt-0.5 text-xs text-red-500" role="alert">
+              {{ errorMessage() }}
+            </div>
+          } @else if (usernameNotFound()) {
+            <div class="mt-0.5 text-xs text-red-500" role="alert">
+              We could not find an account for that username. Please contact
+              support at
+              <a
+                class="font-medium underline hover:text-red-700"
+                [href]="'mailto:' + supportEmail"
+              >
+                {{ supportEmail }}
+              </a>
+            </div>
+          }
+        </div>
+
+        <div class="flex flex-col items-center gap-1">
+          <re-captcha
+            (resolved)="resolved($event)"
+            siteKey="{{ recaptchaSiteKeyV2 }}"
+          ></re-captcha>
+          @if (!recaptchaToken() && recaptchaAttempted()) {
+            <div class="mt-0.5 text-xs text-red-500" role="alert">
+              Please complete the reCAPTCHA verification.
+            </div>
+          }
+        </div>
+
+        <div class="flex flex-col items-center justify-center gap-6">
+          <app-button
+            type="submit"
+            variant="primary"
+            [disabled]="isSubmitting()"
+            widthClass="w-36"
+          >
+            Recover Email
+          </app-button>
+          <button
+            class="text-sky-500 transition-all hover:text-sky-600 hover:underline"
+            routerLink="/login"
+          >
+            Back to Login
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+</div>

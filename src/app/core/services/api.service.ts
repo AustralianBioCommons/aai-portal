@@ -24,26 +24,6 @@ export interface UserProfileGroupData {
   approval_status: Omit<Status, 'revoked'>;
 }
 
-// Data returned from the API for the user's profile -
-// only includes required information for the UI,
-// omits information on who approves platforms and groups,
-// as well as revoked platforms and groups.
-export interface UserProfileData {
-  user_id: string;
-  name: string;
-  given_name?: string;
-  family_name?: string;
-  email: string;
-  email_verified: boolean;
-  username: string;
-  picture: string;
-  created_at: string;
-  last_login: string | null;
-  updated_at: string;
-  platform_memberships: UserProfilePlatformData[];
-  group_memberships: UserProfileGroupData[];
-}
-
 export interface UserGroupStatus {
   group_id: string;
   approval_status: Status;
@@ -82,6 +62,7 @@ export interface PlatformMembership {
   updated_at: string;
   revocation_reason?: string;
   rejection_reason?: string;
+  request_reason?: string;
 }
 
 export interface GroupMembership {
@@ -94,6 +75,7 @@ export interface GroupMembership {
   updated_at: string;
   revocation_reason?: string;
   rejection_reason?: string;
+  request_reason?: string;
 }
 
 export interface BiocommonsUserResponse {
@@ -106,7 +88,30 @@ export interface BiocommonsUserResponse {
   group_memberships: GroupMembership[];
 }
 
+// Data returned from the API for the user's profile -
+// only includes required information for the UI,
+// omits information on who approves platforms and groups,
+// as well as revoked platforms and groups.
+export interface UserProfileData {
+  user_id: string;
+  name: string;
+  given_name?: string;
+  family_name?: string;
+  email: string;
+  email_verified: boolean;
+  username: string;
+  picture: string;
+  created_at: string;
+  last_login: string | null;
+  updated_at: string;
+  show_welcome_message: boolean | null;
+  platform_memberships: UserProfilePlatformData[];
+  group_memberships: UserProfileGroupData[];
+}
+
 export interface BiocommonsUserDetails extends BiocommonsAuth0User {
+  given_name?: string;
+  family_name?: string;
   platform_memberships: PlatformMembership[];
   group_memberships: GroupMembership[];
 }
@@ -137,6 +142,12 @@ export interface AdminUserCountsResponse {
   unverified: number;
 }
 
+export interface RecoverLoginEmailResponse {
+  found: boolean;
+  masked_email: string | null;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -158,10 +169,17 @@ export class ApiService {
     );
   }
 
-  requestGroupAccess(groupId: string): Observable<{ message: string }> {
+  requestGroupAccess(
+    groupId: string,
+    reason: string,
+  ): Observable<{ message: string }> {
+    const body: { group_id: string; request_reason: string } = {
+      group_id: groupId,
+      request_reason: reason,
+    };
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/me/groups/request`,
-      { group_id: groupId },
+      body,
     );
   }
 
@@ -330,6 +348,30 @@ export class ApiService {
     );
   }
 
+  updateUserUsername(userId: string, username: string) {
+    return this.http.post<BiocommonsUserDetails>(
+      `${environment.auth0.backend}/admin/users/${userId}/username/update`,
+      { username: username },
+    );
+  }
+
+  updateUserEmail(
+    userId: string,
+    email: string,
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/admin/users/${userId}/email/update`,
+      { email },
+    );
+  }
+
+  sendPasswordResetEmail(userId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/admin/users/${userId}/password-reset-email`,
+      {},
+    );
+  }
+
   deleteUser(userId: string, reason: string): Observable<string> {
     return this.http.post<string>(
       `${environment.auth0.backend}/admin/users/${userId}/delete`,
@@ -372,10 +414,27 @@ export class ApiService {
     );
   }
 
+  deleteAccount(): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/me/profile/delete`,
+      {},
+    );
+  }
+
   sendMigrationResetPassword(sessionToken: string, clientId: string) {
     return this.http.post<boolean>(
       `${environment.auth0.backend}/me/migration/update-password`,
       { session_token: sessionToken, client_id: clientId },
+    );
+  }
+
+  recoverLoginEmailByUsername(
+    username: string,
+    recaptchaToken: string,
+  ): Observable<RecoverLoginEmailResponse> {
+    return this.http.post<RecoverLoginEmailResponse>(
+      `${environment.auth0.backend}/utils/login/recover-email`,
+      { username, recaptcha_token: recaptchaToken },
     );
   }
 }

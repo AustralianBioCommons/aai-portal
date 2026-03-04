@@ -67,12 +67,15 @@ describe('UserDetailsComponent', () => {
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserDetails',
       'resendVerificationEmail',
+      'sendPasswordResetEmail',
+      'updateUserEmail',
       'approvePlatformAccess',
       'revokePlatformAccess',
       'approveGroupAccess',
       'revokeGroupAccess',
       'unrejectGroupAccess',
       'deleteUser',
+      'updateUserUsername',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
       'listen',
@@ -100,7 +103,7 @@ describe('UserDetailsComponent', () => {
       queryParams: of({}),
     };
 
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
+    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser'], {
       adminPlatforms: signal([]),
       adminGroups: signal([]),
       adminType: signal(null),
@@ -202,9 +205,11 @@ describe('UserDetailsComponent', () => {
 
     fixture.detectChanges();
 
-    const actionsButton = fixture.debugElement.query(By.css('button'));
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    const actionsButton = buttons.find((btn) =>
+      btn.nativeElement.textContent?.includes('Actions'),
+    );
     expect(actionsButton).toBeTruthy();
-    expect(actionsButton.nativeElement.textContent.trim()).toContain('Actions');
   });
 
   it('should not show Actions button for verified users', () => {
@@ -368,6 +373,21 @@ describe('UserDetailsComponent', () => {
     expect(component.alert()).toEqual({
       type: 'success',
       message: 'Verification email sent successfully',
+    });
+  });
+
+  it('should send password reset email', () => {
+    const mockResponse = { message: 'Password reset email sent.' };
+    mockApiService.sendPasswordResetEmail.and.returnValue(of(mockResponse));
+
+    component.user.set(mockUserDetails);
+    component.sendPasswordResetEmail();
+
+    expect(mockApiService.sendPasswordResetEmail).toHaveBeenCalledWith('123');
+    expect(component.openMenuAction()).toBeFalse();
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Password reset email sent successfully',
     });
   });
 
@@ -630,6 +650,68 @@ describe('UserDetailsComponent', () => {
       );
       expect(tooltip).toBeTruthy();
     });
+
+    it('should display request reason tooltip for pending platforms', () => {
+      const pendingMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        platform_memberships: [
+          {
+            id: 'pm1',
+            platform_id: 'galaxy' as const,
+            platform_name: 'Galaxy Australia',
+            user_id: '123',
+            approval_status: 'pending',
+            updated_by: 'user@example.com',
+            updated_at: '2023-01-01T00:00:00Z',
+            request_reason: 'Need access for genomics research project',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingMembership));
+      fixture.detectChanges();
+
+      const tooltip = fixture.debugElement.query(By.css('app-tooltip'));
+      expect(tooltip).toBeTruthy();
+      expect(tooltip.componentInstance.message()).toBe(
+        'Reason for request: Need access for genomics research project',
+      );
+      expect(tooltip.componentInstance.iconColor()).toBe(
+        'text-yellow-500 hover:text-yellow-600',
+      );
+    });
+
+    it('should display request reason tooltip for pending groups', () => {
+      const pendingGroupMembership: BiocommonsUserDetails = {
+        ...mockUserDetails,
+        group_memberships: [
+          {
+            id: 'gm1',
+            group_id: 'tsi',
+            group_name: 'Threatened Species Initiative',
+            group_short_name: 'TSI',
+            approval_status: 'pending',
+            updated_by: 'user@example.com',
+            updated_at: '2023-01-01T00:00:00Z',
+            request_reason: 'Required for biodiversity conservation work',
+          },
+        ],
+      };
+      mockApiService.getUserDetails.and.returnValue(of(pendingGroupMembership));
+      fixture.detectChanges();
+
+      const tooltips = fixture.debugElement.queryAll(By.css('app-tooltip'));
+      expect(tooltips.length).toBeGreaterThan(0);
+
+      const requestReasonTooltip = tooltips.find((t) =>
+        t.componentInstance
+          .message()
+          .includes('Required for biodiversity conservation work'),
+      );
+      expect(requestReasonTooltip).toBeTruthy();
+      expect(requestReasonTooltip?.componentInstance.iconColor()).toBe(
+        'text-yellow-500 hover:text-yellow-600',
+      );
+    });
   });
 
   describe('Group Membership Actions', () => {
@@ -765,6 +847,220 @@ describe('UserDetailsComponent', () => {
         message: 'Failed to delete user',
       });
       expect(component.actionModalData()).toBeNull();
+    });
+  });
+
+  describe('Username Update', () => {
+    it('should open username modal', () => {
+      fixture.detectChanges();
+      component['openModal']('username');
+      expect(component.activeModal()).toBe('username');
+      expect(component.usernameForm.value.username).toBe('testuser');
+    });
+
+    it('should close username modal', () => {
+      fixture.detectChanges();
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component['closeModal']();
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('should update username successfully', () => {
+      const updatedUser = { ...mockUserDetails, username: 'newusername' };
+      mockApiService.updateUserUsername.and.returnValue(of(updatedUser));
+      mockApiService.getUserDetails.and.returnValue(of(updatedUser));
+      fixture.detectChanges();
+
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component['updateUsername']();
+
+      expect(mockApiService.updateUserUsername).toHaveBeenCalledWith(
+        '123',
+        'newusername',
+      );
+      expect(component.alert()).toEqual({
+        type: 'success',
+        message: "User's username updated successfully",
+      });
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('should not update username if form is invalid', () => {
+      fixture.detectChanges();
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: '' });
+      component['updateUsername']();
+
+      expect(mockApiService.updateUserUsername).not.toHaveBeenCalled();
+    });
+
+    it('should handle error when updating username', () => {
+      mockApiService.updateUserUsername.and.returnValue(
+        throwError(() => ({ error: { message: 'Username already taken' } })),
+      );
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component['updateUsername']();
+
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to update username: ',
+        jasmine.any(Object),
+      );
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Username already taken',
+      });
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('should handle field-level validation error', () => {
+      const error = {
+        error: {
+          message: 'Validation failed',
+          field_errors: [{ field: 'username', message: 'Username is taken' }],
+        },
+      };
+      mockApiService.updateUserUsername.and.returnValue(
+        throwError(() => error),
+      );
+      spyOn(console, 'error');
+      fixture.detectChanges();
+
+      component.activeModal.set('username');
+      component.usernameForm.patchValue({ username: 'takenusername' });
+      component['updateUsername']();
+
+      // Modal should stay open when there's a field-level error
+      expect(component.activeModal()).toBe('username');
+      // No general alert should be shown (error is shown inline on the field)
+      expect(component.alert()).toBeNull();
+    });
+  });
+
+  describe('valueUnchangedValidator', () => {
+    it('should add valueUnchanged validator when opening username modal', () => {
+      fixture.detectChanges();
+      component['openModal']('username');
+      fixture.detectChanges();
+
+      expect(component.usernameForm.value.username).toBe(
+        mockUserDetails.username,
+      );
+
+      component.usernameForm.markAllAsTouched();
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+    });
+
+    it('should show error when trying to save unchanged username', () => {
+      fixture.detectChanges();
+      component['openModal']('username');
+      component.usernameForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      const errors = component['getErrorMessages'](
+        component.usernameForm,
+        'username',
+      );
+      expect(errors).toContain(
+        'New username must be different from the current username',
+      );
+    });
+
+    it('should not show error when username is changed', () => {
+      fixture.detectChanges();
+      component['openModal']('username');
+      component.usernameForm.patchValue({ username: 'newusername123' });
+      component.usernameForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeFalse();
+    });
+
+    it('should add valueUnchanged validator when opening email modal', () => {
+      fixture.detectChanges();
+      component['openModal']('email');
+      fixture.detectChanges();
+
+      expect(component.emailForm.value.email).toBe(mockUserDetails.email);
+
+      component.emailForm.markAllAsTouched();
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+    });
+
+    it('should show error when trying to save unchanged email', () => {
+      fixture.detectChanges();
+      component['openModal']('email');
+      component.emailForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      const errors = component['getErrorMessages'](
+        component.emailForm,
+        'email',
+      );
+      expect(errors).toContain(
+        'New email must be different from the current email',
+      );
+    });
+
+    it('should not show error when email is changed', () => {
+      fixture.detectChanges();
+      component['openModal']('email');
+      component.emailForm.patchValue({ email: 'newemail@example.com' });
+      component.emailForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeFalse();
+    });
+
+    it('should remove valueUnchanged validator when closing username modal', () => {
+      fixture.detectChanges();
+      component['openModal']('username');
+      fixture.detectChanges();
+
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+
+      component['closeModal']();
+      fixture.detectChanges();
+
+      // After closing, the validator should be removed
+      component.usernameForm.patchValue({ username: mockUserDetails.username });
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeFalsy();
+    });
+
+    it('should remove valueUnchanged validator when closing email modal', () => {
+      fixture.detectChanges();
+      component['openModal']('email');
+      fixture.detectChanges();
+
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+
+      component['closeModal']();
+      fixture.detectChanges();
+
+      // After closing, the validator should be removed
+      component.emailForm.patchValue({ email: mockUserDetails.email });
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeFalsy();
     });
   });
 });

@@ -23,7 +23,7 @@
         alt="Australian Biocommons Logo"
       />
       <h1 class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
-        AAI User Portal
+        BioCommons Access User Portal
       </h1>
     </div>
 
@@ -38,11 +38,25 @@
         Log in
       </app-button>
     </div>
-    <div class="flex items-center justify-center gap-2">
-      <div class="font-light text-gray-500">Don't have an account?</div>
-      <a class="text-sky-500 hover:text-sky-600" routerLink="/register">
-        Register
-      </a>
+    <div class="space-y-6">
+      <div class="flex items-center justify-center gap-2">
+        <div class="font-light text-gray-500">Don't have an account?</div>
+        <a
+          class="text-sky-500 transition-all hover:text-sky-600 hover:underline"
+          routerLink="/register"
+        >
+          Register
+        </a>
+      </div>
+      <div class="flex items-center justify-center gap-2">
+        <div class="font-light text-gray-500">Don't remember your email?</div>
+        <a
+          class="text-sky-500 transition-all hover:text-sky-600 hover:underline"
+          routerLink="/recover-email"
+        >
+          Click here
+        </a>
+      </div>
     </div>
   }
 </div>

@@ -32,12 +32,12 @@ export interface RegistrationForm {
   password: FormControl<string>;
   confirmPassword: FormControl<string>;
 }
-interface RegistrationRequest {
+interface SbpRegistrationRequest {
   username: string;
   first_name: string;
   last_name: string;
   email: string;
-  reason: string;
+  request_reason: string;
   password: string;
 }
 
@@ -110,12 +110,12 @@ export class SbpRegisterComponent {
     if (this.registrationForm.valid && this.recaptchaToken()) {
       this.isSubmitting.set(true);
       const formValue = this.registrationForm.value;
-      const requestBody: RegistrationRequest = {
+      const requestBody: SbpRegistrationRequest = {
         first_name: formValue.firstName!,
         last_name: formValue.lastName!,
         email: toAsciiEmail(formValue.email!),
         username: formValue.username!,
-        reason: formValue.reason!,
+        request_reason: formValue.reason!,
         password: formValue.password!,
       };
 

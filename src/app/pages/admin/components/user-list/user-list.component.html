@@ -14,7 +14,6 @@
     title="Do you want to revoke this user?"
     [description]="selectedUserForRevoke()!.email"
     [textareaControl]="revokeReasonControl"
-    [textareaLabel]="'Revocation reason'"
     primaryButtonText="Yes"
     secondaryButtonText="No"
     (primaryOutput)="confirmRevokePlatformAccess()"
@@ -90,47 +89,42 @@
 
   <ng-content></ng-content>
 
-  <div class="flex flex-1 flex-col">
+  <div class="-mt-6 flex flex-1 flex-col">
     <div
-      class="sticky z-20 -mx-6 bg-gray-50 px-6 pt-2 md:-mx-12 md:px-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
-      style="position: -webkit-sticky; top: 160px"
+      class="sticky top-40 z-20 -mx-6 bg-gray-50 px-6 pt-6 md:-mx-12 md:px-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
     >
-      <div class="pb-4">
-        <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
+      <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
 
-        <!-- List header -->
+      <!-- List header -->
+      <div
+        class="mt-4 flex items-center rounded-md bg-sky-900 p-2 px-4 text-sm font-medium text-white shadow-md"
+      >
         <div
-          class="mt-4 flex items-center px-4 text-sm font-medium text-gray-900"
+          class="flex-1"
+          [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
         >
-          <div
-            class="flex-1"
-            [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
-          >
-            Total:
-            <span class="font-light text-gray-500"
-              >{{ totalUsers() }} users</span
-            >
-          </div>
+          Total:
+          <span class="font-light text-gray-300">{{ totalUsers() }} users</span>
+        </div>
+        <div class="w-3/12">
+          {{
+            adminType() !== "bundle"
+              ? "Bundles"
+              : adminGroups()[0].short_name + " Bundle Access"
+          }}
+        </div>
+        @if (adminType() !== "bundle") {
           <div class="w-3/12">
             {{
-              adminType() !== "bundle"
-                ? "Bundles"
-                : adminGroups()[0].short_name + " Bundle Access"
+              adminType() === "biocommons"
+                ? "Services"
+                : adminType() === "platform"
+                  ? adminPlatforms()[0].name + " Access"
+                  : "Access"
             }}
           </div>
-          @if (adminType() !== "bundle") {
-            <div class="w-3/12">
-              {{
-                adminType() === "biocommons"
-                  ? "Services"
-                  : adminType() === "platform"
-                    ? adminPlatforms()[0].name + " Access"
-                    : "Access"
-              }}
-            </div>
-          }
-          <div class="w-1/12"></div>
-        </div>
+        }
+        <div class="w-1/12"></div>
       </div>
     </div>
     @if (loading() && users().length === 0) {
@@ -138,9 +132,11 @@
         <app-loading-spinner />
       </div>
     } @else {
-      <div class="flex flex-1 flex-col gap-4">
+      <div class="flex flex-1 flex-col gap-4 pt-4">
         @if (users().length === 0) {
-          <div class="flex flex-1 items-center justify-center text-gray-900">
+          <div
+            class="flex flex-1 items-center justify-center rounded-md bg-white text-gray-900 shadow"
+          >
             No users found
           </div>
         } @else {
@@ -153,7 +149,13 @@
                 class="flex-1 truncate"
                 [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
               >
-                {{ user.email }}
+                <a
+                  [routerLink]="['/user', user.id]"
+                  [state]="{ returnUrl: returnUrl() }"
+                  class="text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
+                >
+                  {{ user.email }}
+                </a>
               </div>
               <div class="flex w-3/12 flex-wrap gap-2">
                 @if (user.group_memberships.length) {
@@ -211,6 +213,17 @@
                               "
                             />
                           }
+                          @if (
+                            group.approval_status === "pending" &&
+                            group.request_reason
+                          ) {
+                            <app-tooltip
+                              [message]="
+                                'Reason for request: ' + group.request_reason
+                              "
+                              iconColor="text-yellow-500 hover:text-yellow-600"
+                            />
+                          }
                         </div>
                       }
                     }
@@ -252,6 +265,17 @@
                             "
                           />
                         }
+                        @if (
+                          platform.approval_status === "pending" &&
+                          platform.request_reason
+                        ) {
+                          <app-tooltip
+                            [message]="
+                              'Reason for request: ' + platform.request_reason
+                            "
+                            iconColor="text-yellow-500 hover:text-yellow-600"
+                          />
+                        }
                       </div>
                     }
                   } @else {
@@ -287,6 +311,17 @@
                                   platform.updated_at
                                 )
                               "
+                            />
+                          }
+                          @if (
+                            platform.approval_status === "pending" &&
+                            platform.request_reason
+                          ) {
+                            <app-tooltip
+                              [message]="
+                                'Reason for request: ' + platform.request_reason
+                              "
+                              iconColor="text-yellow-500 hover:text-yellow-600"
                             />
                           }
                         </div>

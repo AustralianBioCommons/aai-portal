@@ -19,6 +19,7 @@ import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
+import { RecoverEmailComponent } from './pages/recover-email/recover-email.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -26,13 +27,19 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
     canActivate: [loginGuard],
-    data: { title: 'Login | AAI Portal' },
+    data: { title: 'Login | BioCommons Access' },
   },
   {
     path: 'register',
     component: RegisterComponent,
     canActivate: [loginGuard],
-    data: { title: 'Register | AAI Portal' },
+    data: { title: 'Register | BioCommons Access' },
+  },
+  {
+    path: 'recover-email',
+    component: RecoverEmailComponent,
+    canActivate: [loginGuard],
+    data: { title: 'Recover Login Email | BioCommons Access' },
   },
   {
     path: 'user',
@@ -41,7 +48,7 @@ export const routes: Routes = [
       {
         path: 'email-verified',
         component: EmailVerifiedComponent,
-        data: { title: 'Email Verification' },
+        data: { title: 'Email Verification | BioCommons Access' },
       },
     ],
   },
@@ -68,7 +75,7 @@ export const routes: Routes = [
   {
     path: 'migration',
     component: FirstMigrationComponent,
-    data: { title: 'Account Migration | AAI Portal' },
+    data: { title: 'Account Migration | BioCommons Access Portal' },
   },
 
   // Authenticated routes that use DefaultLayoutComponent
@@ -86,36 +93,42 @@ export const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent,
+        data: { title: 'Profile | BioCommons Access Portal' },
       },
       {
-        path: 'bundles',
+        path: 'profile/request-bundle',
         component: BundlesComponent,
-        data: { title: 'Select Bundles' },
+        data: { title: 'Request Bundle Access | BioCommons Access Portal' },
       },
       {
         path: 'user/:id',
         component: UserDetailsComponent,
         canActivate: [adminGuard],
+        data: { title: 'User Details | BioCommons Access Portal' },
       },
       {
         path: 'all-users',
         component: AllUsersComponent,
         canActivate: [adminGuard],
+        data: { title: 'All Users | BioCommons Access Portal' },
       },
       {
         path: 'revoked-users',
         component: RevokedUsersComponent,
         canActivate: [adminGuard],
+        data: { title: 'Revoked Users | BioCommons Access Portal' },
       },
       {
         path: 'pending-users',
         component: PendingUsersComponent,
         canActivate: [adminGuard],
+        data: { title: 'Pending Users | BioCommons Access Portal' },
       },
       {
         path: 'unverified-users',
         component: UnverifiedUsersComponent,
         canActivate: [adminGuard],
+        data: { title: 'Unverified Users | BioCommons Access Portal' },
       },
     ],
   },

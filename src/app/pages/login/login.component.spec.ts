@@ -46,7 +46,9 @@ describe('LoginComponent', () => {
 
   it('should display the correct heading', () => {
     const heading = fixture.debugElement.query(By.css('h1'));
-    expect(heading.nativeElement.textContent.trim()).toBe('AAI User Portal');
+    expect(heading.nativeElement.textContent.trim()).toBe(
+      'BioCommons Access User Portal',
+    );
   });
 
   it('should auto-login when returning from auth error logout', () => {

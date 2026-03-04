@@ -10,10 +10,14 @@ import {
   ApiService,
   UserProfileData,
 } from '../../../core/services/api.service';
-import { AlertComponent } from '../../../shared/components/alert/alert.component';
+import {
+  AlertComponent,
+  AlertType,
+} from '../../../shared/components/alert/alert.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { DropdownMenuComponent } from '../../../shared/components/dropdown-menu/dropdown-menu.component';
 import {
   PlatformId,
   PLATFORMS,
@@ -32,9 +36,17 @@ import {
 } from '../../../shared/validators/emails';
 import { ValidationService } from '../../../core/services/validation.service';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { heroArrowLeft, heroPlusCircle } from '@ng-icons/heroicons/outline';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import {
+  heroArrowLeft,
+  heroChevronDown,
+  heroPlusCircle,
+  heroTrash,
+  heroUser,
+} from '@ng-icons/heroicons/outline';
+import { HttpClient } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
+import { DataRefreshService } from '../../../core/services/data-refresh.service';
+import { FormControl } from '@angular/forms';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
 
@@ -43,7 +55,6 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   standalone: true,
   imports: [
     CommonModule,
-    HttpClientModule,
     LoadingSpinnerComponent,
     AlertComponent,
     ModalComponent,
@@ -51,14 +62,24 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
     ReactiveFormsModule,
     RouterLink,
     NgIcon,
+    DropdownMenuComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
-  viewProviders: [provideIcons({ heroArrowLeft, heroPlusCircle })],
+  viewProviders: [
+    provideIcons({
+      heroArrowLeft,
+      heroChevronDown,
+      heroPlusCircle,
+      heroTrash,
+      heroUser,
+    }),
+  ],
 })
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private dataRefreshService = inject(DataRefreshService);
   private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
@@ -77,7 +98,8 @@ export class ProfileComponent implements OnInit {
   user = signal<UserProfileData | null>(null);
   pageLoading = signal(true);
   pageError = signal<string | null>(null);
-  alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
+  alert = signal<{ type: AlertType; message: string } | null>(null);
+  profileImageLoaded = signal(false);
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
@@ -105,7 +127,6 @@ export class ProfileComponent implements OnInit {
   otpLoading = signal(false);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
-  emailOtpLocked = signal(false);
 
   passwordForm = this.formBuilder.nonNullable.group({
     currentPassword: ['', Validators.required],
@@ -114,6 +135,18 @@ export class ProfileComponent implements OnInit {
 
   activeModal = signal<ProfileModal | null>(null);
   modalLoading = signal(false);
+
+  openMenuAction = signal(false);
+  showDeleteAccountModal = signal(false);
+  deleteConfirmationControl = new FormControl('', {
+    nonNullable: true,
+    validators: [
+      Validators.required,
+      (control) => {
+        return control.value === 'delete' ? null : { confirmDelete: true };
+      },
+    ],
+  });
 
   ngOnInit(): void {
     this.loadUserProfile();
@@ -147,10 +180,22 @@ export class ProfileComponent implements OnInit {
         break;
       case 'username':
         this.usernameForm.reset({ username: user.username });
+        this.usernameForm
+          .get('username')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.username),
+          );
+        this.usernameForm.updateValueAndValidity();
         this.validationService.clearFieldBackendError('username');
         break;
       case 'email':
         this.emailForm.reset({ email: user.email });
+        this.emailForm
+          .get('email')
+          ?.addValidators(
+            this.validationService.valueUnchangedValidator(user.email),
+          );
+        this.emailForm.updateValueAndValidity();
         this.resetEmailFlowState();
         this.validationService.clearFieldBackendError('email');
         break;
@@ -168,15 +213,26 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(false);
     this.otpLoading.set(false);
     this.emailModalNotice.set(null);
-    this.emailOtpLocked.set(false);
   }
 
   protected closeModal(): void {
     if (this.activeModal() === 'email') {
+      this.emailForm.get('email')?.clearValidators();
+      this.emailForm
+        .get('email')
+        ?.setValidators([
+          Validators.required,
+          internationalEmailValidator,
+          emailLengthValidator,
+        ]);
+      this.emailForm.updateValueAndValidity();
       this.resetEmailFlowState();
       this.validationService.clearFieldBackendError('email');
     }
     if (this.activeModal() === 'username') {
+      this.usernameForm.get('username')?.clearValidators();
+      this.usernameForm.get('username')?.setValidators(usernameRequirements);
+      this.usernameForm.updateValueAndValidity();
       this.validationService.clearFieldBackendError('username');
     }
     if (this.activeModal() === 'password') {
@@ -296,6 +352,12 @@ export class ProfileComponent implements OnInit {
         });
         this.closeModal();
         this.loadUserProfile();
+
+        // Wait for Auth0 to update the picture then trigger a refresh for the navbar
+        setTimeout(() => {
+          this.authService.refreshUser();
+          this.dataRefreshService.triggerRefresh();
+        }, 500);
       },
       error: (err) => {
         this.modalLoading.set(false);
@@ -388,7 +450,6 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(true);
     this.validationService.clearFieldBackendError('email');
     this.alert.set(null);
-    this.emailOtpLocked.set(false);
     this.apiService.requestEmailChange(email).subscribe({
       next: ({ message }) => {
         this.emailLoading.set(false);
@@ -399,13 +460,19 @@ export class ProfileComponent implements OnInit {
       },
       error: (err) => {
         this.emailLoading.set(false);
-        this.alert.set({
-          type: 'error',
-          message:
-            err.error?.detail ??
-            'Failed to send OTP. If this issue persists contact the administrators.',
-        });
-        this.closeModal();
+        console.error('Failed to send OTP: ', err);
+        this.validationService.setBackendErrorMessages(err);
+        this.emailForm.markAllAsTouched();
+
+        if (!this.validationService.hasFieldBackendError('email')) {
+          this.alert.set({
+            type: 'error',
+            message:
+              err.error?.message ??
+              'Failed to send OTP. If this issue persists contact the administrators.',
+          });
+          this.closeModal();
+        }
       },
     });
   }
@@ -435,7 +502,12 @@ export class ProfileComponent implements OnInit {
             : (detail ?? 'Invalid code. Please try again.');
         this.otpError.set(message);
         if (status === 429) {
-          this.emailOtpLocked.set(true);
+          this.alert.set({
+            type: 'error',
+            message:
+              'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
+          });
+          this.closeModal();
         }
       },
     });
@@ -449,13 +521,6 @@ export class ProfileComponent implements OnInit {
     return this.validationService.getErrorMessages(form, fieldName);
   }
 
-  protected shouldDisableModalPrimary(): boolean {
-    if (this.activeModal() === 'email') {
-      return this.emailForm.invalid || this.emailOtpLocked();
-    }
-    return false;
-  }
-
   protected isModalLoading(): boolean {
     return this.modalLoading() || this.emailLoading() || this.otpLoading();
   }
@@ -466,6 +531,12 @@ export class ProfileComponent implements OnInit {
     this.apiService.getUserProfile().subscribe({
       next: (user) => {
         this.user.set(user);
+        if (this.user()!.show_welcome_message) {
+          this.alert.set({
+            type: 'success',
+            message: 'Password updated. Welcome to your new access profile!',
+          });
+        }
         this.pageLoading.set(false);
       },
       error: (err) => {
@@ -480,5 +551,49 @@ export class ProfileComponent implements OnInit {
     const bundleId = groupId.split('/').pop() || '';
     const bundle = this.bundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
+  }
+
+  deleteAccountBegin(): void {
+    this.openMenuAction.set(false);
+    this.showDeleteAccountModal.set(true);
+    this.deleteConfirmationControl.reset();
+  }
+
+  closeDeleteAccountModal(): void {
+    this.showDeleteAccountModal.set(false);
+    this.deleteConfirmationControl.reset();
+  }
+
+  confirmDeleteAccount(): void {
+    const user = this.user();
+    this.deleteConfirmationControl.markAsTouched();
+    if (!this.deleteConfirmationControl.valid || !user) {
+      return;
+    }
+
+    this.apiService.deleteAccount().subscribe({
+      next: () => {
+        this.closeDeleteAccountModal();
+        this.alert.set({
+          type: 'success',
+          message: 'Account deleted successfully. You will now be logged out.',
+        });
+        setTimeout(() => {
+          this.authService.logout();
+        }, 3000);
+      },
+      error: (error) => {
+        this.closeDeleteAccountModal();
+        console.error('Failed to delete account:', error);
+        this.alert.set({
+          type: 'error',
+          message: 'Failed to delete account',
+        });
+      },
+    });
+  }
+
+  isDeleteButtonDisabled(): boolean {
+    return this.deleteConfirmationControl.value !== 'delete';
   }
 }

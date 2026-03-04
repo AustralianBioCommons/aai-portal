@@ -10,6 +10,8 @@ import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -36,6 +38,7 @@ describe('ProfileComponent', () => {
     created_at: '2024-01-01T00:00:00Z',
     last_login: '2024-01-02T00:00:00Z',
     updated_at: '2024-01-03T00:00:00Z',
+    show_welcome_message: null,
     platform_memberships: [
       {
         platform_id: 'galaxy',
@@ -82,14 +85,21 @@ describe('ProfileComponent', () => {
       'updateName',
       'requestEmailChange',
       'continueEmailChange',
+      'deleteAccount',
     ]);
-    const authSpy = jasmine.createSpyObj('AuthService', [], {
-      isGeneralAdmin: signal(false),
-    });
+    const authSpy = jasmine.createSpyObj(
+      'AuthService',
+      ['refreshUser', 'logout'],
+      {
+        isGeneralAdmin: signal(false),
+      },
+    );
 
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ApiService, useValue: apiSpy },
         { provide: AuthService, useValue: authSpy },
         {
@@ -117,6 +127,9 @@ describe('ProfileComponent', () => {
       of({ message: 'OTP sent to the requested email address.' }),
     );
     mockApiService.continueEmailChange.and.returnValue(of(void 0));
+    mockApiService.deleteAccount.and.returnValue(
+      of({ message: 'Account deleted successfully' }),
+    );
   });
 
   const openModal = (type: 'username' | 'password' | 'name' | 'email') =>
@@ -138,6 +151,35 @@ describe('ProfileComponent', () => {
     expect(component.user()).toEqual(mockUser);
     expect(component.pageLoading()).toBeFalse();
     expect(component.pageError()).toBeNull();
+  });
+
+  it('should show welcome message when show_welcome_message is true', () => {
+    const userWithWelcomeMessage: UserProfileData = {
+      ...mockUser,
+      show_welcome_message: true,
+    };
+    mockApiService.getUserProfile.and.returnValue(of(userWithWelcomeMessage));
+
+    fixture.detectChanges();
+
+    expect(component.alert()).toEqual({
+      type: 'success',
+      message: 'Password updated. Welcome to your new access profile!',
+    });
+  });
+
+  it('should not show welcome message when show_welcome_message is false', () => {
+    const userWithoutWelcomeMessage: UserProfileData = {
+      ...mockUser,
+      show_welcome_message: false,
+    };
+    mockApiService.getUserProfile.and.returnValue(
+      of(userWithoutWelcomeMessage),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.alert()).toBeNull();
   });
 
   it('should display user info correctly', () => {
@@ -175,6 +217,7 @@ describe('ProfileComponent', () => {
       given_name: 'John',
       family_name: 'Doe',
       last_login: '2024-01-04T00:00:00Z',
+      show_welcome_message: null,
     };
     mockApiService.getUserProfile.and.returnValue(of(userWithNames));
     mockApiService.updateName.and.returnValue(of(mockAuth0User));
@@ -373,7 +416,7 @@ describe('ProfileComponent', () => {
     expect(component.emailFlowState()).toBe('otp-sent');
   });
 
-  it('locks the email flow after too many OTP attempts', () => {
+  it('shows an error alert and closes modal after too many OTP attempts', () => {
     const errorResponse = {
       status: 429,
       error: { detail: 'Too many verification attempts. Try again later.' },
@@ -392,15 +435,12 @@ describe('ProfileComponent', () => {
     confirmEmailChange();
     fixture.detectChanges();
 
-    expect(component.emailOtpLocked()).toBeTrue();
-    expect(component.otpError()).toBe(errorResponse.error.detail);
-    const shouldDisableModalPrimary = () =>
-      (
-        component as unknown as {
-          shouldDisableModalPrimary(): boolean;
-        }
-      ).shouldDisableModalPrimary();
-    expect(shouldDisableModalPrimary()).toBeTrue();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message:
+        'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
+    });
+    expect(component.activeModal()).toBeNull();
   });
 
   it('handles a successful password change', () => {
@@ -544,5 +584,240 @@ describe('ProfileComponent', () => {
     expect(fallback.nativeElement.textContent.trim()).toBe(
       'Launch link unavailable',
     );
+  });
+
+  describe('valueUnchangedValidator', () => {
+    it('should add valueUnchanged validator when opening username modal', () => {
+      fixture.detectChanges();
+      openModal('username');
+      fixture.detectChanges();
+
+      // Username should have the unchanged value
+      expect(component.usernameForm.value.username).toBe(mockUser.username);
+
+      // Should be invalid if value hasn't changed
+      component.usernameForm.markAllAsTouched();
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+    });
+
+    it('should show error when trying to save unchanged username', () => {
+      fixture.detectChanges();
+      openModal('username');
+      component.usernameForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      const errors = component['getErrorMessages'](
+        component.usernameForm,
+        'username',
+      );
+      expect(errors).toContain(
+        'New username must be different from the current username',
+      );
+    });
+
+    it('should not show error when username is changed', () => {
+      fixture.detectChanges();
+      openModal('username');
+      component.usernameForm.patchValue({ username: 'newusername' });
+      component.usernameForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeFalse();
+    });
+
+    it('should add valueUnchanged validator when opening email modal', () => {
+      fixture.detectChanges();
+      openModal('email');
+      fixture.detectChanges();
+
+      expect(component.emailForm.value.email).toBe(mockUser.email);
+
+      component.emailForm.markAllAsTouched();
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+    });
+
+    it('should show error when trying to save unchanged email', () => {
+      fixture.detectChanges();
+      openModal('email');
+      component.emailForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      const errors = component['getErrorMessages'](
+        component.emailForm,
+        'email',
+      );
+      expect(errors).toContain(
+        'New email must be different from the current email',
+      );
+    });
+
+    it('should not show error when email is changed', () => {
+      fixture.detectChanges();
+      openModal('email');
+      component.emailForm.patchValue({ email: 'newemail@example.com' });
+      component.emailForm.markAllAsTouched();
+      fixture.detectChanges();
+
+      expect(
+        component.emailForm.get('email')?.hasError('valueUnchanged'),
+      ).toBeFalse();
+    });
+
+    it('should remove valueUnchanged validator when closing modal', () => {
+      fixture.detectChanges();
+      openModal('username');
+      fixture.detectChanges();
+
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeTrue();
+
+      component['closeModal']();
+      fixture.detectChanges();
+
+      // After closing, the validator should be removed
+      component.usernameForm.patchValue({ username: mockUser.username });
+      expect(
+        component.usernameForm.get('username')?.hasError('valueUnchanged'),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('setupPasswordDifferentValidation', () => {
+    it('should validate that new password is different from current password', () => {
+      fixture.detectChanges();
+      openModal('password');
+      fixture.detectChanges();
+
+      component.passwordForm.patchValue({
+        currentPassword: 'SamePass123!',
+        newPassword: 'SamePass123!',
+      });
+      component.passwordForm.markAllAsTouched();
+
+      expect(
+        component.passwordForm
+          .get('newPassword')
+          ?.hasError('passwordMustBeDifferent'),
+      ).toBeTrue();
+
+      const errors = component['getErrorMessages'](
+        component.passwordForm,
+        'newPassword',
+      );
+      expect(errors).toContain(
+        'New password must be different from the current password',
+      );
+    });
+
+    it('should allow saving when passwords are different', () => {
+      fixture.detectChanges();
+      openModal('password');
+      fixture.detectChanges();
+
+      component.passwordForm.patchValue({
+        currentPassword: 'OldPass123!',
+        newPassword: 'NewPass123!',
+      });
+
+      expect(
+        component.passwordForm
+          .get('newPassword')
+          ?.hasError('passwordMustBeDifferent'),
+      ).toBeFalsy();
+    });
+  });
+
+  describe('delete account', () => {
+    let mockAuthService: jasmine.SpyObj<AuthService>;
+
+    beforeEach(() => {
+      fixture.detectChanges();
+      mockAuthService = TestBed.inject(
+        AuthService,
+      ) as jasmine.SpyObj<AuthService>;
+    });
+
+    it('deleteAccountBegin opens modal and resets confirmation control', () => {
+      component.openMenuAction.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.deleteAccountBegin();
+
+      expect(component.openMenuAction()).toBeFalse();
+      expect(component.showDeleteAccountModal()).toBeTrue();
+      expect(component.deleteConfirmationControl.value).toBe('');
+    });
+
+    it('closeDeleteAccountModal closes modal and resets confirmation control', () => {
+      component.showDeleteAccountModal.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.closeDeleteAccountModal();
+
+      expect(component.showDeleteAccountModal()).toBeFalse();
+      expect(component.deleteConfirmationControl.value).toBe('');
+    });
+
+    it('confirmDeleteAccount does nothing if confirmation control is invalid', () => {
+      component.deleteConfirmationControl.setValue('wrong');
+
+      component.confirmDeleteAccount();
+
+      expect(mockApiService.deleteAccount).not.toHaveBeenCalled();
+      expect(component.deleteConfirmationControl.touched).toBeTrue();
+    });
+
+    it('confirmDeleteAccount calls deleteAccount, closes modal and sets success alert', () => {
+      jasmine.clock().install();
+      component.showDeleteAccountModal.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.confirmDeleteAccount();
+
+      expect(mockApiService.deleteAccount).toHaveBeenCalled();
+      expect(component.showDeleteAccountModal()).toBeFalse();
+      expect(component.alert()).toEqual({
+        type: 'success',
+        message: 'Account deleted successfully. You will now be logged out.',
+      });
+
+      jasmine.clock().tick(3000);
+      expect(mockAuthService.logout).toHaveBeenCalled();
+      jasmine.clock().uninstall();
+    });
+
+    it('confirmDeleteAccount closes modal and sets error alert on failure', () => {
+      mockApiService.deleteAccount.and.returnValue(
+        throwError(() => new Error('Server error')),
+      );
+      component.showDeleteAccountModal.set(true);
+      component.deleteConfirmationControl.setValue('delete');
+
+      component.confirmDeleteAccount();
+
+      expect(component.showDeleteAccountModal()).toBeFalse();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to delete account',
+      });
+    });
+
+    it('isDeleteButtonDisabled returns true unless value is exactly "delete"', () => {
+      component.deleteConfirmationControl.setValue('');
+      expect(component.isDeleteButtonDisabled()).toBeTrue();
+
+      component.deleteConfirmationControl.setValue('delet');
+      expect(component.isDeleteButtonDisabled()).toBeTrue();
+
+      component.deleteConfirmationControl.setValue('delete');
+      expect(component.isDeleteButtonDisabled()).toBeFalse();
+    });
   });
 });

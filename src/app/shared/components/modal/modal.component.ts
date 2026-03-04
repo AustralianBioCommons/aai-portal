@@ -1,8 +1,24 @@
-import { Component, input, output, computed } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  computed,
+  OnInit,
+  OnDestroy,
+  Renderer2,
+  inject,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '../button/button.component';
 
 export type ModalType = 'default' | 'revoke' | 'reject' | 'delete';
+
+const TEXTAREA_LABELS: Record<ModalType, string> = {
+  default: 'Reason',
+  revoke: 'Revocation reason',
+  reject: 'Rejection reason',
+  delete: 'Deletion reason',
+};
 
 @Component({
   selector: 'app-modal',
@@ -11,45 +27,25 @@ export type ModalType = 'default' | 'revoke' | 'reject' | 'delete';
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.css',
 })
-export class ModalComponent {
+export class ModalComponent implements OnInit, OnDestroy {
+  private readonly renderer = inject(Renderer2);
+
   // Inputs
   type = input<ModalType>('default');
   title = input.required<string>();
   description = input<string>('');
   primaryButtonText = input<string>('Confirm');
   secondaryButtonText = input<string>('Cancel');
-  primaryButtonDisabled = input<boolean>(false);
+  primaryButtonWidthClass = input<string>('w-28');
+  secondaryButtonWidthClass = input<string>('w-28');
+  primaryButtonColorClass = input<string>('');
   primaryButtonLoading = input<boolean>(false);
-  textareaLabel = input<string | undefined>();
+  primaryButtonDisabled = input<boolean>(false);
+
   textareaControl = input<FormControl<string> | null>(null);
   textareaMaxLength = input<number>(255);
 
-  // Computed values
-  readonly showTextarea = computed(() => {
-    const type = this.type();
-    return (
-      (type === 'revoke' || type === 'reject' || type === 'delete') &&
-      this.textareaControl()
-    );
-  });
-
-  readonly computedTextareaLabel = computed(() => {
-    let label: string;
-    switch (this.type()) {
-      case 'revoke':
-        label = 'Revocation reason';
-        break;
-      case 'reject':
-        label = 'Rejection reason';
-        break;
-      case 'delete':
-        label = 'Deletion reason';
-        break;
-      default:
-        label = 'Reason';
-    }
-    return this.textareaLabel() ?? label;
-  });
+  readonly computedTextareaLabel = computed(() => TEXTAREA_LABELS[this.type()]);
 
   readonly computedPrimaryButtonText = computed(() => {
     return ['reject', 'revoke'].includes(this.type())
@@ -66,6 +62,14 @@ export class ModalComponent {
   // Outputs
   primaryOutput = output<void>();
   secondaryOutput = output<void>();
+
+  ngOnInit(): void {
+    this.renderer.setStyle(document.body, 'overflow', 'hidden');
+  }
+
+  ngOnDestroy(): void {
+    this.renderer.removeStyle(document.body, 'overflow');
+  }
 
   onPrimary(): void {
     this.primaryOutput.emit();

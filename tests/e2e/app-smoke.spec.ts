@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const buildVersionPattern = /AAI Portal build version:\s+(.+)/;
+const buildVersionPattern = /BioCommons Access Portal build version:\s+(.+)/;
 
 test('displays the portal shell', async ({ page }) => {
   const consoleMessages: string[] = [];
@@ -13,7 +13,7 @@ test('displays the portal shell', async ({ page }) => {
   await page.goto('/');
 
   await expect(page.locator('app-root')).toBeVisible();
-  await expect(page).toHaveTitle(/AAI|BioCommons/i);
+  await expect(page).toHaveTitle(/BioCommons Access Portal/i);
 
   const versionMessage = consoleMessages.find((msg) =>
     buildVersionPattern.test(msg),
