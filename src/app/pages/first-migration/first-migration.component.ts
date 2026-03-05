@@ -57,6 +57,7 @@ export class FirstMigrationComponent implements OnInit {
     });
   }
 
+  // Decodes the payload of a JWT without verifying it (only for extracting email for display purposes)
   private decodeJwtPayload(token: string): Record<string, unknown> | null {
     try {
       const part = token.split('.')[1];
