@@ -10,8 +10,10 @@
     <div
       class="flex flex-wrap justify-end gap-6 text-sm text-biocommons-primary sm:gap-12 sm:text-base [&>a:hover]:text-sky-900"
     >
-      <a href="https://www.biocommons.org.au/about">About</a>
-      <a href="https://www.biocommons.org.au/contact-form">Contact us</a>
+      <a href="https://www.biocommons.org.au/about" rel="noreferrer">About</a>
+      <a href="https://www.biocommons.org.au/contact-form" rel="noreferrer"
+        >Contact us</a
+      >
     </div>
   </nav>
 
@@ -52,7 +54,7 @@
           upgraded secure log in.
         </div>
         <div>
-          We just sent an email to {{ user()?.email }} with everything you need
+          We just sent an email to {{ maskedEmail() }} with everything you need
           to complete this upgrade.
         </div>
         <div>
