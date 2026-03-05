@@ -157,6 +157,66 @@ describe('ValidationService', () => {
     });
   });
 
+  describe('username validation', () => {
+    const valid_usernames = [
+      'abc',
+      'a_c',
+      'user_n-ame',
+      '919',
+      '23user',
+      'a'.repeat(128),
+    ];
+
+    valid_usernames.forEach((username) => {
+      it(`should allow username "${username}"`, () => {
+        testForm.patchValue({ username });
+
+        const usernameControl = testForm.get('username');
+        usernameControl?.markAsTouched();
+        usernameControl?.updateValueAndValidity();
+
+        expect(service.isFieldInvalid(testForm, 'username')).toBeFalse();
+      });
+    });
+
+    const invalid_usernames = [
+      // empty
+      '',
+      // too short
+      'ab',
+      // too long
+      'a'.repeat(129),
+      // no periods
+      'a.b',
+      // no spaces
+      'user name',
+      // lowercase only
+      'User123',
+      // Starting with hyphen or underscore
+      '_user',
+      '-user',
+      // special characters
+      'usér123',
+      'user™',
+    ];
+
+    invalid_usernames.forEach((username) => {
+      it(`should not allow username "${username}"`, () => {
+        testForm.patchValue({
+          username,
+          email: 'valid@example.com',
+          password: 'ValidPassword123!',
+        });
+
+        const usernameControl = testForm.get('username');
+        usernameControl?.markAsTouched();
+        usernameControl?.updateValueAndValidity();
+
+        expect(service.isFieldInvalid(testForm, 'username')).toBeTrue();
+      });
+    });
+  });
+
   describe('addFieldErrorMessages', () => {
     it('should add new error messages for a field', () => {
       // Add custom error messages for a new field

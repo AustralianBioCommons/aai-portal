@@ -1,5 +1,8 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+const USERNAME_ERROR_MESSAGE =
+  'Your username must start with a lowercase letter or number and can only include lowercase letters, numbers, underscores, or dashes';
+
 const repeatPattern = (pattern: string, length: number): string =>
   pattern.repeat(Math.ceil(length / pattern.length)).slice(0, length);
 
@@ -167,8 +170,7 @@ const multiStepForm: FormConfig = {
       label: 'Username',
       invalidValue: 'InvalidName',
       validValue: 'validuser',
-      error:
-        'Your username must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
+      error: USERNAME_ERROR_MESSAGE,
     },
     {
       name: 'password length warning',
@@ -233,8 +235,7 @@ const bpaForm: FormConfig = {
       label: 'Username',
       invalidValue: 'InvalidName',
       validValue: 'validuser',
-      error:
-        'Your username must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
+      error: USERNAME_ERROR_MESSAGE,
     },
     {
       name: 'password length warning',
@@ -360,8 +361,7 @@ const sbpForm: FormConfig = {
       label: 'Username',
       invalidValue: 'InvalidName',
       validValue: 'validuser',
-      error:
-        'Your username must start with a lowercase letter and can only include lowercase letters, numbers, underscores, or dashes',
+      error: USERNAME_ERROR_MESSAGE,
     },
     {
       name: 'reason for request length warning',

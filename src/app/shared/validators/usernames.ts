@@ -15,7 +15,7 @@ interface UsernameErrors {
  * Min length of 3 (based on platform requirements)
  * Max length of 128 (from Auth0)
  * lowercase letters, digits, hyphen and underscore only (based on platform requirements)
- * must start with a lowercase letter
+ * must start with a lowercase letter or digit
  */
 export function usernameRequirements(
   control: AbstractControl,
@@ -24,7 +24,7 @@ export function usernameRequirements(
     Validators.required,
     Validators.minLength(USERNAME_MIN_LENGTH),
     Validators.maxLength(USERNAME_MAX_LENGTH),
-    Validators.pattern(/^[a-z][a-z0-9_-]*$/),
+    Validators.pattern(/^[a-z0-9][a-z0-9_-]*$/),
   ]);
   return validator!(control);
 }
