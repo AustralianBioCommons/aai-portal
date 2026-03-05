@@ -1,6 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
 import {
   heroShieldCheck,
   heroShieldExclamation,
@@ -18,13 +17,19 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
   viewProviders: [provideIcons({ heroShieldCheck, heroShieldExclamation })],
 })
 export class FirstMigrationComponent implements OnInit {
-  private authService = inject(AuthService);
   private route = inject(ActivatedRoute);
   private apiService = inject(ApiService);
 
-  user = this.authService.user;
   sessionToken = signal<string | null>(null);
   state = signal<'success' | 'error' | 'loading'>('loading');
+
+  userEmail = signal<string | null>(null);
+  maskedEmail = computed(() => {
+    const email = this.userEmail();
+    if (!email) return null;
+    const [local, domain] = email.split('@');
+    return `${local[0]}***@${domain}`;
+  });
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('session_token');
@@ -40,6 +45,9 @@ export class FirstMigrationComponent implements OnInit {
 
     this.sessionToken.set(token);
 
+    const payload = this.decodeJwtPayload(token);
+    this.userEmail.set((payload?.['email'] as string) ?? null);
+
     this.apiService.sendMigrationResetPassword(token, clientId).subscribe({
       next: () => this.state.set('success'),
       error: (err) => {
@@ -47,5 +55,19 @@ export class FirstMigrationComponent implements OnInit {
         console.error('Error:', err);
       },
     });
+  }
+
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+      const part = token.split('.')[1];
+      if (!part) return null;
+
+      const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+
+      return JSON.parse(atob(padded));
+    } catch {
+      return null;
+    }
   }
 }

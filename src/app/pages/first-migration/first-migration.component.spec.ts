@@ -3,8 +3,11 @@ import { ActivatedRoute, ParamMap } from '@angular/router';
 import { FirstMigrationComponent } from './first-migration.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+
+const JWT_WITH_EMAIL =
+  'header.eyJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20ifQ.signature';
 
 describe('FirstMigrationComponent', () => {
   let component: FirstMigrationComponent;
@@ -86,5 +89,60 @@ describe('FirstMigrationComponent', () => {
       'session-123',
       environment.auth0.clientId,
     );
+  });
+
+  it('sets state to error and does not call API when session_token is absent', () => {
+    mockQueryParamMap.get.and.returnValue(null);
+
+    fixture.detectChanges();
+
+    expect(component.state()).toBe('error');
+    expect(mockApiService.sendMigrationResetPassword).not.toHaveBeenCalled();
+  });
+
+  it('sets state to success after API call succeeds', () => {
+    mockQueryParamMap.get.and.callFake((key: string) =>
+      key === 'session_token' ? 'session-123' : null,
+    );
+    mockApiService.sendMigrationResetPassword.and.returnValue(of(true));
+
+    fixture.detectChanges();
+
+    expect(component.state()).toBe('success');
+  });
+
+  it('sets state to error after API call fails', () => {
+    mockQueryParamMap.get.and.callFake((key: string) =>
+      key === 'session_token' ? 'session-123' : null,
+    );
+    mockApiService.sendMigrationResetPassword.and.returnValue(
+      throwError(() => new Error('fail')),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.state()).toBe('error');
+  });
+
+  it('extracts userEmail from JWT payload', () => {
+    mockQueryParamMap.get.and.callFake((key: string) =>
+      key === 'session_token' ? JWT_WITH_EMAIL : null,
+    );
+    mockApiService.sendMigrationResetPassword.and.returnValue(of(true));
+
+    fixture.detectChanges();
+
+    expect(component.userEmail()).toBe('test@example.com');
+  });
+
+  it('masks email correctly', () => {
+    mockQueryParamMap.get.and.callFake((key: string) =>
+      key === 'session_token' ? JWT_WITH_EMAIL : null,
+    );
+    mockApiService.sendMigrationResetPassword.and.returnValue(of(true));
+
+    fixture.detectChanges();
+
+    expect(component.maskedEmail()).toBe('t***@example.com');
   });
 });
