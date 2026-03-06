@@ -158,4 +158,25 @@ describe('ApiService', () => {
     expect(req.request.body).toEqual({ reason });
     req.flush('User deleted successfully');
   });
+
+  it('should call resend verification email endpoint', () => {
+    const sessionToken = 'session-123';
+    const recaptchaToken = 'captcha-123';
+
+    service
+      .resendOwnVerificationEmail(sessionToken, recaptchaToken)
+      .subscribe((response) => {
+        expect(response).toEqual({ message: 'Verification email sent' });
+      });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/me/email-verification/resend`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      session_token: sessionToken,
+      recaptcha_token: recaptchaToken,
+    });
+    req.flush({ message: 'Verification email sent' });
+  });
 });

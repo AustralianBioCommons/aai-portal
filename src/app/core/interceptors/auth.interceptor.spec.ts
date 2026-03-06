@@ -50,6 +50,17 @@ describe('authInterceptor', () => {
     req.flush({});
   });
 
+  it('bypasses unverified-email resend endpoint without adding authorization header', () => {
+    const url = `${environment.auth0.backend}/me/email-verification/resend`;
+    authServiceSpy.getAccessTokenSilently.and.returnValue(of('token'));
+
+    http.post(url, {}).subscribe();
+
+    const req = httpMock.expectOne(url);
+    expect(req.request.headers.has('Authorization')).toBeFalse();
+    req.flush({});
+  });
+
   it('attaches bearer token for protected backend requests', () => {
     const url = `${environment.auth0.backend}/admin/users`;
     authServiceSpy.getAccessTokenSilently.and.returnValue(of('token-123'));

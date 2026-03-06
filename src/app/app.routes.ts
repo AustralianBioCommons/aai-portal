@@ -20,6 +20,7 @@ import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
 import { RecoverEmailComponent } from './pages/recover-email/recover-email.component';
+import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -49,6 +50,11 @@ export const routes: Routes = [
         path: 'email-verified',
         component: EmailVerifiedComponent,
         data: { title: 'Email Verification | BioCommons Access' },
+      },
+      {
+        path: 'email-verification-required',
+        component: EmailVerificationRequiredComponent,
+        data: { title: 'Verify Your Email | BioCommons Access' },
       },
     ],
   },
