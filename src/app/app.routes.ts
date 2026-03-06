@@ -47,6 +47,7 @@ export const routes: Routes = [
   {
     path: 'terms/biocommons',
     component: BiocommonsTermsComponent,
+    canActivate: [loginGuard],
     data: { title: 'BioCommons Access Terms & Conditions' },
   },
   {
