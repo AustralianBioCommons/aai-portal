@@ -357,12 +357,13 @@
               (keyup.enter)="toggleTermsAcceptance()"
             >
               <a
-                href=""
+                [routerLink]="['/terms/biocommons']"
                 target="_blank"
+                rel="noopener"
                 class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
                 (click)="$event.stopPropagation()"
               >
-                BioCommons Access terms & conditions
+                Biocommons terms and conditions
                 <ng-icon name="heroArrowTopRightOnSquare" size="16"></ng-icon>
               </a>
               <input

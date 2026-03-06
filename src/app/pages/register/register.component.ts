@@ -9,7 +9,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
@@ -75,6 +75,7 @@ interface Section {
     RegistrationNavbarComponent,
     BundleSelectionComponent,
     NgIcon,
+    RouterModule,
   ],
   styleUrl: './register.component.css',
   viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],

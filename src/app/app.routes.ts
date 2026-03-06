@@ -19,7 +19,8 @@ import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
-import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
+import { RecoverEmailComponent } from './pages/recover-email/recover-email.component';
+import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -36,6 +37,20 @@ export const routes: Routes = [
     data: { title: 'Register | BioCommons Access' },
   },
   {
+<<<<<<< HEAD
+=======
+    path: 'recover-email',
+    component: RecoverEmailComponent,
+    canActivate: [loginGuard],
+    data: { title: 'Recover Login Email | BioCommons Access' },
+  },
+  {
+    path: 'terms/biocommons',
+    component: BiocommonsTermsComponent,
+    data: { title: 'BioCommons Access Terms & Conditions' },
+  },
+  {
+>>>>>>> 431594d (feat: add terms and conditions)
     path: 'user',
     canActivate: [loginGuard],
     children: [
