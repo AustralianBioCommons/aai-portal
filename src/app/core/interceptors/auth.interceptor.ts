@@ -15,6 +15,7 @@ const BYPASS_URLS = [
   '/utils/register/',
   '/utils/login/recover-email',
   '/migration',
+  '/me/email-verification/resend',
 ] as readonly string[];
 /**
  * HTTP interceptor that adds the Auth0 access token to requests sent to the AAI backend API

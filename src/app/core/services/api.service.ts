@@ -148,6 +148,10 @@ export interface RecoverLoginEmailResponse {
   message: string;
 }
 
+export interface ResendVerificationEmailResponse {
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -435,6 +439,16 @@ export class ApiService {
     return this.http.post<RecoverLoginEmailResponse>(
       `${environment.auth0.backend}/utils/login/recover-email`,
       { username, recaptcha_token: recaptchaToken },
+    );
+  }
+
+  resendOwnVerificationEmail(
+    sessionToken: string,
+    recaptchaToken: string,
+  ): Observable<ResendVerificationEmailResponse> {
+    return this.http.post<ResendVerificationEmailResponse>(
+      `${environment.auth0.backend}/me/email-verification/resend`,
+      { session_token: sessionToken, recaptcha_token: recaptchaToken },
     );
   }
 }
