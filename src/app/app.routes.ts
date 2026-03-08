@@ -19,6 +19,7 @@ import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
+import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
 
 export const routes: Routes = [
@@ -34,6 +35,12 @@ export const routes: Routes = [
     component: RegisterComponent,
     canActivate: [loginGuard],
     data: { title: 'Register | BioCommons Access' },
+  },
+  {
+    path: 'terms/biocommons',
+    component: BiocommonsTermsComponent,
+    canActivate: [loginGuard],
+    data: { title: 'BioCommons Access Terms & Conditions' },
   },
   {
     path: 'user',
