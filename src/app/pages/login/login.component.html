@@ -1,5 +1,5 @@
 <div
-  class="flex h-full w-full flex-col items-center justify-center gap-12 bg-white"
+  class="flex h-full w-full flex-col items-center justify-center gap-12 bg-white px-12"
 >
   <!-- Show loading spinner while auto-logging in -->
   @if (isAutoLoggingIn()) {
@@ -29,7 +29,9 @@
         class="auto h-16"
         alt="Australian Biocommons Logo"
       />
-      <h1 class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
+      <h1
+        class="text-center text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl"
+      >
         BioCommons Access User Portal
       </h1>
     </div>
@@ -47,7 +49,10 @@
     </div>
     <div class="flex items-center justify-center gap-2">
       <div class="font-light text-gray-500">Don't have an account?</div>
-      <a class="text-sky-500 hover:text-sky-600" routerLink="/register">
+      <a
+        class="text-sky-500 hover:text-sky-600 hover:underline"
+        routerLink="/register"
+      >
         Register
       </a>
     </div>
