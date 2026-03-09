@@ -3,11 +3,13 @@ import { EmailVerifiedComponent } from './email-verified.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { of } from 'rxjs';
+import { ApiService } from '../../core/services/api.service';
 
 describe('EmailVerifiedComponent', () => {
   let fixture: ComponentFixture<EmailVerifiedComponent>;
   let component: EmailVerifiedComponent;
   let routerSpy: jasmine.SpyObj<Router>;
+  let apiServiceSpy: jasmine.SpyObj<ApiService>;
 
   const createComponent = async (
     queryParams: Record<string, string | null>,
@@ -20,12 +22,15 @@ describe('EmailVerifiedComponent', () => {
     };
 
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    apiServiceSpy = jasmine.createSpyObj('ApiService', ['sendWelcomeEmail']);
+    apiServiceSpy.sendWelcomeEmail.and.returnValue(of(undefined));
 
     await TestBed.configureTestingModule({
       imports: [EmailVerifiedComponent],
       providers: [
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: Router, useValue: routerSpy },
+        { provide: ApiService, useValue: apiServiceSpy },
         Title,
       ],
     }).compileComponents();
@@ -44,6 +49,18 @@ describe('EmailVerifiedComponent', () => {
     });
 
     expect(component.emailVerified()).toBeTrue();
+  });
+
+  it('should call sendWelcomeEmail when success=true', async () => {
+    await createComponent({ success: 'true', message: null });
+
+    expect(apiServiceSpy.sendWelcomeEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('should NOT call sendWelcomeEmail when success=false', async () => {
+    await createComponent({ success: 'false', message: 'Verification failed' });
+
+    expect(apiServiceSpy.sendWelcomeEmail).not.toHaveBeenCalled();
   });
 
   it('should set error message if present in query params', async () => {

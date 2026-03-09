@@ -6,14 +6,21 @@
     <app-loading-spinner></app-loading-spinner>
   } @else {
     @if (authError()) {
-      <app-alert
-        type="error"
-        [message]="
-          authError()?.error_description ||
-          'An error occurred during authentication. Please try again.'
-        "
-      >
-      </app-alert>
+      @if (authError()?.error_description === "user is blocked") {
+        <app-alert
+          type="error"
+          message="An error occurred during authentication. Please try again or contact support for assistance."
+        ></app-alert>
+      } @else {
+        <app-alert
+          type="error"
+          [message]="
+            authError()?.error_description ||
+            'An error occurred during authentication. Please try again.'
+          "
+        >
+        </app-alert>
+      }
     }
 
     <div class="flex flex-col items-center justify-center">
