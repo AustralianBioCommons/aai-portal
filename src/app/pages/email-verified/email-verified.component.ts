@@ -38,7 +38,11 @@ export class EmailVerifiedComponent {
       this.emailVerified.set(success);
       this.errorMessage.set(params.get('message') || '');
       if (success) {
-        this.apiService.sendWelcomeEmail().subscribe({ error: () => {} });
+        this.apiService.sendWelcomeEmail().subscribe({
+          error: (error) => {
+            console.error('Failed to send welcome email:', error);
+          },
+        });
       }
     });
   }
