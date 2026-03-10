@@ -7,7 +7,7 @@
     "backend": "http://localhost:8000"
   },
   "recaptcha": {
-    "siteKeyV2": "6Lfk398rAAAAABUUwVizgZ3M1aQE-BNhDuk9o7Sd"
+    "siteKeyV2": "6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG"
   },
   "platformUrls": {
     "bpaPlatform": "https://aaidemo.bioplatforms.com",
