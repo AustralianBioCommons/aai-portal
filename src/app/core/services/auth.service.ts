@@ -167,14 +167,23 @@ export class AuthService {
    */
   private checkForAuthErrors(): void {
     const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get('error');
-    const errorDescription = urlParams.get('error_description');
-    const state = urlParams.get('state');
+    const hash = window.location.hash.startsWith('#')
+      ? window.location.hash.slice(1)
+      : window.location.hash;
+    const hashParams = new URLSearchParams(hash);
 
-    if (error && errorDescription) {
+    const error = urlParams.get('error') ?? hashParams.get('error');
+    const errorDescription =
+      urlParams.get('error_description') ??
+      hashParams.get('error_description');
+    const state = urlParams.get('state') ?? hashParams.get('state');
+
+    if (error) {
       this.authError.set({
         error,
-        error_description: errorDescription,
+        error_description:
+          errorDescription ||
+          'An error occurred during authentication. Please try again.',
         state: state || undefined,
       });
     }
