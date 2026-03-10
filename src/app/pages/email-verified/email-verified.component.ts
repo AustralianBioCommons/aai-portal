@@ -2,6 +2,7 @@ import { Component, computed, signal, inject, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrandingService } from '../../core/services/branding.service';
+import { ApiService } from '../../core/services/api.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroCheckCircle, heroXCircle } from '@ng-icons/heroicons/outline';
@@ -17,9 +18,11 @@ export class EmailVerifiedComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly brandingService = inject(BrandingService);
+  private readonly apiService = inject(ApiService);
 
   readonly emailVerified = signal(false);
   readonly errorMessage = signal('');
+  private readonly welcomeEmailSent = signal(false);
 
   private readonly title = computed(() => {
     const status = this.emailVerified() ? 'Successful' : 'Failed';
@@ -32,8 +35,19 @@ export class EmailVerifiedComponent {
     });
 
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      this.emailVerified.set(params.get('success') === 'true');
+      const success = params.get('success') === 'true';
+      this.emailVerified.set(success);
       this.errorMessage.set(params.get('message') || '');
+      const rawEmail = params.get('email');
+      const email = rawEmail ? decodeURIComponent(rawEmail) : null;
+      if (success && email && !this.welcomeEmailSent()) {
+        this.welcomeEmailSent.set(true);
+        this.apiService.sendWelcomeEmail(email).subscribe({
+          error: (error) => {
+            console.error('Failed to send welcome email:', error);
+          },
+        });
+      }
     });
   }
 

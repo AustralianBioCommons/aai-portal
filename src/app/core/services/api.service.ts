@@ -435,4 +435,11 @@ export class ApiService {
       { session_token: sessionToken, recaptcha_token: recaptchaToken },
     );
   }
+
+  sendWelcomeEmail(email: string): Observable<void> {
+    return this.http.post<void>(
+      `${environment.auth0.backend}/utils/send-welcome-email`,
+      { email },
+    );
+  }
 }
