@@ -37,8 +37,10 @@ export class EmailVerifiedComponent {
       const success = params.get('success') === 'true';
       this.emailVerified.set(success);
       this.errorMessage.set(params.get('message') || '');
-      if (success) {
-        this.apiService.sendWelcomeEmail().subscribe({
+      const rawEmail = params.get('email');
+      const email = rawEmail ? decodeURIComponent(rawEmail) : null;
+      if (success && email) {
+        this.apiService.sendWelcomeEmail(email).subscribe({
           error: (error) => {
             console.error('Failed to send welcome email:', error);
           },

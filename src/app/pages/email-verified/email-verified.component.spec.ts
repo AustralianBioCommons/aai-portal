@@ -46,19 +46,36 @@ describe('EmailVerifiedComponent', () => {
     await createComponent({
       success: 'true',
       message: '',
+      email: 'test@example.com',
     });
 
     expect(component.emailVerified()).toBeTrue();
   });
 
-  it('should call sendWelcomeEmail when success=true', async () => {
-    await createComponent({ success: 'true', message: null });
+  it('should call sendWelcomeEmail when success=true and email is present', async () => {
+    await createComponent({
+      success: 'true',
+      message: null,
+      email: 'test@example.com',
+    });
 
-    expect(apiServiceSpy.sendWelcomeEmail).toHaveBeenCalledTimes(1);
+    expect(apiServiceSpy.sendWelcomeEmail).toHaveBeenCalledOnceWith(
+      'test@example.com',
+    );
   });
 
   it('should NOT call sendWelcomeEmail when success=false', async () => {
-    await createComponent({ success: 'false', message: 'Verification failed' });
+    await createComponent({
+      success: 'false',
+      message: 'Verification failed',
+      email: 'test@example.com',
+    });
+
+    expect(apiServiceSpy.sendWelcomeEmail).not.toHaveBeenCalled();
+  });
+
+  it('should NOT call sendWelcomeEmail when email is absent', async () => {
+    await createComponent({ success: 'true', message: null, email: null });
 
     expect(apiServiceSpy.sendWelcomeEmail).not.toHaveBeenCalled();
   });
@@ -74,7 +91,11 @@ describe('EmailVerifiedComponent', () => {
   });
 
   it('should display success message and button on email verification success', async () => {
-    await createComponent({ success: 'true', message: null });
+    await createComponent({
+      success: 'true',
+      message: null,
+      email: 'test@example.com',
+    });
 
     const compiled = fixture.nativeElement as HTMLElement;
 
@@ -93,6 +114,7 @@ describe('EmailVerifiedComponent', () => {
     await createComponent({
       success: 'false',
       message: 'Verification token expired',
+      email: null,
     });
 
     const compiled = fixture.nativeElement as HTMLElement;
@@ -106,7 +128,11 @@ describe('EmailVerifiedComponent', () => {
   });
 
   it('should navigate to /profile when continue button is clicked', async () => {
-    await createComponent({ success: 'true', message: null });
+    await createComponent({
+      success: 'true',
+      message: null,
+      email: 'test@example.com',
+    });
 
     component.navigateToProfile();
 

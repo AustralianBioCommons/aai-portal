@@ -436,10 +436,10 @@ export class ApiService {
     );
   }
 
-  sendWelcomeEmail(): Observable<void> {
+  sendWelcomeEmail(email: string): Observable<void> {
     return this.http.post<void>(
       `${environment.auth0.backend}/utils/send-welcome-email`,
-      {},
+      { email },
     );
   }
 }

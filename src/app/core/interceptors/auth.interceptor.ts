@@ -13,6 +13,7 @@ import { environment } from '../../../environments/environment';
 const BYPASS_URLS = [
   '/register',
   '/utils/register/',
+  '/utils/send-welcome-email',
   '/migration',
   '/me/email-verification/resend',
 ] as readonly string[];
