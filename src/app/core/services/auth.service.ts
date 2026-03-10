@@ -174,8 +174,7 @@ export class AuthService {
 
     const error = urlParams.get('error') ?? hashParams.get('error');
     const errorDescription =
-      urlParams.get('error_description') ??
-      hashParams.get('error_description');
+      urlParams.get('error_description') ?? hashParams.get('error_description');
     const state = urlParams.get('state') ?? hashParams.get('state');
 
     if (error) {
