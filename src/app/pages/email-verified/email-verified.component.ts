@@ -22,6 +22,7 @@ export class EmailVerifiedComponent {
 
   readonly emailVerified = signal(false);
   readonly errorMessage = signal('');
+  private readonly welcomeEmailSent = signal(false);
 
   private readonly title = computed(() => {
     const status = this.emailVerified() ? 'Successful' : 'Failed';
@@ -39,7 +40,8 @@ export class EmailVerifiedComponent {
       this.errorMessage.set(params.get('message') || '');
       const rawEmail = params.get('email');
       const email = rawEmail ? decodeURIComponent(rawEmail) : null;
-      if (success && email) {
+      if (success && email && !this.welcomeEmailSent()) {
+        this.welcomeEmailSent.set(true);
         this.apiService.sendWelcomeEmail(email).subscribe({
           error: (error) => {
             console.error('Failed to send welcome email:', error);
