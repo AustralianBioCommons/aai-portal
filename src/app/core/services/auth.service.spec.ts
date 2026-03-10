@@ -249,4 +249,58 @@ describe('AuthService', () => {
 
     httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
   });
+
+  it('should capture auth error from query parameters', () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/?error=access_denied&error_description=User%20is%20blocked',
+    );
+
+    const { httpMock } = createService(false);
+
+    expect(service.authError()).toEqual({
+      error: 'access_denied',
+      error_description: 'User is blocked',
+      state: undefined,
+    });
+
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
+    window.history.replaceState({}, '', '/');
+  });
+
+  it('should capture auth error from hash parameters', () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/#error=access_denied&error_description=Blocked',
+    );
+
+    const { httpMock } = createService(false);
+
+    expect(service.authError()).toEqual({
+      error: 'access_denied',
+      error_description: 'Blocked',
+      state: undefined,
+    });
+
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
+    window.history.replaceState({}, '', '/');
+  });
+
+  it('should fall back to a default message when error description is missing', () => {
+    window.history.replaceState({}, '', '/?error=access_denied');
+
+    const { httpMock } = createService(false);
+
+    expect(service.authError()).toEqual({
+      error: 'access_denied',
+      error_description:
+        'An error occurred during authentication. Please try again.',
+      state: undefined,
+    });
+
+    httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
+    window.history.replaceState({}, '', '/');
+  });
 });
