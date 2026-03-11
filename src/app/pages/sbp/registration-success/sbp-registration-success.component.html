@@ -1,23 +1,23 @@
 <div
-  class="mx-auto flex h-full min-h-full max-w-7xl flex-1 flex-col items-center justify-center gap-12 px-12 text-center"
+  class="mx-auto flex h-full min-h-full flex-1 flex-col items-center justify-center gap-12 px-12 text-center"
 >
   <div class="text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
     Thank you
   </div>
-  <div class="verification-message font-light text-gray-600">
+  <div class="max-w-2xl font-light text-gray-600">
     @if (registrationEmail) {
-      <ng-container>
+      <div>
         We've sent a verification email to
-        <span class="font-semibold text-gray-950">{{ registrationEmail }}</span
+        <span class="font-medium text-gray-900">{{ registrationEmail }}</span
         >. Please open that email and click the link inside to finish setting up
         your account and log in.
-      </ng-container>
+      </div>
     } @else {
-      <ng-container>
+      <div>
         We've sent a verification email to the email address you provided.
         Please open that email and click the link inside to finish setting up
         your account and log in.
-      </ng-container>
+      </div>
     }
   </div>
   <app-button

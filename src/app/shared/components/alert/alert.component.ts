@@ -20,7 +20,7 @@ export type AlertType = 'success' | 'error';
 })
 export class AlertComponent {
   type = input<AlertType>('error');
-  message = input<string>('');
+  message = input<string | null>('');
   dismissible = input<boolean>(false);
 
   dismissed = output<void>();
