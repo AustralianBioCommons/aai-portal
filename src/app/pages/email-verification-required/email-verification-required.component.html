@@ -33,7 +33,7 @@
       >
         Verification Email Sent
       </h1>
-      <p class="max-w-2xl font-light text-gray-600">
+      <p class="max-w-2xl font-light text-gray-700">
         We sent a new verification email
         @if (maskedEmail()) {
           to <span class="font-medium text-gray-900">{{ maskedEmail() }}</span>
@@ -46,7 +46,7 @@
       >
     } @else {
       <h1 class="text-4xl font-semibold text-gray-900">Verify your email</h1>
-      <p class="max-w-2xl font-light text-gray-600">
+      <p class="max-w-2xl font-light text-gray-700">
         Before you can sign in, you need to verify your email address.
         @if (maskedEmail()) {
           We found an account linked to
