@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { EmailVerificationRequiredComponent } from './email-verification-required.component';
 
 const JWT_WITH_EMAIL =
@@ -26,11 +27,16 @@ describe('EmailVerificationRequiredComponent', () => {
       },
     };
 
+    const mockAuthService = jasmine.createSpyObj<AuthService>('AuthService', [
+      'logout',
+    ]);
+
     await TestBed.configureTestingModule({
       imports: [EmailVerificationRequiredComponent],
       providers: [
         { provide: ApiService, useValue: mockApiService },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: AuthService, useValue: mockAuthService },
       ],
     }).compileComponents();
 

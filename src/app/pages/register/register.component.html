@@ -412,12 +412,12 @@
   } @else {
     <!-- Success Page -->
     <div
-      class="flex flex-1 flex-col justify-center gap-12 bg-gray-50 text-center"
+      class="flex flex-1 flex-col items-center justify-center gap-12 bg-gray-50 p-12 text-center"
     >
       <div class="text-4xl font-semibold sm:text-5xl lg:text-6xl">
         Thank you
       </div>
-      <div class="verification-message font-light text-gray-600">
+      <div class="max-w-2xl font-light text-gray-700">
         @if (registrationEmail()) {
           We've sent a verification email to
           <span class="font-medium text-gray-900">
@@ -433,7 +433,7 @@
       <app-button
         type="button"
         variant="primary"
-        widthClass="w-auto"
+        widthClass="w-24"
         (click)="getFinalPageButton().action()"
       >
         {{ getFinalPageButton().text }}

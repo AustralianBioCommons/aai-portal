@@ -37,7 +37,7 @@ describe('SbpRegistrationSuccessComponent', () => {
   });
 
   it('should display email verification message with the user email', () => {
-    const message = fixture.debugElement.query(By.css('.verification-message'));
+    const message = fixture.debugElement.query(By.css('.text-gray-700'));
     expect(message).toBeTruthy();
     const normalizedText = message.nativeElement.textContent
       .replace(/\s+/g, ' ')

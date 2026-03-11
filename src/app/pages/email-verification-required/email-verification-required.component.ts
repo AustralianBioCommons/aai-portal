@@ -5,16 +5,25 @@ import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
 import { ApiService } from '../../core/services/api.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { AuthService } from '../../core/services/auth.service';
+import { AlertComponent } from '../../shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-email-verification-required',
-  imports: [CommonModule, RecaptchaModule, ButtonComponent, RouterLink],
+  imports: [
+    CommonModule,
+    RecaptchaModule,
+    ButtonComponent,
+    AlertComponent,
+    RouterLink,
+  ],
   templateUrl: './email-verification-required.component.html',
   styleUrl: './email-verification-required.component.css',
 })
 export class EmailVerificationRequiredComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly apiService = inject(ApiService);
+  private readonly authService = inject(AuthService);
 
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   readonly sessionToken = signal<string | null>(null);
@@ -102,5 +111,9 @@ export class EmailVerificationRequiredComponent implements OnInit {
     } catch {
       return null;
     }
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }
