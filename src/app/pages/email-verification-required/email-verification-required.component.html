@@ -39,17 +39,18 @@
         </button>
       </div>
     } @else {
-      <h1 class="text-4xl font-semibold text-gray-900">Verify your email</h1>
+      <h1 class="text-4xl font-semibold text-gray-900">Verify Your Email</h1>
       <p class="font-light text-gray-600">
-        Your email address must be verified before you can sign in.
+        Before you can sign in, you need to verify your email address.
         @if (maskedEmail()) {
-          We found your account as
+          We found an account linked to
           <span class="font-semibold">{{ maskedEmail() }}</span
           >.
         }
       </p>
       <p class="text-sm text-gray-500">
-        Complete the reCAPTCHA challenge, then request a new verification email.
+        If this is you, complete the reCAPTCHA check and request a new
+        verification email.
       </p>
 
       @if (state() === "error" && errorMessage()) {
