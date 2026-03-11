@@ -47,11 +47,13 @@
     } @else {
       <h1 class="text-4xl font-semibold text-gray-900">Verify your email</h1>
       <p class="max-w-2xl font-light text-gray-600">
-        Your email address must be verified before you can sign in.
+        Before you can sign in, you need to verify your email address.
         @if (maskedEmail()) {
-          We found your account as
+          We found an account linked to
           <span class="font-medium text-gray-900">{{ maskedEmail() }}</span>
-          .
+          . <br /><br />
+          If this is you, please complete the reCAPTCHA check and request a new
+          verification email.
         }
       </p>
       <div class="flex flex-col items-center gap-1">
