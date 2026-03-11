@@ -1,3 +1,12 @@
+@if (state() === "error" && errorMessage()) {
+  <app-alert
+    type="error"
+    [message]="errorMessage()"
+    [dismissible]="true"
+    (dismissed)="errorMessage.set(null)"
+  ></app-alert>
+}
+
 <div class="flex h-full min-h-screen w-full flex-col bg-gray-50">
   <nav
     class="flex items-center justify-between gap-4 border-b border-gray-100 bg-white px-6 py-6 sm:px-12"
@@ -16,81 +25,62 @@
   </nav>
 
   <div
-    class="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center gap-6 px-6"
+    class="flex flex-1 flex-col items-center justify-center gap-12 px-12 text-center"
   >
     @if (state() === "success") {
-      <div class="space-y-8">
-        <h1 class="text-4xl font-semibold text-gray-900">
-          Verification Email Sent
-        </h1>
-        <p class="font-light text-gray-600">
-          We sent a new verification email
-          @if (maskedEmail()) {
-            to <span class="font-semibold">{{ maskedEmail() }}</span>
-          }
-          . Please check your inbox and click the verification link before
-          logging in.
-        </p>
-        <button
-          class="text-sky-500 transition-all hover:text-sky-600 hover:underline"
-          routerLink="/login"
-        >
-          Back to Login
-        </button>
-      </div>
+      <h1
+        class="text-gray-90 text-center text-4xl font-semibold sm:text-5xl lg:text-6xl"
+      >
+        Verification Email Sent
+      </h1>
+      <p class="max-w-2xl font-light text-gray-600">
+        We sent a new verification email
+        @if (maskedEmail()) {
+          to <span class="font-medium text-gray-900">{{ maskedEmail() }}</span>
+        }
+        . Please check your inbox and click the verification link before logging
+        in.
+      </p>
+      <app-button variant="primary" routerLink="/login" widthClass="w-auto"
+        >Back to Login</app-button
+      >
     } @else {
       <h1 class="text-4xl font-semibold text-gray-900">Verify your email</h1>
-      <p class="font-light text-gray-600">
+      <p class="max-w-2xl font-light text-gray-600">
         Your email address must be verified before you can sign in.
         @if (maskedEmail()) {
           We found your account as
-          <span class="font-semibold">{{ maskedEmail() }}</span
-          >.
+          <span class="font-medium text-gray-900">{{ maskedEmail() }}</span>
+          .
         }
       </p>
-      <p class="text-sm text-gray-500">
-        Complete the reCAPTCHA challenge, then request a new verification email.
-      </p>
-
-      @if (state() === "error" && errorMessage()) {
-        <div
-          class="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          role="alert"
+      <div class="flex flex-col items-center gap-1">
+        <re-captcha
+          (resolved)="resolved($event)"
+          siteKey="{{ recaptchaSiteKeyV2 }}"
+        ></re-captcha>
+        @if (!recaptchaToken() && recaptchaAttempted()) {
+          <div class="mt-0.5 text-xs text-red-500" role="alert">
+            Please complete the reCAPTCHA verification.
+          </div>
+        }
+      </div>
+      <div class="flex flex-col items-center justify-center gap-6">
+        <app-button
+          type="button"
+          variant="primary"
+          [disabled]="state() === 'submitting'"
+          widthClass="w-36"
+          (click)="resendVerificationEmail()"
         >
-          {{ errorMessage() }}
-        </div>
-      }
-
-      <div class="flex flex-col gap-10">
-        <div class="flex flex-col items-center gap-1">
-          <re-captcha
-            (resolved)="resolved($event)"
-            siteKey="{{ recaptchaSiteKeyV2 }}"
-          ></re-captcha>
-          @if (!recaptchaToken() && recaptchaAttempted()) {
-            <div class="mt-0.5 text-xs text-red-500" role="alert">
-              Please complete the reCAPTCHA verification.
-            </div>
-          }
-        </div>
-
-        <div class="flex flex-col items-center justify-center gap-6">
-          <app-button
-            type="button"
-            variant="primary"
-            [disabled]="state() === 'submitting'"
-            widthClass="w-48"
-            (click)="resendVerificationEmail()"
-          >
-            Resend Email
-          </app-button>
-          <button
-            class="text-sky-500 transition-all hover:text-sky-600 hover:underline"
-            routerLink="/login"
-          >
-            Back to Login
-          </button>
-        </div>
+          Resend Email
+        </app-button>
+        <button
+          class="text-sky-500 transition-all hover:text-sky-600 hover:underline"
+          (click)="logout()"
+        >
+          Back to Login
+        </button>
       </div>
     }
   </div>
