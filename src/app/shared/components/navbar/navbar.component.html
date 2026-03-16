@@ -67,17 +67,28 @@
           </ng-template>
         </app-dropdown-menu>
       } @else {
-        <button
-          type="button"
-          class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
-          role="menuitem"
-          tabindex="-1"
-          id="user-menu-item-2"
-          (click)="logout()"
-        >
-          <ng-icon name="logOut" size="20"></ng-icon>
-          Log out
-        </button>
+        <div class="flex items-center gap-6">
+          <a
+            href="https://biocommonsaccess.freshdesk.com/support/home"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+          >
+            <ng-icon name="heroQuestionMarkCircle" size="20"></ng-icon>
+            Support
+          </a>
+          <button
+            type="button"
+            class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+            role="menuitem"
+            tabindex="-1"
+            id="user-menu-item-2"
+            (click)="logout()"
+          >
+            <ng-icon name="logOut" size="20"></ng-icon>
+            Log out
+          </button>
+        </div>
       }
     </div>
   </div>

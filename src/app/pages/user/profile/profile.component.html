@@ -289,16 +289,18 @@
     <div class="text-red-500">{{ pageError() }}</div>
   } @else if (user()) {
     <div class="flex w-full max-w-7xl flex-1 flex-col gap-6">
-      <div class="flex items-center justify-between">
-        @if (isGeneralAdmin()) {
-          <a
-            routerLink="/"
-            class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
-          >
-            <ng-icon name="heroArrowLeft" size="16"></ng-icon>
-            Back to Dashboard
-          </a>
-        }
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          @if (isGeneralAdmin()) {
+            <a
+              routerLink="/"
+              class="flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-gray-700"
+            >
+              <ng-icon name="heroArrowLeft" size="16"></ng-icon>
+              Back to Dashboard
+            </a>
+          }
+        </div>
 
         <app-dropdown-menu
           [isOpen]="openMenuAction()"
