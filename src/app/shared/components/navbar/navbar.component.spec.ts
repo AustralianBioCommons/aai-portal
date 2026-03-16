@@ -60,6 +60,14 @@ describe('NavbarComponent', () => {
     mockAuthService = TestBed.inject(
       AuthService,
     ) as jasmine.SpyObj<AuthService>;
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({
+        all: 0,
+        pending: 0,
+        revoked: 0,
+        unverified: 0,
+      }),
+    );
   });
 
   it('should create', () => {
