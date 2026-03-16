@@ -1,14 +1,11 @@
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 hover:cursor-pointer"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
   tabindex="-1"
-  (click)="onSecondary()"
   (keydown.escape)="onSecondary()"
 >
   <div
-    class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg hover:cursor-default"
+    class="w-full max-w-lg space-y-6 rounded-lg bg-white p-6 shadow-lg"
     tabindex="-1"
-    (click)="$event.stopPropagation()"
-    (keydown)="$event.stopPropagation()"
   >
     <div class="space-y-2">
       <h3
