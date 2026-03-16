@@ -20,6 +20,7 @@ import {
   heroBars3,
   heroUserCircle,
   heroArrowRightStartOnRectangle,
+  heroQuestionMarkCircle,
   heroUser,
 } from '@ng-icons/heroicons/outline';
 
@@ -39,6 +40,7 @@ import {
       heroBars3,
       heroUserCircle,
       logOut: heroArrowRightStartOnRectangle,
+      heroQuestionMarkCircle,
       heroUser,
     }),
   ],

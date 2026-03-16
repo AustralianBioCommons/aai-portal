@@ -17,6 +17,7 @@ describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   type ProfileTestHarness = ProfileComponent & {
     openModal(type: 'username' | 'password' | 'name' | 'email'): void;
@@ -119,6 +120,9 @@ describe('ProfileComponent', () => {
     component = fixture.componentInstance;
     harness = component as ProfileTestHarness;
     mockApiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
+    mockAuthService = TestBed.inject(
+      AuthService,
+    ) as jasmine.SpyObj<AuthService>;
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
     mockApiService.updateUsername.and.returnValue(of(mockAuth0User));
     mockApiService.updatePassword.and.returnValue(of(true));
@@ -735,13 +739,8 @@ describe('ProfileComponent', () => {
   });
 
   describe('delete account', () => {
-    let mockAuthService: jasmine.SpyObj<AuthService>;
-
     beforeEach(() => {
       fixture.detectChanges();
-      mockAuthService = TestBed.inject(
-        AuthService,
-      ) as jasmine.SpyObj<AuthService>;
     });
 
     it('deleteAccountBegin opens modal and resets confirmation control', () => {

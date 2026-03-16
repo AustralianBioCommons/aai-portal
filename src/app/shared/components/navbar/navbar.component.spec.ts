@@ -6,6 +6,7 @@ import { NavbarComponent } from './navbar.component';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
+import { By } from '@angular/platform-browser';
 
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
@@ -59,6 +60,14 @@ describe('NavbarComponent', () => {
     mockAuthService = TestBed.inject(
       AuthService,
     ) as jasmine.SpyObj<AuthService>;
+    mockApiService.getAdminUserCounts.and.returnValue(
+      of({
+        all: 0,
+        pending: 0,
+        revoked: 0,
+        unverified: 0,
+      }),
+    );
   });
 
   it('should create', () => {
@@ -202,6 +211,73 @@ describe('NavbarComponent', () => {
     component.logout();
 
     expect(mockAuthService.logout).toHaveBeenCalled();
+  });
+
+  it('should render a support link for non-admin users', () => {
+    fixture.detectChanges();
+
+    const supportLink = fixture.debugElement
+      .queryAll(By.css('a'))
+      .find(
+        (link) =>
+          link.nativeElement.textContent.includes('Support') &&
+          link.nativeElement.getAttribute('href') ===
+            'https://biocommonsaccess.freshdesk.com/support/home',
+      );
+
+    expect(supportLink).toBeTruthy();
+    expect(supportLink!.nativeElement.getAttribute('target')).toBe('_blank');
+  });
+
+  it('should not render a support link for admin users', async () => {
+    const adminAuthSpy = jasmine.createSpyObj('AuthService', ['logout'], {
+      isAuthenticated: signal(true),
+      user: signal({ name: 'Admin User', picture: 'admin.jpg' }),
+      isGeneralAdmin: signal(true),
+      isLoading: signal(false),
+      adminPlatforms: signal([{ id: 'galaxy', name: 'Galaxy' }]),
+      adminGroups: signal([]),
+      adminType: signal('platform'),
+    });
+
+    const routerSpy = jasmine.createSpyObj(
+      'Router',
+      ['navigate', 'createUrlTree', 'serializeUrl'],
+      {
+        url: '/all-users',
+        events: EMPTY,
+        routerState: { root: {} },
+      },
+    );
+
+    routerSpy.createUrlTree.and.returnValue({});
+    routerSpy.serializeUrl.and.returnValue('/mocked-url');
+
+    const activatedRouteSpy = jasmine.createSpyObj('ActivatedRoute', [], {
+      snapshot: { params: {}, queryParams: {} },
+      params: of({}),
+      queryParams: of({}),
+    });
+
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [NavbarComponent],
+      providers: [
+        { provide: ApiService, useValue: mockApiService },
+        { provide: AuthService, useValue: adminAuthSpy },
+        { provide: Router, useValue: routerSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteSpy },
+      ],
+    }).compileComponents();
+
+    const adminFixture = TestBed.createComponent(NavbarComponent);
+    adminFixture.detectChanges();
+
+    const supportLink = adminFixture.debugElement
+      .queryAll(By.css('a'))
+      .find((link) => link.nativeElement.textContent.includes('Support'));
+
+    expect(supportLink).toBeUndefined();
   });
 
   it('should refresh counts when data refresh is triggered', () => {
