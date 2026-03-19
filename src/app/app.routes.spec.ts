@@ -21,7 +21,7 @@ describe('createRoutes', () => {
     },
   };
 
-  it('disables SBP routes when auth0 domain is production', () => {
+  it('disables SBP routes when in production', () => {
     const routes = createRoutes({
       ...baseEnv,
       production: true,
@@ -30,7 +30,7 @@ describe('createRoutes', () => {
     expect(routes.some((route) => route.path === 'sbp')).toBeFalse();
   });
 
-  it('enables SBP routes when auth0 domain is not production', () => {
+  it('enables SBP routes when not in production', () => {
     const routes = createRoutes({
       ...baseEnv,
       production: false,
