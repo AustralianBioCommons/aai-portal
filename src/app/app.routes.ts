@@ -22,131 +22,134 @@ import { FirstMigrationComponent } from './pages/first-migration/first-migration
 import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
 import { environment } from '../environments/environment';
+import { EnvironmentConfig } from '../environments/runtime-config';
 
-// Disable SBP routes in production for now
-const sbpRoutes: Routes =
-  environment.auth0.domain == 'login.access.services.biocommons.org.au'
-    ? []
-    : [
-        {
-          path: 'sbp',
-          component: SbpLayoutComponent,
-          canActivate: [loginGuard],
-          children: [
-            { path: '', redirectTo: 'register', pathMatch: 'full' },
-            {
-              path: 'register',
-              component: SbpRegisterComponent,
-              data: { title: 'Register | Structural Biology Platform' },
-            },
-            {
-              path: 'register/success',
-              component: SbpRegistrationSuccessComponent,
-              data: {
-                title: 'Registration Success | Structural Biology Platform',
+// Helper function to create routes based on environment configuration
+export function createRoutes(env: EnvironmentConfig): Routes {
+  // Disable SBP in production for now
+  const sbpRoutes: Routes =
+    env.auth0.domain === 'login.access.services.biocommons.org.au'
+      ? []
+      : [
+          {
+            path: 'sbp',
+            component: SbpLayoutComponent,
+            canActivate: [loginGuard],
+            children: [
+              { path: '', redirectTo: 'register', pathMatch: 'full' },
+              {
+                path: 'register',
+                component: SbpRegisterComponent,
+                data: { title: 'Register | Structural Biology Platform' },
               },
-            },
-          ],
+              {
+                path: 'register/success',
+                component: SbpRegistrationSuccessComponent,
+                data: {
+                  title: 'Registration Success | Structural Biology Platform',
+                },
+              },
+            ],
+          },
+        ];
+
+  return [
+    {
+      path: 'login',
+      component: LoginComponent,
+      canActivate: [loginGuard],
+      data: { title: 'Login | BioCommons Access' },
+    },
+    {
+      path: 'register',
+      component: RegisterComponent,
+      canActivate: [loginGuard],
+      data: { title: 'Register | BioCommons Access' },
+    },
+    {
+      path: 'terms/biocommons',
+      component: BiocommonsTermsComponent,
+      data: { title: 'BioCommons Access Terms & Conditions' },
+    },
+    {
+      path: 'user',
+      canActivate: [loginGuard],
+      children: [
+        {
+          path: 'email-verified',
+          component: EmailVerifiedComponent,
+          data: { title: 'Email Verification | BioCommons Access' },
         },
-      ];
+        {
+          path: 'email-verification-required',
+          component: EmailVerificationRequiredComponent,
+          data: { title: 'Verify Your Email | BioCommons Access' },
+        },
+      ],
+    },
 
-export const routes: Routes = [
-  // Auth routes - only accessible when not logged in
-  {
-    path: 'login',
-    component: LoginComponent,
-    canActivate: [loginGuard],
-    data: { title: 'Login | BioCommons Access' },
-  },
-  {
-    path: 'register',
-    component: RegisterComponent,
-    canActivate: [loginGuard],
-    data: { title: 'Register | BioCommons Access' },
-  },
-  {
-    path: 'terms/biocommons',
-    component: BiocommonsTermsComponent,
-    data: { title: 'BioCommons Access Terms & Conditions' },
-  },
-  {
-    path: 'user',
-    canActivate: [loginGuard],
-    children: [
-      {
-        path: 'email-verified',
-        component: EmailVerifiedComponent,
-        data: { title: 'Email Verification | BioCommons Access' },
-      },
-      {
-        path: 'email-verification-required',
-        component: EmailVerificationRequiredComponent,
-        data: { title: 'Verify Your Email | BioCommons Access' },
-      },
-    ],
-  },
+    ...sbpRoutes,
 
-  // Standalone routes without DefaultLayoutComponent
-  ...sbpRoutes,
-  {
-    path: 'migration',
-    component: FirstMigrationComponent,
-    data: { title: 'Account Migration | BioCommons Access Portal' },
-  },
+    {
+      path: 'migration',
+      component: FirstMigrationComponent,
+      data: { title: 'Account Migration | BioCommons Access Portal' },
+    },
+    {
+      path: '',
+      component: DefaultLayoutComponent,
+      canActivate: [authGuard],
+      children: [
+        {
+          path: '',
+          pathMatch: 'full',
+          canActivate: [rootRedirectGuard],
+          children: [],
+        },
+        {
+          path: 'profile',
+          component: ProfileComponent,
+          data: { title: 'Profile | BioCommons Access Portal' },
+        },
+        {
+          path: 'profile/request-bundle',
+          component: BundlesComponent,
+          data: { title: 'Request Bundle Access | BioCommons Access Portal' },
+        },
+        {
+          path: 'user/:id',
+          component: UserDetailsComponent,
+          canActivate: [adminGuard],
+          data: { title: 'User Details | BioCommons Access Portal' },
+        },
+        {
+          path: 'all-users',
+          component: AllUsersComponent,
+          canActivate: [adminGuard],
+          data: { title: 'All Users | BioCommons Access Portal' },
+        },
+        {
+          path: 'revoked-users',
+          component: RevokedUsersComponent,
+          canActivate: [adminGuard],
+          data: { title: 'Revoked Users | BioCommons Access Portal' },
+        },
+        {
+          path: 'pending-users',
+          component: PendingUsersComponent,
+          canActivate: [adminGuard],
+          data: { title: 'Pending Users | BioCommons Access Portal' },
+        },
+        {
+          path: 'unverified-users',
+          component: UnverifiedUsersComponent,
+          canActivate: [adminGuard],
+          data: { title: 'Unverified Users | BioCommons Access Portal' },
+        },
+      ],
+    },
+    { path: '**', component: NotFoundComponent },
+  ];
+}
 
-  // Authenticated routes that use DefaultLayoutComponent
-  {
-    path: '',
-    component: DefaultLayoutComponent,
-    canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        canActivate: [rootRedirectGuard],
-        children: [],
-      },
-      {
-        path: 'profile',
-        component: ProfileComponent,
-        data: { title: 'Profile | BioCommons Access Portal' },
-      },
-      {
-        path: 'profile/request-bundle',
-        component: BundlesComponent,
-        data: { title: 'Request Bundle Access | BioCommons Access Portal' },
-      },
-      {
-        path: 'user/:id',
-        component: UserDetailsComponent,
-        canActivate: [adminGuard],
-        data: { title: 'User Details | BioCommons Access Portal' },
-      },
-      {
-        path: 'all-users',
-        component: AllUsersComponent,
-        canActivate: [adminGuard],
-        data: { title: 'All Users | BioCommons Access Portal' },
-      },
-      {
-        path: 'revoked-users',
-        component: RevokedUsersComponent,
-        canActivate: [adminGuard],
-        data: { title: 'Revoked Users | BioCommons Access Portal' },
-      },
-      {
-        path: 'pending-users',
-        component: PendingUsersComponent,
-        canActivate: [adminGuard],
-        data: { title: 'Pending Users | BioCommons Access Portal' },
-      },
-      {
-        path: 'unverified-users',
-        component: UnverifiedUsersComponent,
-        canActivate: [adminGuard],
-        data: { title: 'Unverified Users | BioCommons Access Portal' },
-      },
-    ],
-  },
-  { path: '**', component: NotFoundComponent },
-];
+export const routes: Routes = createRoutes(environment);
