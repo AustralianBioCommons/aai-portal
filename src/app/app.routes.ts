@@ -21,6 +21,34 @@ import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
 import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
+import { environment } from '../environments/environment';
+
+// Disable SBP routes in production for now
+const sbpRoutes: Routes =
+  environment.auth0.domain == 'login.access.services.biocommons.org.au'
+    ? []
+    : [
+        {
+          path: 'sbp',
+          component: SbpLayoutComponent,
+          canActivate: [loginGuard],
+          children: [
+            { path: '', redirectTo: 'register', pathMatch: 'full' },
+            {
+              path: 'register',
+              component: SbpRegisterComponent,
+              data: { title: 'Register | Structural Biology Platform' },
+            },
+            {
+              path: 'register/success',
+              component: SbpRegistrationSuccessComponent,
+              data: {
+                title: 'Registration Success | Structural Biology Platform',
+              },
+            },
+          ],
+        },
+      ];
 
 export const routes: Routes = [
   // Auth routes - only accessible when not logged in
@@ -59,24 +87,7 @@ export const routes: Routes = [
   },
 
   // Standalone routes without DefaultLayoutComponent
-  {
-    path: 'sbp',
-    component: SbpLayoutComponent,
-    canActivate: [loginGuard],
-    children: [
-      { path: '', redirectTo: 'register', pathMatch: 'full' },
-      {
-        path: 'register',
-        component: SbpRegisterComponent,
-        data: { title: 'Register | Structural Biology Platform' },
-      },
-      {
-        path: 'register/success',
-        component: SbpRegistrationSuccessComponent,
-        data: { title: 'Registration Success | Structural Biology Platform' },
-      },
-    ],
-  },
+  ...sbpRoutes,
   {
     path: 'migration',
     component: FirstMigrationComponent,
