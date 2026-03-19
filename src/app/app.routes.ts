@@ -21,37 +21,35 @@ import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
 import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
-import { environment } from '../environments/environment';
 import { EnvironmentConfig } from '../environments/runtime-config';
 
 // Helper function to create routes based on environment configuration
 export function createRoutes(env: EnvironmentConfig): Routes {
   // Disable SBP in production for now
-  const sbpRoutes: Routes =
-    env.auth0.domain === 'login.access.services.biocommons.org.au'
-      ? []
-      : [
-          {
-            path: 'sbp',
-            component: SbpLayoutComponent,
-            canActivate: [loginGuard],
-            children: [
-              { path: '', redirectTo: 'register', pathMatch: 'full' },
-              {
-                path: 'register',
-                component: SbpRegisterComponent,
-                data: { title: 'Register | Structural Biology Platform' },
+  const sbpRoutes: Routes = env.production
+    ? []
+    : [
+        {
+          path: 'sbp',
+          component: SbpLayoutComponent,
+          canActivate: [loginGuard],
+          children: [
+            { path: '', redirectTo: 'register', pathMatch: 'full' },
+            {
+              path: 'register',
+              component: SbpRegisterComponent,
+              data: { title: 'Register | Structural Biology Platform' },
+            },
+            {
+              path: 'register/success',
+              component: SbpRegistrationSuccessComponent,
+              data: {
+                title: 'Registration Success | Structural Biology Platform',
               },
-              {
-                path: 'register/success',
-                component: SbpRegistrationSuccessComponent,
-                data: {
-                  title: 'Registration Success | Structural Biology Platform',
-                },
-              },
-            ],
-          },
-        ];
+            },
+          ],
+        },
+      ];
 
   return [
     {
@@ -87,9 +85,8 @@ export function createRoutes(env: EnvironmentConfig): Routes {
         },
       ],
     },
-
+    // Standalone routes without DefaultLayoutComponent
     ...sbpRoutes,
-
     {
       path: 'migration',
       component: FirstMigrationComponent,
@@ -151,5 +148,3 @@ export function createRoutes(env: EnvironmentConfig): Routes {
     { path: '**', component: NotFoundComponent },
   ];
 }
-
-export const routes: Routes = createRoutes(environment);
