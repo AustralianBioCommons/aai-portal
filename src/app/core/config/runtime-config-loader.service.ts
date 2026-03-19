@@ -17,7 +17,7 @@ export class RuntimeConfigLoaderService {
   private readonly http = inject(HttpClient);
   private readonly authClientConfig = inject(AuthClientConfig);
 
-  load(): Promise<void> {
+  load(): Promise<RuntimeEnvironmentConfig> {
     return firstValueFrom(
       this.http
         .get<RuntimeEnvironmentConfig>('assets/config/app-config.json')
@@ -42,8 +42,6 @@ export class RuntimeConfigLoaderService {
             });
           }),
         ),
-    )
-      .then(() => undefined)
-      .catch(() => undefined);
+    ).catch(() => ({}) as RuntimeEnvironmentConfig);
   }
 }
