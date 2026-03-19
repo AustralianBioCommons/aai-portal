@@ -85,7 +85,6 @@ export function createRoutes(env: EnvironmentConfig): Routes {
         },
       ],
     },
-    // Standalone routes without DefaultLayoutComponent
     ...sbpRoutes,
     {
       path: 'migration',
