@@ -4,18 +4,28 @@ import {
   provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideAuth0 } from '@auth0/auth0-angular';
-import { routes } from './app.routes';
-import { environment } from '../environments/environment';
+import { createRoutes } from './app.routes';
+import { environment, environmentDefaults } from '../environments/environment';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { RecaptchaSettings, RECAPTCHA_SETTINGS } from 'ng-recaptcha-2';
 import { RuntimeConfigLoaderService } from './core/config/runtime-config-loader.service';
+import { mergeEnvironmentConfig } from '../environments/runtime-config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideAppInitializer(() => inject(RuntimeConfigLoaderService).load()),
+    provideRouter([]),
+    provideAppInitializer(async () => {
+      const loader = inject(RuntimeConfigLoaderService);
+      const router = inject(Router);
+
+      const runtime = await loader.load();
+      const merged = mergeEnvironmentConfig(environmentDefaults, runtime);
+
+      router.resetConfig(createRoutes(merged));
+    }),
     provideAuth0({
       domain: '',
       clientId: '',
@@ -26,7 +36,6 @@ export const appConfig: ApplicationConfig = {
     }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
     {
       provide: RECAPTCHA_SETTINGS,
       useFactory: () =>

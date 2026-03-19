@@ -21,25 +21,19 @@ describe('createRoutes', () => {
     },
   };
 
-  it('disables SBP routes when auth0 domain is production', () => {
+  it('disables SBP routes when in production', () => {
     const routes = createRoutes({
       ...baseEnv,
-      auth0: {
-        ...baseEnv.auth0,
-        domain: 'login.access.services.biocommons.org.au',
-      },
+      production: true,
     });
 
     expect(routes.some((route) => route.path === 'sbp')).toBeFalse();
   });
 
-  it('enables SBP routes when auth0 domain is not production', () => {
+  it('enables SBP routes when not in production', () => {
     const routes = createRoutes({
       ...baseEnv,
-      auth0: {
-        ...baseEnv.auth0,
-        domain: 'dev.login.aai.test.biocommons.org.au',
-      },
+      production: false,
     });
 
     const sbpRoute = routes.find((route) => route.path === 'sbp');
