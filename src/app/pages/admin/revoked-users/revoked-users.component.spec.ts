@@ -16,6 +16,9 @@ describe('RevokedUsersComponent', () => {
   let fixture: ComponentFixture<RevokedUsersComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let adminPlatformsSignal = signal([]);
+  let adminGroupsSignal = signal([]);
+  let adminTypeSignal = signal(null as any);
 
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
@@ -29,10 +32,14 @@ describe('RevokedUsersComponent', () => {
     );
     mockApiService.getFilterOptions.and.returnValue(of([]));
 
+    adminPlatformsSignal = signal([]);
+    adminGroupsSignal = signal([]);
+    adminTypeSignal = signal(null);
+
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
-      adminPlatforms: signal([]),
-      adminGroups: signal([]),
-      adminType: signal(null),
+      adminPlatforms: adminPlatformsSignal,
+      adminGroups: adminGroupsSignal,
+      adminType: adminTypeSignal,
     });
 
     await TestBed.configureTestingModule({
@@ -56,7 +63,8 @@ describe('RevokedUsersComponent', () => {
     expect(component.title).toBe('Revoked Users');
   });
 
-  it('should load users with the correct params', () => {
+  it('should load revoked users for biocommons admins', () => {
+    adminTypeSignal.set('biocommons');
     fixture.detectChanges();
     const expectedParams = {
       page: 1,
@@ -64,6 +72,24 @@ describe('RevokedUsersComponent', () => {
       filterBy: '',
       search: '',
       approvalStatus: 'revoked',
+    } as AdminGetUsersApiParams;
+
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
+      expectedParams,
+    );
+  });
+
+  it('should load revoked users scoped to platform for platform admins', () => {
+    adminTypeSignal.set('platform');
+    adminPlatformsSignal.set([{ id: 'galaxy', name: 'Galaxy Australia' }]);
+    fixture.detectChanges();
+    const expectedParams = {
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      filterBy: '',
+      search: '',
+      platform: 'galaxy',
+      platformApprovalStatus: 'revoked',
     } as AdminGetUsersApiParams;
 
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
