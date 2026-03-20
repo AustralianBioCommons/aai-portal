@@ -450,6 +450,7 @@ describe('ProfileComponent', () => {
   it('handles a successful password change', () => {
     component.passwordForm.controls.currentPassword.setValue('Current123!');
     component.passwordForm.controls.newPassword.setValue('NewPassword1!');
+    component.passwordForm.controls.confirmPassword.setValue('NewPassword1!');
 
     fixture.detectChanges();
     updatePassword();
@@ -481,6 +482,7 @@ describe('ProfileComponent', () => {
     openModal('password');
     component.passwordForm.controls.currentPassword.setValue('Current123!');
     component.passwordForm.controls.newPassword.setValue('ValidPassword1!');
+    component.passwordForm.controls.confirmPassword.setValue('ValidPassword1!');
 
     fixture.detectChanges();
     updatePassword();
@@ -515,6 +517,7 @@ describe('ProfileComponent', () => {
     openModal('password');
     component.passwordForm.controls.currentPassword.setValue('WrongPassword1!');
     component.passwordForm.controls.newPassword.setValue('NewValid1!');
+    component.passwordForm.controls.confirmPassword.setValue('NewValid1!');
 
     fixture.detectChanges();
     updatePassword();
@@ -702,6 +705,7 @@ describe('ProfileComponent', () => {
       component.passwordForm.patchValue({
         currentPassword: 'SamePass123!',
         newPassword: 'SamePass123!',
+        confirmPassword: 'SamePass123!',
       });
       component.passwordForm.markAllAsTouched();
 
@@ -728,6 +732,7 @@ describe('ProfileComponent', () => {
       component.passwordForm.patchValue({
         currentPassword: 'OldPass123!',
         newPassword: 'NewPass123!',
+        confirmPassword: 'NewPass123!',
       });
 
       expect(

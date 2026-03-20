@@ -131,6 +131,7 @@ export class ProfileComponent implements OnInit {
   passwordForm = this.formBuilder.nonNullable.group({
     currentPassword: ['', Validators.required],
     newPassword: ['', passwordRequirements],
+    confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
   });
 
   activeModal = signal<ProfileModal | null>(null);
@@ -151,6 +152,11 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserProfile();
     this.validationService.setupPasswordDifferentValidation(this.passwordForm);
+    this.validationService.setupPasswordConfirmationValidation(
+      this.passwordForm,
+      'newPassword',
+      'confirmPassword',
+    );
     this.usernameForm.get('username')?.valueChanges.subscribe(() => {
       if (this.validationService.hasFieldBackendError('username')) {
         this.validationService.clearFieldBackendError('username');
@@ -200,7 +206,11 @@ export class ProfileComponent implements OnInit {
         this.validationService.clearFieldBackendError('email');
         break;
       case 'password':
-        this.passwordForm.reset({ currentPassword: '', newPassword: '' });
+        this.passwordForm.reset({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
         break;
     }
     this.activeModal.set(type);
