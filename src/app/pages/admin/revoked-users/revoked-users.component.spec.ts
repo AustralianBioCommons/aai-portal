@@ -6,9 +6,11 @@ import { signal } from '@angular/core';
 import { RevokedUsersComponent } from './revoked-users.component';
 import {
   AdminGetUsersApiParams,
+  AdminPlatformResponse,
+  AdminGroupResponse,
   ApiService,
 } from '../../../core/services/api.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { AdminType, AuthService } from '../../../core/services/auth.service';
 import { DEFAULT_PAGE_SIZE } from '../components/user-list/user-list.component';
 
 describe('RevokedUsersComponent', () => {
@@ -16,6 +18,9 @@ describe('RevokedUsersComponent', () => {
   let fixture: ComponentFixture<RevokedUsersComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let adminPlatformsSignal = signal<AdminPlatformResponse[]>([]);
+  let adminGroupsSignal = signal<AdminGroupResponse[]>([]);
+  let adminTypeSignal = signal<AdminType>(null);
 
   beforeEach(async () => {
     mockApiService = jasmine.createSpyObj('ApiService', [
@@ -29,10 +34,14 @@ describe('RevokedUsersComponent', () => {
     );
     mockApiService.getFilterOptions.and.returnValue(of([]));
 
+    adminPlatformsSignal = signal<AdminPlatformResponse[]>([]);
+    adminGroupsSignal = signal<AdminGroupResponse[]>([]);
+    adminTypeSignal = signal<AdminType>(null);
+
     mockAuthService = jasmine.createSpyObj('AuthService', [], {
-      adminPlatforms: signal([]),
-      adminGroups: signal([]),
-      adminType: signal(null),
+      adminPlatforms: adminPlatformsSignal,
+      adminGroups: adminGroupsSignal,
+      adminType: adminTypeSignal,
     });
 
     await TestBed.configureTestingModule({
@@ -56,7 +65,8 @@ describe('RevokedUsersComponent', () => {
     expect(component.title).toBe('Revoked Users');
   });
 
-  it('should load users with the correct params', () => {
+  it('should load revoked users for biocommons admins', () => {
+    adminTypeSignal.set('biocommons');
     fixture.detectChanges();
     const expectedParams = {
       page: 1,
@@ -64,6 +74,24 @@ describe('RevokedUsersComponent', () => {
       filterBy: '',
       search: '',
       approvalStatus: 'revoked',
+    } as AdminGetUsersApiParams;
+
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(
+      expectedParams,
+    );
+  });
+
+  it('should load revoked users scoped to platform for platform admins', () => {
+    adminTypeSignal.set('platform');
+    adminPlatformsSignal.set([{ id: 'galaxy', name: 'Galaxy Australia' }]);
+    fixture.detectChanges();
+    const expectedParams = {
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      filterBy: '',
+      search: '',
+      platform: 'galaxy',
+      platformApprovalStatus: 'revoked',
     } as AdminGetUsersApiParams;
 
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith(

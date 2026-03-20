@@ -1,5 +1,7 @@
-<app-user-list
-  [title]="title"
-  [defaultQueryParams]="defaultQueryParams"
-  [returnUrl]="'/revoked-users'"
-></app-user-list>
+@if (defaultQueryParams()) {
+  <app-user-list
+    [title]="title"
+    [defaultQueryParams]="defaultQueryParams()!"
+    [returnUrl]="'/revoked-users'"
+  ></app-user-list>
+}
