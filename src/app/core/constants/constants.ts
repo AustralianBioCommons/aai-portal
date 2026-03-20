@@ -4,6 +4,7 @@ export interface Bundle {
   logoUrls: string[];
   listItems: string[];
   disabled?: boolean;
+  approved?: boolean;
 }
 
 export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';

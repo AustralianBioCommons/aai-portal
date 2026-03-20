@@ -22,223 +22,275 @@
 }
 
 <div
-  class="relative flex flex-1 grow flex-col gap-12 p-6 md:p-12 lg:px-24 xl:px-48"
+  class="relative flex flex-1 grow flex-col p-6 pt-0 md:p-12 md:pt-0 lg:px-24 xl:px-48"
 >
   <div
-    class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+    class="sticky top-32 z-20 -mx-6 bg-gray-50 px-6 pt-6 md:-mx-12 md:px-12 md:pt-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
   >
-    <!-- Search bar -->
-    <div class="w-full" [ngClass]="isSbpAdmin() ? 'md:w-full' : 'md:w-2/3'">
-      <label
-        for="search-input"
-        class="mb-1 block text-sm font-medium text-gray-900"
-      >
-        Search
-      </label>
-      <div
-        class="flex h-12 w-full flex-1 items-center justify-between rounded-md border bg-white py-2 pl-4 pr-2 font-light focus-within:ring-2 focus-within:ring-sky-100"
-      >
-        <input
-          id="search-input"
-          class="flex-1 focus:outline-none"
-          type="text"
-          placeholder="By name or email address"
-          [(ngModel)]="searchTerm"
-          (input)="onSearchInput()"
-          (keydown.enter)="onSearchSubmit()"
-        />
-        <button
-          type="button"
-          class="flex items-center justify-center rounded-full p-2 transition-all hover:bg-gray-200"
-          (click)="onSearchSubmit()"
-        >
-          <ng-icon
-            name="heroMagnifyingGlass"
-            size="16"
-            class="text-biocommons-primary"
-            strokeWidth="2"
-          ></ng-icon>
-        </button>
+    <div class="flex items-center justify-between gap-6">
+      <div class="w-1/3 text-3xl font-semibold text-gray-900">
+        {{ title() }}
+      </div>
+      <div class="w-2/3 text-right">
+        <ng-content></ng-content>
       </div>
     </div>
 
-    <!-- Filter dropdown -->
-    @if (!isSbpAdmin()) {
-      <div class="w-full md:w-1/3">
+    <div
+      class="mb-4 mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+    >
+      <!-- Search bar -->
+      <div class="w-full" [ngClass]="isSbpAdmin() ? 'md:w-full' : 'md:w-2/3'">
         <label
-          for="filter-select"
+          for="search-input"
           class="mb-1 block text-sm font-medium text-gray-900"
         >
-          Filter by user group
+          Search
         </label>
-        <select
-          id="filter-select"
-          class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light outline outline-1 outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
-          [(ngModel)]="selectedFilter"
-          [disabled]="loading()"
-          (change)="onFilterChange()"
-        >
-          <option value="">All</option>
-          @for (option of filterOptions(); track option.id) {
-            <option [value]="option.id">{{ option.name }}</option>
-          }
-        </select>
-      </div>
-    }
-  </div>
-
-  <ng-content></ng-content>
-
-  <div class="-mt-6 flex flex-1 flex-col">
-    <div
-      class="sticky top-40 z-20 -mx-6 bg-gray-50 px-6 pt-6 md:-mx-12 md:px-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
-    >
-      <div class="text-3xl font-semibold text-gray-900">{{ title() }}</div>
-
-      <!-- List header -->
-      <div
-        class="mt-4 flex items-center rounded-md bg-sky-900 p-2 px-4 text-sm font-medium text-white shadow-md"
-      >
         <div
-          class="flex-1"
-          [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
+          class="flex h-12 w-full flex-1 items-center justify-between rounded-md border bg-white py-2 pl-4 pr-2 font-light focus-within:ring-2 focus-within:ring-sky-100"
         >
-          Total:
-          <span class="font-light text-gray-300">{{ totalUsers() }} users</span>
+          <input
+            id="search-input"
+            class="flex-1 focus:outline-none"
+            type="text"
+            placeholder="By name or email address"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchInput()"
+            (keydown.enter)="onSearchSubmit()"
+          />
+          <button
+            type="button"
+            class="flex items-center justify-center rounded-full p-2 transition-all hover:bg-gray-200"
+            (click)="onSearchSubmit()"
+          >
+            <ng-icon
+              name="heroMagnifyingGlass"
+              size="16"
+              class="text-biocommons-primary"
+              strokeWidth="2"
+            ></ng-icon>
+          </button>
         </div>
+      </div>
+
+      <!-- Filter dropdown -->
+      @if (!isSbpAdmin()) {
+        <div class="w-full md:w-1/3">
+          <label
+            for="filter-select"
+            class="mb-1 block text-sm font-medium text-gray-900"
+          >
+            Filter by user group
+          </label>
+          <select
+            id="filter-select"
+            class="h-12 w-full rounded-md border-r-8 border-transparent bg-white px-4 py-3 font-light outline outline-1 outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
+            [(ngModel)]="selectedFilter"
+            [disabled]="loading()"
+            (change)="onFilterChange()"
+          >
+            <option value="">All</option>
+            @for (option of filterOptions(); track option.id) {
+              <option [value]="option.id">{{ option.name }}</option>
+            }
+          </select>
+        </div>
+      }
+    </div>
+
+    <!-- List header -->
+    <div
+      class="flex items-center rounded-md bg-sky-900 p-2 px-4 text-sm font-medium text-white shadow-md"
+    >
+      <div
+        class="flex-1"
+        [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
+      >
+        Total:
+        <span class="font-light text-gray-300">{{ totalUsers() }} users</span>
+      </div>
+      <div class="w-3/12">
+        {{
+          adminType() !== "bundle"
+            ? "Bundles"
+            : adminGroups()[0].short_name + " Bundle Access"
+        }}
+      </div>
+      @if (adminType() !== "bundle") {
         <div class="w-3/12">
           {{
-            adminType() !== "bundle"
-              ? "Bundles"
-              : adminGroups()[0].short_name + " Bundle Access"
+            adminType() === "biocommons"
+              ? "Services"
+              : adminType() === "platform"
+                ? adminPlatforms()[0].name + " Access"
+                : "Access"
           }}
         </div>
-        @if (adminType() !== "bundle") {
-          <div class="w-3/12">
-            {{
-              adminType() === "biocommons"
-                ? "Services"
-                : adminType() === "platform"
-                  ? adminPlatforms()[0].name + " Access"
-                  : "Access"
-            }}
-          </div>
-        }
-        <div class="w-1/12"></div>
-      </div>
+      }
+      <div class="w-1/12"></div>
     </div>
-    @if (loading() && users().length === 0) {
-      <div class="flex w-full flex-1 items-center justify-center">
-        <app-loading-spinner />
-      </div>
-    } @else {
-      <div class="flex flex-1 flex-col gap-4 pt-4">
-        @if (users().length === 0) {
+  </div>
+
+  @if (loading() && users().length === 0) {
+    <div class="flex w-full flex-1 items-center justify-center p-6">
+      <app-loading-spinner />
+    </div>
+  } @else {
+    <div class="flex flex-1 flex-col gap-4 pt-4">
+      @if (users().length === 0) {
+        <div
+          class="flex flex-1 items-center justify-center rounded-md bg-white p-4 text-gray-900 shadow"
+        >
+          No users found
+        </div>
+      } @else {
+        <!-- List items -->
+        @for (user of users(); track user.id) {
           <div
-            class="flex flex-1 items-center justify-center rounded-md bg-white text-gray-900 shadow"
+            class="flex items-center rounded-md bg-white p-4 font-normal shadow"
           >
-            No users found
-          </div>
-        } @else {
-          <!-- List items -->
-          @for (user of users(); track user.id) {
             <div
-              class="flex items-center rounded-md bg-white p-4 font-normal shadow"
+              class="flex-1 truncate"
+              [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
             >
-              <div
-                class="flex-1 truncate"
-                [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
+              <button
+                type="button"
+                class="truncate text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
+                (click)="navigateToUserDetails(user.id)"
               >
-                <a
-                  [routerLink]="['/user', user.id]"
-                  [state]="{ returnUrl: returnUrl() }"
-                  class="text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
-                >
-                  {{ user.email }}
-                </a>
-              </div>
-              <div class="flex w-3/12 flex-wrap gap-2">
-                @if (user.group_memberships.length) {
-                  @if (adminType() !== "bundle") {
-                    @for (group of user.group_memberships; track group.id) {
-                      <span
-                        class="rounded-md border px-2 py-0.5 text-sm font-medium"
+                {{ user.email }}
+              </button>
+            </div>
+            <div class="flex w-3/12 flex-wrap gap-2">
+              @if (user.group_memberships.length) {
+                @if (adminType() !== "bundle") {
+                  @for (group of user.group_memberships; track group.id) {
+                    <span
+                      class="rounded-md border px-2 py-0.5 text-sm font-medium"
+                      [ngClass]="{
+                        'border-green-600/20 bg-green-50 text-green-700':
+                          group.approval_status === 'approved',
+                        'border-yellow-600/20 bg-yellow-50 text-yellow-800':
+                          group.approval_status === 'pending',
+                        'border-red-600/20 bg-red-50 text-red-700':
+                          group.approval_status === 'revoked' ||
+                          group.approval_status === 'rejected',
+                      }"
+                    >
+                      {{ group.group_short_name }}
+                    </span>
+                  }
+                } @else {
+                  <!-- Show approval status only for bundle admins -->
+                  @for (group of user.group_memberships; track group.id) {
+                    @if (canManageGroup(group.group_id)) {
+                      <div
+                        class="flex items-center gap-2 text-sm font-medium"
                         [ngClass]="{
-                          'border-green-600/20 bg-green-50 text-green-700':
+                          'text-green-500':
                             group.approval_status === 'approved',
-                          'border-yellow-600/20 bg-yellow-50 text-yellow-800':
+                          'text-yellow-500':
                             group.approval_status === 'pending',
-                          'border-red-600/20 bg-red-50 text-red-700':
+                          'text-red-500':
                             group.approval_status === 'revoked' ||
                             group.approval_status === 'rejected',
                         }"
                       >
-                        {{ group.group_short_name }}
-                      </span>
-                    }
-                  } @else {
-                    <!-- Show approval status only for bundle admins -->
-                    @for (group of user.group_memberships; track group.id) {
-                      @if (canManageGroup(group.group_id)) {
-                        <div
-                          class="flex items-center gap-2 text-sm font-medium"
-                          [ngClass]="{
-                            'text-green-500':
-                              group.approval_status === 'approved',
-                            'text-yellow-500':
-                              group.approval_status === 'pending',
-                            'text-red-500':
-                              group.approval_status === 'revoked' ||
-                              group.approval_status === 'rejected',
-                          }"
-                        >
-                          <span class="truncate">
-                            {{ group.approval_status | titlecase }}
-                          </span>
-                          @if (
-                            group.approval_status === "revoked" ||
-                            group.approval_status === "rejected"
-                          ) {
-                            <app-tooltip
-                              [message]="
-                                getTooltipMessage(
-                                  group.revocation_reason ||
-                                    group.rejection_reason,
-                                  group.updated_by,
-                                  group.updated_at,
-                                  group.approval_status === 'rejected'
-                                    ? 'Rejected'
-                                    : 'Revoked'
-                                )
-                              "
-                            />
-                          }
-                          @if (
-                            group.approval_status === "pending" &&
-                            group.request_reason
-                          ) {
-                            <app-tooltip
-                              [message]="
-                                'Reason for request: ' + group.request_reason
-                              "
-                              iconColor="text-yellow-500 hover:text-yellow-600"
-                            />
-                          }
-                        </div>
-                      }
+                        <span class="truncate">
+                          {{ group.approval_status | titlecase }}
+                        </span>
+                        @if (
+                          group.approval_status === "revoked" ||
+                          group.approval_status === "rejected"
+                        ) {
+                          <app-tooltip
+                            [message]="
+                              getTooltipMessage(
+                                group.revocation_reason ||
+                                  group.rejection_reason,
+                                group.updated_by,
+                                group.updated_at,
+                                group.approval_status === 'rejected'
+                                  ? 'Rejected'
+                                  : 'Revoked'
+                              )
+                            "
+                          />
+                        }
+                        @if (
+                          group.approval_status === "pending" &&
+                          group.request_reason
+                        ) {
+                          <app-tooltip
+                            [message]="
+                              'Reason for request: ' + group.request_reason
+                            "
+                            iconColor="text-yellow-500 hover:text-yellow-600"
+                          />
+                        }
+                      </div>
                     }
                   }
-                } @else {
-                  <div class="text-sm text-gray-500">None</div>
                 }
-              </div>
-              @if (adminType() !== "bundle") {
-                <div class="w-3/12">
-                  @if (adminType() === "biocommons") {
-                    <!-- Show all platforms with names for multi-platform (biocommons) admins -->
-                    @for (
-                      platform of user.platform_memberships;
-                      track platform.id
+              } @else {
+                <div class="text-sm text-gray-500">None</div>
+              }
+            </div>
+            @if (adminType() !== "bundle") {
+              <div class="w-3/12">
+                @if (adminType() === "biocommons") {
+                  <!-- Show all platforms with names for multi-platform (biocommons) admins -->
+                  @for (
+                    platform of user.platform_memberships;
+                    track platform.id
+                  ) {
+                    <div
+                      class="flex items-center gap-2 text-sm font-medium"
+                      [ngClass]="{
+                        'text-green-500':
+                          platform.approval_status === 'approved',
+                        'text-yellow-500':
+                          platform.approval_status === 'pending',
+                        'text-red-500': platform.approval_status === 'revoked',
+                      }"
+                    >
+                      <span class="truncate">
+                        {{ platform.platform_name }}
+                      </span>
+                      @if (platform.approval_status === "revoked") {
+                        <app-tooltip
+                          [message]="
+                            getTooltipMessage(
+                              platform.revocation_reason,
+                              platform.updated_by,
+                              platform.updated_at
+                            )
+                          "
+                        />
+                      }
+                      @if (
+                        platform.approval_status === "pending" &&
+                        platform.request_reason
+                      ) {
+                        <app-tooltip
+                          [message]="
+                            'Reason for request: ' + platform.request_reason
+                          "
+                          iconColor="text-yellow-500 hover:text-yellow-600"
+                        />
+                      }
+                    </div>
+                  }
+                } @else {
+                  <!-- Show approval status only for single-platform admins -->
+                  @for (
+                    platform of user.platform_memberships;
+                    track platform.id
+                  ) {
+                    @if (
+                      adminType() === "platform" &&
+                      platform.platform_id === adminPlatforms()[0].id
                     ) {
                       <div
                         class="flex items-center gap-2 text-sm font-medium"
@@ -252,7 +304,7 @@
                         }"
                       >
                         <span class="truncate">
-                          {{ platform.platform_name }}
+                          {{ platform.approval_status | titlecase }}
                         </span>
                         @if (platform.approval_status === "revoked") {
                           <app-tooltip
@@ -278,143 +330,91 @@
                         }
                       </div>
                     }
-                  } @else {
-                    <!-- Show approval status only for single-platform admins -->
-                    @for (
-                      platform of user.platform_memberships;
-                      track platform.id
-                    ) {
-                      @if (
-                        adminType() === "platform" &&
-                        platform.platform_id === adminPlatforms()[0].id
-                      ) {
-                        <div
-                          class="flex items-center gap-2 text-sm font-medium"
-                          [ngClass]="{
-                            'text-green-500':
-                              platform.approval_status === 'approved',
-                            'text-yellow-500':
-                              platform.approval_status === 'pending',
-                            'text-red-500':
-                              platform.approval_status === 'revoked',
-                          }"
-                        >
-                          <span class="truncate">
-                            {{ platform.approval_status | titlecase }}
-                          </span>
-                          @if (platform.approval_status === "revoked") {
-                            <app-tooltip
-                              [message]="
-                                getTooltipMessage(
-                                  platform.revocation_reason,
-                                  platform.updated_by,
-                                  platform.updated_at
-                                )
-                              "
-                            />
-                          }
-                          @if (
-                            platform.approval_status === "pending" &&
-                            platform.request_reason
-                          ) {
-                            <app-tooltip
-                              [message]="
-                                'Reason for request: ' + platform.request_reason
-                              "
-                              iconColor="text-yellow-500 hover:text-yellow-600"
-                            />
-                          }
-                        </div>
-                      }
-                    }
                   }
-                </div>
-              }
-              <div class="relative flex w-1/12 justify-end">
-                <app-dropdown-menu
-                  [isOpen]="isMenuOpen(user.id)"
-                  (isOpenChange)="openMenuUserId.set($event ? user.id : null)"
-                >
-                  <ng-template #trigger>
-                    <button
-                      type="button"
-                      class="flex flex-col items-center justify-center rounded-full p-1 transition-all hover:bg-gray-200"
-                      (click)="
-                        openMenuUserId.set(isMenuOpen(user.id) ? null : user.id)
-                      "
-                    >
-                      <ng-icon
-                        name="heroEllipsisHorizontal"
-                        size="20"
-                      ></ng-icon>
-                    </button>
-                  </ng-template>
-                  <ng-template #menu>
-                    <button
-                      type="button"
-                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                      role="menuitem"
-                      tabindex="-1"
-                      (click)="navigateToUserDetails(user.id)"
-                    >
-                      <ng-icon name="heroUserCircle" size="20"></ng-icon>
-                      View User Details
-                    </button>
-                    @for (
-                      platform of user.platform_memberships;
-                      track platform.id
+                }
+              </div>
+            }
+            <div class="relative flex w-1/12 justify-end">
+              <app-dropdown-menu
+                [isOpen]="isMenuOpen(user.id)"
+                (isOpenChange)="openMenuUserId.set($event ? user.id : null)"
+              >
+                <ng-template #trigger>
+                  <button
+                    type="button"
+                    class="flex flex-col items-center justify-center rounded-full p-1 transition-all hover:bg-gray-200"
+                    (click)="
+                      openMenuUserId.set(isMenuOpen(user.id) ? null : user.id)
+                    "
+                  >
+                    <ng-icon name="heroEllipsisHorizontal" size="20"></ng-icon>
+                  </button>
+                </ng-template>
+                <ng-template #menu>
+                  <button
+                    type="button"
+                    class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                    role="menuitem"
+                    tabindex="-1"
+                    (click)="navigateToUserDetails(user.id)"
+                  >
+                    <ng-icon name="heroUserCircle" size="20"></ng-icon>
+                    View User Details
+                  </button>
+                  @for (
+                    platform of user.platform_memberships;
+                    track platform.id
+                  ) {
+                    <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
+                    @if (
+                      platform.approval_status === "approved" &&
+                      ((adminType() === "biocommons" &&
+                        user.platform_memberships.length === 1) ||
+                        (adminType() === "platform" &&
+                          platform.platform_id === adminPlatforms()[0].id))
                     ) {
-                      <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
-                      @if (
-                        platform.approval_status === "approved" &&
-                        ((adminType() === "biocommons" &&
-                          user.platform_memberships.length === 1) ||
-                          (adminType() === "platform" &&
-                            platform.platform_id === adminPlatforms()[0].id))
-                      ) {
-                        <button
-                          type="button"
-                          class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
-                          role="menuitem"
-                          tabindex="-1"
-                          (click)="
-                            openRevokeModal(
-                              user.id,
-                              user.email,
-                              platform.platform_id
-                            )
-                          "
-                        >
-                          <ng-icon name="heroXCircle" size="20"></ng-icon>
-
-                          Revoke
-                        </button>
-                      }
-                    }
-                    @if (!user.email_verified) {
                       <button
                         type="button"
                         class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                         role="menuitem"
                         tabindex="-1"
-                        (click)="resendVerificationEmail(user.id)"
+                        (click)="
+                          openRevokeModal(
+                            user.id,
+                            user.email,
+                            platform.platform_id
+                          )
+                        "
                       >
-                        <ng-icon name="heroEnvelope" size="20"></ng-icon>
-                        Resend Verification Email
+                        <ng-icon name="heroXCircle" size="20"></ng-icon>
+
+                        Revoke
                       </button>
                     }
-                  </ng-template>
-                </app-dropdown-menu>
-              </div>
+                  }
+                  @if (!user.email_verified) {
+                    <button
+                      type="button"
+                      class="flex w-full items-center justify-start gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
+                      role="menuitem"
+                      tabindex="-1"
+                      (click)="resendVerificationEmail(user.id)"
+                    >
+                      <ng-icon name="heroEnvelope" size="20"></ng-icon>
+                      Resend Verification Email
+                    </button>
+                  }
+                </ng-template>
+              </app-dropdown-menu>
             </div>
-          }
-          @if (loadingMore()) {
-            <div class="flex items-center justify-center py-6">
-              <app-loading-spinner />
-            </div>
-          }
+          </div>
         }
-      </div>
-    }
-  </div>
+        @if (loadingMore()) {
+          <div class="flex items-center justify-center py-6">
+            <app-loading-spinner />
+          </div>
+        }
+      }
+    </div>
+  }
 </div>

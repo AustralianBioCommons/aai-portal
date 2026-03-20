@@ -89,7 +89,7 @@ export class BundlesComponent implements OnInit {
         const updatedBundles = BIOCOMMONS_BUNDLES.map((bundle) => {
           const groupStatus = groupsWithIds.find((g) => g.id === bundle.id);
           if (groupStatus?.approval_status === 'approved') {
-            return { ...bundle, disabled: true };
+            return { ...bundle, disabled: true, approved: true };
           }
           return bundle;
         });

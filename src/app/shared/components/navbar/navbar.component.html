@@ -122,38 +122,38 @@
 
     <!-- Desktop Navigation (visible on larger screens) -->
     <div
-      class="mx-auto mb-8 hidden flex-1 items-center justify-center gap-6 overflow-hidden bg-white sm:flex"
+      class="mx-auto hidden flex-1 items-center justify-center overflow-hidden bg-white sm:flex"
     >
       @for (page of navigationPages; track page.route) {
         <a
           [routerLink]="page.route"
           routerLinkActive
           #routerLinkActive="routerLinkActive"
-          class="flex min-w-32 items-center justify-center gap-2 rounded-md py-2.5 text-sm font-medium transition-all"
+          class="flex min-w-36 items-center justify-center gap-2 border-b-4 border-transparent pb-3 pt-1 text-sm font-medium transition-all hover:cursor-pointer"
           [class]="
             routerLinkActive.isActive
-              ? 'bg-biocommons-primary text-white hover:bg-sky-900'
-              : 'bg-sky-50 text-biocommons-primary hover:bg-sky-100'
+              ? 'border-b-sky-500 text-sky-500 hover:border-b-sky-600 hover:text-sky-600'
+              : 'text-gray-500 hover:border-b-gray-300 hover:text-gray-600'
           "
         >
           {{ page.label }}
           @if (page.label === "Pending" && userCounts().pending > 0) {
             <span
-              class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 px-2 py-0.5 text-center text-xs font-medium text-white"
             >
               {{ userCounts().pending }}
             </span>
           }
           @if (page.label === "Revoked" && userCounts().revoked > 0) {
             <span
-              class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 px-2 py-0.5 text-center text-xs font-medium text-white"
             >
               {{ userCounts().revoked }}
             </span>
           }
           @if (page.label === "Unverified" && userCounts().unverified > 0) {
             <span
-              class="min-h-5 min-w-5 rounded-full bg-red-500 px-1 py-0.5 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 px-2 py-0.5 text-center text-xs font-medium text-white"
             >
               {{ userCounts().unverified }}
             </span>

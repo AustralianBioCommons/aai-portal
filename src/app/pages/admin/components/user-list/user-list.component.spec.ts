@@ -212,7 +212,7 @@ describe('UserListComponent', () => {
     component.searchTerm.set('test');
     component.onFilterChange();
 
-    expect(component.searchTerm()).toBe('');
+    expect(component.searchTerm()).toBe('test');
   });
 
   it('should call loadUsers when manually invoked', () => {
@@ -279,7 +279,11 @@ describe('UserListComponent', () => {
     component.navigateToUserDetails('123');
 
     expect(router.navigate).toHaveBeenCalledWith(['/user', '123'], {
-      state: { returnUrl: '/pending-users' },
+      state: {
+        returnUrl: '/pending-users',
+        searchTerm: '',
+        selectedFilter: '',
+      },
     });
   });
 
@@ -289,7 +293,7 @@ describe('UserListComponent', () => {
     component.navigateToUserDetails('123');
 
     expect(router.navigate).toHaveBeenCalledWith(['/user', '123'], {
-      state: { returnUrl: '' },
+      state: { returnUrl: '', searchTerm: '', selectedFilter: '' },
     });
   });
 
