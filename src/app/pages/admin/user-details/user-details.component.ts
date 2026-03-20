@@ -186,6 +186,8 @@ export class UserDetailsComponent implements OnInit {
   pageError = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
   returnUrl = signal<string>('/all-users');
+  returnSearchTerm = signal<string>('');
+  returnSelectedFilter = signal<string>('');
   profileImageLoaded = signal(false);
 
   openMenuAction = signal(false);
@@ -224,6 +226,17 @@ export class UserDetailsComponent implements OnInit {
       navigation?.extras?.state?.['returnUrl'] || history.state?.returnUrl;
     if (stateReturnUrl) {
       this.returnUrl.set(stateReturnUrl);
+    }
+    const stateSearchTerm =
+      navigation?.extras?.state?.['searchTerm'] || history.state?.searchTerm;
+    if (stateSearchTerm) {
+      this.returnSearchTerm.set(stateSearchTerm);
+    }
+    const stateSelectedFilter =
+      navigation?.extras?.state?.['selectedFilter'] ||
+      history.state?.selectedFilter;
+    if (stateSelectedFilter) {
+      this.returnSelectedFilter.set(stateSelectedFilter);
     }
 
     this.usernameForm.get('username')?.valueChanges.subscribe(() => {

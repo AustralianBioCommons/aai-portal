@@ -78,7 +78,7 @@ export class SbpRegisterComponent {
         username: ['', usernameRequirements],
         reason: ['', [Validators.required, Validators.maxLength(255)]],
         password: ['', passwordRequirements],
-        confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
+        confirmPassword: ['', Validators.required],
       },
       { validators: fullNameLengthValidator() },
     );

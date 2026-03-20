@@ -69,9 +69,6 @@ export class ValidationService {
     reason: {
       maxlength: 'Reason for request cannot be longer than 255 characters',
     },
-    confirmPassword: {
-      maxlength: 'Confirm password cannot be longer than 72 characters',
-    },
     projectOfInterest: {
       maxlength: 'Project of interest cannot be longer than 255 characters',
     },

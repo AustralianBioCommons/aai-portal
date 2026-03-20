@@ -13,8 +13,8 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { NgClass, TitleCasePipe, DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
+import { NgClass, TitleCasePipe, DatePipe, Location } from '@angular/common';
 import { Subject, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -62,7 +62,6 @@ export const DEFAULT_PAGE_SIZE = 50;
     ReactiveFormsModule,
     NgClass,
     TitleCasePipe,
-    RouterLink,
     LoadingSpinnerComponent,
     TooltipComponent,
     AlertComponent,
@@ -85,6 +84,7 @@ export const DEFAULT_PAGE_SIZE = 50;
 })
 export class UserListComponent implements OnInit {
   private router = inject(Router);
+  private location = inject(Location);
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
@@ -140,6 +140,7 @@ export class UserListComponent implements OnInit {
         if (this.page() > 1) {
           this.page.set(1);
         }
+        this.syncSearchState();
         this.resetAndReloadUsers();
         this.loadUserCounts();
       });
@@ -150,6 +151,16 @@ export class UserListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const navState = history.state as {
+      searchTerm?: string;
+      selectedFilter?: string;
+    };
+    if (navState?.searchTerm) {
+      this.searchTerm.set(navState.searchTerm);
+    }
+    if (navState?.selectedFilter) {
+      this.selectedFilter.set(navState.selectedFilter);
+    }
     this.loadUserCounts();
     this.loadUsers(true);
     this.loadFilterOptions();
@@ -169,7 +180,11 @@ export class UserListComponent implements OnInit {
 
   navigateToUserDetails(userId: string): void {
     this.router.navigate(['/user', userId], {
-      state: { returnUrl: this.returnUrl() },
+      state: {
+        returnUrl: this.returnUrl(),
+        searchTerm: this.searchTerm(),
+        selectedFilter: this.selectedFilter(),
+      },
     });
   }
 
@@ -262,6 +277,14 @@ export class UserListComponent implements OnInit {
       });
   }
 
+  private syncSearchState(): void {
+    this.location.replaceState(this.location.path(), '', {
+      ...history.state,
+      searchTerm: this.searchTerm(),
+      selectedFilter: this.selectedFilter(),
+    });
+  }
+
   private loadFilterOptions(): void {
     this.apiService.getFilterOptions().subscribe({
       next: (options: FilterOption[]) => {
@@ -328,7 +351,7 @@ export class UserListComponent implements OnInit {
   }
 
   onFilterChange(): void {
-    this.searchTerm.set('');
+    this.syncSearchState();
     this.page.set(1);
     this.users.set([]);
     this.loadUserCounts();
@@ -340,6 +363,7 @@ export class UserListComponent implements OnInit {
   }
 
   onSearchSubmit(): void {
+    this.syncSearchState();
     this.page.set(1);
     this.users.set([]);
     this.loadUserCounts();

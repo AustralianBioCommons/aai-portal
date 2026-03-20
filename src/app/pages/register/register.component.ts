@@ -33,6 +33,7 @@ import {
 import { fullNameLengthValidator } from '../../shared/validators/full-name';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -76,6 +77,7 @@ interface Section {
     BundleSelectionComponent,
     NgIcon,
     RouterModule,
+    TooltipComponent,
   ],
   styleUrl: './register.component.css',
   viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],
@@ -127,7 +129,7 @@ export class RegisterComponent implements AfterViewInit {
         ],
         username: ['', usernameRequirements],
         password: ['', passwordRequirements],
-        confirmPassword: ['', [Validators.required, Validators.maxLength(72)]],
+        confirmPassword: ['', Validators.required],
         bundle: [''],
         reason: [
           { value: '', disabled: true },
