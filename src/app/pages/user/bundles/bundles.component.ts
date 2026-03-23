@@ -9,6 +9,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroArrowLeft } from '@ng-icons/heroicons/outline';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
 
 @Component({
   selector: 'app-bundles',
@@ -19,6 +20,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
     ButtonComponent,
     NgIcon,
     LoadingSpinnerComponent,
+    TooltipComponent,
   ],
   templateUrl: './bundles.component.html',
   styleUrl: './bundles.component.css',
