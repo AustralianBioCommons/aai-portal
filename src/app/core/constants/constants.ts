@@ -5,6 +5,7 @@ export interface Bundle {
   listItems: string[];
   disabled?: boolean;
   approved?: boolean;
+  pending?: boolean;
 }
 
 export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';
