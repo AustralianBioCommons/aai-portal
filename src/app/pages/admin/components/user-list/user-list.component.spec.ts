@@ -135,7 +135,7 @@ describe('UserListComponent', () => {
 
   it('should filter out the current user from the list', fakeAsync(() => {
     userSignal.set({
-      user_id: '1',
+      user_id: 'does-not-match',
       email: 'user1@example.com',
       email_verified: true,
       username: 'user1',
@@ -151,6 +151,7 @@ describe('UserListComponent', () => {
     tick(250);
 
     expect(component.users()).toEqual([mockUsers[1]]);
+    expect(component.totalUsers()).toBe(99);
   }));
 
   it('should display the title', () => {

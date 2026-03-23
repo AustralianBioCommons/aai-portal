@@ -121,6 +121,12 @@ export class UserListComponent implements OnInit {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
   currentUserId = computed(() => this.authService.user()?.user_id ?? null);
+  currentUserEmail = computed(
+    () => this.authService.user()?.email?.toLowerCase() ?? null,
+  );
+  currentUsername = computed(
+    () => this.authService.user()?.username?.toLowerCase() ?? null,
+  );
 
   readonly isSbpAdmin = computed(
     () =>
@@ -341,9 +347,13 @@ export class UserListComponent implements OnInit {
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
           const filteredUsers = this.filterOutCurrentUser(users);
+          const removedCount = users.length - filteredUsers.length;
           this.users.set(
             append ? [...this.users(), ...filteredUsers] : filteredUsers,
           );
+          if (removedCount > 0) {
+            this.totalUsers.set(Math.max(0, this.totalUsers() - removedCount));
+          }
           this.finishLoading(start);
         },
         error: (error: unknown) => {
@@ -410,9 +420,22 @@ export class UserListComponent implements OnInit {
     users: BiocommonsUserResponse[],
   ): BiocommonsUserResponse[] {
     const currentUserId = this.currentUserId();
-    if (!currentUserId) {
+    const currentUserEmail = this.currentUserEmail();
+    const currentUsername = this.currentUsername();
+    if (!currentUserId && !currentUserEmail && !currentUsername) {
       return users;
     }
-    return users.filter((user) => user.id !== currentUserId);
+    return users.filter((user) => {
+      if (currentUserId && user.id === currentUserId) {
+        return false;
+      }
+      if (currentUserEmail && user.email?.toLowerCase() === currentUserEmail) {
+        return false;
+      }
+      if (currentUsername && user.username?.toLowerCase() === currentUsername) {
+        return false;
+      }
+      return true;
+    });
   }
 }
