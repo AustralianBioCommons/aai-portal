@@ -339,7 +339,7 @@
           <ng-template #trigger>
             <app-button
               type="button"
-              variant="primary"
+              variant="secondary"
               (click)="openMenuAction.set(!openMenuAction())"
             >
               <div class="flex items-center justify-center gap-2">
@@ -537,7 +537,7 @@
                       @if (launchUrl) {
                         <app-button
                           type="button"
-                          variant="secondary"
+                          variant="primary"
                           widthClass="w-auto"
                           (click)="launchPlatform(membership.platform_id)"
                         >
@@ -562,7 +562,7 @@
                 class="flex items-center gap-1 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
                 routerLink="/profile/request-bundle"
               >
-                Request more
+                Add more
                 <ng-icon name="heroPlusCircle" size="24"></ng-icon>
               </a>
             </div>
