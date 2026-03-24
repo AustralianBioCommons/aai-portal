@@ -1,30 +1,111 @@
-name: release-please
+name: release-please-build-upload
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - id: release
+        uses: googleapis/release-please-action@v4
         with:
-          release-type: node
-          package-name: aai-portal
           token: ${{ secrets.GITHUB_TOKEN }}
-          changelog-types: |
-            [
-              {"type":"feat","section":"Features","hidden":false},
-              {"type":"fix","section":"Bug Fixes","hidden":false},
-              {"type":"perf","section":"Performance","hidden":false},
-              {"type":"refactor","section":"Refactoring","hidden":true},
-              {"type":"docs","section":"Docs","hidden":true},
-              {"type":"chore","section":"Chores","hidden":true},
-              {"type":"test","section":"Tests","hidden":true}
-            ]
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish-release-builds:
+    name: Build And Upload Portal Release Artifacts
+    needs: release
+    if: needs.release.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag_name }}
+
+      - name: Normalize version
+        id: version
+        env:
+          TAG_NAME: ${{ needs.release.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+          NORMALIZED_VERSION=${TAG_NAME#aai-portal-v}
+          NORMALIZED_VERSION=${NORMALIZED_VERSION#v}
+          echo "version=${NORMALIZED_VERSION}" >> "${GITHUB_OUTPUT}"
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npx ng build --configuration production --output-path dist/aai-portal-prod
+
+      - name: Build debug bundle
+        run: npx ng build --configuration debug --output-path dist/aai-portal-debug
+
+      - name: Validate required secrets
+        env:
+          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
+          AWS_ROLE_FRONTEND: ${{ secrets.AWS_ROLE_FRONTEND }}
+          AWS_ROLE_FRONTEND_DEPLOY_STAGING: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_STAGING }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          set -euo pipefail
+          if [ -z "${AWS_PORTAL_BUILD_BUCKET}" ]; then
+            echo "Missing required secret AWS_PORTAL_BUILD_BUCKET" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_ROLE_FRONTEND}" ]; then
+            echo "Missing required secret AWS_ROLE_FRONTEND" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_ROLE_FRONTEND_DEPLOY_STAGING}" ]; then
+            echo "Missing required secret AWS_ROLE_FRONTEND_DEPLOY_STAGING" >&2
+            exit 1
+          fi
+          if [ -z "${AWS_REGION}" ]; then
+            echo "Missing required secret AWS_REGION" >&2
+            exit 1
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
+          role-session-name: portal-release-upload
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload production versioned build
+        env:
+          NORMALIZED_VERSION: ${{ steps.version.outputs.version }}
+          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws s3 sync dist/aai-portal-prod/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/prod/version/${NORMALIZED_VERSION}/" --delete
+
+      - name: Upload debug versioned build
+        env:
+          NORMALIZED_VERSION: ${{ steps.version.outputs.version }}
+          AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
+        run: |
+          set -euo pipefail
+          aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/version/${NORMALIZED_VERSION}/" --delete
