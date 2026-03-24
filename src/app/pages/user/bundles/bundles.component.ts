@@ -79,7 +79,7 @@ export class BundlesComponent implements OnInit {
   }
 
   /**
-   * Get the user's groups, disable any bundles that are already approved
+   * Get the user's groups, disable any bundles that are already approved or pending
    */
   loadCurrentBundles() {
     this.apiService.getUserGroups().subscribe({
@@ -92,6 +92,9 @@ export class BundlesComponent implements OnInit {
           const groupStatus = groupsWithIds.find((g) => g.id === bundle.id);
           if (groupStatus?.approval_status === 'approved') {
             return { ...bundle, disabled: true, approved: true };
+          }
+          if (groupStatus?.approval_status === 'pending') {
+            return { ...bundle, disabled: true, pending: true };
           }
           return bundle;
         });

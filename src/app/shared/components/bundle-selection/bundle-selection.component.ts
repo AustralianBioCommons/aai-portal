@@ -8,6 +8,7 @@ import {
   heroPlus,
   heroEye,
   heroMinus,
+  heroClock,
 } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
 
@@ -22,6 +23,7 @@ import { ModalComponent } from '../modal/modal.component';
       heroPlus,
       heroEye,
       heroMinus,
+      heroClock,
     }),
   ],
 })
