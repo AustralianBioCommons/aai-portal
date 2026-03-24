@@ -25,10 +25,13 @@
   class="relative flex flex-1 grow flex-col p-6 pt-0 md:p-12 md:pt-0 lg:px-24 xl:px-48"
 >
   <div
-    class="sticky top-32 z-20 -mx-6 bg-gray-50 px-6 pt-6 md:-mx-12 md:px-12 md:pt-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
+    class="sticky top-40 z-20 -mx-6 bg-gray-50 px-6 pt-6 sm:top-32 md:-mx-12 md:px-12 md:pt-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
   >
     <div class="flex items-center justify-between gap-6">
-      <div class="w-1/3 text-3xl font-semibold text-gray-900">
+      <div
+        class="text-3xl font-semibold text-gray-900"
+        [ngClass]="hasTitleMessage() ? 'w-1/3' : 'w-full'"
+      >
         {{ title() }}
       </div>
       <div class="w-2/3 text-right">
@@ -101,7 +104,7 @@
 
     <!-- List header -->
     <div
-      class="flex items-center rounded-md bg-sky-900 p-2 px-4 text-sm font-medium text-white shadow-md"
+      class="flex items-center gap-2 rounded-md bg-sky-900 p-2 px-4 text-sm font-medium text-white shadow-md"
     >
       <div
         class="flex-1"
@@ -148,7 +151,7 @@
         <!-- List items -->
         @for (user of users(); track user.id) {
           <div
-            class="flex items-center rounded-md bg-white p-4 font-normal shadow"
+            class="flex items-center gap-2 rounded-md bg-white p-4 font-normal shadow"
           >
             <div
               class="flex-1 truncate"
@@ -156,7 +159,7 @@
             >
               <button
                 type="button"
-                class="truncate text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
+                class="max-w-full truncate text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
                 (click)="navigateToUserDetails(user.id)"
               >
                 {{ user.email }}
