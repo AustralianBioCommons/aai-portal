@@ -12,14 +12,18 @@
     "prettier:fix": "prettier --check --write ."
   },
   "private": true,
+  "overrides": {
+    "flatted": "^3.4.2",
+    "socket.io-parser": "^4.2.6"
+  },
   "dependencies": {
-    "@angular/common": "^19.2.19",
-    "@angular/compiler": "^19.2.19",
-    "@angular/core": "^19.2.19",
-    "@angular/forms": "^19.2.19",
-    "@angular/platform-browser": "^19.2.19",
-    "@angular/platform-browser-dynamic": "^19.2.19",
-    "@angular/router": "^19.2.19",
+    "@angular/common": "^19.2.20",
+    "@angular/compiler": "^19.2.20",
+    "@angular/core": "^19.2.20",
+    "@angular/forms": "^19.2.20",
+    "@angular/platform-browser": "^19.2.20",
+    "@angular/platform-browser-dynamic": "^19.2.20",
+    "@angular/router": "^19.2.20",
     "@auth0/auth0-angular": "^2.2.3",
     "@ng-icons/core": "^31.0.0",
     "@ng-icons/heroicons": "^31.0.0",
@@ -30,9 +34,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.19",
-    "@angular/cli": "^19.2.19",
-    "@angular/compiler-cli": "^19.2.19",
+    "@angular-devkit/build-angular": "^19.2.20",
+    "@angular/cli": "^19.2.20",
+    "@angular/compiler-cli": "^19.2.20",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@playwright/test": "^1.50.0",
