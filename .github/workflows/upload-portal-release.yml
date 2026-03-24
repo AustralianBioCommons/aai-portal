@@ -1,9 +1,12 @@
 name: Publish Portal Release Artifacts
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Git tag to build and publish, e.g. v1.2.0
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -15,8 +18,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout release tag
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name }}
+
+      - name: Normalize version
+        id: version
+        env:
+          TAG_NAME: ${{ inputs.tag_name }}
+        run: |
+          set -euo pipefail
+          NORMALIZED_VERSION=${TAG_NAME#aai-portal-v}
+          NORMALIZED_VERSION=${NORMALIZED_VERSION#v}
+          echo "version=${NORMALIZED_VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
@@ -67,20 +82,18 @@ jobs:
 
       - name: Upload production versioned build
         env:
-          VERSION: ${{ github.ref_name }}
+          NORMALIZED_VERSION: ${{ steps.version.outputs.version }}
           AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
         run: |
           set -euo pipefail
-          NORMALIZED_VERSION=${VERSION#v}
           aws s3 sync dist/aai-portal-prod/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/prod/version/${NORMALIZED_VERSION}/" --delete
 
       - name: Upload debug versioned build
         env:
-          VERSION: ${{ github.ref_name }}
+          NORMALIZED_VERSION: ${{ steps.version.outputs.version }}
           AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
         run: |
           set -euo pipefail
-          NORMALIZED_VERSION=${VERSION#v}
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/version/${NORMALIZED_VERSION}/" --delete
 
       - name: Configure AWS credentials for staging release deploy
@@ -94,11 +107,10 @@ jobs:
 
       - name: Deploy staging frontend release via Lambda
         env:
-          VERSION: ${{ github.ref_name }}
+          NORMALIZED_VERSION: ${{ steps.version.outputs.version }}
           STAGING_RELEASE_FUNCTION: AaiFrontendStagingReleaseDeployer
         run: |
           set -euo pipefail
-          NORMALIZED_VERSION=${VERSION#v}
           PAYLOAD=$(jq -n --arg version "${NORMALIZED_VERSION}" '{version: $version, variant: "prod", keepExisting: false}')
           RESPONSE_FILE=$(mktemp)
 
