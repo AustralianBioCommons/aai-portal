@@ -52,7 +52,6 @@ jobs:
         env:
           AWS_PORTAL_BUILD_BUCKET: ${{ secrets.AWS_PORTAL_BUILD_BUCKET }}
           AWS_ROLE_FRONTEND: ${{ secrets.AWS_ROLE_FRONTEND }}
-          AWS_ROLE_FRONTEND_DEPLOY_STAGING: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_STAGING }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           set -euo pipefail
@@ -62,10 +61,6 @@ jobs:
           fi
           if [ -z "${AWS_ROLE_FRONTEND}" ]; then
             echo "Missing required secret AWS_ROLE_FRONTEND" >&2
-            exit 1
-          fi
-          if [ -z "${AWS_ROLE_FRONTEND_DEPLOY_STAGING}" ]; then
-            echo "Missing required secret AWS_ROLE_FRONTEND_DEPLOY_STAGING" >&2
             exit 1
           fi
           if [ -z "${AWS_REGION}" ]; then
