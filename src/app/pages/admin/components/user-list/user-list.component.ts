@@ -127,6 +127,8 @@ export class UserListComponent implements OnInit {
       this.adminPlatforms().some((p) => p?.id === 'sbp'),
   );
 
+  hasTitleMessage = input(false);
+
   // Form controls
   revokeReasonControl = new FormControl('', {
     nonNullable: true,
