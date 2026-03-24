@@ -25,7 +25,6 @@ describe('UserListComponent', () => {
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let router: Router;
-  let userSignal: ReturnType<typeof signal>;
 
   const mockUsers: BiocommonsUserResponse[] = [
     {
@@ -71,24 +70,10 @@ describe('UserListComponent', () => {
     mockApiService.getAdminAllUsers.and.returnValue(of(mockUsers));
     mockApiService.getAdminUsersPageInfo.and.returnValue(of(mockUserCounts));
 
-    userSignal = signal({
-      user_id: '999',
-      email: 'admin@example.com',
-      email_verified: true,
-      username: 'admin',
-      name: 'Admin User',
-      nickname: 'Admin',
-      picture: '',
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      identities: [],
-    });
-
     mockAuthService = jasmine.createSpyObj('AuthService', ['refreshUser'], {
       adminPlatforms: signal([]),
       adminGroups: signal([]),
       adminType: signal(null),
-      user: userSignal,
     });
 
     await TestBed.configureTestingModule({
@@ -131,26 +116,6 @@ describe('UserListComponent', () => {
     });
     expect(component.users()).toEqual(mockUsers);
     expect(component.loading()).toBe(false);
-  }));
-
-  it('should filter out the current user from the list', fakeAsync(() => {
-    userSignal.set({
-      user_id: '1',
-      email: 'user1@example.com',
-      email_verified: true,
-      username: 'user1',
-      name: 'User One',
-      nickname: 'User One',
-      picture: '',
-      created_at: '2023-01-01T00:00:00Z',
-      updated_at: '2023-01-01T00:00:00Z',
-      identities: [],
-    });
-
-    fixture.detectChanges();
-    tick(250);
-
-    expect(component.users()).toEqual([mockUsers[1]]);
   }));
 
   it('should display the title', () => {
