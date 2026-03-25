@@ -35,9 +35,12 @@ export class EmailVerifiedComponent {
     });
 
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-      const success = params.get('success') === 'true';
+      const rawSuccess = params.get('success') === 'true';
+      const message = params.get('message') || '';
+      const alreadyVerified = message === 'This URL can be used only once';
+      const success = rawSuccess || alreadyVerified;
       this.emailVerified.set(success);
-      this.errorMessage.set(params.get('message') || '');
+      this.errorMessage.set(alreadyVerified ? '' : message);
       const rawEmail = params.get('email');
       const email = rawEmail ? decodeURIComponent(rawEmail) : null;
       if (success && email && !this.welcomeEmailSent()) {
