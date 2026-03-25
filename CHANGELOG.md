@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.1](https://github.com/AustralianBioCommons/aai-portal/compare/v1.3.0...v1.3.1) (2026-03-25)
+
+
+### Bug Fixes
+
+* **build:** patch portal dependency vulnerabilities ([e1dc14f](https://github.com/AustralianBioCommons/aai-portal/commit/e1dc14fbf1b8d15b61b6868f9e8fe4f6fadb26fe))
+* treat used verification email as success ([b1b020c](https://github.com/AustralianBioCommons/aai-portal/commit/b1b020c42ed07148b9f20d1f013587cad1e5a400))
+* treat used verification email as success ([7920cf5](https://github.com/AustralianBioCommons/aai-portal/commit/7920cf521198aaef5f5cda57ca08b9503db23afb))
+
 ## [1.3.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.2.0...v1.3.0) (2026-03-24)
 
 
