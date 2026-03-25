@@ -75,7 +75,7 @@
             class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
           >
             <ng-icon name="heroQuestionMarkCircle" size="20"></ng-icon>
-            <span class="hidden sm:block">Support</span>
+            Support
           </a>
           <button
             type="button"
@@ -85,8 +85,8 @@
             id="user-menu-item-2"
             (click)="logout()"
           >
-            <ng-icon name="logOut" size="20" class="min-h-5 min-w-5"></ng-icon>
-            <span class="hidden whitespace-nowrap sm:block">Log out</span>
+            <ng-icon name="logOut" size="20"></ng-icon>
+            Log out
           </button>
         </div>
       }
@@ -132,7 +132,7 @@
           class="flex min-w-36 items-center justify-center gap-2 border-b-4 border-transparent pb-3 pt-1 text-sm font-medium transition-all hover:cursor-pointer"
           [class]="
             routerLinkActive.isActive
-              ? 'border-b-sky-500 text-sky-500'
+              ? 'border-b-sky-500 text-sky-500 hover:border-b-sky-600 hover:text-sky-600'
               : 'text-gray-500 hover:border-b-gray-300 hover:text-gray-600'
           "
         >
