@@ -36,8 +36,6 @@ export class ModalComponent implements OnInit, OnDestroy {
   description = input<string>('');
   primaryButtonText = input<string>('Confirm');
   secondaryButtonText = input<string>('Cancel');
-  primaryButtonWidthClass = input<string>('w-28');
-  secondaryButtonWidthClass = input<string>('w-28');
   primaryButtonColorClass = input<string>('');
   primaryButtonLoading = input<boolean>(false);
   primaryButtonDisabled = input<boolean>(false);
