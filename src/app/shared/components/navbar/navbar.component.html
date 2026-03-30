@@ -139,21 +139,24 @@
           {{ page.label }}
           @if (page.label === "Pending" && userCounts().pending > 0) {
             <span
-              class="min-h-5 min-w-5 rounded-full bg-red-500 px-2 py-0.5 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 py-0.5 text-center text-xs font-medium text-white"
+              [class]="userCounts().pending < 10 ? 'px-2.5' : 'px-2'"
             >
               {{ userCounts().pending }}
             </span>
           }
           @if (page.label === "Revoked" && userCounts().revoked > 0) {
             <span
-              class="min-h-5 min-w-5 rounded-full bg-red-500 px-2 py-0.5 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 py-0.5 text-center text-xs font-medium text-white"
+              [class]="userCounts().revoked < 10 ? 'px-2.5' : 'px-2'"
             >
               {{ userCounts().revoked }}
             </span>
           }
           @if (page.label === "Unverified" && userCounts().unverified > 0) {
             <span
-              class="min-h-5 min-w-5 rounded-full bg-red-500 px-2 py-0.5 text-center text-xs font-medium text-white"
+              class="min-h-5 min-w-5 rounded-full bg-red-500 py-0.5 text-center text-xs font-medium text-white"
+              [class]="userCounts().unverified < 10 ? 'px-2.5' : 'px-2'"
             >
               {{ userCounts().unverified }}
             </span>
