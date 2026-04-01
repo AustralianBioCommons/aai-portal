@@ -59,22 +59,24 @@
       </div>
     }
 
-    <div class="flex justify-between gap-6">
+    <div class="flex gap-6">
       <app-button
+        class="flex-1"
         type="button"
         variant="secondary"
-        [widthClass]="secondaryButtonWidthClass()"
+        widthClass="w-full"
         (click)="onSecondary()"
       >
         {{ computedSecondaryButtonText() }}
       </app-button>
       <app-button
+        class="flex-1"
         type="button"
         variant="primary"
+        widthClass="w-full"
         (click)="onPrimary()"
         [loading]="primaryButtonLoading()"
         [disabled]="primaryButtonDisabled()"
-        [widthClass]="primaryButtonWidthClass()"
         [colorClasses]="primaryButtonColorClass()"
       >
         {{ computedPrimaryButtonText() }}

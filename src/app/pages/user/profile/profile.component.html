@@ -15,8 +15,6 @@
     [description]="modalDescription()"
     [primaryButtonText]="modalPrimaryButtonText()"
     [primaryButtonLoading]="isModalLoading()"
-    [primaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
-    [secondaryButtonWidthClass]="activeModal() === 'email' ? 'w-56' : 'w-28'"
     secondaryButtonText="Cancel"
     (primaryOutput)="onModalPrimaryButtonClick()"
     (secondaryOutput)="closeModal()"
@@ -416,7 +414,7 @@
                     </div>
                     <button
                       type="button"
-                      class="justify-self-end text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                      class="justify-self-end text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                       (click)="openModal('name')"
                     >
                       Edit
@@ -428,7 +426,7 @@
                     <div class="break-all">{{ user()?.name }}</div>
                     <button
                       type="button"
-                      class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                      class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                       (click)="openModal('name')"
                     >
                       Edit
@@ -443,7 +441,7 @@
                   <div class="break-all">{{ user()?.username }}</div>
                   <button
                     type="button"
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                     (click)="openModal('username')"
                   >
                     Edit
@@ -471,7 +469,7 @@
                   </div>
                   <button
                     type="button"
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                     (click)="openModal('email')"
                   >
                     Edit
@@ -485,7 +483,7 @@
                   <div>••••••••••••</div>
                   <button
                     type="button"
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                     (click)="openModal('password')"
                   >
                     Edit
@@ -559,7 +557,7 @@
             <div class="flex items-center justify-between">
               <h2 class="text-2xl font-semibold">Bundles</h2>
               <a
-                class="flex items-center gap-1 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-950"
+                class="flex items-center gap-1 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
                 routerLink="/profile/request-bundle"
               >
                 Add more
