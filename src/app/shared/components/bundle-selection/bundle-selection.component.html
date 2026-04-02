@@ -91,6 +91,7 @@
         </div>
         <div class="text-3xl font-semibold">{{ bundle.name }}</div>
         @if (bundle.eligibilityNote) {
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
           <div
             class="text-sm/6 font-light text-gray-600"
             [innerHTML]="bundle.eligibilityNote"
