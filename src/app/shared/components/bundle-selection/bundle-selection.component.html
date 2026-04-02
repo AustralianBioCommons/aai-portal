@@ -90,6 +90,13 @@
           }
         </div>
         <div class="text-3xl font-semibold">{{ bundle.name }}</div>
+        @if (bundle.eligibilityNote) {
+          <div
+            class="text-sm/6 font-light text-gray-600"
+            [innerHTML]="bundle.eligibilityNote"
+            (click)="onBundleItemClick($event)"
+          ></div>
+        }
         @if (bundle.listItems.length) {
           <div class="text-sm/6 font-light text-gray-600">
             @for (item of bundle.listItems; track item) {
