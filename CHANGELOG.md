@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.4.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.3.1...v1.4.0) (2026-04-02)
+
+
+### Features
+
+* Improve responsive UI (AAI-796) ([19913d7](https://github.com/AustralianBioCommons/aai-portal/commit/19913d7a53214c3c84a3f121add73fe6bcb0f4db))
+* modify tsi bundle description ([b37268a](https://github.com/AustralianBioCommons/aai-portal/commit/b37268a65b961a906691d2d1c321e0664d6fd10e))
+* modify tsi bundle description ([dc55a76](https://github.com/AustralianBioCommons/aai-portal/commit/dc55a76014a931105f772131116559cec9ff00ac))
+
+
+### Bug Fixes
+
+* adjust badge padding for user counts in navbar for better responsiveness ([b4894f7](https://github.com/AustralianBioCommons/aai-portal/commit/b4894f74a06d8222cced474cb01ea8758269636d))
+* adjust title font size for improved responsiveness in user list component ([7649671](https://github.com/AustralianBioCommons/aai-portal/commit/764967123336603995ebf0761bd5af0ae312e61c))
+* remove hardcoded button width classes for improved responsiveness in modal components ([61d6070](https://github.com/AustralianBioCommons/aai-portal/commit/61d60706a99157f6423f3533953098cd1ab115f4))
+* update hover color for buttons in user details and profile components ([1d38bde](https://github.com/AustralianBioCommons/aai-portal/commit/1d38bde6dca7b005e8c14d24795fa88ef1cd2c95))
+
 ## [1.3.1](https://github.com/AustralianBioCommons/aai-portal/compare/v1.3.0...v1.3.1) (2026-03-25)
 
 
