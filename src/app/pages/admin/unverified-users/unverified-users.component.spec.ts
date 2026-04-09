@@ -73,6 +73,7 @@ describe('UnverifiedUsersComponent', () => {
   });
 
   it('should refresh the page when refresh button is clicked', () => {
+    fixture.detectChanges();
     const refreshSpy = spyOn(component, 'refreshPage');
     const refreshButton = fixture.debugElement.query(
       By.css('#refresh-page-button'),
