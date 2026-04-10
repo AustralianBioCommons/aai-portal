@@ -7,7 +7,25 @@
     [textareaControl]="reasonControl"
     (primaryOutput)="saveReason()"
     (secondaryOutput)="cancelReason()"
-  />
+  >
+    @if (modalBundleId() === "tsi") {
+      <div
+        modal-content
+        class="inline-block rounded-md bg-yellow-50 px-4 py-2 text-center text-sm font-normal text-yellow-800"
+      >
+        Please note: Only
+        <a
+          href="https://bioplatforms.com/project/threatened-species/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-semibold text-yellow-800 underline hover:text-yellow-700"
+        >
+          TSI Consortium
+        </a>
+        members are eligible to apply for this bundle.
+      </div>
+    }
+  </app-modal>
 }
 
 <form
@@ -90,14 +108,6 @@
           }
         </div>
         <div class="text-3xl font-semibold">{{ bundle.name }}</div>
-        @if (bundle.eligibilityNote) {
-          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-          <div
-            class="text-sm/6 font-light text-gray-600"
-            [innerHTML]="bundle.eligibilityNote"
-            (click)="onBundleItemClick($event)"
-          ></div>
-        }
         @if (bundle.listItems.length) {
           <div class="text-sm/6 font-light text-gray-600">
             @for (item of bundle.listItems; track item) {

@@ -22,6 +22,10 @@ import {
   heroArrowRightStartOnRectangle,
   heroQuestionMarkCircle,
   heroUser,
+  heroClock,
+  heroXCircle,
+  heroEnvelope,
+  heroDocumentText,
 } from '@ng-icons/heroicons/outline';
 
 @Component({
@@ -42,6 +46,10 @@ import {
       logOut: heroArrowRightStartOnRectangle,
       heroQuestionMarkCircle,
       heroUser,
+      heroClock,
+      heroXCircle,
+      heroEnvelope,
+      heroDocumentText,
     }),
   ],
 })
@@ -80,10 +88,10 @@ export class NavbarComponent {
   );
 
   navigationPages = [
-    { label: 'All', route: '/all-users' },
-    { label: 'Pending', route: '/pending-users' },
-    { label: 'Revoked', route: '/revoked-users' },
-    { label: 'Unverified', route: '/unverified-users' },
+    { label: 'All', route: '/all-users', icon: 'heroUserCircle' },
+    { label: 'Pending', route: '/pending-users', icon: 'heroClock' },
+    { label: 'Revoked', route: '/revoked-users', icon: 'heroXCircle' },
+    { label: 'Unverified', route: '/unverified-users', icon: 'heroEnvelope' },
   ];
 
   constructor() {
