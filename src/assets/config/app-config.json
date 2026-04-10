@@ -12,6 +12,6 @@
   "platformUrls": {
     "bpaPlatform": "https://aaidemo.bioplatforms.com",
     "galaxyPlatform": "https://dev.gvl.org.au",
-    "sbpPlatform": ""
+    "sbpPlatform": "https://dev.sbp.test.biocommons.org.au"
   }
 }
