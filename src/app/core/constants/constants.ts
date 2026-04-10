@@ -45,7 +45,7 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     name: 'Threatened Species Initiative (TSI)',
     logoUrls: ['/assets/tsi-logo.jpg'],
     eligibilityNote:
-      '<span class="inline-block rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-semibold text-amber-900">Only <a href="https://bioplatforms.com/project/threatened-species/" target="_blank" rel="noopener noreferrer" class="font-semibold text-amber-900 underline decoration-amber-300 underline-offset-2 hover:text-amber-700">TSI Consortium</a> members are eligible to apply for this bundle.</span>',
+      '<span class="inline-block rounded-md bg-yellow-50 px-4 py-2 font-normal text-yellow-800">Only <a href="https://bioplatforms.com/project/threatened-species/" target="_blank" rel="noopener noreferrer" class="font-semibold text-yellow-800 underline hover:text-yellow-700">TSI Consortium</a> members are eligible to apply for this bundle.</span>',
     listItems: [
       'Access all <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> open data.',
       'Access embargoed TSI data from <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',

@@ -77,6 +77,15 @@
             <ng-icon name="heroQuestionMarkCircle" size="20"></ng-icon>
             <span class="hidden sm:block">Support</span>
           </a>
+          <a
+            routerLink="/terms/biocommons"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+          >
+            <ng-icon name="heroDocumentText" size="20"></ng-icon>
+            <span class="hidden whitespace-nowrap sm:block">T&amp;Cs</span>
+          </a>
           <button
             type="button"
             class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
@@ -129,13 +138,14 @@
           [routerLink]="page.route"
           routerLinkActive
           #routerLinkActive="routerLinkActive"
-          class="flex min-w-36 items-center justify-center gap-2 border-b-4 border-transparent pb-3 pt-1 text-sm font-medium transition-all hover:cursor-pointer"
+          class="flex min-w-40 items-center justify-center gap-2 border-b-4 border-transparent pb-3 pt-1 text-sm font-medium transition-all hover:cursor-pointer"
           [class]="
             routerLinkActive.isActive
               ? 'border-b-sky-500 text-sky-500'
               : 'text-gray-500 hover:border-b-gray-300 hover:text-gray-600'
           "
         >
+          <ng-icon [name]="page.icon" size="20"></ng-icon>
           {{ page.label }}
           @if (page.label === "Pending" && userCounts().pending > 0) {
             <span
