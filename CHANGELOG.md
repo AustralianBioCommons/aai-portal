@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.1](https://github.com/AustralianBioCommons/aai-portal/compare/v1.4.0...v1.4.1) (2026-04-10)
+
+
+### Bug Fixes
+
+* add back sbp url ([0fa4cf4](https://github.com/AustralianBioCommons/aai-portal/commit/0fa4cf430ad8c3ca8704e8c9198c630ff6418722))
+* add back sbp url ([54539ff](https://github.com/AustralianBioCommons/aai-portal/commit/54539ffb331664b43f8754856580e7921824266c))
+
 ## [1.4.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.3.1...v1.4.0) (2026-04-02)
 
 
