@@ -14,7 +14,13 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgClass, TitleCasePipe, DatePipe, Location } from '@angular/common';
+import {
+  NgClass,
+  NgTemplateOutlet,
+  TitleCasePipe,
+  DatePipe,
+  Location,
+} from '@angular/common';
 import { Subject, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -61,6 +67,7 @@ export const DEFAULT_PAGE_SIZE = 50;
     FormsModule,
     ReactiveFormsModule,
     NgClass,
+    NgTemplateOutlet,
     TitleCasePipe,
     LoadingSpinnerComponent,
     TooltipComponent,
@@ -99,6 +106,7 @@ export class UserListComponent implements OnInit {
   returnUrl = input<string>(''); // Optional return URL for navigation back from user details
 
   // State signals
+  isLargeLayout = signal(this.checkLargeLayout());
   loading = signal(false);
   loadingMore = signal(false);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -150,6 +158,20 @@ export class UserListComponent implements OnInit {
     fromEvent(window, 'scroll', { passive: true })
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.loadNextPage());
+
+    fromEvent(window, 'resize')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.isLargeLayout.set(this.checkLargeLayout()));
+  }
+
+  private checkLargeLayout(): boolean {
+    // Root font size > 16px means OS/browser font settings are enlarged
+    const largeFont =
+      parseFloat(getComputedStyle(document.documentElement).fontSize) > 16;
+
+    // DPR > 2 means browser zoom > 100% on Retina (base DPR 2), or > 200% on standard displays
+    const zoomed = window.devicePixelRatio > 2;
+    return largeFont || zoomed;
   }
 
   ngOnInit(): void {

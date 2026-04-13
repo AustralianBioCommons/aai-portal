@@ -511,7 +511,7 @@
                       <img
                         [src]="platforms[membership.platform_id].logoUrl"
                         [alt]="membership.platform_name"
-                        class="hidden h-16 w-16 object-contain sm:inline-block"
+                        class="h-6 w-6 object-contain sm:h-16 sm:w-16"
                       />
                       <div class="flex items-center gap-2">
                         <div class="font-medium">
@@ -542,7 +542,7 @@
                           Launch
                         </app-button>
                       } @else {
-                        <span class="text-sm font-medium text-red-500">
+                        <span class="text-end text-sm font-medium text-red-500">
                           Launch link unavailable
                         </span>
                       }
@@ -579,7 +579,7 @@
                 <div class="flex items-center justify-between gap-6">
                   <div class="flex items-center gap-6">
                     <div
-                      class="hidden h-16 w-16 items-center justify-center gap-1 sm:flex"
+                      class="flex h-6 w-6 items-center justify-center gap-1 sm:h-16 sm:w-16"
                     >
                       @for (
                         logoUrl of getBundleLogoUrls(membership.group_id);

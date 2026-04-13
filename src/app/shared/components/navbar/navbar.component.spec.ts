@@ -198,10 +198,10 @@ describe('NavbarComponent', () => {
 
     const pages = component.navigationPages;
     expect(pages).toEqual([
-      { label: 'All', route: '/all-users' },
-      { label: 'Pending', route: '/pending-users' },
-      { label: 'Revoked', route: '/revoked-users' },
-      { label: 'Unverified', route: '/unverified-users' },
+      { label: 'All', route: '/all-users', icon: 'heroUserCircle' },
+      { label: 'Pending', route: '/pending-users', icon: 'heroClock' },
+      { label: 'Revoked', route: '/revoked-users', icon: 'heroXCircle' },
+      { label: 'Unverified', route: '/unverified-users', icon: 'heroEnvelope' },
     ]);
   });
 

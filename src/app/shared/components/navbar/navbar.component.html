@@ -67,31 +67,74 @@
           </ng-template>
         </app-dropdown-menu>
       } @else {
-        <div class="flex items-center gap-6">
+        <div class="hidden items-center gap-6 md:flex">
           <a
             href="https://biocommonsaccess.freshdesk.com/support/home"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+            class="flex flex-col items-center gap-1 whitespace-nowrap text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline lg:flex-row lg:gap-2"
           >
             <ng-icon name="heroQuestionMarkCircle" size="20"></ng-icon>
-            <span class="hidden sm:block">Support</span>
+            Support
+          </a>
+          <a
+            routerLink="/terms/biocommons"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex flex-col items-center gap-1 whitespace-nowrap text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline lg:flex-row lg:gap-2"
+          >
+            <ng-icon name="heroDocumentText" size="20"></ng-icon>
+            T&amp;Cs
           </a>
           <button
             type="button"
-            class="flex items-center gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+            class="flex flex-col items-center gap-1 whitespace-nowrap text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline lg:flex-row lg:gap-2"
             role="menuitem"
             tabindex="-1"
             id="user-menu-item-2"
             (click)="logout()"
           >
             <ng-icon name="logOut" size="20" class="min-h-5 min-w-5"></ng-icon>
-            <span class="hidden whitespace-nowrap sm:block">Log out</span>
+            Log out
           </button>
         </div>
       }
     </div>
   </div>
+
+  @if (!isGeneralAdmin()) {
+    <!-- Mobile links row (below title, visible on small screens only) -->
+    <div class="flex items-center justify-center gap-6 px-6 pb-6 md:hidden">
+      <a
+        href="https://biocommonsaccess.freshdesk.com/support/home"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-2 whitespace-nowrap text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+      >
+        <ng-icon name="heroQuestionMarkCircle" size="20"></ng-icon>
+        Support
+      </a>
+      <a
+        routerLink="/terms/biocommons"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="whitespace-nowrapitems-center flex gap-2 text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+      >
+        <ng-icon name="heroDocumentText" size="20"></ng-icon>
+        T&amp;Cs
+      </a>
+      <button
+        type="button"
+        class="flex items-center gap-2 whitespace-nowrap text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900 hover:underline"
+        role="menuitem"
+        tabindex="-1"
+        (click)="logout()"
+      >
+        <ng-icon name="logOut" size="20" class="min-h-5 min-w-5"></ng-icon>
+        Log out
+      </button>
+    </div>
+  }
 
   @if (isNavigationPage() && isGeneralAdmin()) {
     <!-- Mobile Dropdown (visible on small screens) -->
@@ -129,13 +172,14 @@
           [routerLink]="page.route"
           routerLinkActive
           #routerLinkActive="routerLinkActive"
-          class="flex min-w-36 items-center justify-center gap-2 border-b-4 border-transparent pb-3 pt-1 text-sm font-medium transition-all hover:cursor-pointer"
+          class="flex min-w-40 items-center justify-center gap-2 border-b-4 border-transparent pb-3 pt-1 text-sm font-medium transition-all hover:cursor-pointer"
           [class]="
             routerLinkActive.isActive
               ? 'border-b-sky-500 text-sky-500'
               : 'text-gray-500 hover:border-b-gray-300 hover:text-gray-600'
           "
         >
+          <ng-icon [name]="page.icon" size="20"></ng-icon>
           {{ page.label }}
           @if (page.label === "Pending" && userCounts().pending > 0) {
             <span
