@@ -492,6 +492,37 @@
               </div>
             </div>
           </div>
+
+          @if (isGeneralAdmin()) {
+            <div class="space-y-6 rounded-lg bg-white p-6 shadow-md">
+              <div class="text-2xl font-semibold">Support portal</div>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between gap-6">
+                  <div class="flex items-center gap-6">
+                    <img
+                      src="assets/freshdesk-logo.png"
+                      alt="Freshdesk"
+                      class="-ml-0.5 h-8 w-8 object-contain sm:-ml-2 sm:h-16 sm:w-16"
+                    />
+                    <div class="font-medium">BioCommons Access Freshdesk</div>
+                  </div>
+                  <a
+                    href="https://biocommonsaccess.freshdesk.com/support/home"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <app-button
+                      type="button"
+                      variant="primary"
+                      widthClass="w-auto"
+                    >
+                      Launch
+                    </app-button>
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
         </div>
 
         <div class="space-y-6">
