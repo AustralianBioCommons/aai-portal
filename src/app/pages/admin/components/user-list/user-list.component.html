@@ -175,7 +175,7 @@
         <div class="divide-y rounded-b-md bg-white shadow">
           @for (user of users(); track user.id; let even = $even) {
             <div
-              class="flex items-center p-4 font-normal last:rounded-b-md even:bg-sky-50"
+              class="flex items-center gap-2 p-4 font-normal last:rounded-b-md even:bg-sky-50"
             >
               <div
                 class="flex-1 truncate"
@@ -440,12 +440,12 @@
               </div>
             </div>
           }
-          @if (loadingMore()) {
-            <div class="flex items-center justify-center py-6">
-              <app-loading-spinner />
-            </div>
-          }
         </div>
+        @if (loadingMore()) {
+          <div class="flex items-center justify-center pt-6">
+            <app-loading-spinner />
+          </div>
+        }
       }
     </div>
   }
