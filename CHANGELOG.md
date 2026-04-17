@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.5.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.4.0...v1.5.0) (2026-04-17)
+
+
+### Features
+
+* add fix version tagging in JIRA ([775155a](https://github.com/AustralianBioCommons/aai-portal/commit/775155ab6f4d1a105725caf52af366c023c79371))
+* add fix version tagging in JIRA ([9464fea](https://github.com/AustralianBioCommons/aai-portal/commit/9464feafa807c3592d6cda7abc8a73677df4db6f))
+* add Freshdesk links to admin navbar & profile page ([fe16c94](https://github.com/AustralianBioCommons/aai-portal/commit/fe16c948447404cab0791efb9e8c956118a0c80d))
+* add Terms & Conditions link and update navigation icons ([d424065](https://github.com/AustralianBioCommons/aai-portal/commit/d424065ea8eebbb9396e86ebe7f1555ebf530d83))
+* UI optimizations ([a60c5fe](https://github.com/AustralianBioCommons/aai-portal/commit/a60c5fec19bc12f5d43ddf2950ffa59c2e26d3cc))
+
+
+### Bug Fixes
+
+* add back sbp url ([0fa4cf4](https://github.com/AustralianBioCommons/aai-portal/commit/0fa4cf430ad8c3ca8704e8c9198c630ff6418722))
+* add back sbp url ([54539ff](https://github.com/AustralianBioCommons/aai-portal/commit/54539ffb331664b43f8754856580e7921824266c))
+* adjust user list item alignment and loading spinner padding ([1a259a2](https://github.com/AustralianBioCommons/aai-portal/commit/1a259a222c5e2126d82aba5ba95af345225cc644))
+* adjust user list item alignment and loading spinner padding ([42521e3](https://github.com/AustralianBioCommons/aai-portal/commit/42521e3cce0c34317eef2240ee5b8ce245d4d962))
+* fix tests ([5f1a352](https://github.com/AustralianBioCommons/aai-portal/commit/5f1a3528da5890e92a02903555d62f8d28aed830))
+* move the JIRA API calls into seperate python script ([e4f89af](https://github.com/AustralianBioCommons/aai-portal/commit/e4f89af54e6c4c738265e8c482a23ee8e1e18e88))
+* remove bells and whistles ([11f5dac](https://github.com/AustralianBioCommons/aai-portal/commit/11f5dac017a3ed0b7c023f912d6eae37fbb6f1de))
+
 ## [1.4.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.3.1...v1.4.0) (2026-04-02)
 
 
