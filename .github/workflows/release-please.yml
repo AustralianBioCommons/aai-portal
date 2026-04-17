@@ -104,3 +104,137 @@ jobs:
         run: |
           set -euo pipefail
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/version/${NORMALIZED_VERSION}/" --delete
+
+  notify-jira:
+    name: Tag JIRA Tickets for Release
+    needs: release
+    if: needs.release.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag_name }}
+          fetch-depth: 0
+
+      - name: Extract tickets and update JIRA fix versions
+        env:
+          JIRA_BASE_URL: https://biocloud.atlassian.net
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          RELEASE_TAG: ${{ needs.release.outputs.tag_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, re, json, subprocess, urllib.request, urllib.error, base64
+
+          base_url = os.environ['JIRA_BASE_URL']
+          tag = os.environ['RELEASE_TAG']
+          auth = base64.b64encode(
+              f"{os.environ['JIRA_USER_EMAIL']}:{os.environ['JIRA_API_TOKEN']}".encode()
+          ).decode()
+          jira_headers = {
+              'Authorization': f'Basic {auth}',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+          }
+          gh_token = os.environ.get('GITHUB_TOKEN', '')
+          gh_repo = os.environ.get('GITHUB_REPOSITORY', '')
+
+          def jira(method, path, body=None):
+              url = f"{base_url}/rest/api/3{path}"
+              data = json.dumps(body).encode() if body else None
+              req = urllib.request.Request(url, data=data, headers=jira_headers, method=method)
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      text = r.read()
+                      return json.loads(text) if text else None
+              except urllib.error.HTTPError as e:
+                  print(f"  WARN {e.code} {method} {path}: {e.read().decode()[:200]}")
+                  return None
+
+          def github(path):
+              url = f"https://api.github.com/repos/{gh_repo}{path}"
+              req = urllib.request.Request(url, headers={
+                  'Authorization': f'Bearer {gh_token}',
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+              })
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  print(f"  WARN GitHub {e.code} {path}: {e.read().decode()[:200]}")
+                  return None
+
+          # Commits since previous tag
+          all_tags = subprocess.run(
+              ['git', 'tag', '--sort=-version:refname'], capture_output=True, text=True
+          ).stdout.strip().split('\n')
+          prev_tags = [t for t in all_tags if t and t != tag]
+          range_spec = f"{prev_tags[0]}..{tag}" if prev_tags else tag
+          log = subprocess.run(
+              ['git', 'log', range_spec, '--format=%s%n%b'],
+              capture_output=True, text=True
+          ).stdout
+
+          # Tickets from commit messages (subject + body)
+          tickets = set(re.findall(r'AAI-\d+', log))
+
+          # Also check PR bodies and branch names for PRs without AAI-* in commit text
+          for pr_num in re.findall(r'\(#(\d+)\)', log):
+              pr = github(f'/pulls/{pr_num}')
+              if pr:
+                  body  = pr.get('body') or ''
+                  title = pr.get('title') or ''
+                  head  = pr.get('head', {}).get('ref') or ''
+                  tickets.update(re.findall(r'AAI-\d+', f"{title} {body} {head}"))
+
+          tickets = sorted(tickets)
+          if not tickets:
+              print("No AAI-* tickets found in this release — nothing to tag.")
+              raise SystemExit(0)
+          print(f"Tickets in {tag}: {', '.join(tickets)}")
+
+          # Get AAI project ID
+          project = jira('GET', '/project/AAI')
+          if not project:
+              raise SystemExit("ERROR: could not fetch AAI project from JIRA")
+
+          # Create or reuse fix version named after the release tag
+          versions = jira('GET', '/project/AAI/versions') or []
+          existing = next((v for v in versions if v['name'] == tag), None)
+          if existing:
+              version_id = existing['id']
+              print(f"Reusing existing JIRA version '{tag}' (id={version_id})")
+          else:
+              created = jira('POST', '/version', {
+                  'name': tag,
+                  'projectId': project['id'],
+                  'released': True,
+              })
+              if not created:
+                  raise SystemExit("ERROR: could not create JIRA version")
+              version_id = created['id']
+              print(f"Created JIRA version '{tag}' (id={version_id})")
+
+          # Stamp fixVersions on each ticket (append, don't overwrite)
+          for ticket in tickets:
+              issue = jira('GET', f'/issue/{ticket}?fields=fixVersions,summary')
+              if not issue:
+                  print(f"  SKIP {ticket}: issue not found or inaccessible")
+                  continue
+              current = issue['fields'].get('fixVersions', [])
+              if any(v['id'] == version_id for v in current):
+                  print(f"  SKIP {ticket}: already tagged with {tag}")
+                  continue
+              jira('PUT', f'/issue/{ticket}', {
+                  'fields': {'fixVersions': current + [{'id': version_id}]}
+              })
+              summary = issue['fields'].get('summary', '')[:60]
+              print(f"  DONE {ticket}: {summary}")
+
+          print(f"\nTagged {len(tickets)} ticket(s) with fix version '{tag}'.")
+          PYEOF
