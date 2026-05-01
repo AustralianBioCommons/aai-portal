@@ -1,11 +1,4 @@
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  effect,
-  untracked,
-} from '@angular/core';
+import { Component, inject, signal, effect, untracked } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import {
   ApiService,
@@ -75,12 +68,6 @@ export class NavbarComponent {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
-  readonly isSbpAdmin = computed(
-    () =>
-      this.adminType() === 'platform' &&
-      this.adminPlatforms().some((p) => p?.id === 'sbp'),
-  );
-
   // Component state signals
   userMenuOpen = signal(false);
   profileImageLoaded = signal(false);
@@ -100,18 +87,12 @@ export class NavbarComponent {
     { initialValue: null },
   );
 
-  private readonly allNavigationPages = [
+  navigationPages = [
     { label: 'All', route: '/all-users', icon: 'heroUserCircle' },
     { label: 'Pending', route: '/pending-users', icon: 'heroClock' },
     { label: 'Revoked', route: '/revoked-users', icon: 'heroXCircle' },
     { label: 'Unverified', route: '/unverified-users', icon: 'heroEnvelope' },
   ];
-
-  navigationPages = computed(() =>
-    this.isSbpAdmin()
-      ? this.allNavigationPages.filter((p) => p.label !== 'Pending')
-      : this.allNavigationPages,
-  );
 
   constructor() {
     effect((onCleanup) => {
@@ -169,7 +150,7 @@ export class NavbarComponent {
 
   isNavigationPage(): boolean {
     const currentUrl = this.router.url;
-    return this.navigationPages().some((page) => page.route === currentUrl);
+    return this.navigationPages.some((page) => page.route === currentUrl);
   }
 
   onNavigationChange(event: Event) {
