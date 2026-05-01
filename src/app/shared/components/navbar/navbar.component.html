@@ -159,7 +159,7 @@
         (change)="onNavigationChange($event)"
         class="h-12 w-full rounded-md border-r-8 border-transparent bg-biocommons-primary px-4 py-3 text-center text-sm font-medium text-white shadow outline-gray-200 focus-within:ring-2 focus-within:ring-sky-100 hover:cursor-pointer"
       >
-        @for (page of navigationPages; track page.route) {
+        @for (page of navigationPages(); track page.route) {
           <option
             [value]="page.route"
             [selected]="getCurrentRoute() === page.route"
@@ -183,7 +183,7 @@
     <div
       class="mx-auto hidden flex-1 items-center justify-center overflow-hidden bg-white sm:flex"
     >
-      @for (page of navigationPages; track page.route) {
+      @for (page of navigationPages(); track page.route) {
         <a
           [routerLink]="page.route"
           routerLinkActive
