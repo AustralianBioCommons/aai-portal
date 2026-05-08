@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  signal,
-  model,
-  input,
-  inject,
-  computed,
-} from '@angular/core';
+import { Component, OnInit, signal, model, input, inject } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -128,12 +120,6 @@ export class UserListComponent implements OnInit {
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
-
-  readonly isSbpAdmin = computed(
-    () =>
-      this.adminType() === 'platform' &&
-      this.adminPlatforms().some((p) => p?.id === 'sbp'),
-  );
 
   hasTitleMessage = input(false);
 

@@ -52,6 +52,14 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
   {
+    id: 'sbp_bundle',
+    name: 'Structural Biology Platform Bundle (SBP)',
+    logoUrls: ['/assets/biocommons-logo.png'],
+    listItems: [
+      'Access to the Structural Biology Platform resources and services.',
+    ],
+  },
+  {
     id: 'fungi',
     name: "Fungi Functional 'Omics",
     logoUrls: ['/assets/aff-logo.png'],
