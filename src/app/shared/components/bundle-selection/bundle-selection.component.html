@@ -1,42 +1,21 @@
-@if (showReasonModal()) {
+@if (modalBundleId()) {
   <app-modal
-    title="Reason for request"
-    description="To proceed, please provide a brief reason for your request. The bundle manager will review it shortly."
-    primaryButtonText="Save"
+    [title]="modalTitle()"
+    [description]="modalDescription()"
+    [primaryButtonText]="modalPrimaryButtonText()"
     secondaryButtonText="Cancel"
-    [textareaControl]="reasonControl"
-    (primaryOutput)="saveReason()"
-    (secondaryOutput)="cancelReason()"
+    [textareaControl]="modalRequiresReason() ? reasonControl : null"
+    (primaryOutput)="confirmModal()"
+    (secondaryOutput)="cancelModal()"
   >
-    @if (modalBundleId() === "tsi") {
+    @if (modalNotice(); as notice) {
       <div
         modal-content
         class="inline-block rounded-md bg-yellow-50 px-4 py-2 text-center text-sm font-normal text-yellow-800"
-      >
-        Please note: Only
-        <a
-          href="https://bioplatforms.com/project/threatened-species/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="font-semibold text-yellow-800 underline hover:text-yellow-700"
-        >
-          TSI Consortium
-        </a>
-        members are eligible to apply for this bundle.
-      </div>
+        [innerHTML]="notice"
+      ></div>
     }
   </app-modal>
-}
-
-@if (showInstitutionalEmailModal()) {
-  <app-modal
-    title="Institutional email required"
-    description="Only those with an Australian institutional email address are eligible for this bundle. Please use your institutional email before proceeding."
-    primaryButtonText="Add"
-    secondaryButtonText="Cancel"
-    (primaryOutput)="closeInstitutionalEmailModal()"
-    (secondaryOutput)="cancelInstitutionalEmailModal()"
-  ></app-modal>
 }
 
 <form
