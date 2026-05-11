@@ -58,7 +58,7 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     listItems: [
       'Unrestricted access to all Structural Biology Platform (SBP) tools.',
       'Run jobs using your available credits (1000/month). Your balance resets on the first of every month.',
-      'Monitor job execution status in the Jobs dashboard.',
+      'Monitor job execution status in the job dashboard.',
       'Browse jobs results in summary reports.',
       'Download output files for local analysis.',
     ],
