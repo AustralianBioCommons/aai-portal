@@ -252,23 +252,19 @@ describe('RegisterComponent', () => {
 
     describe('Bundle Data', () => {
       it('should have correct bundle data structure', () => {
-        expect(component.bundles.length).toBe(3);
+        expect(component.bundles.length).toBe(2);
         expect(component.bundles[0].id).toBe('tsi');
         expect(component.bundles[1].id).toBe('sbp_workflow_execution');
-        expect(component.bundles[2].id).toBe('fungi');
       });
 
       it('should have logoUrls for each bundle', () => {
         const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
-        const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
+        const sbpBundle = component.bundles.find(
+          (b) => b.id === 'sbp_workflow_execution',
+        );
 
         expect(tsiBundle?.logoUrls.length).toBe(1);
-        expect(fungiBundle?.logoUrls.length).toBe(1);
-      });
-
-      it('should have fungi bundle disabled', () => {
-        const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
-        expect(fungiBundle?.disabled).toBe(true);
+        expect(sbpBundle?.logoUrls.length).toBe(1);
       });
     });
   });

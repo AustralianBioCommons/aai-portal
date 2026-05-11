@@ -63,13 +63,6 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
       'Download output files for local analysis.',
     ],
   },
-  {
-    id: 'fungi',
-    name: "Fungi Functional 'Omics",
-    logoUrls: ['/assets/aff-logo.png'],
-    listItems: ['Coming soon!'],
-    disabled: true,
-  },
 ];
 
 /**
