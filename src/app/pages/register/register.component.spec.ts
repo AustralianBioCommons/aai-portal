@@ -254,7 +254,7 @@ describe('RegisterComponent', () => {
       it('should have correct bundle data structure', () => {
         expect(component.bundles.length).toBe(3);
         expect(component.bundles[0].id).toBe('tsi');
-        expect(component.bundles[1].id).toBe('sbp_bundle');
+        expect(component.bundles[1].id).toBe('sbp_workflow_execution');
         expect(component.bundles[2].id).toBe('fungi');
       });
 

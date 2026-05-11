@@ -52,11 +52,15 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
   {
-    id: 'sbp_bundle',
-    name: 'Structural Biology Platform Bundle (SBP)',
-    logoUrls: ['/assets/biocommons-logo.png'],
+    id: 'sbp_workflow_execution',
+    name: 'SBP Workflow Execution Bundle',
+    logoUrls: ['/assets/biocommons-logo-small.png'],
     listItems: [
-      'Access to the Structural Biology Platform resources and services.',
+      'Unrestricted access to all Structural Biology Platform (SBP) tools.',
+      'Run jobs using your available credits (1000/month). Your balance resets on the first of every month.',
+      'Monitor job execution status in the Jobs dashboard.',
+      'Browse jobs results in summary reports.',
+      'Download output files for local analysis.',
     ],
   },
   {
