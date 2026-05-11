@@ -70,6 +70,36 @@ describe('BundleSelectionComponent', () => {
     expect(component.form().get('bundle')?.value).toBe('');
   });
 
+  it('should select SBP bundle without requiring a reason and show institutional email modal', () => {
+    component.toggleBundle('sbp_bundle');
+
+    expect(component.form().get('bundle')?.value).toBe('sbp_bundle');
+    expect(component.form().get('reason')?.value).toBe('');
+    expect(component.reasonControl.disabled).toBe(true);
+    expect(component.showInstitutionalEmailModal()).toBe(true);
+    expect(component.showReasonModal()).toBe(false);
+  });
+
+  it('should toggle SBP bundle selection off without requiring a reason', () => {
+    component.toggleBundle('sbp_bundle');
+    component.toggleBundle('sbp_bundle');
+
+    expect(component.form().get('bundle')?.value).toBe('');
+    expect(component.form().get('reason')?.value).toBe('');
+    expect(component.reasonControl.disabled).toBe(true);
+  });
+
+  it('should unselect SBP bundle when institutional email modal is canceled', () => {
+    component.toggleBundle('sbp_bundle');
+
+    component.cancelInstitutionalEmailModal();
+
+    expect(component.form().get('bundle')?.value).toBe('');
+    expect(component.form().get('reason')?.value).toBe('');
+    expect(component.reasonControl.disabled).toBe(true);
+    expect(component.showInstitutionalEmailModal()).toBe(false);
+  });
+
   it('should not save reason if validation fails', () => {
     component.toggleBundle('tsi');
     expect(component.showReasonModal()).toBe(true);
