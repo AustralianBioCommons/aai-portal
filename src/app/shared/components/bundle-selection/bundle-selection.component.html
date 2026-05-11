@@ -28,6 +28,17 @@
   </app-modal>
 }
 
+@if (showInstitutionalEmailModal()) {
+  <app-modal
+    title="Institutional email required"
+    description="Only those with an Australian institutional email address are eligible for this bundle. Please use your institutional email before proceeding."
+    primaryButtonText="Add"
+    secondaryButtonText="Cancel"
+    (primaryOutput)="closeInstitutionalEmailModal()"
+    (secondaryOutput)="cancelInstitutionalEmailModal()"
+  ></app-modal>
+}
+
 <form
   id="add-bundle"
   [formGroup]="form()"
@@ -127,7 +138,7 @@
           </div>
         }
         <!-- Provide reason section for selected bundle -->
-        @if (isBundleSelected(bundle)) {
+        @if (isBundleSelected(bundle) && requiresReason(bundle)) {
           <button
             type="button"
             class="flex items-center justify-between gap-2 rounded-full border py-3 pl-4 pr-3 transition-all hover:cursor-pointer hover:bg-gray-100"

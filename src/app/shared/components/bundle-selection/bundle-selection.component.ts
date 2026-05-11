@@ -36,6 +36,7 @@ export class BundleSelectionComponent {
 
   showReasonModal = signal(false);
   modalBundleId = signal<string | null>(null);
+  showInstitutionalEmailModal = signal(false);
 
   get reasonControl(): FormControl<string> {
     return this.form().get('reason') as FormControl<string>;
@@ -53,13 +54,50 @@ export class BundleSelectionComponent {
         this.reasonControl.markAsUntouched();
         this.reasonControl.markAsPristine();
       } else {
-        // Select bundle - open modal
-        this.modalBundleId.set(value);
-        this.originalReason.set(this.reasonControl.value || '');
-        this.reasonControl.enable();
-        this.showReasonModal.set(true);
+        this.selectBundle(value);
       }
     }
+  }
+
+  selectBundle(value: string) {
+    if (value === 'sbp_bundle') {
+      this.selectBundleWithoutReason(value);
+      this.showInstitutionalEmailModal.set(true);
+      return;
+    }
+
+    this.openReasonModalForBundle(value);
+  }
+
+  selectBundleWithoutReason(value: string) {
+    this.form().patchValue({ bundle: value, reason: '' });
+    this.savedReason.set('');
+    this.reasonControl.disable();
+    this.reasonControl.markAsUntouched();
+    this.reasonControl.markAsPristine();
+  }
+
+  openReasonModalForBundle(value: string) {
+    this.modalBundleId.set(value);
+    this.originalReason.set(this.reasonControl.value || '');
+    this.reasonControl.enable();
+    this.showReasonModal.set(true);
+  }
+
+  closeInstitutionalEmailModal() {
+    this.showInstitutionalEmailModal.set(false);
+  }
+
+  cancelInstitutionalEmailModal() {
+    if (this.form().get('bundle')?.value === 'sbp_bundle') {
+      this.form().patchValue({ bundle: '', reason: '' });
+      this.savedReason.set('');
+      this.reasonControl.disable();
+      this.reasonControl.markAsUntouched();
+      this.reasonControl.markAsPristine();
+    }
+
+    this.closeInstitutionalEmailModal();
   }
 
   openReasonModal(event: Event) {
@@ -130,5 +168,9 @@ export class BundleSelectionComponent {
 
   isBundleSelected(bundle: Bundle) {
     return bundle.id === this.form().get('bundle')?.value;
+  }
+
+  requiresReason(bundle: Bundle) {
+    return bundle.id !== 'sbp_bundle';
   }
 }
