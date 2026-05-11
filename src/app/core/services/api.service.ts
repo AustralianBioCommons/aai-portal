@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BiocommonsAuth0User } from './auth.service';
 import { PlatformId } from '../constants/constants';
+import { map } from 'rxjs/operators';
 
 export type Status = 'approved' | 'revoked' | 'pending' | 'rejected';
 
@@ -144,6 +145,10 @@ export interface AdminUserCountsResponse {
 
 export interface ResendVerificationEmailResponse {
   message: string;
+}
+
+export interface CheckAustralianResearchInstitutionResponse {
+  is_australian_research_institution: boolean;
 }
 
 @Injectable({
@@ -441,5 +446,12 @@ export class ApiService {
       `${environment.auth0.backend}/utils/send-welcome-email`,
       { email },
     );
+  }
+
+  checkAustralianResearchInstitution(email: string): Observable<boolean> {
+    return this.http.get<CheckAustralianResearchInstitutionResponse>(
+      `${environment.auth0.backend}/utils/check-australian-research-institution`,
+      { params: { email } },
+    ).pipe(map((data) => data.is_australian_research_institution));
   }
 }
