@@ -68,7 +68,7 @@ describe('BundlesComponent', () => {
     fixture.detectChanges();
 
     const bundleId = 'tsi';
-    component.bundleForm.patchValue({ bundle: bundleId });
+    component.bundleForm.patchValue({ bundles: { [bundleId]: '' } });
 
     apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
     const routerSpy = spyOn(router, 'navigate');
@@ -88,7 +88,9 @@ describe('BundlesComponent', () => {
 
     const bundleId = 'tsi';
     const reason = 'Need access for biodiversity research';
-    component.bundleForm.patchValue({ bundle: bundleId, reason: reason });
+    component.bundleForm.patchValue({
+      bundles: { [bundleId]: reason },
+    });
 
     apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
     const routerSpy = spyOn(router, 'navigate');
@@ -102,12 +104,39 @@ describe('BundlesComponent', () => {
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
   });
 
+  it('should submit each selected bundle via the apiService', () => {
+    apiService.getUserGroups.and.returnValue(of([]));
+    fixture.detectChanges();
+
+    component.bundleForm.patchValue({
+      bundles: {
+        tsi: 'Need access for biodiversity research',
+        sbp_bundle: '',
+      },
+    });
+
+    apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
+    const routerSpy = spyOn(router, 'navigate');
+
+    component.submit();
+
+    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
+      'biocommons/group/tsi',
+      'Need access for biodiversity research',
+    );
+    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
+      'biocommons/group/sbp_bundle',
+      '',
+    );
+    expect(apiService.requestGroupAccess).toHaveBeenCalledTimes(2);
+    expect(routerSpy).toHaveBeenCalledWith(['/profile']);
+  });
+
   it('should disable submit button when no bundle is selected', () => {
     apiService.getUserGroups.and.returnValue(of([]));
     fixture.detectChanges();
 
-    // Initially no bundle is selected
-    expect(component.selected()).toBeUndefined();
+    expect(component.selected()).toEqual({});
 
     const buttonDebugEl = fixture.debugElement.query(
       By.directive(ButtonComponent),
@@ -128,18 +157,17 @@ describe('BundlesComponent', () => {
     const buttonCmp = buttonDebugEl.componentInstance as ButtonComponent;
 
     // Select a bundle
-    component.bundleForm.patchValue({ bundle: 'tsi' });
+    component.bundleForm.patchValue({ bundles: { tsi: '' } });
     fixture.detectChanges();
 
-    expect(component.selected()).toBeDefined();
-    expect(component.selected()?.id).toBe('tsi');
+    expect(component.selected()).toEqual({ tsi: '' });
     expect(buttonCmp.disabled()).toBe(false);
 
     // Deselect the bundle
-    component.bundleForm.patchValue({ bundle: '' });
+    component.bundleForm.patchValue({ bundles: {} });
     fixture.detectChanges();
 
-    expect(component.selected()).toBeUndefined();
+    expect(component.selected()).toEqual({});
     expect(buttonCmp.disabled()).toBe(true);
   });
 });

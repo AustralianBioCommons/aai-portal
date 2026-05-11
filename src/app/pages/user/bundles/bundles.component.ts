@@ -1,8 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
-import { BundleSelectionComponent } from '../../../shared/components/bundle-selection/bundle-selection.component';
+import {
+  BundleSelectionComponent,
+  BundleSelections,
+} from '../../../shared/components/bundle-selection/bundle-selection.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -10,6 +13,7 @@ import { heroArrowLeft } from '@ng-icons/heroicons/outline';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-bundles',
@@ -32,40 +36,45 @@ export class BundlesComponent implements OnInit {
   private apiService = inject(ApiService);
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
-    bundle: [''],
-    reason: [
-      { value: '', disabled: true },
-      [Validators.required, Validators.maxLength(255)],
-    ],
+    bundles: new FormControl<BundleSelections>({} as BundleSelections, {
+      nonNullable: true,
+    }),
   });
 
   errorAlert = signal<string | null>(null);
   bundles = signal<Bundle[]>(BIOCOMMONS_BUNDLES);
   isSubmitting = signal<boolean>(false);
   isLoading = signal<boolean>(true);
-  selected = signal<Bundle | undefined>(undefined);
+  selected = signal<BundleSelections>({});
 
   ngOnInit() {
     this.loadCurrentBundles();
-    // Update selected signal
-    this.bundleForm.get('bundle')?.valueChanges.subscribe(() => {
-      this.selected.set(this.getSelectedBundle());
+    this.bundleForm.get('bundles')?.valueChanges.subscribe((selected) => {
+      this.selected.set(selected || {});
     });
   }
 
-  getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.bundleForm.get('bundle')?.value;
-    return this.bundles().find((bundle) => bundle.id === selectedId);
+  getSelectedBundles(): Bundle[] {
+    const selections = this.selected();
+    return this.bundles().filter((bundle) => bundle.id in selections);
   }
 
   submit() {
-    this.isSubmitting.set(true);
-    const formValue = this.bundleForm.getRawValue();
-    const selectedBundle = formValue.bundle;
-    const reason = formValue.reason;
-    const groupId = `biocommons/group/${selectedBundle}`;
+    const selections =
+      (this.bundleForm.getRawValue().bundles as BundleSelections) || {};
+    if (!Object.keys(selections).length) {
+      return;
+    }
 
-    this.apiService.requestGroupAccess(groupId, reason).subscribe({
+    this.isSubmitting.set(true);
+    const requests = Object.entries(selections).map(([bundleId, reason]) =>
+      this.apiService.requestGroupAccess(
+        `biocommons/group/${bundleId}`,
+        reason || '',
+      ),
+    );
+
+    forkJoin(requests).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.router.navigate(['/profile']);
