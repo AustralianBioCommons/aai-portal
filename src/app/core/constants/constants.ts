@@ -52,11 +52,16 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
   {
-    id: 'fungi',
-    name: "Fungi Functional 'Omics",
-    logoUrls: ['/assets/aff-logo.png'],
-    listItems: ['Coming soon!'],
-    disabled: true,
+    id: 'sbp_workflow_execution',
+    name: 'SBP Workflow Execution Bundle',
+    logoUrls: ['/assets/biocommons-logo-small.png'],
+    listItems: [
+      'Unrestricted access to all Structural Biology Platform (SBP) tools.',
+      'Run jobs using your available credits (1000/month). Your balance resets on the first of every month.',
+      'Monitor job execution status in the job dashboard.',
+      'Browse jobs results in summary reports.',
+      'Download output files for local analysis.',
+    ],
   },
 ];
 
