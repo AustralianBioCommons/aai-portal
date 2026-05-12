@@ -1063,4 +1063,36 @@ describe('UserDetailsComponent', () => {
       ).toBeFalsy();
     });
   });
+
+  describe('getPendingTooltipMessage', () => {
+    beforeEach(() => fixture.detectChanges());
+
+    it('returns reason only when no timestamp', () => {
+      expect(component.getPendingTooltipMessage('My reason', undefined)).toBe(
+        'Reason for request: My reason',
+      );
+    });
+
+    it('returns formatted timestamp only when no reason', () => {
+      const result = component.getPendingTooltipMessage(
+        undefined,
+        '2024-06-01T10:30:00Z',
+      );
+      expect(result).toContain('Requested on:');
+    });
+
+    it('joins both parts with double newline', () => {
+      const result = component.getPendingTooltipMessage(
+        'My reason',
+        '2024-06-01T10:30:00Z',
+      );
+      expect(result).toContain('Reason for request: My reason');
+      expect(result).toContain('Requested on:');
+      expect(result).toContain('\n\n');
+    });
+
+    it('returns empty string when both are undefined', () => {
+      expect(component.getPendingTooltipMessage(undefined, undefined)).toBe('');
+    });
+  });
 });

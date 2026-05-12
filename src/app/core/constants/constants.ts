@@ -54,7 +54,7 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
   {
     id: 'sbp_workflow_execution',
     name: 'SBP Workflow Execution Bundle',
-    logoUrls: ['/assets/biocommons-logo-small.png'],
+    logoUrls: ['/assets/biocommons-favicon.png'],
     listItems: [
       'Unrestricted access to all Structural Biology Platform (SBP) tools.',
       'Run jobs using your available credits (1000/month). Your balance resets on the first of every month.',
