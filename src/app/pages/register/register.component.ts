@@ -50,7 +50,7 @@ export interface RegistrationForm {
 }
 
 export interface BundleRequest {
-  bundleId: string;
+  bundle_id: string;
   reason?: string;
 }
 
@@ -313,8 +313,8 @@ export class RegisterComponent implements AfterViewInit {
 
     if (Object.keys(formValue.bundles).length) {
       requestBody.bundles = Object.entries(formValue.bundles).map(
-        ([bundleId, reason]) => ({
-          bundleId,
+        ([bundle_id, reason]) => ({
+          bundle_id,
           ...(reason ? { reason } : {}),
         }),
       );
