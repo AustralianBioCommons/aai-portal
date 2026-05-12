@@ -350,7 +350,7 @@ describe('RegisterComponent', () => {
         email: 'john@example.com',
         username: 'johndoe',
         password: 'Password123!',
-        bundles: [{ bundleId: 'tsi' }],
+        bundles: [{ bundle_id: 'tsi' }],
         recaptcha_token: 'test-recaptcha-token',
       });
 
@@ -436,7 +436,7 @@ describe('RegisterComponent', () => {
         password: 'Password123!',
         bundles: [
           {
-            bundleId: 'tsi',
+            bundle_id: 'tsi',
             reason: 'Need access for genomics research project',
           },
         ],
@@ -463,10 +463,10 @@ describe('RegisterComponent', () => {
       );
       expect(req.request.body.bundles).toEqual([
         {
-          bundleId: 'tsi',
+          bundle_id: 'tsi',
           reason: 'Need access for genomics research project',
         },
-        { bundleId: 'sbp_bundle' },
+        { bundle_id: 'sbp_bundle' },
       ]);
 
       req.flush({ success: true });
