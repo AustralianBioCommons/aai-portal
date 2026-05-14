@@ -50,7 +50,7 @@ export class ValidationService {
     },
     email: {
       invalidSbpEmailDomain:
-        'Email must be from an authorized institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
+        'Email must be from an authorised institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
       localPartTooLong: 'Email local part cannot exceed 64 characters',
       domainPartTooLong: 'Email domain cannot exceed 254 characters',
       valueUnchanged: 'New email must be different from the current email',

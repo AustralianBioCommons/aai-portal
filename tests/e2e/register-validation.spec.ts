@@ -340,7 +340,7 @@ const sbpForm: FormConfig = {
       invalidValue: 'user@example.com',
       validValue: 'user@unsw.edu.au',
       error:
-        'Email must be from an authorized institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
+        'Email must be from an authorised institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
     },
     {
       name: 'email format warning',
@@ -504,7 +504,8 @@ for (const form of forms) {
       });
     }
 
-    if (form.idnEmail) {
+    const idnEmail = form.idnEmail;
+    if (idnEmail) {
       test('accepts IDN email address', async ({ page }) => {
         await page.goto(form.path);
         if (form.setup) {
@@ -513,8 +514,8 @@ for (const form of forms) {
 
         await fillAllFields(page, form);
 
-        const emailField = fieldByLabel(page, form.idnEmail.label);
-        await applyValue(emailField, form.idnEmail.value, 'fill');
+        const emailField = fieldByLabel(page, idnEmail.label);
+        await applyValue(emailField, idnEmail.value, 'fill');
 
         await expect(
           page.locator('.text-xs.text-red-500').filter({ hasText: 'Email' }),
