@@ -151,6 +151,16 @@ export interface CheckAustralianResearchInstitutionResponse {
   is_australian_research_institution: boolean;
 }
 
+export interface GroupAccessRequestResult {
+  group_id: string;
+  status: string;
+  message: string;
+}
+
+export interface GroupAccessRequestResponse {
+  results: GroupAccessRequestResult[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -173,16 +183,11 @@ export class ApiService {
   }
 
   requestGroupAccess(
-    groupId: string,
-    reason: string,
-  ): Observable<{ message: string }> {
-    const body: { group_id: string; request_reason: string } = {
-      group_id: groupId,
-      request_reason: reason,
-    };
-    return this.http.post<{ message: string }>(
+    groups: { group_id: string; request_reason: string }[],
+  ): Observable<GroupAccessRequestResponse> {
+    return this.http.post<GroupAccessRequestResponse>(
       `${environment.auth0.backend}/me/groups/request`,
-      body,
+      { groups },
     );
   }
 
