@@ -25,6 +25,15 @@
         members are eligible to apply for this bundle.
       </div>
     }
+    @if (modalBundleId() === "sbp_workflow_execution") {
+      <div
+        modal-content
+        class="inline-block rounded-md bg-yellow-50 px-4 py-2 text-center text-sm font-normal text-yellow-800"
+      >
+        Only users with an Australian institutional email address are eligible
+        for this bundle.
+      </div>
+    }
   </app-modal>
 }
 
