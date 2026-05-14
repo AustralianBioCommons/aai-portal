@@ -244,24 +244,35 @@ describe('RegisterComponent', () => {
   });
 
   describe('Bundle Selection', () => {
-    it('should return undefined for no selection', () => {
-      component.registrationForm.get('bundle')?.setValue('');
-      const selectedBundle = component.getSelectedBundle();
-      expect(selectedBundle).toBeUndefined();
+    it('should return empty array for no selection', () => {
+      component.registrationForm.get('bundles')?.setValue({});
+      expect(component.getSelectedBundles()).toEqual([]);
+    });
+
+    it('should return matching Bundle objects for selected ids', () => {
+      component.registrationForm
+        .get('bundles')
+        ?.setValue({ tsi: '', sbp_workflow_execution: '' });
+      const selected = component.getSelectedBundles();
+      expect(selected.length).toBe(2);
+      expect(selected.map((b) => b.id)).toEqual(['tsi', 'sbp_workflow_execution']);
     });
 
     describe('Bundle Data', () => {
       it('should have correct bundle data structure', () => {
-        expect(component.bundles.length).toBe(2);
+        expect(component.bundles.length).toBe(3);
         expect(component.bundles[0].id).toBe('tsi');
-        expect(component.bundles[1].id).toBe('fungi');
+        expect(component.bundles[1].id).toBe('sbp_workflow_execution');
+        expect(component.bundles[2].id).toBe('fungi');
       });
 
       it('should have logoUrls for each bundle', () => {
         const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
+        const sbpBundle = component.bundles.find((b) => b.id === 'sbp_workflow_execution');
         const fungiBundle = component.bundles.find((b) => b.id === 'fungi');
 
         expect(tsiBundle?.logoUrls.length).toBe(1);
+        expect(sbpBundle?.logoUrls.length).toBe(1);
         expect(fungiBundle?.logoUrls.length).toBe(1);
       });
 
@@ -451,7 +462,7 @@ describe('RegisterComponent', () => {
       component.registrationForm.patchValue({
         bundles: {
           tsi: 'Need access for genomics research project',
-          sbp_bundle: '',
+          sbp_workflow_execution: '',
         },
         terms: true,
       });
@@ -466,7 +477,7 @@ describe('RegisterComponent', () => {
           bundle_id: 'tsi',
           reason: 'Need access for genomics research project',
         },
-        { bundle_id: 'sbp_bundle' },
+        { bundle_id: 'sbp_workflow_execution' },
       ]);
 
       req.flush({ success: true });

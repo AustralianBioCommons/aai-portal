@@ -70,15 +70,14 @@ describe('BundlesComponent', () => {
     const bundleId = 'tsi';
     component.bundleForm.patchValue({ bundles: { [bundleId]: '' } });
 
-    apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
+    apiService.requestGroupAccess.and.returnValue(of({ results: [] }));
     const routerSpy = spyOn(router, 'navigate');
 
     component.submit();
 
-    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
-      `biocommons/group/${bundleId}`,
-      '',
-    );
+    expect(apiService.requestGroupAccess).toHaveBeenCalledWith([
+      { group_id: `biocommons/group/${bundleId}`, request_reason: '' },
+    ]);
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
   });
 
@@ -92,15 +91,14 @@ describe('BundlesComponent', () => {
       bundles: { [bundleId]: reason },
     });
 
-    apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
+    apiService.requestGroupAccess.and.returnValue(of({ results: [] }));
     const routerSpy = spyOn(router, 'navigate');
 
     component.submit();
 
-    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
-      `biocommons/group/${bundleId}`,
-      reason,
-    );
+    expect(apiService.requestGroupAccess).toHaveBeenCalledWith([
+      { group_id: `biocommons/group/${bundleId}`, request_reason: reason },
+    ]);
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
   });
 
@@ -111,24 +109,22 @@ describe('BundlesComponent', () => {
     component.bundleForm.patchValue({
       bundles: {
         tsi: 'Need access for biodiversity research',
-        sbp_bundle: '',
+        sbp_workflow_execution: '',
       },
     });
 
-    apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
+    apiService.requestGroupAccess.and.returnValue(of({ results: [] }));
     const routerSpy = spyOn(router, 'navigate');
 
     component.submit();
 
-    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
-      'biocommons/group/tsi',
-      'Need access for biodiversity research',
-    );
-    expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
-      'biocommons/group/sbp_bundle',
-      '',
-    );
-    expect(apiService.requestGroupAccess).toHaveBeenCalledTimes(2);
+    expect(apiService.requestGroupAccess).toHaveBeenCalledOnceWith([
+      {
+        group_id: 'biocommons/group/tsi',
+        request_reason: 'Need access for biodiversity research',
+      },
+      { group_id: 'biocommons/group/sbp_workflow_execution', request_reason: '' },
+    ]);
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
   });
 
