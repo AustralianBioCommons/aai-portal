@@ -13,9 +13,6 @@ import { rootRedirectGuard } from './core/guards/root-redirect.guard';
 import { RegisterComponent } from './pages/register/register.component';
 import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
 import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
-import { SbpRegisterComponent } from './pages/sbp/register/sbp-register.component';
-import { SbpRegistrationSuccessComponent } from './pages/sbp/registration-success/sbp-registration-success.component';
-import { SbpLayoutComponent } from './layouts/sbp-layout/sbp-layout.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
 import { BundlesComponent } from './pages/user/bundles/bundles.component';
 import { FirstMigrationComponent } from './pages/first-migration/first-migration.component';
@@ -24,33 +21,8 @@ import { EmailVerificationRequiredComponent } from './pages/email-verification-r
 import { EnvironmentConfig } from '../environments/runtime-config';
 
 // Helper function to create routes based on environment configuration
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function createRoutes(env: EnvironmentConfig): Routes {
-  // Disable SBP in production for now
-  const sbpRoutes: Routes = env.production
-    ? []
-    : [
-        {
-          path: 'sbp',
-          component: SbpLayoutComponent,
-          canActivate: [loginGuard],
-          children: [
-            { path: '', redirectTo: 'register', pathMatch: 'full' },
-            {
-              path: 'register',
-              component: SbpRegisterComponent,
-              data: { title: 'Register | Structural Biology Platform' },
-            },
-            {
-              path: 'register/success',
-              component: SbpRegistrationSuccessComponent,
-              data: {
-                title: 'Registration Success | Structural Biology Platform',
-              },
-            },
-          ],
-        },
-      ];
-
   return [
     {
       path: 'login',
@@ -85,7 +57,6 @@ export function createRoutes(env: EnvironmentConfig): Routes {
         },
       ],
     },
-    ...sbpRoutes,
     {
       path: 'migration',
       component: FirstMigrationComponent,

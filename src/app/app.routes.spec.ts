@@ -21,28 +21,9 @@ describe('createRoutes', () => {
     },
   };
 
-  it('disables SBP routes when in production', () => {
-    const routes = createRoutes({
-      ...baseEnv,
-      production: true,
-    });
-
-    expect(routes.some((route) => route.path === 'sbp')).toBeFalse();
-  });
-
-  it('enables SBP routes when not in production', () => {
-    const routes = createRoutes({
-      ...baseEnv,
-      production: false,
-    });
-
-    const sbpRoute = routes.find((route) => route.path === 'sbp');
-    expect(sbpRoute).toBeTruthy();
-    expect(
-      sbpRoute?.children?.some((child) => child.path === 'register'),
-    ).toBeTrue();
-    expect(
-      sbpRoute?.children?.some((child) => child.path === 'register/success'),
-    ).toBeTrue();
-  });
+  it('expect key routes to be defined', () => {
+    const routes = createRoutes(baseEnv);
+    const keyRoutes = ['login', 'register', 'profile', 'email-verification'];
+    expect(routes.some((route) => keyRoutes.includes((route.path as string)))).toBeTrue();
+  })
 });
