@@ -30,7 +30,10 @@
       class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
     >
       <!-- Search bar -->
-      <div class="w-full" [ngClass]="isSbpAdmin() ? 'md:w-full' : 'md:w-2/3'">
+      <div
+        class="w-full"
+        [ngClass]="adminType() === 'bundle' ? 'md:w-full' : 'md:w-2/3'"
+      >
         <label
           for="search-input"
           class="mb-1 block text-sm font-medium text-gray-900"
@@ -65,7 +68,7 @@
       </div>
 
       <!-- Filter dropdown -->
-      @if (!isSbpAdmin()) {
+      @if (adminType() !== "bundle") {
         <div class="w-full md:w-1/3">
           <label
             for="filter-select"
@@ -247,11 +250,14 @@
                           }
                           @if (
                             group.approval_status === "pending" &&
-                            group.request_reason
+                            (group.request_reason || group.requested_at)
                           ) {
                             <app-tooltip
                               [message]="
-                                'Reason for request: ' + group.request_reason
+                                getPendingTooltipMessage(
+                                  group.request_reason,
+                                  group.requested_at
+                                )
                               "
                               iconColor="text-yellow-500 hover:text-yellow-600"
                             />

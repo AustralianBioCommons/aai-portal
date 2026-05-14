@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  signal,
-  model,
-  input,
-  inject,
-  computed,
-} from '@angular/core';
+import { Component, OnInit, signal, model, input, inject } from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -129,12 +121,6 @@ export class UserListComponent implements OnInit {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
-  readonly isSbpAdmin = computed(
-    () =>
-      this.adminType() === 'platform' &&
-      this.adminPlatforms().some((p) => p?.id === 'sbp'),
-  );
-
   hasTitleMessage = input(false);
 
   // Form controls
@@ -247,6 +233,21 @@ export class UserListComponent implements OnInit {
     const formattedDate =
       this.datePipe.transform(updatedAt, 'MMM d y, h:mm a') || 'Unknown date';
     return `${reason || action}\n\n(${action} by ${updatedBy} on ${formattedDate})`;
+  }
+
+  getPendingTooltipMessage(
+    requestReason: string | undefined,
+    requestedAt: string | undefined,
+  ): string {
+    const parts: string[] = [];
+    if (requestReason) parts.push(`Reason for request: ${requestReason}`);
+    if (requestedAt) {
+      const formattedDate =
+        this.datePipe.transform(requestedAt, 'MMM d y, h:mm a') ||
+        'Unknown date';
+      parts.push(`Requested on: ${formattedDate}`);
+    }
+    return parts.join('\n\n');
   }
 
   openRevokeModal(userId: string, email: string, platformId: string): void {

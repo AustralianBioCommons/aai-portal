@@ -77,6 +77,7 @@ export interface GroupMembership {
   revocation_reason?: string;
   rejection_reason?: string;
   request_reason?: string;
+  requested_at?: string;
 }
 
 export interface BiocommonsUserResponse {

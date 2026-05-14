@@ -457,11 +457,14 @@
                       }
                       @if (
                         group.approval_status === "pending" &&
-                        group.request_reason
+                        (group.request_reason || group.requested_at)
                       ) {
                         <app-tooltip
                           [message]="
-                            'Reason for request: ' + group.request_reason
+                            getPendingTooltipMessage(
+                              group.request_reason,
+                              group.requested_at
+                            )
                           "
                           iconColor="text-yellow-500 hover:text-yellow-600"
                         />
