@@ -43,7 +43,7 @@ const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
     notice:
       'Please note: Only <a href="https://bioplatforms.com/project/threatened-species/" target="_blank" rel="noopener noreferrer" class="font-semibold text-yellow-800 underline hover:text-yellow-700">TSI Consortium</a> members are eligible to apply for this bundle.',
   },
-  sbp_bundle: {
+  sbp_workflow_execution: {
     title: 'Institutional email required',
     description:
       'Only those with an Australian institutional email address are eligible for this bundle. Please use your institutional email before proceeding.',

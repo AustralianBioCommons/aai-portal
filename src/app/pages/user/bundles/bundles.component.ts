@@ -13,7 +13,6 @@ import { heroArrowLeft } from '@ng-icons/heroicons/outline';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
-import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-bundles',
@@ -67,14 +66,12 @@ export class BundlesComponent implements OnInit {
     }
 
     this.isSubmitting.set(true);
-    const requests = Object.entries(selections).map(([bundleId, reason]) =>
-      this.apiService.requestGroupAccess(
-        `biocommons/group/${bundleId}`,
-        reason || '',
-      ),
-    );
+    const groups = Object.entries(selections).map(([bundleId, reason]) => ({
+      group_id: `biocommons/group/${bundleId}`,
+      request_reason: reason || '',
+    }));
 
-    forkJoin(requests).subscribe({
+    this.apiService.requestGroupAccess(groups).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.router.navigate(['/profile']);

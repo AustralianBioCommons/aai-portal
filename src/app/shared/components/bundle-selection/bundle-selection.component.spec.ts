@@ -76,11 +76,11 @@ describe('BundleSelectionComponent', () => {
   });
 
   it('should select SBP bundle without requiring a reason and show institutional email modal', () => {
-    component.toggleBundle('sbp_bundle');
+    component.toggleBundle('sbp_workflow_execution');
 
     expect(component.selectedBundles()).toEqual({});
     expect(component.reasonControl.disabled).toBe(true);
-    expect(component.modalBundleId()).toBe('sbp_bundle');
+    expect(component.modalBundleId()).toBe('sbp_workflow_execution');
     expect(component.modalRequiresReason()).toBe(false);
     expect(component.modalTitle()).toBe('Institutional email required');
     expect(component.modalDescription()).toBe(
@@ -90,7 +90,7 @@ describe('BundleSelectionComponent', () => {
 
     component.confirmModal();
 
-    expect(component.selectedBundles()).toEqual({ sbp_bundle: '' });
+    expect(component.selectedBundles()).toEqual({ sbp_workflow_execution: '' });
   });
 
   it('should select a bundle without opening a modal when requireReason is false', () => {
@@ -139,16 +139,16 @@ describe('BundleSelectionComponent', () => {
   });
 
   it('should toggle SBP bundle selection off without requiring a reason', () => {
-    component.toggleBundle('sbp_bundle');
+    component.toggleBundle('sbp_workflow_execution');
     component.confirmModal();
-    component.toggleBundle('sbp_bundle');
+    component.toggleBundle('sbp_workflow_execution');
 
     expect(component.selectedBundles()).toEqual({});
     expect(component.reasonControl.disabled).toBe(true);
   });
 
   it('should unselect SBP bundle when institutional email modal is canceled', () => {
-    component.toggleBundle('sbp_bundle');
+    component.toggleBundle('sbp_workflow_execution');
 
     component.cancelModal();
 
