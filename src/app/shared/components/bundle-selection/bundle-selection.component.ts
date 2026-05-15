@@ -234,8 +234,9 @@ export class BundleSelectionComponent implements OnInit {
 
   private removeSelectedBundle(bundleId: string): void {
     this.selectedBundles.update((current) => {
-      const { [bundleId]: _, ...rest } = current;
-      return rest;
+      return Object.fromEntries(
+        Object.entries(current).filter(([id]) => id !== bundleId),
+      );
     });
     if (this.modalBundleId() === bundleId) {
       this.closeModal();
