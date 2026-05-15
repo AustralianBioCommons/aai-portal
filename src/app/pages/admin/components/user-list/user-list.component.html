@@ -98,12 +98,12 @@
     >
       <div
         class="flex-1"
-        [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
+        [ngClass]="adminType() !== 'bundle' ? 'w-6/12' : 'w-8/12'"
       >
         Total:
         <span class="font-light text-gray-300">{{ totalUsers() }} users</span>
       </div>
-      <div class="w-3/12">
+      <div class="w-2/12">
         {{
           adminType() !== "bundle"
             ? "Bundles"
@@ -112,13 +112,17 @@
       </div>
       @if (adminType() !== "bundle") {
         <div class="w-3/12">
-          {{
-            adminType() === "biocommons"
-              ? "Services"
-              : adminType() === "platform"
-                ? adminPlatforms()[0].name + " Access"
-                : "Access"
-          }}
+          @if (showSignedUpColumn()) {
+            Signed Up
+          } @else {
+            {{
+              adminType() === "biocommons"
+                ? "Services"
+                : adminType() === "platform"
+                  ? adminPlatforms()[0].name + " Access"
+                  : "Access"
+            }}
+          }
         </div>
       }
       <div class="w-1/12"></div>
@@ -181,18 +185,27 @@
               class="flex items-center gap-2 p-4 font-normal last:rounded-b-md even:bg-sky-50"
             >
               <div
-                class="flex-1 truncate"
+                class="min-w-0 flex-1"
                 [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
               >
-                <button
-                  type="button"
-                  class="max-w-full truncate text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
-                  (click)="navigateToUserDetails(user.id)"
-                >
-                  {{ user.email }}
-                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    class="max-w-full truncate text-sky-600 transition-all hover:text-biocommons-primary hover:underline"
+                    (click)="navigateToUserDetails(user.id)"
+                  >
+                    {{ user.email }}
+                  </button>
+                  @if (showEmailVerifiedTag() && !user.email_verified) {
+                    <span
+                      class="rounded bg-red-100 px-1 py-0.5 text-xs font-semibold uppercase text-red-800"
+                    >
+                      Unverified
+                    </span>
+                  }
+                </div>
               </div>
-              <div class="flex w-3/12 flex-wrap gap-2">
+              <div class="flex w-2/12 flex-wrap gap-2">
                 @if (user.group_memberships.length) {
                   @if (adminType() !== "bundle") {
                     @for (group of user.group_memberships; track group.id) {
@@ -272,7 +285,11 @@
               </div>
               @if (adminType() !== "bundle") {
                 <div class="w-3/12">
-                  @if (adminType() === "biocommons") {
+                  @if (showSignedUpColumn()) {
+                    <span class="text-sm text-gray-700">{{
+                      user.created_at | date: "MMM d y, h:mm a"
+                    }}</span>
+                  } @else if (adminType() === "biocommons") {
                     <!-- Show all platforms with names for multi-platform (biocommons) admins -->
                     @for (
                       platform of user.platform_memberships;
@@ -316,7 +333,7 @@
                         }
                       </div>
                     }
-                  } @else {
+                  } @else if (adminType() !== "biocommons") {
                     <!-- Show approval status only for single-platform admins -->
                     @for (
                       platform of user.platform_memberships;
