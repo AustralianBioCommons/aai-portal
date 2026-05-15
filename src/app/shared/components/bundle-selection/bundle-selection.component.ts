@@ -46,7 +46,7 @@ const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
   sbp_workflow_execution: {
     title: 'Institutional email required',
     description:
-      'Only those with an Australian institutional email address are eligible for this bundle. Please use your institutional email before proceeding.',
+      'Only those with an <a href="https://site.usegalaxy.org.au/list-of-institutions.html" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Australian institutional email address</a> are eligible for this bundle. Please use your institutional email before proceeding.',
     primaryButtonText: 'Add',
   },
 };
