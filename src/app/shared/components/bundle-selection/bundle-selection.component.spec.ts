@@ -1,8 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BundleSelectionComponent } from './bundle-selection.component';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { BIOCOMMONS_BUNDLES } from '../../../core/constants/constants';
+import {
+  BUNDLE_MODAL_TEXT_BY_BUNDLE_ID,
+  BundleSelectionComponent,
+} from './bundle-selection.component';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
 
 describe('BundleSelectionComponent', () => {
   let component: BundleSelectionComponent;
@@ -18,11 +21,7 @@ describe('BundleSelectionComponent', () => {
     component = fixture.componentInstance;
     const fb = new FormBuilder();
     bundleForm = fb.group({
-      bundle: '',
-      reason: [
-        { value: '', disabled: true },
-        [Validators.required, Validators.maxLength(255)],
-      ],
+      bundles: [{} as Record<string, string>],
     });
     fixture.componentRef.setInput('form', bundleForm);
     fixture.componentRef.setInput('bundles', BIOCOMMONS_BUNDLES);
@@ -35,96 +34,180 @@ describe('BundleSelectionComponent', () => {
 
   it('should select bundle', () => {
     component.toggleBundle('tsi');
-    expect(component.showReasonModal()).toBe(true);
     expect(component.modalBundleId()).toBe('tsi');
 
     component.reasonControl.setValue('Need access for research');
     component.saveReason();
 
-    expect(component.form().get('bundle')?.value).toBe('tsi');
-    expect(component.showReasonModal()).toBe(false);
+    expect(component.selectedBundles()).toEqual({
+      tsi: 'Need access for research',
+    });
+    expect(component.form().get('bundles')?.value).toEqual({
+      tsi: 'Need access for research',
+    });
+    expect(component.modalBundleId()).toBeNull();
+  });
+
+  it('should use bundle-specific reason modal text', () => {
+    component.toggleBundle('tsi');
+
+    expect(component.modalTitle()).toBe('Reason for request');
+    expect(component.modalDescription()).toBe(
+      'To proceed, please provide a brief reason for your request. The bundle manager will review it shortly.',
+    );
+    expect(component.modalPrimaryButtonText()).toBe('Save');
+    expect(component.modalNotice()).toBe(
+      'Please note: Only <a href="https://bioplatforms.com/project/threatened-species/" target="_blank" rel="noopener noreferrer" class="font-semibold text-yellow-800 underline hover:text-yellow-700">TSI Consortium</a> members are eligible to apply for this bundle.',
+    );
   });
 
   it('should toggle bundle selection off when clicking same bundle', () => {
     component.toggleBundle('tsi');
     component.reasonControl.setValue('Need access for research');
     component.saveReason();
-    expect(component.form().get('bundle')?.value).toBe('tsi');
+    expect(component.selectedBundles()).toEqual({
+      tsi: 'Need access for research',
+    });
 
     component.toggleBundle('tsi');
-    expect(component.form().get('bundle')?.value).toBe('');
-  });
-
-  it('should return selected bundle object', () => {
-    component.toggleBundle('tsi');
-    component.reasonControl.setValue('Need access for research');
-    component.saveReason();
-
-    const selectedBundle = component.getSelectedBundle();
-    expect(selectedBundle?.id).toBe('tsi');
-    expect(selectedBundle?.name).toBe('Threatened Species Initiative (TSI)');
+    expect(component.selectedBundles()).toEqual({});
   });
 
   it('should not toggle disabled bundle', () => {
     component.toggleBundle('fungi');
-    expect(component.form().get('bundle')?.value).toBe('');
+    expect(component.selectedBundles()).toEqual({});
+  });
+
+  it('should select SBP bundle without requiring a reason and show institutional email modal', () => {
+    component.toggleBundle('sbp_workflow_execution');
+
+    expect(component.selectedBundles()).toEqual({});
+    expect(component.reasonControl.disabled).toBe(true);
+    expect(component.modalBundleId()).toBe('sbp_workflow_execution');
+    expect(component.modalRequiresReason()).toBe(false);
+    expect(component.modalTitle()).toBe('Institutional email required');
+    expect(component.modalDescription()).toBe(
+      BUNDLE_MODAL_TEXT_BY_BUNDLE_ID['sbp_workflow_execution'].description,
+    );
+    expect(component.modalPrimaryButtonText()).toBe('Add');
+
+    component.confirmModal();
+
+    expect(component.selectedBundles()).toEqual({ sbp_workflow_execution: '' });
+  });
+
+  it('should select a bundle without opening a modal when requireReason is false', () => {
+    const noReasonBundle: Bundle = {
+      id: 'no_reason',
+      name: 'No Reason Bundle',
+      logoUrls: [],
+      requireReason: false,
+      listItems: [],
+    };
+    fixture.componentRef.setInput('bundles', [
+      ...BIOCOMMONS_BUNDLES,
+      noReasonBundle,
+    ]);
+
+    component.toggleBundle('no_reason');
+
+    expect(component.selectedBundles()).toEqual({ no_reason: '' });
+    expect(component.form().get('bundles')?.value).toEqual({ no_reason: '' });
+    expect(component.reasonControl.disabled).toBe(true);
+    expect(component.modalBundleId()).toBeNull();
+  });
+
+  it('should allow multiple selected bundles with independent reasons', () => {
+    const noReasonBundle: Bundle = {
+      id: 'no_reason',
+      name: 'No Reason Bundle',
+      logoUrls: [],
+      requireReason: false,
+      listItems: [],
+    };
+    fixture.componentRef.setInput('bundles', [
+      ...BIOCOMMONS_BUNDLES,
+      noReasonBundle,
+    ]);
+
+    component.toggleBundle('no_reason');
+    component.toggleBundle('tsi');
+    component.reasonControl.setValue('Need access for research');
+    component.saveReason();
+
+    expect(component.selectedBundles()).toEqual({
+      no_reason: '',
+      tsi: 'Need access for research',
+    });
+  });
+
+  it('should toggle SBP bundle selection off without requiring a reason', () => {
+    component.toggleBundle('sbp_workflow_execution');
+    component.confirmModal();
+    component.toggleBundle('sbp_workflow_execution');
+
+    expect(component.selectedBundles()).toEqual({});
+    expect(component.reasonControl.disabled).toBe(true);
+  });
+
+  it('should unselect SBP bundle when institutional email modal is canceled', () => {
+    component.toggleBundle('sbp_workflow_execution');
+
+    component.cancelModal();
+
+    expect(component.selectedBundles()).toEqual({});
+    expect(component.reasonControl.disabled).toBe(true);
+    expect(component.modalBundleId()).toBeNull();
   });
 
   it('should not save reason if validation fails', () => {
     component.toggleBundle('tsi');
-    expect(component.showReasonModal()).toBe(true);
+    expect(component.modalBundleId()).toBe('tsi');
 
     component.saveReason();
 
-    expect(component.showReasonModal()).toBe(true);
-    expect(component.form().get('bundle')?.value).toBe('');
+    expect(component.modalBundleId()).toBe('tsi');
+    expect(component.selectedBundles()).toEqual({});
   });
 
   it('should cancel new bundle selection when canceling modal', () => {
     component.toggleBundle('tsi');
-    expect(component.showReasonModal()).toBe(true);
+    expect(component.modalBundleId()).toBe('tsi');
 
     component.cancelReason();
 
-    expect(component.showReasonModal()).toBe(false);
-    expect(component.form().get('bundle')?.value).toBe('');
+    expect(component.modalBundleId()).toBeNull();
+    expect(component.selectedBundles()).toEqual({});
   });
 
   it('should allow editing reason for already selected bundle', () => {
     component.toggleBundle('tsi');
     component.reasonControl.setValue('Initial reason');
     component.saveReason();
-    expect(component.form().get('bundle')?.value).toBe('tsi');
-    expect(component.form().get('reason')?.value).toBe('Initial reason');
+    expect(component.selectedBundles()).toEqual({ tsi: 'Initial reason' });
 
-    const mockEvent = new MouseEvent('click');
-    spyOn(mockEvent, 'stopPropagation');
-    component.openReasonModal(mockEvent);
+    component.openBundleModal(BIOCOMMONS_BUNDLES[0]);
 
-    expect(component.showReasonModal()).toBe(true);
-    expect(mockEvent.stopPropagation).toHaveBeenCalled();
+    expect(component.modalBundleId()).toBe('tsi');
 
     component.reasonControl.setValue('Updated reason');
     component.saveReason();
 
-    expect(component.form().get('bundle')?.value).toBe('tsi');
-    expect(component.form().get('reason')?.value).toBe('Updated reason');
+    expect(component.selectedBundles()).toEqual({ tsi: 'Updated reason' });
   });
 
   it('should restore original reason when canceling edit modal', () => {
     component.toggleBundle('tsi');
     component.reasonControl.setValue('Initial reason');
     component.saveReason();
-    expect(component.form().get('reason')?.value).toBe('Initial reason');
+    expect(component.selectedBundles()).toEqual({ tsi: 'Initial reason' });
 
-    const mockEvent = new MouseEvent('click');
-    component.openReasonModal(mockEvent);
+    component.openBundleModal(BIOCOMMONS_BUNDLES[0]);
 
     component.reasonControl.setValue('Changed in modal');
     component.cancelReason();
 
-    expect(component.form().get('bundle')?.value).toBe('tsi');
-    expect(component.form().get('reason')?.value).toBe('Initial reason');
+    expect(component.selectedBundles()).toEqual({ tsi: 'Initial reason' });
   });
 
   describe('Bundle Item Click Handler', () => {

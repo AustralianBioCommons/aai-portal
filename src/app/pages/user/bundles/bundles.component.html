@@ -47,7 +47,7 @@
           variant="primary"
           (click)="submit()"
           [loading]="isSubmitting()"
-          [disabled]="selected() === undefined || isSubmitting()"
+          [disabled]="!getSelectedBundles().length || isSubmitting()"
         >
           Submit
         </app-button>
