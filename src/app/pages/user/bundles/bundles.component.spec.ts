@@ -123,7 +123,10 @@ describe('BundlesComponent', () => {
         group_id: 'biocommons/group/tsi',
         request_reason: 'Need access for biodiversity research',
       },
-      { group_id: 'biocommons/group/sbp_workflow_execution', request_reason: '' },
+      {
+        group_id: 'biocommons/group/sbp_workflow_execution',
+        request_reason: '',
+      },
     ]);
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
   });

@@ -255,7 +255,10 @@ describe('RegisterComponent', () => {
         ?.setValue({ tsi: '', sbp_workflow_execution: '' });
       const selected = component.getSelectedBundles();
       expect(selected.length).toBe(2);
-      expect(selected.map((b) => b.id)).toEqual(['tsi', 'sbp_workflow_execution']);
+      expect(selected.map((b) => b.id)).toEqual([
+        'tsi',
+        'sbp_workflow_execution',
+      ]);
     });
 
     describe('Bundle Data', () => {
@@ -267,7 +270,9 @@ describe('RegisterComponent', () => {
 
       it('should have logoUrls for each bundle', () => {
         const tsiBundle = component.bundles.find((b) => b.id === 'tsi');
-        const sbpBundle = component.bundles.find((b) => b.id === 'sbp_workflow_execution');
+        const sbpBundle = component.bundles.find(
+          (b) => b.id === 'sbp_workflow_execution',
+        );
 
         expect(tsiBundle?.logoUrls.length).toBe(1);
         expect(sbpBundle?.logoUrls.length).toBe(1);

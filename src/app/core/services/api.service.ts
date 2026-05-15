@@ -455,9 +455,11 @@ export class ApiService {
   }
 
   checkAustralianResearchInstitution(email: string): Observable<boolean> {
-    return this.http.get<CheckAustralianResearchInstitutionResponse>(
-      `${environment.auth0.backend}/utils/check-australian-research-institution`,
-      { params: { email } },
-    ).pipe(map((data) => data.is_australian_research_institution));
+    return this.http
+      .get<CheckAustralianResearchInstitutionResponse>(
+        `${environment.auth0.backend}/utils/check-australian-research-institution`,
+        { params: { email } },
+      )
+      .pipe(map((data) => data.is_australian_research_institution));
   }
 }

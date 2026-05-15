@@ -24,6 +24,8 @@ describe('createRoutes', () => {
   it('expect key routes to be defined', () => {
     const routes = createRoutes(baseEnv);
     const keyRoutes = ['login', 'register', 'profile', 'email-verification'];
-    expect(routes.some((route) => keyRoutes.includes((route.path as string)))).toBeTrue();
-  })
+    expect(
+      routes.some((route) => keyRoutes.includes(route.path as string)),
+    ).toBeTrue();
+  });
 });

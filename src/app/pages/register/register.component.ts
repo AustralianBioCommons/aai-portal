@@ -136,10 +136,9 @@ export class RegisterComponent implements AfterViewInit {
         username: ['', usernameRequirements],
         password: ['', passwordRequirements],
         confirmPassword: ['', Validators.required],
-        bundles: new FormControl<BundleSelections>(
-          {} as BundleSelections,
-          { nonNullable: true },
-        ),
+        bundles: new FormControl<BundleSelections>({} as BundleSelections, {
+          nonNullable: true,
+        }),
         terms: [false, Validators.requiredTrue],
       },
       { validators: fullNameLengthValidator() },
