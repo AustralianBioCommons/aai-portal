@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.6.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.5.0...v1.6.0) (2026-05-15)
+
+
+### Features
+
+* add SBP bundle description ([ab40cb0](https://github.com/AustralianBioCommons/aai-portal/commit/ab40cb0738ff982ec975735a9aaa979ed3677a18))
+* show timestamp of Bundle request reasoning on Admin dashboard ([972236a](https://github.com/AustralianBioCommons/aai-portal/commit/972236ac658e0db8a3dfe855c55af7226f5debc4))
+* show timestamp of Bundle request reasoning on Admin dashboard (AAI-805) ([b680389](https://github.com/AustralianBioCommons/aai-portal/commit/b68038958cc8c89d5fa95d3210835fa2aa8134d9))
+* update admin list for SBP bundle view ([10ce909](https://github.com/AustralianBioCommons/aai-portal/commit/10ce9098fd7ec3bd30233a9d0f61be10167b0719))
+* update admin list for SBP bundle view and add SBP bundle ([784f4ae](https://github.com/AustralianBioCommons/aai-portal/commit/784f4ae7687444e3fa796ff75a2696a93d54c448))
+
+
+### Bug Fixes
+
+* content with SBP bundle ([735b7d8](https://github.com/AustralianBioCommons/aai-portal/commit/735b7d85dbd9fb6458ebbb6abb9a9999720ec9cc))
+* generate github app token for release-please ([#224](https://github.com/AustralianBioCommons/aai-portal/issues/224)) ([2dc239c](https://github.com/AustralianBioCommons/aai-portal/commit/2dc239cff503ae80260af9078d5c8bb5a7de2a77))
+* removed fungi bundle ([4aad1a7](https://github.com/AustralianBioCommons/aai-portal/commit/4aad1a78819377bfa6f2013704d8dc7106939065))
+* test and update bundle count ([1fbefd3](https://github.com/AustralianBioCommons/aai-portal/commit/1fbefd3c3d9da326e9a43258b47a4a0d971362f4))
+
 ## [1.5.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.4.0...v1.5.0) (2026-04-17)
 
 
