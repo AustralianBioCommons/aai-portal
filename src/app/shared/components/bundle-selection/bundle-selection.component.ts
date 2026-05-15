@@ -34,7 +34,7 @@ const DEFAULT_REASON_MODAL_TEXT: BundleModalText = {
   primaryButtonText: 'Save',
 };
 
-const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
+export const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
   tsi: {
     title: 'Reason for request',
     description:

@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BundleSelectionComponent } from './bundle-selection.component';
+import {
+  BUNDLE_MODAL_TEXT_BY_BUNDLE_ID,
+  BundleSelectionComponent,
+} from './bundle-selection.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
 
@@ -84,7 +87,7 @@ describe('BundleSelectionComponent', () => {
     expect(component.modalRequiresReason()).toBe(false);
     expect(component.modalTitle()).toBe('Institutional email required');
     expect(component.modalDescription()).toBe(
-      'Only those with an Australian institutional email address are eligible for this bundle. Please use your institutional email before proceeding.',
+      BUNDLE_MODAL_TEXT_BY_BUNDLE_ID['sbp_workflow_execution'].description,
     );
     expect(component.modalPrimaryButtonText()).toBe('Add');
 
