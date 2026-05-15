@@ -499,38 +499,4 @@ describe('RegisterComponent', () => {
       expect(component.recaptchaToken()).toBeNull();
     });
   });
-
-  describe('SBP bundle email domain validation', () => {
-    it('should add domain validator when sbp_workflow_execution is selected', () => {
-      component.registrationForm.patchValue({
-        bundle: 'sbp_workflow_execution',
-      });
-      const email = component.registrationForm.get('email')!;
-      email.setValue('user@example.com');
-      email.markAsTouched();
-
-      expect(email.hasError('invalidSbpEmailDomain')).toBeTrue();
-    });
-
-    it('should accept allowed domain when sbp bundle is selected', () => {
-      component.registrationForm.patchValue({
-        bundle: 'sbp_workflow_execution',
-      });
-      const email = component.registrationForm.get('email')!;
-      email.setValue('user@unsw.edu.au');
-
-      expect(email.hasError('invalidSbpEmailDomain')).toBeFalse();
-    });
-
-    it('should remove domain validator when bundle is deselected', () => {
-      component.registrationForm.patchValue({
-        bundle: 'sbp_workflow_execution',
-      });
-      component.registrationForm.patchValue({ bundle: '' });
-      const email = component.registrationForm.get('email')!;
-      email.setValue('user@example.com');
-
-      expect(email.hasError('invalidSbpEmailDomain')).toBeFalse();
-    });
-  });
 });

@@ -11,8 +11,6 @@ import {
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { AuthService } from '../../../core/services/auth.service';
-import { signal } from '@angular/core';
 
 describe('BundlesComponent', () => {
   let component: BundlesComponent;
@@ -20,20 +18,11 @@ describe('BundlesComponent', () => {
   let apiService: jasmine.SpyObj<ApiService>;
   let router: Router;
 
-  const mockUser = (email: string) => ({
-    sub: 'auth0|123',
-    email,
-    email_verified: true,
-    name: 'Test User',
-    updated_at: '',
-  });
-
   beforeEach(async () => {
     const apiServiceSpy = jasmine.createSpyObj('ApiService', [
       'getUserGroups',
       'requestGroupAccess',
     ]);
-    const authServiceStub = { user: signal(mockUser('user@unsw.edu.au')) };
 
     await TestBed.configureTestingModule({
       imports: [BundlesComponent],
@@ -42,7 +31,6 @@ describe('BundlesComponent', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: ApiService, useValue: apiServiceSpy },
-        { provide: AuthService, useValue: authServiceStub },
       ],
     }).compileComponents();
 
@@ -153,54 +141,5 @@ describe('BundlesComponent', () => {
 
     expect(component.selected()).toBeUndefined();
     expect(buttonCmp.disabled()).toBe(true);
-  });
-
-  describe('SBP email domain check', () => {
-    beforeEach(() => {
-      apiService.getUserGroups.and.returnValue(of([]));
-      fixture.detectChanges();
-      component.bundleForm.patchValue({ bundle: 'sbp_workflow_execution' });
-    });
-
-    it('should set errorAlert and not call API when email domain is not allowed', () => {
-      const authService = TestBed.inject(AuthService) as unknown as {
-        user: ReturnType<typeof signal>;
-      };
-      (authService.user as ReturnType<typeof signal<unknown>>).set(
-        mockUser('user@gmail.com'),
-      );
-
-      component.submit();
-
-      expect(component.errorAlert()).toBeTruthy();
-      expect(apiService.requestGroupAccess).not.toHaveBeenCalled();
-    });
-
-    it('should submit when email domain is on the allowed list', () => {
-      apiService.requestGroupAccess.and.returnValue(of({ message: 'Success' }));
-
-      component.submit();
-
-      expect(component.errorAlert()).toBeNull();
-      expect(apiService.requestGroupAccess).toHaveBeenCalledWith(
-        'biocommons/group/sbp_workflow_execution',
-        '',
-      );
-    });
-
-    it('should clear errorAlert when bundle selection changes', () => {
-      const authService = TestBed.inject(AuthService) as unknown as {
-        user: ReturnType<typeof signal>;
-      };
-      (authService.user as ReturnType<typeof signal<unknown>>).set(
-        mockUser('user@gmail.com'),
-      );
-      component.submit();
-      expect(component.errorAlert()).toBeTruthy();
-
-      component.bundleForm.patchValue({ bundle: 'tsi' });
-
-      expect(component.errorAlert()).toBeNull();
-    });
   });
 });

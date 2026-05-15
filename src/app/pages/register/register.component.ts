@@ -21,7 +21,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import {
   emailLengthValidator,
   internationalEmailValidator,
-  sbpEmailDomainRequired,
   toAsciiEmail,
 } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
@@ -152,27 +151,6 @@ export class RegisterComponent implements AfterViewInit {
       .subscribe(() => {
         if (this.validationService.hasFieldBackendError('email'))
           this.validationService.clearFieldBackendError('email');
-      });
-
-    this.registrationForm
-      .get('bundle')
-      ?.valueChanges.pipe(takeUntilDestroyed())
-      .subscribe((bundle: string) => {
-        const emailControl = this.registrationForm.get('email')!;
-        const baseValidators = [
-          Validators.required,
-          internationalEmailValidator,
-          emailLengthValidator,
-        ];
-        if (bundle === 'sbp_workflow_execution') {
-          emailControl.setValidators([
-            ...baseValidators,
-            sbpEmailDomainRequired,
-          ]);
-        } else {
-          emailControl.setValidators(baseValidators);
-        }
-        emailControl.updateValueAndValidity();
       });
 
     this.registrationForm

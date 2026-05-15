@@ -1,11 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
-import {
-  BIOCOMMONS_BUNDLES,
-  Bundle,
-  SBP_ALLOWED_EMAIL_DOMAINS,
-} from '../../../core/constants/constants';
+import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
 import { BundleSelectionComponent } from '../../../shared/components/bundle-selection/bundle-selection.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { Router, RouterLink } from '@angular/router';
@@ -14,7 +10,6 @@ import { heroArrowLeft } from '@ng-icons/heroicons/outline';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
-import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-bundles',
@@ -35,7 +30,6 @@ export class BundlesComponent implements OnInit {
   public router = inject(Router);
   private formBuilder = inject(FormBuilder);
   private apiService = inject(ApiService);
-  private authService = inject(AuthService);
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     bundle: [''],
@@ -56,7 +50,6 @@ export class BundlesComponent implements OnInit {
     // Update selected signal
     this.bundleForm.get('bundle')?.valueChanges.subscribe(() => {
       this.selected.set(this.getSelectedBundle());
-      this.errorAlert.set(null);
     });
   }
 
@@ -66,18 +59,10 @@ export class BundlesComponent implements OnInit {
   }
 
   submit() {
-    const { bundle: selectedBundle, reason } = this.bundleForm.getRawValue();
-    if (selectedBundle === 'sbp_workflow_execution') {
-      const email = (this.authService.user()?.email ?? '').toLowerCase();
-      const domain = email.slice(email.lastIndexOf('@') + 1);
-      if (!(SBP_ALLOWED_EMAIL_DOMAINS as readonly string[]).includes(domain)) {
-        this.errorAlert.set(
-          'Your current email address is not from an authorised institutional domain. Please update your email address before requesting this bundle.',
-        );
-        return;
-      }
-    }
     this.isSubmitting.set(true);
+    const formValue = this.bundleForm.getRawValue();
+    const selectedBundle = formValue.bundle;
+    const reason = formValue.reason;
     const groupId = `biocommons/group/${selectedBundle}`;
 
     this.apiService.requestGroupAccess(groupId, reason).subscribe({
