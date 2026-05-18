@@ -61,6 +61,7 @@ export const DEFAULT_PAGE_SIZE = 50;
     NgClass,
     NgTemplateOutlet,
     TitleCasePipe,
+    DatePipe,
     LoadingSpinnerComponent,
     TooltipComponent,
     AlertComponent,
@@ -122,6 +123,8 @@ export class UserListComponent implements OnInit {
   adminGroups = this.authService.adminGroups;
 
   hasTitleMessage = input(false);
+  showEmailVerifiedTag = input(false);
+  showSignedUpColumn = input(false);
 
   // Form controls
   revokeReasonControl = new FormControl('', {
