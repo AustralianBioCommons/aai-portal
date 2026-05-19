@@ -1,5 +1,5 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { Component, OnInit, signal, inject, DOCUMENT } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   FormGroup,
   ReactiveFormsModule,
