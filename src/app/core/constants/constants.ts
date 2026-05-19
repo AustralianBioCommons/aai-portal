@@ -3,6 +3,7 @@ export interface Bundle {
   name: string;
   logoUrls: string[];
   listItems: string[];
+  requireReason?: boolean;
   disabled?: boolean;
   approved?: boolean;
   pending?: boolean;
@@ -43,6 +44,7 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     id: 'tsi',
     name: 'Threatened Species Initiative (TSI)',
     logoUrls: ['/assets/tsi-logo.jpg'],
+    requireReason: true,
     listItems: [
       'Access all <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a> open data.',
       'Access embargoed TSI data from <a href="https://data.bioplatforms.com/" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Bioplatforms Australia Data Portal</a>',

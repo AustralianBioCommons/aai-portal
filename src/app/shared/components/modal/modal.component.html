@@ -15,9 +15,7 @@
       </h3>
 
       @if (description()) {
-        <p class="text-center text-gray-600">
-          {{ description() }}
-        </p>
+        <p class="text-center text-gray-600" [innerHTML]="description()"></p>
       }
     </div>
 

@@ -85,8 +85,8 @@ describe('RegisterComponent', () => {
       expect(component.sections[3].id).toBe('terms');
     });
 
-    it('should initialize bundle field with empty selection', () => {
-      expect(component.registrationForm.get('bundle')?.value).toBe('');
+    it('should initialize bundles field with empty selection', () => {
+      expect(component.registrationForm.get('bundles')?.value).toEqual({});
     });
 
     it('should initialize registration form with empty values', () => {
@@ -244,10 +244,21 @@ describe('RegisterComponent', () => {
   });
 
   describe('Bundle Selection', () => {
-    it('should return undefined for no selection', () => {
-      component.registrationForm.get('bundle')?.setValue('');
-      const selectedBundle = component.getSelectedBundle();
-      expect(selectedBundle).toBeUndefined();
+    it('should return empty array for no selection', () => {
+      component.registrationForm.get('bundles')?.setValue({});
+      expect(component.getSelectedBundles()).toEqual([]);
+    });
+
+    it('should return matching Bundle objects for selected ids', () => {
+      component.registrationForm
+        .get('bundles')
+        ?.setValue({ tsi: '', sbp_workflow_execution: '' });
+      const selected = component.getSelectedBundles();
+      expect(selected.length).toBe(2);
+      expect(selected.map((b) => b.id)).toEqual([
+        'tsi',
+        'sbp_workflow_execution',
+      ]);
     });
 
     describe('Bundle Data', () => {
@@ -314,7 +325,7 @@ describe('RegisterComponent', () => {
         username: 'johndoe',
         password: 'Password123!',
         confirmPassword: 'Password123!',
-        bundle: 'tsi',
+        bundles: { tsi: '' },
         terms: true,
       });
       component.recaptchaToken.set('test-recaptcha-token');
@@ -347,8 +358,7 @@ describe('RegisterComponent', () => {
         email: 'john@example.com',
         username: 'johndoe',
         password: 'Password123!',
-        bundle: 'tsi',
-        request_reason: '',
+        bundles: [{ bundle_id: 'tsi' }],
         recaptcha_token: 'test-recaptcha-token',
       });
 
@@ -402,15 +412,14 @@ describe('RegisterComponent', () => {
     });
 
     it('should handle registration without bundle', () => {
-      component.registrationForm.patchValue({ bundle: '', terms: true });
+      component.registrationForm.patchValue({ bundles: {}, terms: true });
 
       component.submitRegistration();
 
       const req = httpMock.expectOne(
         `${environment.auth0.backend}/biocommons/register`,
       );
-      expect(req.request.body.bundle).toBeUndefined();
-      expect(req.request.body.request_reason).toBeUndefined();
+      expect(req.request.body.bundles).toBeUndefined();
 
       req.flush({ success: true });
       expect(component.isRegistrationComplete()).toBe(true);
@@ -418,8 +427,7 @@ describe('RegisterComponent', () => {
 
     it('should include request_reason when bundle is selected with reason', () => {
       component.registrationForm.patchValue({
-        bundle: 'tsi',
-        reason: 'Need access for genomics research project',
+        bundles: { tsi: 'Need access for genomics research project' },
         terms: true,
       });
 
@@ -434,10 +442,40 @@ describe('RegisterComponent', () => {
         email: 'john@example.com',
         username: 'johndoe',
         password: 'Password123!',
-        bundle: 'tsi',
-        request_reason: 'Need access for genomics research project',
+        bundles: [
+          {
+            bundle_id: 'tsi',
+            reason: 'Need access for genomics research project',
+          },
+        ],
         recaptcha_token: 'test-recaptcha-token',
       });
+
+      req.flush({ success: true });
+      expect(component.isRegistrationComplete()).toBe(true);
+    });
+
+    it('should include multiple selected bundles', () => {
+      component.registrationForm.patchValue({
+        bundles: {
+          tsi: 'Need access for genomics research project',
+          sbp_workflow_execution: '',
+        },
+        terms: true,
+      });
+
+      component.submitRegistration();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      expect(req.request.body.bundles).toEqual([
+        {
+          bundle_id: 'tsi',
+          reason: 'Need access for genomics research project',
+        },
+        { bundle_id: 'sbp_workflow_execution' },
+      ]);
 
       req.flush({ success: true });
       expect(component.isRegistrationComplete()).toBe(true);
