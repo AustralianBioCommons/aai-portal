@@ -24,7 +24,10 @@ import {
   toAsciiEmail,
 } from '../../shared/validators/emails';
 import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
-import { BundleSelectionComponent } from '../../shared/components/bundle-selection/bundle-selection.component';
+import {
+  BundleSelectionComponent,
+  BundleSelections,
+} from '../../shared/components/bundle-selection/bundle-selection.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   heroCheck,
@@ -42,9 +45,13 @@ export interface RegistrationForm {
   username: FormControl<string>;
   password: FormControl<string>;
   confirmPassword: FormControl<string>;
-  bundle: FormControl<string>;
-  reason: FormControl<string>;
+  bundles: FormControl<BundleSelections>;
   terms: FormControl<boolean>;
+}
+
+export interface BundleRequest {
+  bundle_id: string;
+  reason?: string;
 }
 
 interface RegistrationRequest {
@@ -53,8 +60,7 @@ interface RegistrationRequest {
   email: string;
   username: string;
   password: string;
-  bundle?: string;
-  request_reason?: string;
+  bundles?: BundleRequest[];
   recaptcha_token: string;
 }
 
@@ -130,15 +136,13 @@ export class RegisterComponent implements AfterViewInit {
         username: ['', usernameRequirements],
         password: ['', passwordRequirements],
         confirmPassword: ['', Validators.required],
-        bundle: [''],
-        reason: [
-          { value: '', disabled: true },
-          [Validators.required, Validators.maxLength(255)],
-        ],
+        bundles: new FormControl<BundleSelections>({} as BundleSelections, {
+          nonNullable: true,
+        }),
         terms: [false, Validators.requiredTrue],
       },
       { validators: fullNameLengthValidator() },
-    );
+    ) as FormGroup<RegistrationForm>;
 
   constructor() {
     this.validationService.setupPasswordConfirmationValidation(
@@ -274,9 +278,9 @@ export class RegisterComponent implements AfterViewInit {
     this.recaptchaToken.set(captchaResponse);
   }
 
-  getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.registrationForm.get('bundle')?.value;
-    return this.bundles.find((bundle) => bundle.id === selectedId);
+  getSelectedBundles(): Bundle[] {
+    const selections = this.registrationForm.get('bundles')?.value ?? {};
+    return this.bundles.filter((bundle) => bundle.id in selections);
   }
 
   submitRegistration() {
@@ -306,9 +310,13 @@ export class RegisterComponent implements AfterViewInit {
       recaptcha_token: this.recaptchaToken()!,
     };
 
-    if (formValue.bundle) {
-      requestBody.bundle = formValue.bundle;
-      requestBody.request_reason = formValue.reason;
+    if (Object.keys(formValue.bundles).length) {
+      requestBody.bundles = Object.entries(formValue.bundles).map(
+        ([bundle_id, reason]) => ({
+          bundle_id,
+          ...(reason ? { reason } : {}),
+        }),
+      );
     }
 
     this.http

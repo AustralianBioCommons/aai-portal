@@ -1,6 +1,11 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, OnInit, computed, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Bundle } from '../../../core/constants/constants';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -11,6 +16,40 @@ import {
   heroClock,
 } from '@ng-icons/heroicons/outline';
 import { ModalComponent } from '../modal/modal.component';
+
+interface BundleModalText {
+  title: string;
+  description: string;
+  primaryButtonText: string;
+  notice?: string;
+}
+
+// Key = bundleId (presence means selected), value = reason (empty string if none)
+export type BundleSelections = Record<string, string>;
+
+const DEFAULT_REASON_MODAL_TEXT: BundleModalText = {
+  title: 'Reason for request',
+  description:
+    'To proceed, please provide a brief reason for your request. The bundle manager will review it shortly.',
+  primaryButtonText: 'Save',
+};
+
+export const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
+  tsi: {
+    title: 'Reason for request',
+    description:
+      'To proceed, please provide a brief reason for your request. The bundle manager will review it shortly.',
+    primaryButtonText: 'Save',
+    notice:
+      'Please note: Only <a href="https://bioplatforms.com/project/threatened-species/" target="_blank" rel="noopener noreferrer" class="font-semibold text-yellow-800 underline hover:text-yellow-700">TSI Consortium</a> members are eligible to apply for this bundle.',
+  },
+  sbp_workflow_execution: {
+    title: 'Institutional email required',
+    description:
+      'Only those with an <a href="https://site.usegalaxy.org.au/list-of-institutions.html" target="_blank" rel="noopener noreferrer" class="font-medium text-gray-900 hover:text-sky-500 hover:underline">Australian institutional email address</a> are eligible for this bundle. Please use your institutional email before proceeding.',
+    primaryButtonText: 'Add',
+  },
+};
 
 @Component({
   selector: 'app-bundle-selection',
@@ -27,50 +66,118 @@ import { ModalComponent } from '../modal/modal.component';
     }),
   ],
 })
-export class BundleSelectionComponent {
+export class BundleSelectionComponent implements OnInit {
   form = input.required<FormGroup>();
   bundles = input.required<Bundle[]>();
+  selectedBundles = signal<BundleSelections>({});
 
   originalReason = signal<string>('');
-  savedReason = signal<string>('');
 
-  showReasonModal = signal(false);
   modalBundleId = signal<string | null>(null);
+  reasonControl = new FormControl('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.maxLength(255)],
+  });
 
-  get reasonControl(): FormControl<string> {
-    return this.form().get('reason') as FormControl<string>;
+  modalBundle = computed(() => {
+    const bundleId = this.modalBundleId();
+    return this.bundles().find((bundle) => bundle.id === bundleId);
+  });
+  modalRequiresReason = computed(() => {
+    const bundle = this.modalBundle();
+    return bundle ? this.requiresReason(bundle) : false;
+  });
+  modalText = computed(() => {
+    const bundleId = this.modalBundleId();
+    return (
+      (bundleId && BUNDLE_MODAL_TEXT_BY_BUNDLE_ID[bundleId]) ||
+      DEFAULT_REASON_MODAL_TEXT
+    );
+  });
+  modalTitle = computed(() => this.modalText().title);
+  modalDescription = computed(() => this.modalText().description);
+  modalPrimaryButtonText = computed(() => this.modalText().primaryButtonText);
+  modalNotice = computed(() => this.modalText().notice);
+
+  ngOnInit(): void {
+    const initialBundles =
+      (this.form().get('bundles')?.value as BundleSelections | null) || {};
+    this.selectedBundles.set(initialBundles);
   }
 
   toggleBundle(value: string) {
     const bundle = this.bundles().find((bundle) => bundle.id === value);
-    if (!bundle?.disabled) {
-      const currentValue = this.form().get('bundle')?.value;
-      if (currentValue === value) {
-        // Unselect bundle
-        this.form().patchValue({ bundle: '', reason: '' });
-        this.savedReason.set('');
-        this.reasonControl.disable();
-        this.reasonControl.markAsUntouched();
-        this.reasonControl.markAsPristine();
-      } else {
-        // Select bundle - open modal
-        this.modalBundleId.set(value);
-        this.originalReason.set(this.reasonControl.value || '');
-        this.reasonControl.enable();
-        this.showReasonModal.set(true);
-      }
+    if (!bundle || bundle.disabled) {
+      return;
+    }
+
+    if (this.isBundleSelected(bundle)) {
+      this.removeSelectedBundle(value);
+    } else {
+      this.selectBundle(value);
     }
   }
 
-  openReasonModal(event: Event) {
-    event.stopPropagation();
-    const currentBundle = this.form().get('bundle')?.value;
-    if (currentBundle) {
-      this.modalBundleId.set(currentBundle);
-      this.originalReason.set(this.reasonControl.value || '');
-      this.reasonControl.enable();
-      this.showReasonModal.set(true);
+  selectBundle(value: string) {
+    const bundle = this.bundles().find((candidate) => candidate.id === value);
+    if (!bundle) {
+      return;
     }
+
+    if (this.hasBundleModal(bundle) || this.requiresReason(bundle)) {
+      this.openBundleModal(bundle);
+      return;
+    }
+
+    this.selectBundleWithoutReason(bundle.id);
+  }
+
+  selectBundleWithoutReason(value: string) {
+    this.selectedBundles.update((current) => ({ ...current, [value]: '' }));
+    this.syncSelectedBundlesToForm();
+    this.reasonControl.disable();
+    this.reasonControl.markAsUntouched();
+    this.reasonControl.markAsPristine();
+  }
+
+  openBundleModal(bundle: Bundle) {
+    this.modalBundleId.set(bundle.id);
+    const currentReason = this.getBundleReason(bundle);
+    this.originalReason.set(currentReason);
+    this.reasonControl.setValue(currentReason);
+    this.reasonControl.markAsUntouched();
+    this.reasonControl.markAsPristine();
+
+    if (this.requiresReason(bundle)) {
+      this.reasonControl.enable();
+    } else {
+      this.reasonControl.disable();
+    }
+  }
+
+  confirmModal() {
+    const bundleId = this.modalBundleId();
+    if (!bundleId) {
+      return;
+    }
+
+    if (this.modalRequiresReason()) {
+      this.saveReason();
+      return;
+    }
+
+    this.selectedBundles.update((current) => ({ ...current, [bundleId]: '' }));
+    this.syncSelectedBundlesToForm();
+    this.closeModal();
+  }
+
+  cancelModal() {
+    if (!this.modalRequiresReason()) {
+      this.closeModal();
+      return;
+    }
+
+    this.cancelReason();
   }
 
   saveReason() {
@@ -82,35 +189,21 @@ export class BundleSelectionComponent {
     const bundleId = this.modalBundleId();
     if (bundleId) {
       const trimmedReason = this.reasonControl.value.trim();
-      this.form().patchValue({
-        bundle: bundleId,
-        reason: trimmedReason,
-      });
-      this.savedReason.set(trimmedReason);
+      this.selectedBundles.update((current) => ({
+        ...current,
+        [bundleId]: trimmedReason,
+      }));
+      this.syncSelectedBundlesToForm();
     }
-    this.closeReasonModal();
+    this.closeModal();
   }
 
   cancelReason() {
-    const currentBundle = this.form().get('bundle')?.value;
-    const selectedBundle = this.modalBundleId();
-
-    // If canceling while selecting a new bundle (not editing), unselect it
-    if (selectedBundle && currentBundle !== selectedBundle) {
-      this.form().patchValue({ bundle: '', reason: '' });
-      this.reasonControl.disable();
-      this.reasonControl.markAsUntouched();
-      this.reasonControl.markAsPristine();
-    } else {
-      // Restore the original reason value
-      this.reasonControl.setValue(this.originalReason());
-    }
-
-    this.closeReasonModal();
+    this.reasonControl.setValue(this.originalReason());
+    this.closeModal();
   }
 
-  closeReasonModal() {
-    this.showReasonModal.set(false);
+  closeModal() {
     this.modalBundleId.set(null);
     this.originalReason.set('');
     this.reasonControl.markAsUntouched();
@@ -123,12 +216,37 @@ export class BundleSelectionComponent {
     }
   }
 
-  getSelectedBundle(): Bundle | undefined {
-    const selectedId = this.form().get('bundle')?.value;
-    return this.bundles().find((bundle) => bundle.id === selectedId);
+  isBundleSelected(bundle: Bundle): boolean {
+    return bundle.id in this.selectedBundles();
   }
 
-  isBundleSelected(bundle: Bundle) {
-    return bundle.id === this.form().get('bundle')?.value;
+  getBundleReason(bundle: Bundle): string {
+    return this.selectedBundles()[bundle.id] ?? '';
+  }
+
+  requiresReason(bundle: Bundle) {
+    return !!bundle.requireReason;
+  }
+
+  hasBundleModal(bundle: Bundle) {
+    return !!BUNDLE_MODAL_TEXT_BY_BUNDLE_ID[bundle.id];
+  }
+
+  private removeSelectedBundle(bundleId: string): void {
+    this.selectedBundles.update((current) => {
+      return Object.fromEntries(
+        Object.entries(current).filter(([id]) => id !== bundleId),
+      );
+    });
+    if (this.modalBundleId() === bundleId) {
+      this.closeModal();
+    }
+    this.syncSelectedBundlesToForm();
+  }
+
+  private syncSelectedBundlesToForm(): void {
+    const bundlesControl = this.form().get('bundles');
+    bundlesControl?.setValue(this.selectedBundles());
+    bundlesControl?.markAsDirty();
   }
 }

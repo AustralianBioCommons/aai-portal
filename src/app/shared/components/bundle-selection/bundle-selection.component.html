@@ -1,29 +1,19 @@
-@if (showReasonModal()) {
+@if (modalBundleId()) {
   <app-modal
-    title="Reason for request"
-    description="To proceed, please provide a brief reason for your request. The bundle manager will review it shortly."
-    primaryButtonText="Save"
+    [title]="modalTitle()"
+    [description]="modalDescription()"
+    [primaryButtonText]="modalPrimaryButtonText()"
     secondaryButtonText="Cancel"
-    [textareaControl]="reasonControl"
-    (primaryOutput)="saveReason()"
-    (secondaryOutput)="cancelReason()"
+    [textareaControl]="modalRequiresReason() ? reasonControl : null"
+    (primaryOutput)="confirmModal()"
+    (secondaryOutput)="cancelModal()"
   >
-    @if (modalBundleId() === "tsi") {
+    @if (modalNotice(); as notice) {
       <div
         modal-content
         class="inline-block rounded-md bg-yellow-50 px-4 py-2 text-center text-sm font-normal text-yellow-800"
-      >
-        Please note: Only
-        <a
-          href="https://bioplatforms.com/project/threatened-species/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="font-semibold text-yellow-800 underline hover:text-yellow-700"
-        >
-          TSI Consortium
-        </a>
-        members are eligible to apply for this bundle.
-      </div>
+        [innerHTML]="notice"
+      ></div>
     }
   </app-modal>
 }
@@ -127,16 +117,16 @@
           </div>
         }
         <!-- Provide reason section for selected bundle -->
-        @if (isBundleSelected(bundle)) {
+        @if (isBundleSelected(bundle) && requiresReason(bundle)) {
           <button
             type="button"
             class="flex items-center justify-between gap-2 rounded-full border py-3 pl-4 pr-3 transition-all hover:cursor-pointer hover:bg-gray-100"
-            (click)="openReasonModal($event)"
+            (click)="$event.stopPropagation(); openBundleModal(bundle)"
           >
             <span
               class="truncate text-left text-sm font-medium text-biocommons-primary"
             >
-              Reason: {{ savedReason() }}
+              Reason: {{ getBundleReason(bundle) }}
             </span>
             <ng-icon
               name="heroEye"

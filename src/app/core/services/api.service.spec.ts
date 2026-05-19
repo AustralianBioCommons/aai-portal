@@ -179,4 +179,19 @@ describe('ApiService', () => {
     });
     req.flush({ message: 'Verification email sent' });
   });
+
+  it('should call research institution check endpoint', () => {
+    const email = 'example@university.edu.au';
+
+    service.checkAustralianResearchInstitution(email).subscribe((response) => {
+      expect(response).toBe(true);
+    });
+
+    const req = httpMock.expectOne(
+      `${environment.auth0.backend}/utils/check-australian-research-institution?email=${email}`,
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('email')).toBe(email);
+    req.flush({ is_australian_research_institution: true });
+  });
 });
