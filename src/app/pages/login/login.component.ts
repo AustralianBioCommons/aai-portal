@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -10,7 +10,6 @@ import { ButtonComponent } from '../../shared/components/button/button.component
   selector: 'app-login',
   imports: [
     RouterLink,
-    CommonModule,
     LoadingSpinnerComponent,
     AlertComponent,
     ButtonComponent,

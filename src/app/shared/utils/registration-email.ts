@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
  */
 export function resolveRegistrationEmail(router: Router): string | null {
   const emailFromNavigation =
-    router.getCurrentNavigation()?.extras.state?.['email'];
+    router.currentNavigation()?.extras.state?.['email'];
   if (typeof emailFromNavigation === 'string') {
     return emailFromNavigation;
   }

@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject, DOCUMENT } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   FormGroup,
   ReactiveFormsModule,
@@ -54,7 +54,6 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   selector: 'app-profile',
   standalone: true,
   imports: [
-    CommonModule,
     LoadingSpinnerComponent,
     AlertComponent,
     ModalComponent,

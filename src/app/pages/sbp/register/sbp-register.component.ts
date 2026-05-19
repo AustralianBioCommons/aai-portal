@@ -8,7 +8,7 @@ import {
   FormControl,
   FormGroup,
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
@@ -45,7 +45,6 @@ interface SbpRegistrationRequest {
   selector: 'app-register',
   imports: [
     ReactiveFormsModule,
-    CommonModule,
     RecaptchaModule,
     AlertComponent,
     ButtonComponent,

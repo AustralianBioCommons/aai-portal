@@ -10,7 +10,7 @@ import {
   RouterLinkActive,
   NavigationEnd,
 } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
@@ -30,13 +30,7 @@ import {
 
 @Component({
   selector: 'app-navbar',
-  imports: [
-    RouterLink,
-    RouterLinkActive,
-    CommonModule,
-    NgIcon,
-    DropdownMenuComponent,
-  ],
+  imports: [RouterLink, RouterLinkActive, NgIcon, DropdownMenuComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
   viewProviders: [

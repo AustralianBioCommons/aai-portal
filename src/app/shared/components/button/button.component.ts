@@ -1,12 +1,11 @@
 import { Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 export type ButtonType = 'button' | 'submit';
 export type ButtonVariant = 'primary' | 'secondary';
 
 @Component({
   selector: 'app-button',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './button.component.html',
   styleUrl: './button.component.css',
 })
