@@ -7,7 +7,7 @@ describe('SbpRegistrationSuccessComponent', () => {
   let component: SbpRegistrationSuccessComponent;
   let fixture: ComponentFixture<SbpRegistrationSuccessComponent>;
   const routerStub = {
-    getCurrentNavigation: () => ({
+    currentNavigation: () => ({
       extras: { state: { email: 'sbp.user@example.com' } },
     }),
   };
