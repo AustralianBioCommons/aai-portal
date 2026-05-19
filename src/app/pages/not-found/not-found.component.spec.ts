@@ -4,7 +4,7 @@ import { By } from '@angular/platform-browser';
 import { NotFoundComponent } from './not-found.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideMockAuth0Service } from '../../shared/utils/testing-utils';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router, RouterLink } from '@angular/router';
 
 describe('NotFoundComponent', () => {
   let component: NotFoundComponent;
@@ -50,6 +50,9 @@ describe('NotFoundComponent', () => {
     const button = fixture.debugElement.query(By.css('app-button'));
     expect(button).toBeTruthy();
     expect(button.nativeElement.textContent.trim()).toBe('Go back');
-    expect(button.attributes['ng-reflect-router-link']).toBe('/');
+
+    const router = TestBed.inject(Router);
+    const routerLink = button.injector.get(RouterLink);
+    expect(router.serializeUrl(routerLink.urlTree!)).toBe('/');
   });
 });
