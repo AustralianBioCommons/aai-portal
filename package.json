@@ -20,13 +20,13 @@
     "socket.io-parser": "^4.2.6"
   },
   "dependencies": {
-    "@angular/common": "^19.2.20",
-    "@angular/compiler": "^19.2.20",
-    "@angular/core": "^19.2.20",
-    "@angular/forms": "^19.2.20",
-    "@angular/platform-browser": "^19.2.20",
-    "@angular/platform-browser-dynamic": "^19.2.20",
-    "@angular/router": "^19.2.20",
+    "@angular/common": "^20.3.21",
+    "@angular/compiler": "^20.3.21",
+    "@angular/core": "^20.3.21",
+    "@angular/forms": "^20.3.21",
+    "@angular/platform-browser": "^20.3.21",
+    "@angular/platform-browser-dynamic": "^20.3.21",
+    "@angular/router": "^20.3.21",
     "@auth0/auth0-angular": "^2.2.3",
     "@ng-icons/core": "^31.0.0",
     "@ng-icons/heroicons": "^31.0.0",
@@ -37,9 +37,9 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.20",
-    "@angular/cli": "^19.2.20",
-    "@angular/compiler-cli": "^19.2.20",
+    "@angular/build": "^20.3.26",
+    "@angular/cli": "^20.3.26",
+    "@angular/compiler-cli": "^20.3.21",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@playwright/test": "^1.50.0",
@@ -58,7 +58,7 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^3.4.17",
-    "typescript": "~5.7.2",
+    "typescript": "~5.9.3",
     "typescript-eslint": "~8.27.0"
   }
 }
