@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Title } from '@angular/platform-browser';
 import {
@@ -9,7 +10,6 @@ import {
 } from '@angular/router';
 import { Subject } from 'rxjs';
 import { BrandingService } from './branding.service';
-import { DOCUMENT } from '@angular/common';
 
 describe('BrandingService', () => {
   let routerEvents$: Subject<NavigationEnd>;

@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, DOCUMENT } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { DOCUMENT } from '@angular/common';
+
 import { filter, map } from 'rxjs/operators';
 
 interface BrandingConfig {
