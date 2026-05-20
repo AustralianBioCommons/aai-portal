@@ -411,6 +411,7 @@ describe('UserDetailsComponent', () => {
       extractedUrl: {} as UrlTree,
       trigger: 'imperative',
       previousNavigation: null,
+      abort: () => {},
       extras: {
         state: {
           returnUrl: '/pending-users',
