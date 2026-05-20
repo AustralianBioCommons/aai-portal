@@ -134,6 +134,9 @@ export class NavbarComponent {
         : 'Dashboard';
 
     if (this.adminType() === 'biocommons') {
+      if (this.adminPlatforms().length === 1) {
+        return `${this.adminPlatforms()[0].name} Admin ${suffix}`;
+      }
       return `BioCommons Admin ${suffix}`;
     } else if (this.adminType() === 'platform') {
       return `${this.adminPlatforms()[0].name} Admin ${suffix}`;
