@@ -1,4 +1,5 @@
-import { Injectable, inject, DOCUMENT } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Title } from '@angular/platform-browser';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 

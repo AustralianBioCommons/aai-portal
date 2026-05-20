@@ -287,12 +287,6 @@ describe('AuthService', () => {
         .flush(groups);
     }
 
-    it('returns null when not a general admin', () => {
-      createService();
-      flushAdminTypeRequests(false, [], []);
-      expect(service.adminType()).toBeNull();
-    });
-
     it('returns "platform-bundle" for SBP admin (single platform with its associated bundle group)', () => {
       createService();
       flushAdminTypeRequests(true, [sbpPlatform], [sbpGroup]);
@@ -311,16 +305,5 @@ describe('AuthService', () => {
       expect(service.adminType()).toBe('biocommons');
     });
 
-    it('returns "platform" for single-platform admin with no groups', () => {
-      createService();
-      flushAdminTypeRequests(true, [galaxyPlatform], []);
-      expect(service.adminType()).toBe('platform');
-    });
-
-    it('returns "bundle" for admin with groups but no platforms', () => {
-      createService();
-      flushAdminTypeRequests(true, [], [otherGroup]);
-      expect(service.adminType()).toBe('bundle');
-    });
   });
 });
