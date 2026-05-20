@@ -7,6 +7,7 @@ import {
 import { of, throwError } from 'rxjs';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { AuthService, BiocommonsAuth0User } from './auth.service';
+import { AdminPlatformResponse, AdminGroupResponse } from './api.service';
 import { environment } from '../../../environments/environment';
 
 describe('AuthService', () => {
@@ -248,5 +249,78 @@ describe('AuthService', () => {
     });
 
     httpMock.expectNone(`${environment.auth0.backend}/me/is-general-admin`);
+  });
+
+  describe('adminType', () => {
+    const sbpPlatform: AdminPlatformResponse = {
+      id: 'sbp',
+      name: 'Structural Biology Platform',
+    };
+    const sbpGroup: AdminGroupResponse = {
+      id: 'biocommons/group/sbp_workflow_execution',
+      name: 'SBP Workflow Execution',
+      short_name: 'SBP',
+    };
+    const galaxyPlatform: AdminPlatformResponse = {
+      id: 'galaxy',
+      name: 'Galaxy Australia',
+    };
+    const otherGroup: AdminGroupResponse = {
+      id: 'biocommons/group/other',
+      name: 'Other Group',
+      short_name: 'Other',
+    };
+
+    function flushAdminTypeRequests(
+      isAdmin: boolean,
+      platforms: AdminPlatformResponse[],
+      groups: AdminGroupResponse[],
+    ) {
+      httpMock
+        .expectOne(`${environment.auth0.backend}/me/is-general-admin`)
+        .flush(isAdmin);
+      httpMock
+        .expectOne(`${environment.auth0.backend}/me/platforms/admin-roles`)
+        .flush(platforms);
+      httpMock
+        .expectOne(`${environment.auth0.backend}/me/groups/admin-roles`)
+        .flush(groups);
+    }
+
+    it('returns null when not a general admin', () => {
+      createService();
+      flushAdminTypeRequests(false, [], []);
+      expect(service.adminType()).toBeNull();
+    });
+
+    it('returns "platform-bundle" for SBP admin (single platform with its associated bundle group)', () => {
+      createService();
+      flushAdminTypeRequests(true, [sbpPlatform], [sbpGroup]);
+      expect(service.adminType()).toBe('platform-bundle');
+    });
+
+    it('returns "biocommons" not "platform-bundle" when SBP admin also has an unrelated group', () => {
+      createService();
+      flushAdminTypeRequests(true, [sbpPlatform], [sbpGroup, otherGroup]);
+      expect(service.adminType()).toBe('biocommons');
+    });
+
+    it('returns "biocommons" for admin with multiple platforms', () => {
+      createService();
+      flushAdminTypeRequests(true, [sbpPlatform, galaxyPlatform], []);
+      expect(service.adminType()).toBe('biocommons');
+    });
+
+    it('returns "platform" for single-platform admin with no groups', () => {
+      createService();
+      flushAdminTypeRequests(true, [galaxyPlatform], []);
+      expect(service.adminType()).toBe('platform');
+    });
+
+    it('returns "bundle" for admin with groups but no platforms', () => {
+      createService();
+      flushAdminTypeRequests(true, [], [otherGroup]);
+      expect(service.adminType()).toBe('bundle');
+    });
   });
 });
