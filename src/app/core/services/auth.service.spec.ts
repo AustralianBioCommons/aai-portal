@@ -304,6 +304,5 @@ describe('AuthService', () => {
       flushAdminTypeRequests(true, [sbpPlatform, galaxyPlatform], []);
       expect(service.adminType()).toBe('biocommons');
     });
-
   });
 });
