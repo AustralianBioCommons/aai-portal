@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { RecaptchaModule } from 'ng-recaptcha-2';
@@ -10,13 +9,7 @@ import { AlertComponent } from '../../shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-email-verification-required',
-  imports: [
-    CommonModule,
-    RecaptchaModule,
-    ButtonComponent,
-    AlertComponent,
-    RouterLink,
-  ],
+  imports: [RecaptchaModule, ButtonComponent, AlertComponent, RouterLink],
   templateUrl: './email-verification-required.component.html',
   styleUrl: './email-verification-required.component.css',
 })

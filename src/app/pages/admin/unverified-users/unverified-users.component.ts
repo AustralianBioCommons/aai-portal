@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, DOCUMENT } from '@angular/core';
 import {
   AdminGetUsersApiParams,
   ApiService,
 } from '../../../core/services/api.service';
 import { UserListComponent } from '../components/user-list/user-list.component';
-import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-unverified-users',

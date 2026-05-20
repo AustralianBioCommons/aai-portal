@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { Router, RouterLink } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { RegistrationNavbarComponent } from './registration-navbar.component';
 
@@ -21,8 +23,11 @@ describe('RegistrationNavbarComponent', () => {
   });
 
   it('points logo link to the app root', () => {
-    const link: HTMLAnchorElement | null =
-      fixture.nativeElement.querySelector('a');
-    expect(link?.getAttribute('ng-reflect-router-link')).toBe('/');
+    const link = fixture.debugElement.query(By.directive(RouterLink));
+    expect(link).toBeTruthy();
+
+    const router = TestBed.inject(Router);
+    const routerLink = link.injector.get(RouterLink);
+    expect(router.serializeUrl(routerLink.urlTree!)).toBe('/');
   });
 });

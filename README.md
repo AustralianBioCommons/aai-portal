@@ -4,7 +4,7 @@
 ![Coverage](https://github.com/AustralianBiocommons/aai-portal/actions/workflows/coverage.yml/badge.svg)
 ![Code Style](https://github.com/AustralianBiocommons/aai-portal/actions/workflows/lint.yml/badge.svg)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.0.
+This project currently uses Angular v21.
 
 ## Project Info
 

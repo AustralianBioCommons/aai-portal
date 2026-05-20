@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { Component, signal } from '@angular/core';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../core/services/auth.service';
+import { AlertComponent } from '../../shared/components/alert/alert.component';
 
 @Component({
   template: '<div>Mock Register Component</div>',
@@ -102,11 +103,10 @@ describe('LoginComponent', () => {
     });
     fixture.detectChanges();
 
-    const alert = fixture.debugElement.query(By.css('app-alert'));
+    const alert = fixture.debugElement.query(By.directive(AlertComponent));
     expect(alert).toBeTruthy();
-    expect(alert.nativeElement.getAttribute('ng-reflect-message')).toBe(
-      'Test error message',
-    );
+    const alertComponent = alert.componentInstance as AlertComponent;
+    expect(alertComponent.message()).toBe('Test error message');
   });
 
   it('should display loading spinner when auto-logging in', () => {

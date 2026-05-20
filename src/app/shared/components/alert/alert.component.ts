@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { heroXMark } from '@ng-icons/heroicons/outline';
 import {
@@ -11,7 +11,7 @@ export type AlertType = 'success' | 'error';
 
 @Component({
   selector: 'app-alert',
-  imports: [CommonModule, NgIcon],
+  imports: [NgIcon],
   templateUrl: './alert.component.html',
   styleUrl: './alert.component.css',
   viewProviders: [
