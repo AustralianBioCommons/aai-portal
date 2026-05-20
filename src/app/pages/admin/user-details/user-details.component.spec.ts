@@ -411,7 +411,6 @@ describe('UserDetailsComponent', () => {
       extractedUrl: {} as UrlTree,
       trigger: 'imperative',
       previousNavigation: null,
-      abort: jasmine.createSpy('abort'),
       extras: {
         state: {
           returnUrl: '/pending-users',
