@@ -116,6 +116,7 @@
         @let showActionButton =
           !user()?.email_verified ||
           adminType() === "platform" ||
+          adminType() === "platform-bundle" ||
           adminType() === "biocommons";
         @if (showActionButton) {
           <app-dropdown-menu
@@ -146,7 +147,11 @@
                   Resend Verification Email
                 </button>
               }
-              @if (adminType() === "platform" || adminType() === "biocommons") {
+              @if (
+                adminType() === "platform" ||
+                adminType() === "platform-bundle" ||
+                adminType() === "biocommons"
+              ) {
                 <button
                   class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 transition-all hover:bg-gray-100 hover:text-gray-900"
                   role="menuitem"

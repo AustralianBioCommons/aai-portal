@@ -13,8 +13,14 @@ import {
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AdminPlatformResponse, AdminGroupResponse } from './api.service';
+import { PLATFORM_BUNDLE_GROUP_MAP } from '../constants/constants';
 
-export type AdminType = 'biocommons' | 'platform' | 'bundle' | null;
+export type AdminType =
+  | 'biocommons'
+  | 'platform'
+  | 'platform-bundle'
+  | 'bundle'
+  | null;
 
 export interface AuthError {
   error: string;
@@ -143,6 +149,18 @@ export class AuthService {
 
     const platforms = this.adminPlatforms();
     const groups = this.adminGroups();
+
+    // Platform-bundle admin: single platform whose groups are exactly its
+    // associated bundles (e.g. SBP admin). Detected before 'biocommons' so it
+    // doesn't inherit the broader biocommons privileges in the UI.
+    if (
+      platforms.length === 1 &&
+      groups.length > 0 &&
+      groups.every((g) =>
+        platforms.some((p) => PLATFORM_BUNDLE_GROUP_MAP[p.id] === g.id),
+      )
+    )
+      return 'platform-bundle';
 
     // BioCommons admin: manages multiple platforms or both platforms and groups
     if (platforms.length > 1 || (platforms.length && groups.length))

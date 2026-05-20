@@ -13,7 +13,6 @@ import {
 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
-import { PLATFORM_BUNDLE_GROUP_MAP } from '../../../core/constants/constants';
 import { DropdownMenuComponent } from '../dropdown-menu/dropdown-menu.component';
 import { filter } from 'rxjs';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -135,22 +134,11 @@ export class NavbarComponent {
         : 'Dashboard';
 
     if (this.adminType() === 'biocommons') {
-      const platforms = this.adminPlatforms();
-      const groups = this.adminGroups();
-      // Show the platform name only when this is a single-platform admin whose
-      // groups are exactly the bundles associated with that platform — i.e. an
-      // SBP-style admin, not a true multi-resource BioCommons admin.
-      const allGroupsArePlatformBundles =
-        platforms.length === 1 &&
-        groups.length > 0 &&
-        groups.every((g) =>
-          platforms.some((p) => PLATFORM_BUNDLE_GROUP_MAP[p.id] === g.id),
-        );
-      if (allGroupsArePlatformBundles) {
-        return `${platforms[0].name} Admin ${suffix}`;
-      }
       return `BioCommons Admin ${suffix}`;
-    } else if (this.adminType() === 'platform') {
+    } else if (
+      this.adminType() === 'platform' ||
+      this.adminType() === 'platform-bundle'
+    ) {
       return `${this.adminPlatforms()[0].name} Admin ${suffix}`;
     }
 
