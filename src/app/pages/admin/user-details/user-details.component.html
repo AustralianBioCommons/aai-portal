@@ -86,6 +86,41 @@
             }
           </form>
         }
+        @case ("deleteInvalidEmail") {
+          <form [formGroup]="deleteInvalidEmailForm">
+            <label
+              class="block text-sm font-medium text-gray-900"
+              for="modal-correct-email"
+            >
+              Correct email address
+              <span class="text-red-500" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="modal-correct-email"
+              type="email"
+              formControlName="correctEmail"
+              autocomplete="email"
+              class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+              [class.border-red-500]="
+                isFieldInvalid(deleteInvalidEmailForm, 'correctEmail')
+              "
+              placeholder="user@example.com"
+            />
+            @if (isFieldInvalid(deleteInvalidEmailForm, "correctEmail")) {
+              <div class="mt-0.5 text-xs text-red-500">
+                @for (
+                  error of getErrorMessages(
+                    deleteInvalidEmailForm,
+                    "correctEmail"
+                  );
+                  track error
+                ) {
+                  {{ error }}<br />
+                }
+              </div>
+            }
+          </form>
+        }
       }
     </div>
   </app-modal>
@@ -161,6 +196,17 @@
                   <ng-icon name="heroEnvelope" size="20"></ng-icon>
                   Send Password Reset Email
                 </button>
+                @if (!user()?.email_verified) {
+                  <button
+                    class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
+                    role="menuitem"
+                    tabindex="-1"
+                    (click)="deleteUserInvalidEmailBegin()"
+                  >
+                    <ng-icon name="heroTrash" size="20"></ng-icon>
+                    Delete Account &amp; Inform User
+                  </button>
+                }
                 <button
                   class="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-700 transition-all hover:bg-red-100 hover:text-red-900"
                   role="menuitem"

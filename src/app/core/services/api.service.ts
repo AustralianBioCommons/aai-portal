@@ -388,6 +388,16 @@ export class ApiService {
     );
   }
 
+  deleteUserInvalidEmail(
+    userId: string,
+    correctEmail: string,
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${environment.auth0.backend}/admin/users/${userId}/delete_invalid_email`,
+      { correct_email: correctEmail },
+    );
+  }
+
   updateName(firstName: string, lastName: string) {
     return this.http.post<BiocommonsUserDetails>(
       `${environment.auth0.backend}/me/profile/name/update`,
