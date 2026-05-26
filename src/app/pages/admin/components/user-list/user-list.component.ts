@@ -3,6 +3,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
   FormControl,
+  FormGroup,
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -26,6 +27,10 @@ import {
 } from '../../../../core/services/api.service';
 import { AlertComponent } from '../../../../shared/components/alert/alert.component';
 import { PlatformId } from '../../../../core/constants/constants';
+import {
+  internationalEmailValidator,
+  emailLengthValidator,
+} from '../../../../shared/validators/emails';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -37,6 +42,7 @@ import {
   heroEnvelope,
   heroUserCircle,
   heroXCircle,
+  heroTrash,
 } from '@ng-icons/heroicons/outline';
 
 export const DEFAULT_PAGE_SIZE = 50;
@@ -79,6 +85,7 @@ export const DEFAULT_PAGE_SIZE = 50;
       heroEnvelope,
       heroUserCircle,
       heroXCircle,
+      heroTrash,
     }),
   ],
 })
@@ -117,6 +124,23 @@ export class UserListComponent implements OnInit {
     email: string;
     platformId: string;
   } | null>(null);
+
+  showDeleteInvalidEmailModal = signal(false);
+  selectedUserForDeleteInvalidEmail = signal<{
+    userId: string;
+    email: string;
+  } | null>(null);
+
+  deleteInvalidEmailForm = new FormGroup({
+    correctEmail: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        internationalEmailValidator,
+        emailLengthValidator,
+      ],
+    }),
+  });
 
   adminType = this.authService.adminType;
   adminPlatforms = this.authService.adminPlatforms;
@@ -264,6 +288,52 @@ export class UserListComponent implements OnInit {
     this.showRevokeModal.set(false);
     this.revokeReasonControl.reset();
     this.selectedUserForRevoke.set(null);
+  }
+
+  openDeleteInvalidEmailModal(userId: string, email: string): void {
+    this.selectedUserForDeleteInvalidEmail.set({ userId, email });
+    this.deleteInvalidEmailForm.reset();
+    this.showDeleteInvalidEmailModal.set(true);
+    this.openMenuUserId.set(null);
+  }
+
+  closeDeleteInvalidEmailModal(): void {
+    this.showDeleteInvalidEmailModal.set(false);
+    this.deleteInvalidEmailForm.reset();
+    this.selectedUserForDeleteInvalidEmail.set(null);
+  }
+
+  confirmDeleteInvalidEmail(): void {
+    const selectedUser = this.selectedUserForDeleteInvalidEmail();
+    this.deleteInvalidEmailForm.markAllAsTouched();
+
+    if (!selectedUser || this.deleteInvalidEmailForm.invalid) {
+      return;
+    }
+
+    const { correctEmail } = this.deleteInvalidEmailForm.getRawValue();
+    this.alert.set(null);
+    this.apiService
+      .deleteUserInvalidEmail(selectedUser.userId, correctEmail)
+      .subscribe({
+        next: () => {
+          this.alert.set({
+            type: 'success',
+            message: 'User deleted and notification sent successfully',
+          });
+          this.closeDeleteInvalidEmailModal();
+          this.resetAndReloadUsers();
+          this.dataRefreshService.triggerRefresh();
+        },
+        error: (error) => {
+          console.error('Failed to delete user:', error);
+          this.alert.set({
+            type: 'error',
+            message: 'Failed to delete user',
+          });
+          this.closeDeleteInvalidEmailModal();
+        },
+      });
   }
 
   confirmRevokePlatformAccess(): void {

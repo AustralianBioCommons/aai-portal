@@ -60,7 +60,7 @@ interface ActionModalData {
   email: string;
 }
 
-type UserModal = 'username' | 'email';
+type UserModal = 'username' | 'email' | 'deleteInvalidEmail';
 
 @Component({
   selector: 'app-user-details',
@@ -217,6 +217,13 @@ export class UserDetailsComponent implements OnInit {
     ],
   });
 
+  deleteInvalidEmailForm = this.formBuilder.nonNullable.group({
+    correctEmail: [
+      '',
+      [Validators.required, internationalEmailValidator, emailLengthValidator],
+    ],
+  });
+
   activeModal = signal<UserModal | null>(null);
   modalLoading = signal(false);
 
@@ -339,6 +346,10 @@ export class UserDetailsComponent implements OnInit {
         this.emailForm.updateValueAndValidity();
         this.validationService.clearFieldBackendError('email');
         break;
+      case 'deleteInvalidEmail':
+        this.deleteInvalidEmailForm.reset();
+        this.openMenuAction.set(false);
+        break;
     }
     this.activeModal.set(type);
   }
@@ -362,6 +373,9 @@ export class UserDetailsComponent implements OnInit {
       this.usernameForm.updateValueAndValidity();
       this.validationService.clearFieldBackendError('username');
     }
+    if (this.activeModal() === 'deleteInvalidEmail') {
+      this.deleteInvalidEmailForm.reset();
+    }
     this.activeModal.set(null);
   }
 
@@ -371,19 +385,32 @@ export class UserDetailsComponent implements OnInit {
         return "Change user's username";
       case 'email':
         return "Change user's email address";
+      case 'deleteInvalidEmail':
+        return 'Delete user and send email notification?';
       default:
         return '';
     }
   }
 
   protected modalDescription(): string {
-    return this.activeModal() === 'email'
-      ? 'The user will receive a verification email to verify their new email address.'
-      : '';
+    if (this.activeModal() === 'email') {
+      return 'The user will receive a verification email to verify their new email address.';
+    }
+    if (this.activeModal() === 'deleteInvalidEmail') {
+      return this.user()?.email ?? '';
+    }
+    return '';
   }
 
   protected modalPrimaryButtonText(): string {
-    return this.activeModal() === 'email' ? 'Send verification email' : 'Save';
+    switch (this.activeModal()) {
+      case 'email':
+        return 'Send verification email';
+      case 'deleteInvalidEmail':
+        return 'Delete & Inform';
+      default:
+        return 'Save';
+    }
   }
 
   protected onModalPrimaryButtonClick(): void {
@@ -393,6 +420,9 @@ export class UserDetailsComponent implements OnInit {
         break;
       case 'email':
         this.updateEmail();
+        break;
+      case 'deleteInvalidEmail':
+        this.deleteUserInvalidEmail();
         break;
       default:
         break;
@@ -432,6 +462,39 @@ export class UserDetailsComponent implements OnInit {
         }
       },
     });
+  }
+
+  protected deleteUserInvalidEmail(): void {
+    this.deleteInvalidEmailForm.markAllAsTouched();
+    if (this.deleteInvalidEmailForm.invalid) {
+      return;
+    }
+    const { correctEmail } = this.deleteInvalidEmailForm.getRawValue();
+    const userId = this.user()!.user_id;
+    this.modalLoading.set(true);
+    this.apiService
+      .deleteUserInvalidEmail(userId, correctEmail.trim())
+      .subscribe({
+        next: () => {
+          this.modalLoading.set(false);
+          this.closeModal();
+          this.alert.set({
+            type: 'success',
+            message:
+              'User deleted and notification sent successfully, returning to dashboard',
+          });
+          setTimeout(() => this.router.navigate([this.returnUrl()]), 2000);
+        },
+        error: (error) => {
+          this.modalLoading.set(false);
+          console.error('Failed to delete user:', error);
+          this.alert.set({
+            type: 'error',
+            message: 'Failed to delete user',
+          });
+          this.closeModal();
+        },
+      });
   }
 
   getPlatformName(platformId: string): string {
@@ -570,6 +633,10 @@ export class UserDetailsComponent implements OnInit {
       this.user()!.user_id,
       this.user()!.email,
     );
+  }
+
+  deleteUserInvalidEmailBegin(): void {
+    this.openModal('deleteInvalidEmail');
   }
 
   unrejectGroup(groupId: string): void {
