@@ -106,6 +106,10 @@
               "
               placeholder="user@example.com"
             />
+            <div class="mt-1 text-xs text-gray-600">
+              An email will be sent to the correct address to let them know this
+              account was deleted.
+            </div>
             @if (isFieldInvalid(deleteInvalidEmailForm, "correctEmail")) {
               <div class="mt-0.5 text-xs text-red-500">
                 @for (

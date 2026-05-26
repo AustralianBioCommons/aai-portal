@@ -52,11 +52,15 @@
         placeholder="user@example.com"
         autocomplete="email"
       />
+      <div class="mt-1 text-xs text-gray-600">
+        An email will be sent to the correct address to let them know this
+        account was deleted.
+      </div>
       @if (
         deleteInvalidEmailForm.controls.correctEmail.invalid &&
         deleteInvalidEmailForm.controls.correctEmail.touched
       ) {
-        <p class="mt-1 text-xs text-red-500" role="alert">
+        <p class="mt-0.5 text-xs text-red-500" role="alert">
           Please enter a valid email address.
         </p>
       }
