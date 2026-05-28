@@ -3,7 +3,7 @@ import { ActivatedRoute, Navigation, Router, UrlTree } from '@angular/router';
 import { Renderer2 } from '@angular/core';
 import { of, throwError, Observable, EMPTY } from 'rxjs';
 import { By } from '@angular/platform-browser';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 
 import { UserDetailsComponent } from './user-details.component';
 import {
@@ -83,12 +83,12 @@ describe('UserDetailsComponent', () => {
     ]);
     const routerSpy = jasmine.createSpyObj(
       'Router',
-      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl', 'navigate'],
+      ['createUrlTree', 'serializeUrl', 'navigate'],
       {
         events: EMPTY,
+        currentNavigation: signal<Navigation | null>(null),
       },
     );
-    routerSpy.getCurrentNavigation.and.returnValue(null);
     routerSpy.createUrlTree.and.returnValue({} as UrlTree);
     routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
@@ -405,7 +405,9 @@ describe('UserDetailsComponent', () => {
 
   it('should set returnUrl from navigation state', () => {
     const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    mockRouter.getCurrentNavigation.and.returnValue({
+    (
+      mockRouter.currentNavigation as unknown as WritableSignal<Navigation | null>
+    ).set({
       id: 1,
       initialUrl: {} as UrlTree,
       extractedUrl: {} as UrlTree,
@@ -431,7 +433,9 @@ describe('UserDetailsComponent', () => {
 
   it('should set returnUrl from history state when navigation state is not available', () => {
     const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    mockRouter.getCurrentNavigation.and.returnValue(null);
+    (
+      mockRouter.currentNavigation as unknown as WritableSignal<Navigation | null>
+    ).set(null);
 
     spyOnProperty(history, 'state', 'get').and.returnValue({
       returnUrl: '/revoked-users',

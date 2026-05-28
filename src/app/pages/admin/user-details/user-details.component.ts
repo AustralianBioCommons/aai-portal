@@ -228,7 +228,7 @@ export class UserDetailsComponent implements OnInit {
   modalLoading = signal(false);
 
   ngOnInit() {
-    const navigation = this.router.getCurrentNavigation();
+    const navigation = this.router.currentNavigation();
     const stateReturnUrl =
       navigation?.extras?.state?.['returnUrl'] || history.state?.returnUrl;
     if (stateReturnUrl) {
