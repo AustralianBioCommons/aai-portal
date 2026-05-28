@@ -1,4 +1,5 @@
-import { Component, OnInit, signal, inject, DOCUMENT } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, OnInit, signal, inject } from '@angular/core';
 
 import {
   FormGroup,
