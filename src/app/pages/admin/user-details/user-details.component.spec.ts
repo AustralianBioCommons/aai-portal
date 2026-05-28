@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router, UrlTree } from '@angular/router';
+import { ActivatedRoute, Navigation, Router, UrlTree } from '@angular/router';
 import { Renderer2 } from '@angular/core';
 import { of, throwError, Observable, EMPTY } from 'rxjs';
 import { By } from '@angular/platform-browser';
@@ -411,12 +411,13 @@ describe('UserDetailsComponent', () => {
       extractedUrl: {} as UrlTree,
       trigger: 'imperative',
       previousNavigation: null,
+      abort: () => {},
       extras: {
         state: {
           returnUrl: '/pending-users',
         },
       },
-    });
+    } as Navigation);
 
     fixture = TestBed.createComponent(UserDetailsComponent);
     component = fixture.componentInstance;
