@@ -405,13 +405,12 @@ describe('UserDetailsComponent', () => {
 
   it('should set returnUrl from navigation state', () => {
     const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    mockRouter.currentNavigation.and.returnValue({
+    mockRouter.getCurrentNavigation.and.returnValue({
       id: 1,
       initialUrl: {} as UrlTree,
       extractedUrl: {} as UrlTree,
       trigger: 'imperative',
       previousNavigation: null,
-      abort: jasmine.createSpy('abort'),
       extras: {
         state: {
           returnUrl: '/pending-users',
@@ -431,7 +430,7 @@ describe('UserDetailsComponent', () => {
 
   it('should set returnUrl from history state when navigation state is not available', () => {
     const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    mockRouter.currentNavigation.and.returnValue(null);
+    mockRouter.getCurrentNavigation.and.returnValue(null);
 
     spyOnProperty(history, 'state', 'get').and.returnValue({
       returnUrl: '/revoked-users',
