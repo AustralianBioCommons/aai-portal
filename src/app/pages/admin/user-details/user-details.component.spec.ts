@@ -83,12 +83,12 @@ describe('UserDetailsComponent', () => {
     ]);
     const routerSpy = jasmine.createSpyObj(
       'Router',
-      ['currentNavigation', 'createUrlTree', 'serializeUrl', 'navigate'],
+      ['getCurrentNavigation', 'createUrlTree', 'serializeUrl', 'navigate'],
       {
         events: EMPTY,
       },
     );
-    routerSpy.currentNavigation.and.returnValue(null);
+    routerSpy.getCurrentNavigation.and.returnValue(null);
     routerSpy.createUrlTree.and.returnValue({} as UrlTree);
     routerSpy.serializeUrl.and.returnValue('/mocked-url');
 
