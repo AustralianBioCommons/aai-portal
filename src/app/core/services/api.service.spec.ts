@@ -188,7 +188,7 @@ describe('ApiService', () => {
     });
 
     const req = httpMock.expectOne(
-      `${environment.auth0.backend}/utils/check-australian-research-institution?email=${email}`,
+      `${environment.auth0.backend}/utils/register/check-australian-research-institution?email=${email}`,
     );
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('email')).toBe(email);
