@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, signal, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   FormGroup,
@@ -45,7 +46,14 @@ import {
   heroUser,
 } from '@ng-icons/heroicons/outline';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of } from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  of,
+  switchMap,
+} from 'rxjs';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 import { FormControl } from '@angular/forms';
 
@@ -84,6 +92,7 @@ export class ProfileComponent implements OnInit {
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly platforms = PLATFORMS;
   protected readonly bundles = BIOCOMMONS_BUNDLES;
@@ -127,6 +136,9 @@ export class ProfileComponent implements OnInit {
   otpLoading = signal(false);
   otpError = signal<string | null>(null);
   emailModalNotice = signal<string | null>(null);
+  // True only when the user holds an approved SBP bundle AND the new email is
+  // confirmed to NOT be from an Australian research institution.
+  sbpEmailNotInstitutional = signal(false);
 
   passwordForm = this.formBuilder.nonNullable.group({
     currentPassword: ['', Validators.required],
@@ -162,6 +174,37 @@ export class ProfileComponent implements OnInit {
         this.validationService.clearFieldBackendError('username');
       }
     });
+    this.watchEmailInstitutionStatus();
+  }
+
+  /**
+   * Live-check the new email as the user types: when they hold an approved SBP
+   * bundle and enter a valid, non-institutional email, show the revocation
+   * reminder — without waiting for the OTP to be sent. On any error we leave the
+   * reminder hidden rather than warn on an inconclusive check.
+   */
+  private watchEmailInstitutionStatus(): void {
+    const emailControl = this.emailForm.get('email');
+    if (!emailControl) return;
+
+    emailControl.valueChanges
+      .pipe(
+        debounceTime(400),
+        map((value) => toAsciiEmail((value ?? '').trim())),
+        distinctUntilChanged(),
+        switchMap((email) => {
+          if (!email || emailControl.invalid || !this.hasApprovedSbpBundle()) {
+            return of(true);
+          }
+          return this.apiService
+            .checkAustralianResearchInstitution(email)
+            .pipe(catchError(() => of(true)));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((isInstitution) => {
+        this.sbpEmailNotInstitutional.set(!isInstitution);
+      });
   }
 
   protected openModal(type: ProfileModal): void {
@@ -223,6 +266,7 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(false);
     this.otpLoading.set(false);
     this.emailModalNotice.set(null);
+    this.sbpEmailNotInstitutional.set(false);
   }
 
   protected closeModal(): void {
@@ -561,6 +605,19 @@ export class ProfileComponent implements OnInit {
     const bundleId = groupId.split('/').pop() || '';
     const bundle = this.bundles.find((b) => b.id === bundleId);
     return bundle?.logoUrls || [];
+  }
+
+  /**
+   * Whether the current user holds an approved SBP Workflow Execution bundle.
+   * Used to warn the user, when changing their email, that switching to a
+   * non-institutional email will revoke their SBP bundle access.
+   */
+  protected hasApprovedSbpBundle(): boolean {
+    return !!this.user()?.group_memberships?.some(
+      (membership) =>
+        membership.group_id.split('/').pop() === 'sbp_workflow_execution' &&
+        membership.approval_status === 'approved',
+    );
   }
 
   deleteAccountBegin(): void {

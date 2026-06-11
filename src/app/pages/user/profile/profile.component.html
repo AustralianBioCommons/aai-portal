@@ -128,6 +128,21 @@
                   }
                 </div>
               }
+              @if (sbpEmailNotInstitutional()) {
+                <div class="mt-2 text-xs font-medium text-red-600" role="alert">
+                  Access to the Structural Biology Platform Bundle requires
+                  affiliation with an
+                  <a
+                    href="https://site.usegalaxy.org.au/list-of-institutions.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="underline hover:text-red-700"
+                    >Australian Research Institute</a
+                  >. Changing to a non-institutional email address will
+                  automatically revoke access to the SBP workflow execution
+                  bundle
+                </div>
+              }
             </div>
             @if (emailFlowState() === "otp-sent") {
               <div>

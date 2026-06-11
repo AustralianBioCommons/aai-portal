@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from '@angular/core/testing';
 import { ProfileComponent } from './profile.component';
 import {
   ApiService,
@@ -86,6 +91,7 @@ describe('ProfileComponent', () => {
       'updateName',
       'requestEmailChange',
       'continueEmailChange',
+      'checkAustralianResearchInstitution',
       'deleteAccount',
     ]);
     const authSpy = jasmine.createSpyObj(
@@ -131,6 +137,7 @@ describe('ProfileComponent', () => {
       of({ message: 'OTP sent to the requested email address.' }),
     );
     mockApiService.continueEmailChange.and.returnValue(of(void 0));
+    mockApiService.checkAustralianResearchInstitution.and.returnValue(of(true));
     mockApiService.deleteAccount.and.returnValue(
       of({ message: 'Account deleted successfully' }),
     );
@@ -445,6 +452,177 @@ describe('ProfileComponent', () => {
         'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
     });
     expect(component.activeModal()).toBeNull();
+  });
+
+  describe('SBP bundle email-change reminder', () => {
+    const sbpReminder =
+      'Access to the Structural Biology Platform Bundle requires';
+
+    const userWithSbp = (
+      approvalStatus: 'approved' | 'pending',
+    ): UserProfileData => ({
+      ...mockUser,
+      group_memberships: [
+        {
+          group_id: 'biocommons/group/sbp_workflow_execution',
+          group_name: 'Structural Biology Platform Bundle',
+          group_short_name: 'SBP',
+          approval_status: approvalStatus,
+        },
+      ],
+    });
+
+    it('reports an approved SBP bundle via hasApprovedSbpBundle()', () => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      fixture.detectChanges();
+
+      expect(
+        (
+          component as unknown as { hasApprovedSbpBundle(): boolean }
+        ).hasApprovedSbpBundle(),
+      ).toBeTrue();
+    });
+
+    it('does not report a pending SBP bundle as approved', () => {
+      mockApiService.getUserProfile.and.returnValue(of(userWithSbp('pending')));
+      fixture.detectChanges();
+
+      expect(
+        (
+          component as unknown as { hasApprovedSbpBundle(): boolean }
+        ).hasApprovedSbpBundle(),
+      ).toBeFalse();
+    });
+
+    it('returns false when the user has no SBP bundle', () => {
+      fixture.detectChanges();
+
+      expect(
+        (
+          component as unknown as { hasApprovedSbpBundle(): boolean }
+        ).hasApprovedSbpBundle(),
+      ).toBeFalse();
+    });
+
+    // Type a new email into the open email modal and let the debounced
+    // institution check resolve (no Send OTP click).
+    const typeNewEmail = (email: string) => {
+      openModal('email');
+      component.emailForm.controls.email.setValue(email);
+      tick(400);
+      fixture.detectChanges();
+    };
+
+    it('shows the red reminder when SBP is approved and the typed email is non-institutional', fakeAsync(() => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        of(false),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('new@gmail.com');
+
+      expect(
+        mockApiService.checkAustralianResearchInstitution,
+      ).toHaveBeenCalledWith('new@gmail.com');
+      const reminder: HTMLElement | null = (
+        fixture.nativeElement as HTMLElement
+      ).querySelector('.text-red-600');
+      expect(reminder?.textContent).toContain(sbpReminder);
+    }));
+
+    it('does not show the reminder when the typed email is institutional', fakeAsync(() => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        of(true),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('new@sydney.edu.au');
+
+      expect(component.sbpEmailNotInstitutional()).toBeFalse();
+      expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(
+        sbpReminder,
+      );
+    }));
+
+    it('does not check the email or show the reminder without an approved SBP bundle', fakeAsync(() => {
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        of(false),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('new@gmail.com');
+
+      expect(
+        mockApiService.checkAustralianResearchInstitution,
+      ).not.toHaveBeenCalled();
+      expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(
+        sbpReminder,
+      );
+    }));
+
+    it('does not call the API for an invalid email', fakeAsync(() => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('not-an-email');
+
+      expect(
+        mockApiService.checkAustralianResearchInstitution,
+      ).not.toHaveBeenCalled();
+      expect(component.sbpEmailNotInstitutional()).toBeFalse();
+    }));
+
+    it('does not show the reminder when the institution check errors', fakeAsync(() => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        throwError(() => new Error('network')),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('new@gmail.com');
+
+      expect(component.sbpEmailNotInstitutional()).toBeFalse();
+      expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(
+        sbpReminder,
+      );
+    }));
+
+    it('hides the reminder again when the email is corrected to institutional', fakeAsync(() => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        of(false),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('new@gmail.com');
+      expect(component.sbpEmailNotInstitutional()).toBeTrue();
+
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        of(true),
+      );
+      component.emailForm.controls.email.setValue('new@sydney.edu.au');
+      tick(400);
+      fixture.detectChanges();
+
+      expect(component.sbpEmailNotInstitutional()).toBeFalse();
+      expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(
+        sbpReminder,
+      );
+    }));
   });
 
   it('handles a successful password change', () => {
