@@ -23,7 +23,6 @@ import {
   internationalEmailValidator,
   toAsciiEmail,
 } from '../../shared/validators/emails';
-import { RegistrationNavbarComponent } from '../../shared/components/registration-navbar/registration-navbar.component';
 import {
   BundleSelectionComponent,
   BundleSelections,
@@ -79,7 +78,6 @@ interface Section {
     RecaptchaModule,
     AlertComponent,
     ButtonComponent,
-    RegistrationNavbarComponent,
     BundleSelectionComponent,
     NgIcon,
     RouterModule,
