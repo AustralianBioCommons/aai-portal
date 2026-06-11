@@ -49,8 +49,6 @@ export class ValidationService {
         'New username must be different from the current username',
     },
     email: {
-      invalidSbpEmailDomain:
-        'Email must be from an authorized institution domain (UNSW, BioCommons, USyd, WEHI, Monash, Griffith, or UoM)',
       localPartTooLong: 'Email local part cannot exceed 64 characters',
       domainPartTooLong: 'Email domain cannot exceed 254 characters',
       valueUnchanged: 'New email must be different from the current email',
