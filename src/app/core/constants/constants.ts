@@ -75,29 +75,3 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
 export const PLATFORM_BUNDLE_GROUP_MAP: Partial<Record<PlatformId, string>> = {
   sbp: 'biocommons/group/sbp_workflow_execution',
 };
-
-/**
- * Allowed email domains for SBP (Structural Biology Platform) registration
- */
-export const SBP_ALLOWED_EMAIL_DOMAINS = [
-  // UNSW
-  'unsw.edu.au',
-  'ad.unsw.edu.au',
-  'student.unsw.edu.au',
-  // BioCommons
-  'biocommons.org.au',
-  // USyd
-  'sydney.edu.au',
-  'uni.sydney.edu.au',
-  // WEHI
-  'wehi.edu.au',
-  // Monash
-  'monash.edu',
-  'student.monash.edu',
-  // Griffith
-  'griffith.edu.au',
-  'griffithuni.edu.au',
-  // UoM
-  'unimelb.edu.au',
-  'student.unimelb.edu.au',
-] as const;
