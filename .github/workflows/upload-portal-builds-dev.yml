@@ -88,7 +88,7 @@ jobs:
         run: npx ng build --configuration debug --output-path dist/aai-portal-debug
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.1.2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
           role-session-name: portal-build-upload
@@ -109,7 +109,7 @@ jobs:
           aws s3 sync dist/aai-portal-debug/browser/ "s3://${AWS_PORTAL_BUILD_BUCKET}/build/debug/dev/" --delete
 
       - name: Configure AWS credentials for dev release deploy
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.1.2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_DEV }}
           role-session-name: portal-dev-release-deploy
