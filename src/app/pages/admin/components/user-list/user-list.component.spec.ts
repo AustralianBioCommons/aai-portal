@@ -7,24 +7,36 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 
 import { DEFAULT_PAGE_SIZE, UserListComponent } from './user-list.component';
 import {
   ApiService,
+  AdminPlatformResponse,
+  AdminGroupResponse,
   BiocommonsUserResponse,
   FilterOption,
 } from '../../../../core/services/api.service';
 import { DataRefreshService } from '../../../../core/services/data-refresh.service';
 import { PlatformId } from '../../../../core/constants/constants';
-import { AuthService } from '../../../../core/services/auth.service';
+import {
+  AdminType,
+  AuthService,
+  BiocommonsAuth0User,
+} from '../../../../core/services/auth.service';
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
   let fixture: ComponentFixture<UserListComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let adminTypeSignal: WritableSignal<AdminType>;
+  let adminPlatformsSignal: WritableSignal<AdminPlatformResponse[]>;
+  let adminGroupsSignal: WritableSignal<AdminGroupResponse[]>;
+  let userSignal: WritableSignal<BiocommonsAuth0User | null>;
   let router: Router;
+
+  const currentUserSub = 'auth0|admin123';
 
   const mockUsers: BiocommonsUserResponse[] = [
     {
@@ -70,10 +82,17 @@ describe('UserListComponent', () => {
     mockApiService.getAdminAllUsers.and.returnValue(of(mockUsers));
     mockApiService.getAdminUsersPageInfo.and.returnValue(of(mockUserCounts));
 
+    adminTypeSignal = signal<AdminType>(null);
+    adminPlatformsSignal = signal<AdminPlatformResponse[]>([]);
+    adminGroupsSignal = signal<AdminGroupResponse[]>([]);
+    userSignal = signal<BiocommonsAuth0User | null>({
+      sub: currentUserSub,
+    } as BiocommonsAuth0User);
     mockAuthService = jasmine.createSpyObj('AuthService', ['refreshUser'], {
-      adminPlatforms: signal([]),
-      adminGroups: signal([]),
-      adminType: signal(null),
+      adminPlatforms: adminPlatformsSignal,
+      adminGroups: adminGroupsSignal,
+      adminType: adminTypeSignal,
+      user: userSignal,
     });
 
     await TestBed.configureTestingModule({
@@ -491,6 +510,103 @@ describe('UserListComponent', () => {
 
       expect(component.users().length).toBe(0);
       expect(component.loading()).toBeFalse();
+    }));
+  });
+
+  describe('current admin user entry', () => {
+    const approvedGalaxyMembership = {
+      id: 'membership-1',
+      platform_id: 'galaxy' as PlatformId,
+      platform_name: 'Galaxy Australia',
+      user_id: currentUserSub,
+      approval_status: 'approved' as const,
+      updated_by: 'admin',
+      updated_at: '2023-01-01T00:00:00Z',
+    };
+
+    const adminUserEntry: BiocommonsUserResponse = {
+      id: currentUserSub,
+      email: 'admin@example.com',
+      username: 'admin',
+      email_verified: true,
+      created_at: '2023-01-01T00:00:00Z',
+      platform_memberships: [approvedGalaxyMembership],
+      group_memberships: [],
+    };
+
+    const otherUserEntry: BiocommonsUserResponse = {
+      id: 'auth0|other456',
+      email: 'other@example.com',
+      username: 'other',
+      email_verified: true,
+      created_at: '2023-01-02T00:00:00Z',
+      platform_memberships: [
+        {
+          ...approvedGalaxyMembership,
+          id: 'membership-2',
+          user_id: 'auth0|other456',
+        },
+      ],
+      group_memberships: [],
+    };
+
+    beforeEach(() => {
+      adminTypeSignal.set('platform');
+      adminPlatformsSignal.set([{ id: 'galaxy', name: 'Galaxy Australia' }]);
+      mockApiService.getAdminAllUsers.and.returnValue(
+        of([adminUserEntry, otherUserEntry]),
+      );
+    });
+
+    function getUserRows(): HTMLElement[] {
+      return Array.from(
+        fixture.debugElement.nativeElement.querySelectorAll(
+          '.divide-y > div',
+        ) as NodeListOf<HTMLElement>,
+      );
+    }
+
+    it('should identify the current admin user entry', () => {
+      expect(component.isCurrentAdminUser(currentUserSub)).toBeTrue();
+      expect(component.isCurrentAdminUser('auth0|other456')).toBeFalse();
+    });
+
+    it('should navigate to the profile page when clicking own entry', () => {
+      fixture.detectChanges();
+
+      component.navigateToUserDetails(currentUserSub);
+
+      expect(router.navigate).toHaveBeenCalledWith(['/profile']);
+    });
+
+    it('should highlight the own entry row and show a You badge', fakeAsync(() => {
+      fixture.detectChanges();
+      tick(250);
+      fixture.detectChanges();
+
+      const [adminRow, otherRow] = getUserRows();
+      expect(adminRow.textContent).toContain('admin@example.com');
+      expect(adminRow.classList).toContain('bg-amber-50');
+      expect(adminRow.textContent).toContain('You');
+      expect(otherRow.classList).not.toContain('bg-amber-50');
+      expect(otherRow.textContent).not.toContain('You');
+    }));
+
+    it('should not show the Revoke option in the own entry menu', fakeAsync(() => {
+      fixture.detectChanges();
+      tick(250);
+
+      component.openMenuUserId.set(currentUserSub);
+      fixture.detectChanges();
+      const [adminRow] = getUserRows();
+      expect(adminRow.textContent).not.toContain('Revoke');
+      expect(adminRow.textContent).toContain('View My Profile');
+
+      component.openMenuUserId.set('auth0|other456');
+      fixture.detectChanges();
+      const [, otherRow] = getUserRows();
+      expect(otherRow.textContent).toContain('Revoke');
+      expect(otherRow.textContent).toContain('View User Details');
     }));
   });
 

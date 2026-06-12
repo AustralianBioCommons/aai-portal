@@ -12,7 +12,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "prettier:check": "prettier --check .",
-    "prettier:fix": "prettier --check --write ."
+    "format": "prettier --check --write ."
   },
   "private": true,
   "overrides": {

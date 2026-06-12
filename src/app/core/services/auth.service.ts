@@ -58,6 +58,7 @@ export interface BiocommonsAuth0User {
   name: string;
   nickname: string;
   picture: string;
+  sub?: string;
   updated_at: string;
   user_id: string;
   username: string;

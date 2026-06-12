@@ -42,6 +42,7 @@ describe('RevokedUsersComponent', () => {
       adminPlatforms: adminPlatformsSignal,
       adminGroups: adminGroupsSignal,
       adminType: adminTypeSignal,
+      user: signal(null),
     });
 
     await TestBed.configureTestingModule({
