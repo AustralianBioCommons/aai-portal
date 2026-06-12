@@ -529,10 +529,10 @@ describe('ProfileComponent', () => {
       expect(
         mockApiService.checkAustralianResearchInstitution,
       ).toHaveBeenCalledWith('new@gmail.com');
-      const reminder: HTMLElement | null = (
-        fixture.nativeElement as HTMLElement
-      ).querySelector('.text-red-600');
-      expect(reminder?.textContent).toContain(sbpReminder);
+      expect(component.sbpEmailNotInstitutional()).toBeTrue();
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+        sbpReminder,
+      );
     }));
 
     it('does not show the reminder when the typed email is institutional', fakeAsync(() => {
