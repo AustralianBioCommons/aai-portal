@@ -1,4 +1,12 @@
-import { Component, OnInit, signal, model, input, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  signal,
+  model,
+  input,
+  inject,
+} from '@angular/core';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -146,6 +154,8 @@ export class UserListComponent implements OnInit {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
+  currentUserId = computed(() => this.authService.user()?.sub ?? null);
+
   hasTitleMessage = input(false);
   showEmailVerifiedTag = input(false);
   showSignedUpColumn = input(false);
@@ -215,7 +225,15 @@ export class UserListComponent implements OnInit {
     return this.openMenuUserId() === userId;
   }
 
+  isCurrentAdminUser(userId: string): boolean {
+    return userId === this.currentUserId();
+  }
+
   navigateToUserDetails(userId: string): void {
+    if (this.isCurrentAdminUser(userId)) {
+      this.router.navigate(['/profile']);
+      return;
+    }
     this.router.navigate(['/user', userId], {
       state: {
         returnUrl: this.returnUrl(),

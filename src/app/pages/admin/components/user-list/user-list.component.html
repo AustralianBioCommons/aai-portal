@@ -234,7 +234,10 @@
         <div class="divide-y rounded-b-md bg-white shadow">
           @for (user of users(); track user.id; let even = $even) {
             <div
-              class="flex items-center gap-2 p-4 font-normal last:rounded-b-md even:bg-sky-50"
+              class="flex items-center gap-2 p-4 font-normal last:rounded-b-md"
+              [class]="
+                isCurrentAdminUser(user.id) ? 'bg-amber-50' : 'even:bg-sky-50'
+              "
             >
               <div
                 class="min-w-0 flex-1"
@@ -248,6 +251,13 @@
                   >
                     {{ user.email }}
                   </button>
+                  @if (isCurrentAdminUser(user.id)) {
+                    <span
+                      class="rounded bg-amber-100 px-1 py-0.5 text-xs font-semibold uppercase text-amber-800"
+                    >
+                      You
+                    </span>
+                  }
                   @if (showEmailVerifiedTag() && !user.email_verified) {
                     <span
                       class="rounded bg-red-100 px-1 py-0.5 text-xs font-semibold uppercase text-red-800"
@@ -466,14 +476,19 @@
                       (click)="navigateToUserDetails(user.id)"
                     >
                       <ng-icon name="heroUserCircle" size="20"></ng-icon>
-                      View User Details
+                      {{
+                        isCurrentAdminUser(user.id)
+                          ? "View My Profile"
+                          : "View User Details"
+                      }}
                     </button>
                     @for (
                       platform of user.platform_memberships;
                       track platform.id
                     ) {
-                      <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform -->
+                      <!-- Show revoke button: for multi-platform admins only when user has 1 platform, for single-platform admins show if they manage that platform. Never shown for the admin's own entry to prevent accidental self-revocation -->
                       @if (
+                        !isCurrentAdminUser(user.id) &&
                         platform.approval_status === "approved" &&
                         ((adminType() === "biocommons" &&
                           user.platform_memberships.length === 1) ||
@@ -513,6 +528,7 @@
                       </button>
                     }
                     @if (
+                      !isCurrentAdminUser(user.id) &&
                       !user.email_verified &&
                       (adminType() === "platform" ||
                         adminType() === "platform-bundle" ||

@@ -30,6 +30,7 @@ describe('AllUsersComponent', () => {
       adminPlatforms: signal([]),
       adminGroups: signal([]),
       adminType: signal(null),
+      user: signal(null),
     });
 
     await TestBed.configureTestingModule({
