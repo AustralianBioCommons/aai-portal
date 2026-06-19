@@ -68,3 +68,42 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## AAF integration — `dev-aaf` deployment
+
+The `aaf-dev` branch targets the **`biocloud-dev-aaf`** Auth0 tenant
+(`dev-aaf` environment), isolated from `dev-bc`. Deploys are **manual** for now.
+
+Point the app at the tenant via runtime config — edit
+`src/assets/config/app-config.json`:
+
+```json
+"auth0": {
+  "domain": "biocloud-dev-aaf.au.auth0.com",
+  "clientId": "<dev-aaf portal SPA client id>",
+  "backend": "https://dev-aaf.api.aai.test.biocommons.org.au"
+}
+```
+
+Run locally (set `backend` to `http://localhost:8000` if running the API locally):
+
+```bash
+npm ci && npm start        # http://localhost:4200
+```
+
+Deploy to the hosted dev-aaf portal:
+
+```bash
+aws sso login --profile aai
+export AWS_PROFILE=aai AWS_REGION=ap-southeast-2
+npm ci && npm run build
+aws s3 sync ./dist/aai-portal/browser/ s3://aai-dev-aaf-portal/ --delete
+DIST=$(aws cloudfront list-distributions \
+  --query "DistributionList.Items[?contains(Aliases.Items,'dev-aaf.portal.aai.test.biocommons.org.au')].Id | [0]" \
+  --output text)
+aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
+```
+
+AAF login: trigger the AAF connection with
+`loginWithRedirect({ authorizationParams: { connection: 'AAF' } })`.
+Hosted at <https://dev-aaf.portal.aai.test.biocommons.org.au>.
