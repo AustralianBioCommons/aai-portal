@@ -80,7 +80,7 @@ Point the app at the tenant via runtime config — edit
 ```json
 "auth0": {
   "domain": "biocloud-dev-aaf.au.auth0.com",
-  "clientId": "<dev-aaf portal SPA client id>",
+  "clientId": "ZtroVyP0eDfVzpCBSnfYfXBCE6iCmo1R",
   "backend": "https://dev-aaf.api.aai.test.biocommons.org.au"
 }
 ```
