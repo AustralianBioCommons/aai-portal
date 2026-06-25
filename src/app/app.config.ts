@@ -31,8 +31,10 @@ export const appConfig: ApplicationConfig = {
       clientId: '',
       authorizationParams: {
         redirect_uri: window.location.origin,
+        scope: 'openid profile email offline_access',
       },
       cacheLocation: 'localstorage',
+      useRefreshTokens: true,
     }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
