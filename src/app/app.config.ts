@@ -35,6 +35,9 @@ export const appConfig: ApplicationConfig = {
       },
       cacheLocation: 'localstorage',
       useRefreshTokens: true,
+      // Fall back to silent iframe auth when no refresh token is cached (e.g.
+      // before login) instead of throwing a "Missing Refresh Token" error.
+      useRefreshTokensFallback: true,
     }),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),

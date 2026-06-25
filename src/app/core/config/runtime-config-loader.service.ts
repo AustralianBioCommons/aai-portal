@@ -43,6 +43,9 @@ export class RuntimeConfigLoaderService {
               // Rotating refresh tokens keep the SSO session alive without
               // depending on third-party-cookie iframe checks.
               useRefreshTokens: true,
+              // Fall back to silent iframe auth when no refresh token is cached
+              // (e.g. before login) instead of throwing "Missing Refresh Token".
+              useRefreshTokensFallback: true,
             });
           }),
         ),
