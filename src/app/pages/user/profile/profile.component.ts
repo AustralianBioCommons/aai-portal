@@ -356,7 +356,11 @@ export class ProfileComponent implements OnInit {
     }
 
     if (platformId !== 'galaxy') {
-      windowRef.open(launchUrl, '_blank');
+      // SBP performs a seamless SSO login when launched with `login=true`; it
+      // does a full-page Auth0 redirect that reuses the existing SSO session.
+      const targetUrl =
+        platformId === 'sbp' ? this.withLoginFlag(launchUrl) : launchUrl;
+      windowRef.open(targetUrl, '_blank');
       return;
     }
 
@@ -384,6 +388,16 @@ export class ProfileComponent implements OnInit {
           windowRef.open(launchUrl, '_blank');
         }
       });
+  }
+
+  private withLoginFlag(url: string): string {
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set('login', 'true');
+      return parsed.toString();
+    } catch {
+      return url;
+    }
   }
 
   protected updateName(): void {

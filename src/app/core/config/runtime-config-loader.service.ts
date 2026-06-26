@@ -37,8 +37,15 @@ export class RuntimeConfigLoaderService {
               clientId: merged.auth0.clientId,
               authorizationParams: {
                 redirect_uri: merged.auth0.redirectUri,
+                scope: 'openid profile email offline_access',
               },
               cacheLocation: 'localstorage',
+              // Rotating refresh tokens keep the SSO session alive without
+              // depending on third-party-cookie iframe checks.
+              useRefreshTokens: true,
+              // Fall back to silent iframe auth when no refresh token is cached
+              // (e.g. before login) instead of throwing "Missing Refresh Token".
+              useRefreshTokensFallback: true,
             });
           }),
         ),
