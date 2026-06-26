@@ -1,5 +1,62 @@
 # Changelog
 
+## [1.6.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.5.0...v1.6.0) (2026-06-26)
+
+
+### Features
+
+* add admin in user list ([312563d](https://github.com/AustralianBioCommons/aai-portal/commit/312563d91e23b6438104e2801a67b9808274fc15))
+* add Admin user to the user list ([82172c1](https://github.com/AustralianBioCommons/aai-portal/commit/82172c12dec78a5f01c5c08a811073a198f5d8db))
+* add functionality to delete user and notify users with invalid email ([63e02f6](https://github.com/AustralianBioCommons/aai-portal/commit/63e02f6e882dd455a684b100227362b56a0dd082))
+* add functionality to delete user and notify users with invalid emails (AAI-822) ([3b63a83](https://github.com/AustralianBioCommons/aai-portal/commit/3b63a833e2c9bd02fca6ec4b0f09de929f9f6ebc))
+* add info ([710ec1e](https://github.com/AustralianBioCommons/aai-portal/commit/710ec1e4e73e394ae424c4cf6b6e97ed50f201a1))
+* add SBP bundle description ([ab40cb0](https://github.com/AustralianBioCommons/aai-portal/commit/ab40cb0738ff982ec975735a9aaa979ed3677a18))
+* add showEmailVerifiedTag and showSignedUpColumn inputs to user list components ([72865de](https://github.com/AustralianBioCommons/aai-portal/commit/72865deecafb685dc098c4c1322dd243a2548639))
+* implement SBP email domain validation and update related messages ([bf38eeb](https://github.com/AustralianBioCommons/aai-portal/commit/bf38eeb018ac76516ef08ad0cba3105aa926a7a5))
+* remove eligibility message for SBP workflow execution bundle ([a067fb5](https://github.com/AustralianBioCommons/aai-portal/commit/a067fb508367caf40ccb292e307dc2f204dfc703))
+* show reminder to sbp bundle user when changing emails ([3e0e2b4](https://github.com/AustralianBioCommons/aai-portal/commit/3e0e2b4de7afd049b95240590189e35a70b56df1))
+* show reminder to sbp bundle user when changing emails ([23b3754](https://github.com/AustralianBioCommons/aai-portal/commit/23b3754ddefa1469d0dc506423e6cb5488d12af7))
+* show timestamp of Bundle request reasoning on Admin dashboard ([972236a](https://github.com/AustralianBioCommons/aai-portal/commit/972236ac658e0db8a3dfe855c55af7226f5debc4))
+* show timestamp of Bundle request reasoning on Admin dashboard (AAI-805) ([b680389](https://github.com/AustralianBioCommons/aai-portal/commit/b68038958cc8c89d5fa95d3210835fa2aa8134d9))
+* update admin list for SBP bundle view ([10ce909](https://github.com/AustralianBioCommons/aai-portal/commit/10ce9098fd7ec3bd30233a9d0f61be10167b0719))
+* update admin list for SBP bundle view and add SBP bundle ([784f4ae](https://github.com/AustralianBioCommons/aai-portal/commit/784f4ae7687444e3fa796ff75a2696a93d54c448))
+* update SBP admin dashboard title ([d90e9be](https://github.com/AustralianBioCommons/aai-portal/commit/d90e9bef480d326b87610a6925935568b3e14f4e))
+* update SBP admin dashboard title ([ae68c9d](https://github.com/AustralianBioCommons/aai-portal/commit/ae68c9d6b503311797f6efc155b60f4831f2c5c4))
+* Update user list to have more info ([f2acece](https://github.com/AustralianBioCommons/aai-portal/commit/f2acece056cffe1acfb6fc7a836c33a7e6076fe0))
+* validate email domain when requesting SBP bundle (AAI-816) ([#229](https://github.com/AustralianBioCommons/aai-portal/issues/229)) ([5c1230b](https://github.com/AustralianBioCommons/aai-portal/commit/5c1230bda6935dcf2c36d915d352afb57280bf7f))
+
+
+### Bug Fixes
+
+* add plaform-bundle as a special type ([a16789f](https://github.com/AustralianBioCommons/aai-portal/commit/a16789fb2c78039e822a15587a446f16e7e8daeb))
+* cast Navigation ([8e934fe](https://github.com/AustralianBioCommons/aai-portal/commit/8e934feddc8b018f43b0eee2d5cb7246a21006c5))
+* content with SBP bundle ([735b7d8](https://github.com/AustralianBioCommons/aai-portal/commit/735b7d85dbd9fb6458ebbb6abb9a9999720ec9cc))
+* do not lint dependabot commits ([a0e6abc](https://github.com/AustralianBioCommons/aai-portal/commit/a0e6abcada110e5e18e6272a530a2b9a322ef913))
+* do not lint dependabot commits ([6e25193](https://github.com/AustralianBioCommons/aai-portal/commit/6e25193c921c6b13ea310dcc07fad9a1a5ecbbeb))
+* fix admin type condition in user list ([133c3f6](https://github.com/AustralianBioCommons/aai-portal/commit/133c3f6780ce126bed064887393b080a92d28c10))
+* fix admin type condition in user list ([d259eef](https://github.com/AustralianBioCommons/aai-portal/commit/d259eeffa3e45d4b2732cc56ed9ac68a77fa6b1c))
+* formatting of biocommons ts and cs ([0274ccc](https://github.com/AustralianBioCommons/aai-portal/commit/0274cccb848844292d628418dfc435983d3defb2))
+* generate github app token for release-please ([#224](https://github.com/AustralianBioCommons/aai-portal/issues/224)) ([2dc239c](https://github.com/AustralianBioCommons/aai-portal/commit/2dc239cff503ae80260af9078d5c8bb5a7de2a77))
+* lint ([aa14333](https://github.com/AustralianBioCommons/aai-portal/commit/aa143337bbd4b1c5931d0050ce57ea889811fd05))
+* lint ([89a8ce9](https://github.com/AustralianBioCommons/aai-portal/commit/89a8ce9dac87403b3a58a8a6a6b4ed90ba6ee278))
+* only SBP admin title ([2857215](https://github.com/AustralianBioCommons/aai-portal/commit/28572157cae3888a2092290d08aafaf88641a08b))
+* prettier ([fa9358c](https://github.com/AustralianBioCommons/aai-portal/commit/fa9358cdc606db78413329300bfe4ba07f476589))
+* refresh tokens ([8a9bded](https://github.com/AustralianBioCommons/aai-portal/commit/8a9bdedabc71740641a917a7fbdcf3a8e2d2550e))
+* remove all sbp allowed domains ([eb6c795](https://github.com/AustralianBioCommons/aai-portal/commit/eb6c79507d10499a764dfa7dff7eeb0010a894c1))
+* remove all unused sbp allowed domains ([0760db3](https://github.com/AustralianBioCommons/aai-portal/commit/0760db34941450fcd5648dbb6ad9fd0770a5b865))
+* removed fungi bundle ([4aad1a7](https://github.com/AustralianBioCommons/aai-portal/commit/4aad1a78819377bfa6f2013704d8dc7106939065))
+* rename getCurrentNavigation ([96a36e5](https://github.com/AustralianBioCommons/aai-portal/commit/96a36e5f46f863698cee8a9e9642058353e3d791))
+* reverted back to this.router.currentNavigation() ([e06eba3](https://github.com/AustralianBioCommons/aai-portal/commit/e06eba39df3a690211256f5697ed6fe850c2ef3c))
+* sbp login launch ([ce7a3e4](https://github.com/AustralianBioCommons/aai-portal/commit/ce7a3e4a50f0c9cb37a922963de35e0334bf528a))
+* SBP login launch ([b95dd3a](https://github.com/AustralianBioCommons/aai-portal/commit/b95dd3ab15a803bc34a695cb1ae942e4d0251e2e))
+* test and update bundle count ([1fbefd3](https://github.com/AustralianBioCommons/aai-portal/commit/1fbefd3c3d9da326e9a43258b47a4a0d971362f4))
+* tests ([feb618a](https://github.com/AustralianBioCommons/aai-portal/commit/feb618a2f5e6f9596c8c66fa01157d07275be684))
+* typo in biocommons ts and cs ([7d5a821](https://github.com/AustralianBioCommons/aai-portal/commit/7d5a821de428604b710f2f6d860b382a7db31f33))
+* typo in biocommons ts and cs ([e941d46](https://github.com/AustralianBioCommons/aai-portal/commit/e941d4617bb5ea9c2fbb326d4907ae46f2ddcd92))
+* update user list layout for platform-bundle ([22014a5](https://github.com/AustralianBioCommons/aai-portal/commit/22014a5cfeada4a061d0b83770e7923bad9fbeaa))
+* update user list layout for platform-bundle ([223dae4](https://github.com/AustralianBioCommons/aai-portal/commit/223dae409be47cda1d04a5a703a36686026e385e))
+* use angular/common ([86dcf31](https://github.com/AustralianBioCommons/aai-portal/commit/86dcf31b47e8b22c5e38678d035ac78c4184c816))
+
 ## [1.5.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.4.0...v1.5.0) (2026-04-17)
 
 
