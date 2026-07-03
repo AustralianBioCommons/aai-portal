@@ -66,12 +66,3 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
 ];
-
-/**
- * Maps platform IDs to the bundle group ID whose admin access is granted by
- * the same Auth0 role as the platform admin role (biocommons/role/{platform}/admin).
- * Mirrors the backend PLATFORM_BUNDLE_GROUP_MAP in scheduled_tasks/tasks.py.
- */
-export const PLATFORM_BUNDLE_GROUP_MAP: Partial<Record<PlatformId, string>> = {
-  sbp: 'biocommons/group/sbp_workflow_execution',
-};
