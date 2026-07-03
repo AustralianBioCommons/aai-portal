@@ -104,6 +104,9 @@ DIST=$(aws cloudfront list-distributions \
 aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
 ```
 
-AAF login: trigger the AAF connection with
-`loginWithRedirect({ authorizationParams: { connection: 'AAF' } })`.
-Hosted at <https://dev-aaf.portal.aai.test.biocommons.org.au>.
+AAF login: **no portal change needed.** AAF uses Identifier-First / Home-Realm
+Discovery configured in Auth0 (see `aai-infrastructure`) — the portal's standard
+`loginWithRedirect()` shows an email-only screen, and institutional emails (any
+AAF-federated domain) route to AAF automatically. There is deliberately **no
+"Login with AAF" button** and no `connection` parameter. Hosted at
+<https://dev-aaf.portal.aai.test.biocommons.org.au>.
