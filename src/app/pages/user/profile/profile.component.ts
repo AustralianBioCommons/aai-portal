@@ -367,7 +367,7 @@ export class ProfileComponent implements OnInit {
     const normalizedBase = launchUrl.endsWith('/')
       ? launchUrl
       : `${launchUrl}/`;
-    const loginEndpoint = `${normalizedBase}authnz/oidc/login`;
+    const loginEndpoint = `${normalizedBase}authnz/auth0/login`;
 
     this.httpClient
       .get<{ redirect_uri?: string }>(loginEndpoint)
