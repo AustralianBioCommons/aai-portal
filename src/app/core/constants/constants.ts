@@ -9,7 +9,7 @@ export interface Bundle {
   pending?: boolean;
 }
 
-export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';
+export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp' | 'edna_explorer';
 
 export interface Platform {
   id: PlatformId;
@@ -36,6 +36,12 @@ export const PLATFORMS: Record<PlatformId, Platform> = {
     name: 'Structural Biology Platform',
     logoUrl: '/assets/biocommons-logo.png',
     url: 'https://sbp.biocommons.org.au/',
+  },
+  edna_explorer: {
+    id: 'edna_explorer',
+    name: 'eDNA Explorer',
+    logoUrl: '/assets/edna-explorer-logo.png',
+    url: 'https://amotu.it.csiro.au/',
   },
 } as const;
 

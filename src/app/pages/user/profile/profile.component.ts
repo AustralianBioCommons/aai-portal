@@ -102,6 +102,7 @@ export class ProfileComponent implements OnInit {
       environment.platformUrls.bpaPlatform,
     galaxy: environment.platformUrls.galaxyPlatform,
     sbp: environment.platformUrls.sbpPlatform,
+    edna_explorer: environment.platformUrls.ednaExplorerPlatform,
   };
 
   user = signal<UserProfileData | null>(null);

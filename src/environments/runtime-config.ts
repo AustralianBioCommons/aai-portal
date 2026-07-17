@@ -14,6 +14,7 @@ export interface PlatformUrlsConfig {
   bpaPlatformLogin?: string;
   galaxyPlatform: string;
   sbpPlatform?: string;
+  ednaExplorerPlatform?: string;
 }
 
 export interface EnvironmentConfig {

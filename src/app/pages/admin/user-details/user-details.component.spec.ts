@@ -280,6 +280,7 @@ describe('UserDetailsComponent', () => {
     expect(component.getPlatformName('bpa_data_portal')).toBe(
       'Bioplatforms Australia Data Portal',
     );
+    expect(component.getPlatformName('edna_explorer')).toBe('eDNA Explorer');
     expect(component.getPlatformName('unknown')).toBe('unknown');
   });
 
