@@ -10,6 +10,8 @@ export interface Bundle {
 }
 
 export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';
+export const SBP_PLATFORM_ID: PlatformId = 'sbp';
+export const SBP_BUNDLE_ID = 'sbp_workflow_execution';
 
 export interface Platform {
   id: PlatformId;
@@ -31,8 +33,8 @@ export const PLATFORMS: Record<PlatformId, Platform> = {
     logoUrl: '/assets/bpa-logo.png',
     url: 'https://data.bioplatforms.com/',
   },
-  sbp: {
-    id: 'sbp',
+  [SBP_PLATFORM_ID]: {
+    id: SBP_PLATFORM_ID,
     name: 'Structural Biology Platform',
     logoUrl: '/assets/biocommons-logo.png',
     url: 'https://sbp.biocommons.org.au/',
@@ -54,7 +56,7 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
   {
-    id: 'sbp_workflow_execution',
+    id: SBP_BUNDLE_ID,
     name: 'SBP Workflow Execution Bundle',
     logoUrls: ['/assets/biocommons-favicon.png'],
     listItems: [
@@ -66,3 +68,17 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
 ];
+
+export function isSbpBundleId(bundleId: string): boolean {
+  return bundleId === SBP_BUNDLE_ID;
+}
+
+export function isSbpGroupId(groupId: string): boolean {
+  return groupId.split('/').pop() === SBP_BUNDLE_ID;
+}
+
+export function getVisibleBiocommonsBundles(sbpEnabled: boolean): Bundle[] {
+  return sbpEnabled
+    ? BIOCOMMONS_BUNDLES
+    : BIOCOMMONS_BUNDLES.filter((bundle) => !isSbpBundleId(bundle.id));
+}

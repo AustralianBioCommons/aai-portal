@@ -16,11 +16,16 @@ export interface PlatformUrlsConfig {
   sbpPlatform?: string;
 }
 
+export interface FeatureConfig {
+  sbpEnabled: boolean;
+}
+
 export interface EnvironmentConfig {
   production: boolean;
   auth0: Auth0Config;
   recaptcha: RecaptchaConfig;
   platformUrls: PlatformUrlsConfig;
+  features: FeatureConfig;
 }
 
 export interface RuntimeEnvironmentConfig {
@@ -28,6 +33,7 @@ export interface RuntimeEnvironmentConfig {
   auth0?: Partial<Auth0Config>;
   recaptcha?: Partial<RecaptchaConfig>;
   platformUrls?: Partial<PlatformUrlsConfig>;
+  features?: Partial<FeatureConfig>;
 }
 
 function resolveRedirectUri(value: string | undefined): string {
@@ -56,6 +62,10 @@ export function mergeEnvironmentConfig(
     platformUrls: {
       ...defaults.platformUrls,
       ...(runtime?.platformUrls ?? {}),
+    },
+    features: {
+      ...defaults.features,
+      ...(runtime?.features ?? {}),
     },
   };
 }

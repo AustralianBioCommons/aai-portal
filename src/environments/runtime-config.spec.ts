@@ -20,6 +20,9 @@ describe('Runtime configuration Tests', () => {
       bpaPlatform: 'https://default.bpa.portal',
       galaxyPlatform: 'https://default.galaxy.portal',
     },
+    features: {
+      sbpEnabled: false,
+    },
   };
 
   it('returns defaults merged with redirect fallback when runtime config is absent', () => {
@@ -34,6 +37,7 @@ describe('Runtime configuration Tests', () => {
     expect(result.platformUrls.galaxyPlatform).toBe(
       'https://default.galaxy.portal',
     );
+    expect(result.features.sbpEnabled).toBeFalse();
 
     // defaults should remain untouched
     expect(defaults.auth0.redirectUri).toBe('');
@@ -53,6 +57,9 @@ describe('Runtime configuration Tests', () => {
         bpaPlatform: 'https://override.bpa.portal',
         galaxyPlatform: 'https://override.galaxy.portal',
       },
+      features: {
+        sbpEnabled: true,
+      },
     };
 
     const result = mergeEnvironmentConfig(defaults, runtime);
@@ -67,6 +74,7 @@ describe('Runtime configuration Tests', () => {
     expect(result.platformUrls.galaxyPlatform).toBe(
       'https://override.galaxy.portal',
     );
+    expect(result.features.sbpEnabled).toBeTrue();
 
     // Ensure defaults object was not mutated
     expect(defaults.production).toBe(false);
@@ -78,6 +86,7 @@ describe('Runtime configuration Tests', () => {
     expect(defaults.platformUrls.galaxyPlatform).toBe(
       'https://default.galaxy.portal',
     );
+    expect(defaults.features.sbpEnabled).toBeFalse();
   });
 
   it('honours runtime redirectUri when provided and falls back when empty', () => {
