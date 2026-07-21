@@ -14,7 +14,11 @@ import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
-import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
+import {
+  Bundle,
+  getVisibleBiocommonsBundles,
+  isSbpBundleId,
+} from '../../core/constants/constants';
 import { ValidationService } from '../../core/services/validation.service';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -97,8 +101,9 @@ export class RegisterComponent implements AfterViewInit {
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
   private readonly galaxyPlatformUrl =
     environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
+  private readonly sbpEnabled = environment.features.sbpEnabled;
 
-  readonly bundles = BIOCOMMONS_BUNDLES;
+  readonly bundles = getVisibleBiocommonsBundles(this.sbpEnabled);
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   readonly sections: Section[] = [
     { id: 'introduction', label: 'Introduction', mobileLabel: 'Introduction' },
@@ -308,13 +313,15 @@ export class RegisterComponent implements AfterViewInit {
       recaptcha_token: this.recaptchaToken()!,
     };
 
-    if (Object.keys(formValue.bundles).length) {
-      requestBody.bundles = Object.entries(formValue.bundles).map(
-        ([bundle_id, reason]) => ({
-          bundle_id,
-          ...(reason ? { reason } : {}),
-        }),
-      );
+    const selectedBundles = Object.entries(formValue.bundles).filter(
+      ([bundleId]) => this.sbpEnabled || !isSbpBundleId(bundleId),
+    );
+
+    if (selectedBundles.length) {
+      requestBody.bundles = selectedBundles.map(([bundle_id, reason]) => ({
+        bundle_id,
+        ...(reason ? { reason } : {}),
+      }));
     }
 
     this.http

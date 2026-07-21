@@ -23,7 +23,9 @@ import { DropdownMenuComponent } from '../../../shared/components/dropdown-menu/
 import {
   PlatformId,
   PLATFORMS,
-  BIOCOMMONS_BUNDLES,
+  SBP_PLATFORM_ID,
+  getVisibleBiocommonsBundles,
+  isSbpGroupId,
 } from '../../../core/constants/constants';
 import { environment } from '../../../../environments/environment';
 import { usernameRequirements } from '../../../shared/validators/usernames';
@@ -94,14 +96,17 @@ export class ProfileComponent implements OnInit {
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
+  private readonly sbpEnabled = environment.features.sbpEnabled;
   protected readonly platforms = PLATFORMS;
-  protected readonly bundles = BIOCOMMONS_BUNDLES;
+  protected readonly bundles = getVisibleBiocommonsBundles(this.sbpEnabled);
   protected readonly platformLaunchUrls: Partial<Record<PlatformId, string>> = {
     bpa_data_portal:
       environment.platformUrls.bpaPlatformLogin ??
       environment.platformUrls.bpaPlatform,
     galaxy: environment.platformUrls.galaxyPlatform,
-    sbp: environment.platformUrls.sbpPlatform,
+    ...(this.sbpEnabled && environment.platformUrls.sbpPlatform
+      ? { [SBP_PLATFORM_ID]: environment.platformUrls.sbpPlatform }
+      : {}),
   };
 
   user = signal<UserProfileData | null>(null);
@@ -348,6 +353,10 @@ export class ProfileComponent implements OnInit {
   }
 
   protected launchPlatform(platformId: PlatformId): void {
+    if (!this.sbpEnabled && platformId === SBP_PLATFORM_ID) {
+      return;
+    }
+
     const launchUrl = this.platformLaunchUrls[platformId];
     const windowRef = this.document.defaultView;
 
@@ -598,7 +607,7 @@ export class ProfileComponent implements OnInit {
     this.pageError.set(null);
     this.apiService.getUserProfile().subscribe({
       next: (user) => {
-        this.user.set(user);
+        this.user.set(this.filterSbpAccess(user));
         if (this.user()!.show_welcome_message) {
           this.alert.set({
             type: 'success',
@@ -627,11 +636,31 @@ export class ProfileComponent implements OnInit {
    * non-institutional email will revoke their SBP bundle access.
    */
   protected hasApprovedSbpBundle(): boolean {
+    if (!this.sbpEnabled) {
+      return false;
+    }
+
     return !!this.user()?.group_memberships?.some(
       (membership) =>
-        membership.group_id.split('/').pop() === 'sbp_workflow_execution' &&
+        isSbpGroupId(membership.group_id) &&
         membership.approval_status === 'approved',
     );
+  }
+
+  private filterSbpAccess(user: UserProfileData): UserProfileData {
+    if (this.sbpEnabled) {
+      return user;
+    }
+
+    return {
+      ...user,
+      platform_memberships: user.platform_memberships.filter(
+        (membership) => membership.platform_id !== SBP_PLATFORM_ID,
+      ),
+      group_memberships: user.group_memberships.filter(
+        (membership) => !isSbpGroupId(membership.group_id),
+      ),
+    };
   }
 
   deleteAccountBegin(): void {
