@@ -71,7 +71,7 @@
                       (click)="scrollToSection($event, section.id)"
                     >
                       <div
-                        class="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
+                        class="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium transition-all"
                         [ngClass]="{
                           'border-gray-300': !visited,
                           'border-biocommons-primary group-hover:border-sky-900':
@@ -93,8 +93,8 @@
                         } @else if (last && active && valid) {
                           <ng-icon
                             name="heroCheck"
-                            size="16"
-                            strokeWidth="2"
+                            size="14"
+                            strokeWidth="2.5"
                             class="z-10 text-white"
                           ></ng-icon>
                         } @else if (active) {
@@ -104,8 +104,8 @@
                         } @else if (completed && valid) {
                           <ng-icon
                             name="heroCheck"
-                            size="16"
-                            strokeWidth="2"
+                            size="14"
+                            strokeWidth="2.5"
                             class="z-10 text-white"
                           ></ng-icon>
                         } @else if (completed && !valid) {
@@ -113,8 +113,8 @@
                         } @else if (visited && valid) {
                           <ng-icon
                             name="heroCheck"
-                            size="16"
-                            strokeWidth="2"
+                            size="14"
+                            strokeWidth="2.5"
                             class="text-biocommons-primary"
                           ></ng-icon>
                         } @else if (visited && !valid) {
