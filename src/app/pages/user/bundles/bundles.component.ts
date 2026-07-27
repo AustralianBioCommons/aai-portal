@@ -1,7 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
-import { BIOCOMMONS_BUNDLES, Bundle } from '../../../core/constants/constants';
+import {
+  getVisibleBiocommonsBundles,
+  isSbpBundleId,
+  Bundle,
+} from '../../../core/constants/constants';
 import {
   BundleSelectionComponent,
   BundleSelections,
@@ -13,6 +17,7 @@ import { heroArrowLeft } from '@ng-icons/heroicons/outline';
 import { AlertComponent } from '../../../shared/components/alert/alert.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-bundles',
@@ -33,6 +38,7 @@ export class BundlesComponent implements OnInit {
   public router = inject(Router);
   private formBuilder = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private readonly sbpEnabled = environment.features.sbpEnabled;
 
   bundleForm: FormGroup = this.formBuilder.nonNullable.group({
     bundles: new FormControl<BundleSelections>({} as BundleSelections, {
@@ -41,7 +47,7 @@ export class BundlesComponent implements OnInit {
   });
 
   errorAlert = signal<string | null>(null);
-  bundles = signal<Bundle[]>(BIOCOMMONS_BUNDLES);
+  bundles = signal<Bundle[]>(getVisibleBiocommonsBundles(this.sbpEnabled));
   isSubmitting = signal<boolean>(false);
   isLoading = signal<boolean>(true);
   selected = signal<BundleSelections>({});
@@ -61,12 +67,15 @@ export class BundlesComponent implements OnInit {
   submit() {
     const selections =
       (this.bundleForm.getRawValue().bundles as BundleSelections) || {};
-    if (!Object.keys(selections).length) {
+    const selectableEntries = Object.entries(selections).filter(
+      ([bundleId]) => this.sbpEnabled || !isSbpBundleId(bundleId),
+    );
+    if (!selectableEntries.length) {
       return;
     }
 
     this.isSubmitting.set(true);
-    const groups = Object.entries(selections).map(([bundleId, reason]) => ({
+    const groups = selectableEntries.map(([bundleId, reason]) => ({
       group_id: `biocommons/group/${bundleId}`,
       request_reason: reason || '',
     }));
@@ -94,16 +103,18 @@ export class BundlesComponent implements OnInit {
           const shortId = g.group_id.replace('biocommons/group/', '');
           return { ...g, id: shortId };
         });
-        const updatedBundles = BIOCOMMONS_BUNDLES.map((bundle) => {
-          const groupStatus = groupsWithIds.find((g) => g.id === bundle.id);
-          if (groupStatus?.approval_status === 'approved') {
-            return { ...bundle, disabled: true, approved: true };
-          }
-          if (groupStatus?.approval_status === 'pending') {
-            return { ...bundle, disabled: true, pending: true };
-          }
-          return bundle;
-        });
+        const updatedBundles = getVisibleBiocommonsBundles(this.sbpEnabled).map(
+          (bundle) => {
+            const groupStatus = groupsWithIds.find((g) => g.id === bundle.id);
+            if (groupStatus?.approval_status === 'approved') {
+              return { ...bundle, disabled: true, approved: true };
+            }
+            if (groupStatus?.approval_status === 'pending') {
+              return { ...bundle, disabled: true, pending: true };
+            }
+            return bundle;
+          },
+        );
         this.bundles.set(updatedBundles);
         this.isLoading.set(false);
       },

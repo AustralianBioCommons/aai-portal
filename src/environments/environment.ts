@@ -22,6 +22,9 @@ const defaults: EnvironmentConfig = {
     sbpPlatform: 'https://dev.sbp.test.biocommons.org.au',
     ednaExplorerPlatform: 'https://amotu.it.csiro.au',
   },
+  features: {
+    sbpEnabled: false,
+  },
 };
 
 export const environment: EnvironmentConfig = mergeEnvironmentConfig(defaults);
@@ -32,6 +35,7 @@ export function updateEnvironment(runtime?: RuntimeEnvironmentConfig): void {
   environment.auth0 = merged.auth0;
   environment.recaptcha = merged.recaptcha;
   environment.platformUrls = merged.platformUrls;
+  environment.features = merged.features;
 }
 
 export const environmentDefaults = defaults;

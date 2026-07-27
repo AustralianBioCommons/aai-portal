@@ -19,6 +19,9 @@ describe('createRoutes', () => {
       galaxyPlatform: 'https://example.test/galaxy',
       sbpPlatform: 'https://example.test/sbp',
     },
+    features: {
+      sbpEnabled: true,
+    },
   };
 
   it('expect key routes to be defined', () => {

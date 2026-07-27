@@ -17,6 +17,10 @@ import { signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  environment,
+  updateEnvironment,
+} from '../../../../environments/environment';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -84,6 +88,7 @@ describe('ProfileComponent', () => {
   };
 
   beforeEach(async () => {
+    environment.features.sbpEnabled = true;
     const apiSpy = jasmine.createSpyObj('ApiService', [
       'getUserProfile',
       'updateUsername',
@@ -141,6 +146,11 @@ describe('ProfileComponent', () => {
     mockApiService.deleteAccount.and.returnValue(
       of({ message: 'Account deleted successfully' }),
     );
+  });
+
+  afterEach(() => {
+    fixture.destroy();
+    updateEnvironment();
   });
 
   const openModal = (type: 'username' | 'password' | 'name' | 'email') =>
@@ -623,6 +633,62 @@ describe('ProfileComponent', () => {
         sbpReminder,
       );
     }));
+
+    it('does not report an approved SBP bundle when SBP is disabled', () => {
+      (component as unknown as { sbpEnabled: boolean }).sbpEnabled = false;
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      fixture.detectChanges();
+
+      expect(
+        (
+          component as unknown as { hasApprovedSbpBundle(): boolean }
+        ).hasApprovedSbpBundle(),
+      ).toBeFalse();
+    });
+  });
+
+  it('filters SBP services and bundles from profile data when SBP is disabled', () => {
+    fixture.destroy();
+    environment.features.sbpEnabled = false;
+
+    const userWithSbpAccess: UserProfileData = {
+      ...mockUser,
+      platform_memberships: [
+        ...mockUser.platform_memberships,
+        {
+          platform_id: 'sbp',
+          platform_name: 'Structural Biology Platform',
+          approval_status: 'approved',
+        },
+      ],
+      group_memberships: [
+        ...mockUser.group_memberships,
+        {
+          group_id: 'biocommons/group/sbp_workflow_execution',
+          group_name: 'Structural Biology Platform Bundle',
+          group_short_name: 'SBP',
+          approval_status: 'approved',
+        },
+      ],
+    };
+    mockApiService.getUserProfile.and.returnValue(of(userWithSbpAccess));
+
+    fixture = TestBed.createComponent(ProfileComponent);
+    component = fixture.componentInstance;
+    harness = component as ProfileTestHarness;
+    fixture.detectChanges();
+
+    expect(component.user()?.platform_memberships).toEqual([
+      mockUser.platform_memberships[0],
+    ]);
+    expect(component.user()?.group_memberships).toEqual([
+      mockUser.group_memberships[0],
+    ]);
+    expect((fixture.nativeElement as HTMLElement).textContent).not.toContain(
+      'Structural Biology Platform',
+    );
   });
 
   it('handles a successful password change', () => {

@@ -11,6 +11,10 @@ import {
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import {
+  environment,
+  updateEnvironment,
+} from '../../../../environments/environment';
 
 describe('BundlesComponent', () => {
   let component: BundlesComponent;
@@ -19,6 +23,7 @@ describe('BundlesComponent', () => {
   let router: Router;
 
   beforeEach(async () => {
+    environment.features.sbpEnabled = true;
     const apiServiceSpy = jasmine.createSpyObj('ApiService', [
       'getUserGroups',
       'requestGroupAccess',
@@ -39,6 +44,10 @@ describe('BundlesComponent', () => {
     apiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
     router = TestBed.inject(Router);
     apiService.getUserGroups.and.returnValue(of([]));
+  });
+
+  afterEach(() => {
+    updateEnvironment();
   });
 
   it('should create', () => {
@@ -129,6 +138,29 @@ describe('BundlesComponent', () => {
       },
     ]);
     expect(routerSpy).toHaveBeenCalledWith(['/profile']);
+  });
+
+  it('should omit SBP when submitting with SBP disabled', () => {
+    fixture.detectChanges();
+    (component as unknown as { sbpEnabled: boolean }).sbpEnabled = false;
+
+    component.bundleForm.patchValue({
+      bundles: {
+        tsi: 'Need access for biodiversity research',
+        sbp_workflow_execution: '',
+      },
+    });
+
+    apiService.requestGroupAccess.and.returnValue(of({ results: [] }));
+
+    component.submit();
+
+    expect(apiService.requestGroupAccess).toHaveBeenCalledOnceWith([
+      {
+        group_id: 'biocommons/group/tsi',
+        request_reason: 'Need access for biodiversity research',
+      },
+    ]);
   });
 
   it('should disable submit button when no bundle is selected', () => {

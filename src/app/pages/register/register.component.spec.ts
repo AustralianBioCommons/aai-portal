@@ -9,7 +9,10 @@ import {
 import { Component } from '@angular/core';
 import { RegisterComponent, RegistrationForm } from './register.component';
 import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
+import {
+  environment,
+  updateEnvironment,
+} from '../../../environments/environment';
 
 @Component({
   template: '<div>Mock Login Component</div>',
@@ -37,6 +40,7 @@ describe('RegisterComponent', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    environment.features.sbpEnabled = true;
     const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser']);
 
     await TestBed.configureTestingModule({
@@ -66,6 +70,7 @@ describe('RegisterComponent', () => {
   afterEach(() => {
     httpMock.verify();
     fixture.destroy();
+    updateEnvironment();
   });
 
   it('should create', () => {
@@ -479,6 +484,31 @@ describe('RegisterComponent', () => {
 
       req.flush({ success: true });
       expect(component.isRegistrationComplete()).toBe(true);
+    });
+
+    it('should omit SBP from the registration request when SBP is disabled', () => {
+      (component as unknown as { sbpEnabled: boolean }).sbpEnabled = false;
+      component.registrationForm.patchValue({
+        bundles: {
+          tsi: 'Need access for genomics research project',
+          sbp_workflow_execution: '',
+        },
+        terms: true,
+      });
+
+      component.submitRegistration();
+
+      const req = httpMock.expectOne(
+        `${environment.auth0.backend}/biocommons/register`,
+      );
+      expect(req.request.body.bundles).toEqual([
+        {
+          bundle_id: 'tsi',
+          reason: 'Need access for genomics research project',
+        },
+      ]);
+
+      req.flush({ success: true });
     });
   });
 

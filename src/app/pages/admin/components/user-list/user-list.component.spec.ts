@@ -247,8 +247,10 @@ describe('UserListComponent', () => {
     });
   });
 
-  it('should debounce search and not call API multiple times rapidly', (done) => {
+  it('should debounce search and not call API multiple times rapidly', fakeAsync(() => {
     fixture.detectChanges();
+    // Wait for initial finishLoading() time
+    tick(250);
     mockApiService.getAdminAllUsers.calls.reset();
 
     component.searchTerm.set('a');
@@ -260,17 +262,16 @@ describe('UserListComponent', () => {
     component.searchTerm.set('abc');
     component.onSearchInput();
 
-    setTimeout(() => {
-      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledTimes(1);
-      expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
-        page: 1,
-        perPage: DEFAULT_PAGE_SIZE,
-        filterBy: '',
-        search: 'abc',
-      });
-      done();
-    }, 600);
-  });
+    tick(600);
+
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledTimes(1);
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      filterBy: '',
+      search: 'abc',
+    });
+  }));
 
   it('should not trigger search when the same term is entered (distinctUntilChanged)', fakeAsync(() => {
     fixture.detectChanges();
