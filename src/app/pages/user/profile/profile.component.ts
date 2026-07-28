@@ -107,6 +107,7 @@ export class ProfileComponent implements OnInit {
     ...(this.sbpEnabled && environment.platformUrls.sbpPlatform
       ? { [SBP_PLATFORM_ID]: environment.platformUrls.sbpPlatform }
       : {}),
+    edna_explorer: environment.platformUrls.ednaExplorerPlatform,
   };
 
   user = signal<UserProfileData | null>(null);

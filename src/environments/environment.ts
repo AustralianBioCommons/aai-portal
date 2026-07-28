@@ -20,6 +20,7 @@ const defaults: EnvironmentConfig = {
     bpaPlatformLogin: 'https://aaidemo.bioplatforms.com/user/login',
     galaxyPlatform: 'https://dev.gvl.org.au',
     sbpPlatform: 'https://dev.sbp.test.biocommons.org.au',
+    ednaExplorerPlatform: 'https://amotu.it.csiro.au',
   },
   features: {
     sbpEnabled: false,
