@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.6.0...v1.7.0) (2026-07-29)
+
+
+### Features
+
+* add eDNA Explorer service ([92ba21c](https://github.com/AustralianBioCommons/aai-portal/commit/92ba21c5c2c25a228078f438d12d0a73b3aaa2b8))
+* add eDNA Explorer service ([9ce41d1](https://github.com/AustralianBioCommons/aai-portal/commit/9ce41d1ac2823d8de2d837a7dd96e793aa42985d))
+
 ## [1.6.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.5.0...v1.6.0) (2026-07-21)
 
 
