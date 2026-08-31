@@ -126,8 +126,10 @@ export class RegisterComponent implements AfterViewInit {
   errorAlert = signal<string | null>(null);
   registrationEmail = signal<string | null>(null);
   isSubmitting = signal(false);
+  isCheckingInstitutionalEmail = signal(false);
   isRegistrationComplete = signal(false);
   showInstitutionalLoginModal = signal(false);
+  showRegistrationFields = signal(false);
 
   activeSection = signal<string>('introduction');
   visitedSections = signal<Set<string>>(new Set(['introduction']));
@@ -170,6 +172,7 @@ export class RegisterComponent implements AfterViewInit {
           this.validationService.clearFieldBackendError('email');
         this.lastAafEmailCheck = null;
         this.showInstitutionalLoginModal.set(false);
+        this.showRegistrationFields.set(false);
       });
 
     this.registrationForm
@@ -306,6 +309,7 @@ export class RegisterComponent implements AfterViewInit {
     }
 
     this.lastAafEmailCheck = email;
+    this.isCheckingInstitutionalEmail.set(true);
 
     this.loginProxyService
       .checkAafEmail(email)
@@ -317,11 +321,18 @@ export class RegisterComponent implements AfterViewInit {
         }),
       )
       .subscribe((isAafEmail) => {
+        this.isCheckingInstitutionalEmail.set(false);
         const currentEmail = toAsciiEmail(
           this.registrationForm.get('email')?.value.trim() ?? '',
         );
-        if (isAafEmail && currentEmail === email) {
+        if (currentEmail !== email) {
+          return;
+        }
+
+        if (isAafEmail) {
           this.showInstitutionalLoginModal.set(true);
+        } else {
+          this.showRegistrationFields.set(true);
         }
       });
   }
@@ -330,6 +341,12 @@ export class RegisterComponent implements AfterViewInit {
     const emailControl = this.registrationForm.get('email');
     emailControl?.reset('');
     this.showInstitutionalLoginModal.set(false);
+  }
+
+  continueFromEmail(): void {
+    const emailControl = this.registrationForm.get('email');
+    emailControl?.markAsTouched();
+    this.checkInstitutionalEmail();
   }
 
   loginWithInstitutionalCredentials(): void {
