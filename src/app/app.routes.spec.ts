@@ -9,6 +9,7 @@ describe('createRoutes', () => {
       clientId: 'test-client-id',
       redirectUri: 'https://example.test/portal',
       backend: 'http://localhost:8000',
+      loginProxyUrl: 'https://aaf-login.example.com/',
     },
     recaptcha: {
       siteKeyV2: 'test-site-key',
