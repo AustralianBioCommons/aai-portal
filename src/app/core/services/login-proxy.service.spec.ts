@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AafDomainsResponse, LoginProxyService } from './login-proxy.service';
+import {
+  AafDomainsResponse,
+  EmailCheckResponse,
+  LoginProxyService,
+} from './login-proxy.service';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -11,6 +15,7 @@ import { environment } from '../../../environments/environment';
 describe('LoginProxyService', () => {
   let service: LoginProxyService;
   let httpMock: HttpTestingController;
+  let baseUrl: string;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -22,6 +27,7 @@ describe('LoginProxyService', () => {
     });
     service = TestBed.inject(LoginProxyService);
     httpMock = TestBed.inject(HttpTestingController);
+    baseUrl = environment.auth0.loginProxyUrl.replace(/\/$/, '');
   });
 
   it('should be created', () => {
@@ -36,8 +42,22 @@ describe('LoginProxyService', () => {
     service.getAafDomains().subscribe((response) => {
       expect(response).toEqual(['melbourne.edu.au', 'sydney.edu.au']);
     });
-    const baseUrl = environment.auth0.loginProxyUrl.replace(/\/$/, '');
     const req = httpMock.expectOne(`${baseUrl}/aaf/domains`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockResponse);
+  });
+
+  it('should check if email is AAF', () => {
+    const email = 'user@sydney.edu.au';
+    const mockResponse: EmailCheckResponse = {
+      email: email,
+      is_aaf: true,
+    };
+
+    service.checkAafEmail(email).subscribe((response) => {
+      expect(response).toBeTrue();
+    });
+    const req = httpMock.expectOne(`${baseUrl}/aaf/email-check?email=${email}`);
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
   });
