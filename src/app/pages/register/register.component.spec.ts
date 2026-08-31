@@ -101,6 +101,15 @@ describe('RegisterComponent', () => {
       expect(component.registrationForm.get('email')?.value).toBe('');
       expect(component.registrationForm.get('username')?.value).toBe('');
     });
+
+    it('should initially show only the email field from the registration form', () => {
+      expect(fixture.debugElement.query(By.css('#email'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#firstName'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#lastName'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#username'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#password'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('re-captcha'))).toBeNull();
+    });
   });
 
   describe('Section Navigation', () => {
@@ -269,6 +278,7 @@ describe('RegisterComponent', () => {
       req.flush({ email: 'john@example.com', is_aaf: false });
 
       expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(true);
     });
 
     it('should not check AAF email when the email is invalid', () => {
@@ -278,6 +288,7 @@ describe('RegisterComponent', () => {
 
       httpMock.expectNone(`${loginProxyBaseUrl}/aaf/email-check`);
       expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(false);
     });
 
     it('should show institutional login modal when email is AAF', () => {
@@ -292,8 +303,27 @@ describe('RegisterComponent', () => {
       fixture.detectChanges();
 
       expect(component.showInstitutionalLoginModal()).toBe(true);
+      expect(component.showRegistrationFields()).toBe(false);
       const modal = fixture.debugElement.query(By.css('app-modal'));
       expect(modal).toBeTruthy();
+    });
+
+    it('should reveal registration fields when email is not AAF', () => {
+      component.registrationForm.get('email')?.setValue('john@example.com');
+
+      component.continueFromEmail();
+
+      const req = httpMock.expectOne(
+        (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+      );
+      req.flush({ email: 'john@example.com', is_aaf: false });
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('#firstName'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#lastName'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#username'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#password'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('re-captcha'))).toBeTruthy();
     });
 
     it('should not show institutional login modal for a stale email response', () => {
@@ -308,6 +338,7 @@ describe('RegisterComponent', () => {
       req.flush({ email: 'john@example.edu.au', is_aaf: true });
 
       expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(false);
     });
 
     it('should login with Auth0 from the institutional login modal', () => {
