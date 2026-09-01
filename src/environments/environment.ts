@@ -11,6 +11,7 @@ const defaults: EnvironmentConfig = {
     clientId: 'oXjPRRuMIVrzpJY7Ku2ojs0gZNmPVKmS',
     redirectUri: '',
     backend: 'http://localhost:8000',
+    loginProxyUrl: 'https://dev-aaf.aaf-login.aai.test.biocommons.org.au/',
   },
   recaptcha: {
     siteKeyV2: '6LdR15krAAAAACZ5Lfx8yj2yBJ-whWNBTICNfwaG',

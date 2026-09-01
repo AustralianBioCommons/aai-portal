@@ -12,6 +12,7 @@ describe('Runtime configuration Tests', () => {
       clientId: 'default-client',
       redirectUri: '',
       backend: 'http://localhost:8000',
+      loginProxyUrl: 'default-proxy.domain',
     },
     recaptcha: {
       siteKeyV2: 'default-key',

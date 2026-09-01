@@ -45,114 +45,127 @@
     </app-alert>
   }
 
+  @if (showInstitutionalLoginModal()) {
+    <app-modal
+      title="Institutional login available"
+      description="You have an institutional login, please click Login to log in using those credentials before continuing the registration process."
+      primaryButtonText="Login"
+      secondaryButtonText="Cancel"
+      (primaryOutput)="loginWithInstitutionalCredentials()"
+      (secondaryOutput)="closeInstitutionalLoginModal()"
+    ></app-modal>
+  }
+
   <!-- Registration Page -->
   @if (!isRegistrationComplete()) {
     <div
       class="flex w-full flex-1 flex-col items-center justify-start bg-gray-50"
     >
-      <!-- Progress Bar -->
-      <div class="sticky top-0 z-30 w-full bg-white shadow">
-        <div class="mx-auto max-w-4xl px-6 pb-4 pt-6">
-          <div class="flex items-start justify-between">
-            @for (section of sections; track section.id; let index = $index) {
-              @let active = isSectionActive(section.id);
-              @let completed = isSectionCompleted(section.id);
-              @let visited = isSectionVisited(section.id);
-              @let valid = isSectionValid(section.id);
-              @let last = section.id === "terms";
+      @if (showRegistrationFields()) {
+        <!-- Progress Bar -->
+        <div class="sticky top-0 z-30 w-full bg-white shadow">
+          <div class="mx-auto max-w-4xl px-6 pb-4 pt-6">
+            <div class="flex items-start justify-between">
+              @for (section of sections; track section.id; let index = $index) {
+                @let active = isSectionActive(section.id);
+                @let completed = isSectionCompleted(section.id);
+                @let visited = isSectionVisited(section.id);
+                @let valid = isSectionValid(section.id);
+                @let last = section.id === "terms";
 
-              <div class="group relative flex flex-1 flex-col items-center">
-                <div class="flex w-full items-center">
-                  <!-- Circle Indicator -->
-                  <div class="flex w-full justify-center">
-                    <a
-                      [href]="'#' + section.id"
-                      class="cursor-pointer"
-                      (click)="scrollToSection($event, section.id)"
-                    >
-                      <div
-                        class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
-                        [ngClass]="{
-                          'border-gray-300': !visited,
-                          'border-biocommons-primary group-hover:border-sky-900':
-                            active || ((visited || completed) && valid),
-                          'border-red-600 group-hover:border-red-700':
-                            !active && !valid && (completed || visited),
-                          'bg-biocommons-primary group-hover:bg-sky-900':
-                            (completed && valid) || (last && active && valid),
-                          'bg-red-600 group-hover:bg-red-700':
-                            completed && !valid,
-                          'bg-white hover:bg-gray-100':
-                            !completed && !(last && active && valid),
-                        }"
+                <div class="group relative flex flex-1 flex-col items-center">
+                  <div class="flex w-full items-center">
+                    <!-- Circle Indicator -->
+                    <div class="flex w-full justify-center">
+                      <a
+                        [href]="'#' + section.id"
+                        class="cursor-pointer"
+                        (click)="scrollToSection($event, section.id)"
                       >
-                        @if (last && active && !valid) {
-                          <div
-                            class="h-2 w-2 rounded-full bg-biocommons-primary"
-                          ></div>
-                        } @else if (last && active && valid) {
-                          <ng-icon
-                            name="heroCheck"
-                            size="20"
-                            class="z-10 text-white"
-                          ></ng-icon>
-                        } @else if (active) {
-                          <div
-                            class="h-2 w-2 rounded-full bg-biocommons-primary"
-                          ></div>
-                        } @else if (completed && valid) {
-                          <ng-icon
-                            name="heroCheck"
-                            size="20"
-                            class="z-10 text-white"
-                          ></ng-icon>
-                        } @else if (completed && !valid) {
-                          <span class="text-white">!</span>
-                        } @else if (visited && valid) {
-                          <ng-icon
-                            name="heroCheck"
-                            size="20"
-                            class="text-biocommons-primary"
-                          ></ng-icon>
-                        } @else if (visited && !valid) {
-                          <span class="text-red-600">!</span>
-                        }
-                      </div>
-                    </a>
+                        <div
+                          class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
+                          [ngClass]="{
+                            'border-gray-300': !visited,
+                            'border-biocommons-primary group-hover:border-sky-900':
+                              active || ((visited || completed) && valid),
+                            'border-red-600 group-hover:border-red-700':
+                              !active && !valid && (completed || visited),
+                            'bg-biocommons-primary group-hover:bg-sky-900':
+                              (completed && valid) || (last && active && valid),
+                            'bg-red-600 group-hover:bg-red-700':
+                              completed && !valid,
+                            'bg-white hover:bg-gray-100':
+                              !completed && !(last && active && valid),
+                          }"
+                        >
+                          @if (last && active && !valid) {
+                            <div
+                              class="h-2 w-2 rounded-full bg-biocommons-primary"
+                            ></div>
+                          } @else if (last && active && valid) {
+                            <ng-icon
+                              name="heroCheck"
+                              size="20"
+                              class="z-10 text-white"
+                            ></ng-icon>
+                          } @else if (active) {
+                            <div
+                              class="h-2 w-2 rounded-full bg-biocommons-primary"
+                            ></div>
+                          } @else if (completed && valid) {
+                            <ng-icon
+                              name="heroCheck"
+                              size="20"
+                              class="z-10 text-white"
+                            ></ng-icon>
+                          } @else if (completed && !valid) {
+                            <span class="text-white">!</span>
+                          } @else if (visited && valid) {
+                            <ng-icon
+                              name="heroCheck"
+                              size="20"
+                              class="text-biocommons-primary"
+                            ></ng-icon>
+                          } @else if (visited && !valid) {
+                            <span class="text-red-600">!</span>
+                          }
+                        </div>
+                      </a>
+                    </div>
+
+                    <!-- Connecting line -->
+                    @if (index < sections.length - 1) {
+                      <div
+                        class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
+                        [class]="
+                          completed ? 'bg-biocommons-primary' : 'bg-gray-300'
+                        "
+                      ></div>
+                    }
                   </div>
 
-                  <!-- Connecting line -->
-                  @if (index < sections.length - 1) {
-                    <div
-                      class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
-                      [class]="
-                        completed ? 'bg-biocommons-primary' : 'bg-gray-300'
-                      "
-                    ></div>
-                  }
+                  <!-- Label -->
+                  <a
+                    [href]="'#' + section.id"
+                    class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
+                    [class]="
+                      active || completed
+                        ? 'text-biocommons-primary'
+                        : 'text-gray-900'
+                    "
+                    (click)="scrollToSection($event, section.id)"
+                  >
+                    <span class="hidden sm:inline">{{ section.label }}</span>
+                    <span class="inline sm:hidden">
+                      {{ section.mobileLabel }}
+                    </span>
+                  </a>
                 </div>
-
-                <!-- Label -->
-                <a
-                  [href]="'#' + section.id"
-                  class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
-                  [class]="
-                    active || completed
-                      ? 'text-biocommons-primary'
-                      : 'text-gray-900'
-                  "
-                  (click)="scrollToSection($event, section.id)"
-                >
-                  <span class="hidden sm:inline">{{ section.label }}</span>
-                  <span class="inline sm:hidden">
-                    {{ section.mobileLabel }}
-                  </span>
-                </a>
-              </div>
-            }
+              }
+            </div>
           </div>
         </div>
-      </div>
+      }
 
       <!-- Main Content -->
       <div class="w-full p-12 sm:px-24">
@@ -174,7 +187,8 @@
               workflows that support bioinformatics research across Australia.
               It simplifies access by connecting multiple services under one
               trusted identity, making it easier to move between platforms and
-              collaborate with others in the research community. <br /><br />
+              collaborate with others in the research community.
+              <br /><br />
               Once registered, you can easily update your account details,
               change your password, and add new bundles whenever you like.
             </p>
@@ -183,64 +197,21 @@
           <!-- Your Details Section -->
           <div id="your-details" class="flex scroll-mt-24 flex-col gap-6">
             <h2 class="text-3xl font-semibold text-gray-900">Your details</h2>
-            <p class="font-light text-gray-600">
-              To create your BioCommons Access account, simply provide your full
-              name, email address, and password. This single account enables you
-              to securely log in to both Galaxy Australia and the Bioplatforms
-              Data Portal, granting you immediate access to open data and
-              research tools across these interconnected platforms.
-            </p>
-
-            <!-- Registration form fields -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div class="relative">
-                <label
-                  for="firstName"
-                  class="block text-sm font-medium text-gray-900"
-                >
-                  First Name <span class="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  formControlName="firstName"
-                  placeholder="John"
-                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-                  [class.border-red-500]="isFieldInvalid('firstName')"
-                />
-                @if (isFieldInvalid("firstName")) {
-                  <div class="mt-0.5 text-xs text-red-500">
-                    @for (error of getErrorMessages("firstName"); track error) {
-                      {{ error }}<br />
-                    }
-                  </div>
-                }
-              </div>
-
-              <div class="relative">
-                <label
-                  for="lastName"
-                  class="block text-sm font-medium text-gray-900"
-                >
-                  Last Name <span class="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  formControlName="lastName"
-                  placeholder="Doe"
-                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-                  [class.border-red-500]="isFieldInvalid('lastName')"
-                />
-                @if (isFieldInvalid("lastName")) {
-                  <div class="mt-0.5 text-xs text-red-500">
-                    @for (error of getErrorMessages("lastName"); track error) {
-                      {{ error }}<br />
-                    }
-                  </div>
-                }
-              </div>
-            </div>
+            @if (showRegistrationFields()) {
+              <p class="font-light text-gray-600">
+                To create your BioCommons Access account, simply provide your
+                full name, email address, and password. This single account
+                enables you to securely log in to both Galaxy Australia and the
+                Bioplatforms Data Portal, granting you immediate access to open
+                data and research tools across these interconnected platforms.
+              </p>
+            } @else {
+              <p class="font-light text-gray-600">
+                Enter your email address first. If institutional login is
+                available for your email, we will ask you to log in with those
+                credentials before continuing.
+              </p>
+            }
 
             <div class="relative">
               <label
@@ -266,189 +237,263 @@
               }
             </div>
 
-            <div class="relative">
-              <label
-                for="username"
-                class="block text-sm font-medium text-gray-900"
-              >
-                Username <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="username"
-                formControlName="username"
-                placeholder="johndoe"
-                class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-                [class.border-red-500]="isFieldInvalid('username')"
-              />
-              @if (isFieldInvalid("username")) {
-                <div class="mt-0.5 text-xs text-red-500">
-                  @for (error of getErrorMessages("username"); track error) {
-                    {{ error }}<br />
-                  }
-                </div>
-              }
-            </div>
-
-            <div class="relative">
-              <label
-                for="password"
-                class="block text-sm font-medium text-gray-900"
-              >
-                Password <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                id="password"
-                formControlName="password"
-                placeholder="••••••••"
-                class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-                [class.border-red-500]="isFieldInvalid('password')"
-              />
-              <div class="mt-1 text-xs text-gray-600">
-                Passwords must be 8 to 72 characters long, contain at least one
-                uppercase letter, one lowercase letter, one number, one special
-                character.
+            @if (!showRegistrationFields()) {
+              <div>
+                <app-button
+                  type="button"
+                  variant="primary"
+                  (click)="continueFromEmail()"
+                  [loading]="isCheckingInstitutionalEmail()"
+                >
+                  Continue
+                </app-button>
               </div>
-              @if (isFieldInvalid("password")) {
-                <div class="mt-0.5 text-xs text-red-500">
-                  @for (error of getErrorMessages("password"); track error) {
-                    {{ error }}<br />
+            }
+
+            @if (showRegistrationFields()) {
+              <!-- Registration form fields -->
+              <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div class="relative">
+                  <label
+                    for="firstName"
+                    class="block text-sm font-medium text-gray-900"
+                  >
+                    First Name <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    formControlName="firstName"
+                    placeholder="John"
+                    class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    [class.border-red-500]="isFieldInvalid('firstName')"
+                  />
+                  @if (isFieldInvalid("firstName")) {
+                    <div class="mt-0.5 text-xs text-red-500">
+                      @for (
+                        error of getErrorMessages("firstName");
+                        track error
+                      ) {
+                        {{ error }}<br />
+                      }
+                    </div>
                   }
                 </div>
-              }
-            </div>
 
-            <div class="relative">
-              <label
-                for="confirmPassword"
-                class="block text-sm font-medium text-gray-900"
-              >
-                Confirm Password <span class="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                formControlName="confirmPassword"
-                placeholder="••••••••"
-                class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
-                [class.border-red-500]="isFieldInvalid('confirmPassword')"
-              />
-              @if (isFieldInvalid("confirmPassword")) {
-                <div class="mt-0.5 text-xs text-red-500">
-                  @for (
-                    error of getErrorMessages("confirmPassword");
-                    track error
-                  ) {
-                    {{ error }}<br />
+                <div class="relative">
+                  <label
+                    for="lastName"
+                    class="block text-sm font-medium text-gray-900"
+                  >
+                    Last Name <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    formControlName="lastName"
+                    placeholder="Doe"
+                    class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                    [class.border-red-500]="isFieldInvalid('lastName')"
+                  />
+                  @if (isFieldInvalid("lastName")) {
+                    <div class="mt-0.5 text-xs text-red-500">
+                      @for (
+                        error of getErrorMessages("lastName");
+                        track error
+                      ) {
+                        {{ error }}<br />
+                      }
+                    </div>
                   }
                 </div>
-              }
-            </div>
-          </div>
+              </div>
 
-          <!-- Bundle Selection Section -->
-          <div id="add-bundle" class="flex scroll-mt-24 flex-col gap-6">
-            <div class="flex items-center justify-start gap-3">
-              <h2 class="text-left text-3xl font-semibold text-gray-900">
-                Add a bundle (Optional)
-              </h2>
+              <div class="relative">
+                <label
+                  for="username"
+                  class="block text-sm font-medium text-gray-900"
+                >
+                  Username <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  formControlName="username"
+                  placeholder="johndoe"
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="isFieldInvalid('username')"
+                />
+                @if (isFieldInvalid("username")) {
+                  <div class="mt-0.5 text-xs text-red-500">
+                    @for (error of getErrorMessages("username"); track error) {
+                      {{ error }}<br />
+                    }
+                  </div>
+                }
+              </div>
 
-              <app-tooltip
-                class="mt-2"
-                message="Bundles are designed to make it easy for researchers to access sets of resources in one step, such as open and/or embargoed data, analysis tools and pipelines/workflows, and the ability to easily move data between both. You can find out more at: <a href='https://www.biocommons.org.au/access' target='_blank' rel='noopener noreferrer' class='text-sky-400 hover:text-sky-500'>https://www.biocommons.org.au/access</a>"
-                iconColor="text-sky-500 hover:text-sky-600"
-              />
-            </div>
-            <p class="text-left font-light text-gray-600">
-              Request access to a bundle you need for your research.
-            </p>
-            <app-bundle-selection
-              [form]="registrationForm"
-              [bundles]="bundles"
-            ></app-bundle-selection>
-          </div>
+              <div class="relative">
+                <label
+                  for="password"
+                  class="block text-sm font-medium text-gray-900"
+                >
+                  Password <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="isFieldInvalid('password')"
+                />
+                <div class="mt-1 text-xs text-gray-600">
+                  Passwords must be 8 to 72 characters long, contain at least
+                  one uppercase letter, one lowercase letter, one number, one
+                  special character.
+                </div>
+                @if (isFieldInvalid("password")) {
+                  <div class="mt-0.5 text-xs text-red-500">
+                    @for (error of getErrorMessages("password"); track error) {
+                      {{ error }}<br />
+                    }
+                  </div>
+                }
+              </div>
 
-          <!-- Terms & Conditions Section -->
-          <div id="terms" class="flex scroll-mt-24 flex-col gap-6">
-            <h2 class="text-3xl font-semibold text-gray-900">
-              BioCommons Services terms and conditions
-            </h2>
-            <p class="font-light text-gray-600">
-              You must accept the terms & conditions before you proceed.
-            </p>
-            <div
-              tabindex="0"
-              class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
-              [ngClass]="{
-                'ring-transparent':
-                  registrationForm.get('terms')?.value !==
-                  (!registrationForm.get('terms')?.invalid ||
-                    !registrationForm.get('terms')?.touched),
-                'ring-red-500':
-                  registrationForm.get('terms')?.value !== true &&
-                  registrationForm.get('terms')?.invalid &&
-                  registrationForm.get('terms')?.touched,
-                'ring-sky-400': registrationForm.get('terms')?.value === true,
-              }"
-              (click)="toggleTermsAcceptance()"
-              (keyup.enter)="toggleTermsAcceptance()"
-            >
-              <a
-                [routerLink]="['/terms/biocommons']"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
-                (click)="$event.stopPropagation()"
-              >
-                Australian BioCommons Services Acceptable Use Policy and
-                Conditions of Use
-                <ng-icon
-                  name="heroArrowTopRightOnSquare"
-                  size="16"
-                  class="shrink-0"
-                ></ng-icon>
-              </a>
-              <input
-                type="checkbox"
-                formControlName="terms"
-                class="pointer-events-none h-4 w-4 accent-biocommons-primary"
-              />
-            </div>
-            @if (
-              registrationForm.get("terms")?.invalid &&
-              registrationForm.get("terms")?.touched
-            ) {
-              <div class="-mt-4 text-xs text-red-500">
-                Please accept the terms & conditions to continue
+              <div class="relative">
+                <label
+                  for="confirmPassword"
+                  class="block text-sm font-medium text-gray-900"
+                >
+                  Confirm Password <span class="text-red-500">*</span>
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  formControlName="confirmPassword"
+                  placeholder="••••••••"
+                  class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
+                  [class.border-red-500]="isFieldInvalid('confirmPassword')"
+                />
+                @if (isFieldInvalid("confirmPassword")) {
+                  <div class="mt-0.5 text-xs text-red-500">
+                    @for (
+                      error of getErrorMessages("confirmPassword");
+                      track error
+                    ) {
+                      {{ error }}<br />
+                    }
+                  </div>
+                }
               </div>
             }
           </div>
 
-          <div class="flex flex-col items-center justify-center gap-6">
-            <!-- reCAPTCHA -->
-            <div class="flex flex-col items-center gap-0.5">
-              <re-captcha
-                (resolved)="resolved($event)"
-                siteKey="{{ recaptchaSiteKeyV2 }}"
-              ></re-captcha>
-              @if (!recaptchaToken() && recaptchaAttempted()) {
-                <div class="text-xs text-red-500">
-                  Please complete the reCAPTCHA verification
+          @if (showRegistrationFields()) {
+            <!-- Bundle Selection Section -->
+            <div id="add-bundle" class="flex scroll-mt-24 flex-col gap-6">
+              <div class="flex items-center justify-start gap-3">
+                <h2 class="text-left text-3xl font-semibold text-gray-900">
+                  Add a bundle (Optional)
+                </h2>
+
+                <app-tooltip
+                  class="mt-2"
+                  message="Bundles are designed to make it easy for researchers to access sets of resources in one step, such as open and/or embargoed data, analysis tools and pipelines/workflows, and the ability to easily move data between both. You can find out more at: <a href='https://www.biocommons.org.au/access' target='_blank' rel='noopener noreferrer' class='text-sky-400 hover:text-sky-500'>https://www.biocommons.org.au/access</a>"
+                  iconColor="text-sky-500 hover:text-sky-600"
+                />
+              </div>
+              <p class="text-left font-light text-gray-600">
+                Request access to a bundle you need for your research.
+              </p>
+              <app-bundle-selection
+                [form]="registrationForm"
+                [bundles]="bundles"
+              ></app-bundle-selection>
+            </div>
+
+            <!-- Terms & Conditions Section -->
+            <div id="terms" class="flex scroll-mt-24 flex-col gap-6">
+              <h2 class="text-3xl font-semibold text-gray-900">
+                BioCommons Services terms and conditions
+              </h2>
+              <p class="font-light text-gray-600">
+                You must accept the terms & conditions before you proceed.
+              </p>
+              <div
+                tabindex="0"
+                class="flex cursor-pointer items-center justify-between gap-12 rounded-md bg-white p-6 shadow-md ring-2 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                [ngClass]="{
+                  'ring-transparent':
+                    registrationForm.get('terms')?.value !==
+                    (!registrationForm.get('terms')?.invalid ||
+                      !registrationForm.get('terms')?.touched),
+                  'ring-red-500':
+                    registrationForm.get('terms')?.value !== true &&
+                    registrationForm.get('terms')?.invalid &&
+                    registrationForm.get('terms')?.touched,
+                  'ring-sky-400': registrationForm.get('terms')?.value === true,
+                }"
+                (click)="toggleTermsAcceptance()"
+                (keyup.enter)="toggleTermsAcceptance()"
+              >
+                <a
+                  [routerLink]="['/terms/biocommons']"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-2 font-medium text-biocommons-primary hover:text-sky-900 hover:underline"
+                  (click)="$event.stopPropagation()"
+                >
+                  Australian BioCommons Services Acceptable Use Policy and
+                  Conditions of Use
+                  <ng-icon
+                    name="heroArrowTopRightOnSquare"
+                    size="16"
+                    class="shrink-0"
+                  ></ng-icon>
+                </a>
+                <input
+                  type="checkbox"
+                  formControlName="terms"
+                  class="pointer-events-none h-4 w-4 accent-biocommons-primary"
+                />
+              </div>
+              @if (
+                registrationForm.get("terms")?.invalid &&
+                registrationForm.get("terms")?.touched
+              ) {
+                <div class="-mt-4 text-xs text-red-500">
+                  Please accept the terms & conditions to continue
                 </div>
               }
             </div>
 
-            <!-- Submit Button -->
-            <app-button
-              type="submit"
-              variant="primary"
-              (click)="submitRegistration()"
-              [loading]="isSubmitting()"
-            >
-              Submit
-            </app-button>
-          </div>
+            <div class="flex flex-col items-center justify-center gap-6">
+              <!-- reCAPTCHA -->
+              <div class="flex flex-col items-center gap-0.5">
+                <re-captcha
+                  (resolved)="resolved($event)"
+                  siteKey="{{ recaptchaSiteKeyV2 }}"
+                ></re-captcha>
+                @if (!recaptchaToken() && recaptchaAttempted()) {
+                  <div class="text-xs text-red-500">
+                    Please complete the reCAPTCHA verification
+                  </div>
+                }
+              </div>
+
+              <!-- Submit Button -->
+              <app-button
+                type="submit"
+                variant="primary"
+                (click)="submitRegistration()"
+                [loading]="isSubmitting()"
+              >
+                Submit
+              </app-button>
+            </div>
+          }
         </form>
       </div>
     </div>

@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -15,6 +21,8 @@ import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
 import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
+import { AuthService } from '../../core/services/auth.service';
+import { LoginProxyService } from '../../core/services/login-proxy.service';
 import { ValidationService } from '../../core/services/validation.service';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -36,6 +44,7 @@ import { fullNameLengthValidator } from '../../shared/validators/full-name';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -82,6 +91,7 @@ interface Section {
     NgIcon,
     RouterModule,
     TooltipComponent,
+    ModalComponent,
   ],
   styleUrl: './register.component.css',
   viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],
@@ -89,7 +99,10 @@ interface Section {
 export class RegisterComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly loginProxyService = inject(LoginProxyService);
   private readonly validationService = inject(ValidationService);
   private readonly http = inject(HttpClient);
 
@@ -113,10 +126,14 @@ export class RegisterComponent implements AfterViewInit {
   errorAlert = signal<string | null>(null);
   registrationEmail = signal<string | null>(null);
   isSubmitting = signal(false);
+  isCheckingInstitutionalEmail = signal(false);
   isRegistrationComplete = signal(false);
+  showInstitutionalLoginModal = signal(false);
+  showRegistrationFields = signal(false);
 
   activeSection = signal<string>('introduction');
   visitedSections = signal<Set<string>>(new Set(['introduction']));
+  private lastAafEmailCheck: string | null = null;
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group(
@@ -153,6 +170,9 @@ export class RegisterComponent implements AfterViewInit {
       .subscribe(() => {
         if (this.validationService.hasFieldBackendError('email'))
           this.validationService.clearFieldBackendError('email');
+        this.lastAafEmailCheck = null;
+        this.showInstitutionalLoginModal.set(false);
+        this.showRegistrationFields.set(false);
       });
 
     this.registrationForm
@@ -274,6 +294,63 @@ export class RegisterComponent implements AfterViewInit {
 
   resolved(captchaResponse: string | null): void {
     this.recaptchaToken.set(captchaResponse);
+  }
+
+  checkInstitutionalEmail(): void {
+    const emailControl = this.registrationForm.get('email');
+    if (!emailControl?.valid) {
+      return;
+    }
+
+    const email = toAsciiEmail(emailControl.value.trim());
+    // Skip check if this value was already checked
+    if (!email || email === this.lastAafEmailCheck) {
+      return;
+    }
+
+    this.lastAafEmailCheck = email;
+    this.isCheckingInstitutionalEmail.set(true);
+
+    this.loginProxyService
+      .checkAafEmail(email)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError((error: unknown) => {
+          console.error('Institutional email check failed:', error);
+          return of(false);
+        }),
+      )
+      .subscribe((isAafEmail) => {
+        this.isCheckingInstitutionalEmail.set(false);
+        const currentEmail = toAsciiEmail(
+          this.registrationForm.get('email')?.value.trim() ?? '',
+        );
+        if (currentEmail !== email) {
+          return;
+        }
+
+        if (isAafEmail) {
+          this.showInstitutionalLoginModal.set(true);
+        } else {
+          this.showRegistrationFields.set(true);
+        }
+      });
+  }
+
+  closeInstitutionalLoginModal(): void {
+    const emailControl = this.registrationForm.get('email');
+    emailControl?.reset('');
+    this.showInstitutionalLoginModal.set(false);
+  }
+
+  continueFromEmail(): void {
+    const emailControl = this.registrationForm.get('email');
+    emailControl?.markAsTouched();
+    this.checkInstitutionalEmail();
+  }
+
+  loginWithInstitutionalCredentials(): void {
+    this.authService.login();
   }
 
   getSelectedBundles(): Bundle[] {

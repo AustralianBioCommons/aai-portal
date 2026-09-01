@@ -7,6 +7,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { Component } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { RegisterComponent, RegistrationForm } from './register.component';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
@@ -35,9 +36,13 @@ describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let httpMock: HttpTestingController;
+  let authService: jasmine.SpyObj<AuthService>;
 
   beforeEach(async () => {
-    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser']);
+    const authSpy = jasmine.createSpyObj('AuthService', [
+      'refreshUser',
+      'login',
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
@@ -55,6 +60,7 @@ describe('RegisterComponent', () => {
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
 
     // Prevent scroll-based section updates from running during tests
     // This keeps activeSection stable at 'introduction' (its initial value)
@@ -94,6 +100,15 @@ describe('RegisterComponent', () => {
       expect(component.registrationForm.get('lastName')?.value).toBe('');
       expect(component.registrationForm.get('email')?.value).toBe('');
       expect(component.registrationForm.get('username')?.value).toBe('');
+    });
+
+    it('should initially show only the email field from the registration form', () => {
+      expect(fixture.debugElement.query(By.css('#email'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#firstName'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#lastName'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#username'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('#password'))).toBeNull();
+      expect(fixture.debugElement.query(By.css('re-captcha'))).toBeNull();
     });
   });
 
@@ -240,6 +255,101 @@ describe('RegisterComponent', () => {
       expect(
         component.registrationForm.hasError('fullNameTooLong'),
       ).toBeFalsy();
+    });
+  });
+
+  describe('Institutional Email Check', () => {
+    const loginProxyBaseUrl = environment.auth0.loginProxyUrl.replace(
+      /\/$/,
+      '',
+    );
+
+    it('should check AAF email when a valid email is finished', () => {
+      component.registrationForm.get('email')?.setValue('john@example.com');
+
+      component.checkInstitutionalEmail();
+
+      const req = httpMock.expectOne(
+        (request) =>
+          request.url === `${loginProxyBaseUrl}/aaf/email-check` &&
+          request.params.get('email') === 'john@example.com',
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush({ email: 'john@example.com', is_aaf: false });
+
+      expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(true);
+    });
+
+    it('should not check AAF email when the email is invalid', () => {
+      component.registrationForm.get('email')?.setValue('invalid-email');
+
+      component.checkInstitutionalEmail();
+
+      httpMock.expectNone(`${loginProxyBaseUrl}/aaf/email-check`);
+      expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(false);
+    });
+
+    it('should show institutional login modal when email is AAF', () => {
+      component.registrationForm.get('email')?.setValue('john@example.edu.au');
+
+      component.checkInstitutionalEmail();
+
+      const req = httpMock.expectOne(
+        (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+      );
+      req.flush({ email: 'john@example.edu.au', is_aaf: true });
+      fixture.detectChanges();
+
+      expect(component.showInstitutionalLoginModal()).toBe(true);
+      expect(component.showRegistrationFields()).toBe(false);
+      const modal = fixture.debugElement.query(By.css('app-modal'));
+      expect(modal).toBeTruthy();
+    });
+
+    it('should reveal registration fields when email is not AAF', () => {
+      component.registrationForm.get('email')?.setValue('john@example.com');
+
+      component.continueFromEmail();
+
+      const req = httpMock.expectOne(
+        (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+      );
+      req.flush({ email: 'john@example.com', is_aaf: false });
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('#firstName'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#lastName'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#username'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#password'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('re-captcha'))).toBeTruthy();
+    });
+
+    it('should not show institutional login modal for a stale email response', () => {
+      component.registrationForm.get('email')?.setValue('john@example.edu.au');
+
+      component.checkInstitutionalEmail();
+
+      const req = httpMock.expectOne(
+        (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+      );
+      component.registrationForm.get('email')?.setValue('changed@example.com');
+      req.flush({ email: 'john@example.edu.au', is_aaf: true });
+
+      expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(false);
+    });
+
+    it('should login with Auth0 from the institutional login modal', () => {
+      component.showInstitutionalLoginModal.set(true);
+      fixture.detectChanges();
+
+      fixture.debugElement
+        .query(By.css('app-modal'))
+        .triggerEventHandler('primaryOutput', undefined);
+
+      expect(authService.login).toHaveBeenCalled();
     });
   });
 
