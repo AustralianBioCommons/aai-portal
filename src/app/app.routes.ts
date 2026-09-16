@@ -19,6 +19,7 @@ import { FirstMigrationComponent } from './pages/first-migration/first-migration
 import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
 import { EnvironmentConfig } from '../environments/runtime-config';
+import { AafRegisterComponent } from './pages/aaf-register/aaf-register.component';
 
 // Helper function to create routes based on environment configuration
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,6 +36,11 @@ export function createRoutes(env: EnvironmentConfig): Routes {
       component: RegisterComponent,
       canActivate: [loginGuard],
       data: { title: 'Register | BioCommons Access' },
+    },
+    {
+      path: 'aaf-register',
+      component: AafRegisterComponent,
+      data: { title: 'AAF Registration | BioCommons Access' },
     },
     {
       path: 'terms/biocommons',

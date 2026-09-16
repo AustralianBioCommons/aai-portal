@@ -29,4 +29,10 @@ describe('createRoutes', () => {
       routes.some((route) => keyRoutes.includes(route.path as string)),
     ).toBeTrue();
   });
+
+  it('defines the AAF registration route', () => {
+    const routes = createRoutes(baseEnv);
+
+    expect(routes.some((route) => route.path === 'aaf-register')).toBeTrue();
+  });
 });
