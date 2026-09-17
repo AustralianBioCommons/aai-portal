@@ -1,5 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import {
+  ActivatedRoute,
+  ParamMap,
+  Router,
+  provideRouter,
+} from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -44,6 +49,7 @@ describe('AafRegisterComponent', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         {
           provide: ActivatedRoute,
           useValue: {
@@ -100,11 +106,33 @@ describe('AafRegisterComponent', () => {
     expect(req.request.body).toEqual({
       session_token: sessionToken,
       username: 'ada_lovelace',
+      client_id: environment.auth0.clientId,
       bundles: [],
       recaptcha_token: 'test-recaptcha-token',
     });
 
     req.flush({ success: true });
     expect(component.isRegistrationComplete()).toBe(true);
+  });
+
+  it('shows a continue button after registration completes', () => {
+    fixture.detectChanges();
+    component.isRegistrationComplete.set(true);
+    fixture.detectChanges();
+
+    const button = fixture.debugElement.query(By.css('app-button'));
+
+    expect(button).toBeTruthy();
+    expect(button.nativeElement.textContent).toContain('Continue to profile');
+  });
+
+  it('navigates to the profile page from the continue button', async () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
+    fixture.detectChanges();
+
+    component.navigateToProfile();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/profile']);
   });
 });

@@ -6,7 +6,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
@@ -32,6 +32,7 @@ interface AafRegisterForm {
 interface AafRegistrationRequest {
   session_token: string;
   username: string;
+  client_id: string;
   bundles: [];
   recaptcha_token: string;
 }
@@ -50,6 +51,7 @@ interface AafRegistrationRequest {
 })
 export class AafRegisterComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
   private readonly http = inject(HttpClient);
 
@@ -113,6 +115,7 @@ export class AafRegisterComponent implements OnInit {
     const requestBody: AafRegistrationRequest = {
       session_token: sessionToken,
       username: this.aafRegisterForm.getRawValue().username,
+      client_id: environment.auth0.clientId,
       bundles: [],
       recaptcha_token: recaptcha,
     };
@@ -137,6 +140,10 @@ export class AafRegisterComponent implements OnInit {
           this.isRegistrationComplete.set(true);
         }
       });
+  }
+
+  navigateToProfile(): void {
+    this.router.navigate(['/profile']);
   }
 
   /*
