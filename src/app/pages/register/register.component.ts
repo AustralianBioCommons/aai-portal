@@ -350,7 +350,13 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   loginWithInstitutionalCredentials(): void {
-    this.authService.login();
+    // The email here is a known AAF-domain address (this modal only shows for
+    // those), so pass it as login_hint AND force the AAF connection, so Auth0
+    // skips its identifier screen and routes straight to AAF.
+    const email = toAsciiEmail(
+      this.registrationForm.get('email')?.value?.trim() ?? '',
+    );
+    this.authService.login(email || undefined, 'AAF');
   }
 
   getSelectedBundles(): Bundle[] {

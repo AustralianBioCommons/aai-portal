@@ -1,19 +1,26 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { DOCUMENT } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
+import { BIOCOMMONS_BUNDLES } from '../../core/constants/constants';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import {
+  BundleSelectionComponent,
+  BundleSelections,
+} from '../../shared/components/bundle-selection/bundle-selection.component';
 import { usernameRequirements } from '../../shared/validators/usernames';
-import { jwtDecode } from 'jwt-decode';
 
 interface AafRegisterToken {
   purpose: string;
@@ -25,16 +32,29 @@ interface AafRegisterToken {
 
 interface AafRegisterForm {
   email: FormControl<string>;
-  name: FormControl<string>;
+  firstName: FormControl<string>;
+  lastName: FormControl<string>;
   username: FormControl<string>;
+  bundles: FormControl<BundleSelections>;
+  terms: FormControl<boolean>;
+}
+
+interface BundleRequest {
+  bundle_id: string;
+  reason?: string;
 }
 
 interface AafRegistrationRequest {
   session_token: string;
+  state: string;
   username: string;
-  client_id: string;
-  bundles: [];
+  bundles: BundleRequest[];
   recaptcha_token: string;
+}
+
+interface AafRegistrationResponse {
+  message?: string;
+  redirect_url?: string;
 }
 
 @Component({
@@ -44,6 +64,7 @@ interface AafRegistrationRequest {
     RecaptchaModule,
     AlertComponent,
     ButtonComponent,
+    BundleSelectionComponent,
     RouterLink,
   ],
   templateUrl: './aaf-register.component.html',
@@ -51,12 +72,14 @@ interface AafRegistrationRequest {
 })
 export class AafRegisterComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly formBuilder = inject(FormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
 
+  readonly bundles = BIOCOMMONS_BUNDLES;
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   readonly sessionToken = signal<string | null>(null);
+  readonly authState = signal<string | null>(null);
   readonly recaptchaToken = signal<string | null>(null);
   readonly recaptchaAttempted = signal(false);
   readonly errorAlert = signal<string | null>(null);
@@ -65,30 +88,37 @@ export class AafRegisterComponent implements OnInit {
 
   readonly aafRegisterForm: FormGroup<AafRegisterForm> =
     this.formBuilder.nonNullable.group({
+      // email / firstName / lastName come from AAF (rendered read-only).
       email: [''],
-      name: [''],
+      firstName: [''],
+      lastName: [''],
       username: ['', usernameRequirements],
+      bundles: new FormControl<BundleSelections>({} as BundleSelections, {
+        nonNullable: true,
+      }),
+      terms: [false, Validators.requiredTrue],
     });
 
   ngOnInit(): void {
     const token = this.route.snapshot.queryParamMap.get('session_token');
-    if (!token) {
-      this.errorAlert.set('Invalid or missing session token.');
+    const state = this.route.snapshot.queryParamMap.get('state');
+    // Both are required to complete registration and resume the Auth0 login.
+    if (!token || !state) {
+      this.errorAlert.set(
+        'Invalid or missing registration link. Please try logging in again.',
+      );
       return;
     }
 
     this.sessionToken.set(token);
-    const payload = this.decodeJwtPayload(token);
-    const email = (payload?.['email'] as string | undefined) ?? '';
-    const givenName = (payload?.['given_name'] as string | undefined) ?? '';
-    const familyName = (payload?.['family_name'] as string | undefined) ?? '';
-    const fullName = (payload?.['name'] as string | undefined) ?? '';
-    const displayName =
-      fullName || [givenName, familyName].filter(Boolean).join(' ');
+    this.authState.set(state);
 
+    const payload = this.decodeJwtPayload(token);
+    const [fallbackFirst, ...fallbackRest] = (payload?.name ?? '').split(' ');
     this.aafRegisterForm.patchValue({
-      email,
-      name: displayName,
+      email: payload?.email ?? '',
+      firstName: payload?.given_name || fallbackFirst || '',
+      lastName: payload?.family_name || fallbackRest.join(' ') || '',
     });
   }
 
@@ -102,9 +132,12 @@ export class AafRegisterComponent implements OnInit {
     this.aafRegisterForm.markAllAsTouched();
 
     const sessionToken = this.sessionToken();
+    const state = this.authState();
     const recaptcha = this.recaptchaToken();
-    if (!sessionToken) {
-      this.errorAlert.set('Invalid or missing session token.');
+    if (!sessionToken || !state) {
+      this.errorAlert.set(
+        'Invalid or missing registration link. Please try logging in again.',
+      );
       return;
     }
     if (!recaptcha || this.aafRegisterForm.invalid) {
@@ -112,16 +145,26 @@ export class AafRegisterComponent implements OnInit {
     }
 
     this.isSubmitting.set(true);
+    const selections = this.aafRegisterForm.getRawValue().bundles ?? {};
+    const bundles: BundleRequest[] = Object.entries(selections).map(
+      ([bundle_id, reason]) => ({
+        bundle_id,
+        ...(reason ? { reason } : {}),
+      }),
+    );
     const requestBody: AafRegistrationRequest = {
       session_token: sessionToken,
+      state,
       username: this.aafRegisterForm.getRawValue().username,
-      client_id: environment.auth0.clientId,
-      bundles: [],
+      bundles,
       recaptcha_token: recaptcha,
     };
 
     this.http
-      .post(`${environment.auth0.backend}/biocommons/register-aaf`, requestBody)
+      .post<AafRegistrationResponse>(
+        `${environment.auth0.backend}/biocommons/register-aaf`,
+        requestBody,
+      )
       .pipe(
         catchError((error: HttpErrorResponse) => {
           console.error('AAF registration failed:', error);
@@ -135,23 +178,37 @@ export class AafRegisterComponent implements OnInit {
         }),
       )
       .subscribe((result) => {
-        this.isSubmitting.set(false);
-        if (result) {
-          this.isRegistrationComplete.set(true);
+        if (!result) {
+          this.isSubmitting.set(false);
+          return;
         }
+        // Resume the Auth0 login by following the signed /continue URL returned
+        // by the backend. Full-page navigation so the redirect chain runs.
+        if (result.redirect_url) {
+          this.document.location.href = result.redirect_url;
+          return;
+        }
+        // Defensive fallback: registration succeeded but no continue URL came
+        // back. Show a completion message rather than leaving the user stuck.
+        this.isSubmitting.set(false);
+        this.isRegistrationComplete.set(true);
       });
-  }
-
-  navigateToProfile(): void {
-    this.router.navigate(['/profile']);
   }
 
   /*
    Decode the token sent by Auth0 so we can display email/name prefilled.
-   Note we can't validate the token properly here, that's handled by
-   the backend when we send the token on
+   Not validated here (only for display) — the backend verifies the token when
+   we send it on.
    */
   private decodeJwtPayload(token: string): AafRegisterToken | null {
-    return jwtDecode<AafRegisterToken>(token);
+    try {
+      const part = token.split('.')[1];
+      if (!part) return null;
+      const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+      return JSON.parse(atob(padded)) as AafRegisterToken;
+    } catch {
+      return null;
+    }
   }
 }

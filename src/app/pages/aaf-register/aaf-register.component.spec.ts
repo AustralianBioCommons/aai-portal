@@ -1,10 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {
-  ActivatedRoute,
-  ParamMap,
-  Router,
-  provideRouter,
-} from '@angular/router';
+import { ActivatedRoute, ParamMap, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -29,6 +24,7 @@ describe('AafRegisterComponent', () => {
   let component: AafRegisterComponent;
   let httpMock: HttpTestingController;
   let mockQueryParamMap: jasmine.SpyObj<ParamMap>;
+  let mockLocation: { href: string };
 
   const sessionToken = createUnsignedJwt({
     purpose: 'aaf_registration',
@@ -37,13 +33,15 @@ describe('AafRegisterComponent', () => {
     family_name: 'Lovelace',
     name: 'Ada Lovelace',
   });
+  const state = 'auth0-state-abc';
 
   beforeEach(async () => {
     mockQueryParamMap = jasmine.createSpyObj<ParamMap>('ParamMap', ['get']);
-    mockQueryParamMap.get.and.callFake((key: string) =>
-      key === 'session_token' ? sessionToken : null,
-    );
-
+    mockQueryParamMap.get.and.callFake((key: string) => {
+      if (key === 'session_token') return sessionToken;
+      if (key === 'state') return state;
+      return null;
+    });
     await TestBed.configureTestingModule({
       imports: [AafRegisterComponent],
       providers: [
@@ -64,37 +62,49 @@ describe('AafRegisterComponent', () => {
     fixture = TestBed.createComponent(AafRegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+
+    // Capture navigation instead of performing it: override the component's
+    // injected document after creation (TestBed's renderer keeps the real one).
+    mockLocation = { href: '' };
+    (component as unknown as { document: { location: { href: string } } })[
+      'document'
+    ] = { location: mockLocation };
   });
 
   afterEach(() => {
     httpMock.verify();
   });
 
-  it('prefills email and name from the session token', () => {
+  it('prefills email and first/last name from the session token', () => {
     fixture.detectChanges();
 
     expect(component.aafRegisterForm.get('email')?.value).toBe(
       'ada@example.edu.au',
     );
-    expect(component.aafRegisterForm.get('name')?.value).toBe('Ada Lovelace');
+    expect(component.aafRegisterForm.get('firstName')?.value).toBe('Ada');
+    expect(component.aafRegisterForm.get('lastName')?.value).toBe('Lovelace');
     expect(fixture.debugElement.query(By.css('#email'))).toBeTruthy();
-    expect(fixture.debugElement.query(By.css('#name'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#firstName'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('#lastName'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('#username'))).toBeTruthy();
   });
 
-  it('sets an error when session_token is missing', () => {
+  it('sets an error when session_token or state is missing', () => {
     mockQueryParamMap.get.and.returnValue(null);
 
     fixture.detectChanges();
 
     expect(component.errorAlert()).toContain(
-      'Invalid or missing session token',
+      'Invalid or missing registration link',
     );
   });
 
-  it('submits registration with an empty bundle list', () => {
+  it('submits registration with session_token, state, username and bundles, then follows redirect_url', () => {
     fixture.detectChanges();
-    component.aafRegisterForm.patchValue({ username: 'ada_lovelace' });
+    component.aafRegisterForm.patchValue({
+      username: 'ada_lovelace',
+      terms: true,
+    });
     component.resolved('test-recaptcha-token');
 
     component.submitRegistration();
@@ -105,34 +115,33 @@ describe('AafRegisterComponent', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       session_token: sessionToken,
+      state,
       username: 'ada_lovelace',
-      client_id: environment.auth0.clientId,
       bundles: [],
       recaptcha_token: 'test-recaptcha-token',
     });
 
-    req.flush({ success: true });
-    expect(component.isRegistrationComplete()).toBe(true);
+    req.flush({
+      message: 'User registered successfully',
+      redirect_url: 'https://biocloud-dev-aaf.au.auth0.com/continue?state=abc',
+    });
+
+    expect(mockLocation.href).toBe(
+      'https://biocloud-dev-aaf.au.auth0.com/continue?state=abc',
+    );
   });
 
-  it('shows a continue button after registration completes', () => {
+  it('does not submit without a reCAPTCHA token', () => {
     fixture.detectChanges();
-    component.isRegistrationComplete.set(true);
-    fixture.detectChanges();
+    component.aafRegisterForm.patchValue({
+      username: 'ada_lovelace',
+      terms: true,
+    });
 
-    const button = fixture.debugElement.query(By.css('app-button'));
+    component.submitRegistration();
 
-    expect(button).toBeTruthy();
-    expect(button.nativeElement.textContent).toContain('Continue to profile');
-  });
-
-  it('navigates to the profile page from the continue button', async () => {
-    const router = TestBed.inject(Router);
-    const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
-    fixture.detectChanges();
-
-    component.navigateToProfile();
-
-    expect(navigateSpy).toHaveBeenCalledWith(['/profile']);
+    httpMock.expectNone(
+      `${environment.auth0.backend}/biocommons/register-aaf`,
+    );
   });
 });

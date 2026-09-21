@@ -12,7 +12,7 @@
     <div
       class="flex flex-1 items-center justify-center text-3xl font-semibold text-gray-900"
     >
-      Complete AAF registration
+      Complete your registration
     </div>
     <div
       class="flex flex-wrap justify-end gap-6 text-sm text-biocommons-primary sm:gap-12 sm:text-base [&>a:hover]:text-sky-900"
@@ -51,6 +51,13 @@
         [formGroup]="aafRegisterForm"
         class="flex w-full max-w-2xl flex-col gap-6 rounded-md bg-white p-6 shadow-sm"
       >
+        <p class="font-light text-gray-600">
+          You're signing in with your institutional (AAF) account. Your name and
+          email are provided by your institution — just choose a username and
+          finish your BioCommons Access registration below.
+        </p>
+
+        <!-- Details provided by AAF (read-only) -->
         <div>
           <label for="email" class="block text-sm font-medium text-gray-900">
             Email Address
@@ -64,19 +71,40 @@
           />
         </div>
 
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-900">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            formControlName="name"
-            readonly
-            class="mt-1 block w-full rounded-md border bg-gray-50 p-3 text-sm text-gray-700 focus:outline-none"
-          />
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label
+              for="firstName"
+              class="block text-sm font-medium text-gray-900"
+            >
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              formControlName="firstName"
+              readonly
+              class="mt-1 block w-full rounded-md border bg-gray-50 p-3 text-sm text-gray-700 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label
+              for="lastName"
+              class="block text-sm font-medium text-gray-900"
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              formControlName="lastName"
+              readonly
+              class="mt-1 block w-full rounded-md border bg-gray-50 p-3 text-sm text-gray-700 focus:outline-none"
+            />
+          </div>
         </div>
 
+        <!-- Username -->
         <div>
           <label for="username" class="block text-sm font-medium text-gray-900">
             Username <span class="text-red-500">*</span>
@@ -103,6 +131,46 @@
           }
         </div>
 
+        <!-- Bundles -->
+        <div class="flex flex-col gap-2">
+          <h2 class="text-lg font-semibold text-gray-900">
+            Add a bundle (optional)
+          </h2>
+          <app-bundle-selection
+            [form]="aafRegisterForm"
+            [bundles]="bundles"
+          ></app-bundle-selection>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="flex flex-col gap-2">
+          <label class="flex items-start gap-3 text-sm text-gray-900">
+            <input
+              type="checkbox"
+              formControlName="terms"
+              class="mt-1 h-4 w-4 accent-biocommons-primary"
+            />
+            <span>
+              I accept the BioCommons Access
+              <a
+                routerLink="/terms/biocommons"
+                target="_blank"
+                class="text-biocommons-primary hover:underline"
+                >terms and conditions</a
+              >. <span class="text-red-500">*</span>
+            </span>
+          </label>
+          @if (
+            aafRegisterForm.get("terms")?.invalid &&
+            aafRegisterForm.get("terms")?.touched
+          ) {
+            <div class="text-xs text-red-500">
+              Please accept the terms & conditions to continue
+            </div>
+          }
+        </div>
+
+        <!-- reCAPTCHA -->
         <div class="flex flex-col items-start gap-0.5">
           <re-captcha
             (resolved)="resolved($event)"
@@ -125,6 +193,19 @@
             Register
           </app-button>
         </div>
+
+        <!-- Return to the first registration step (enter a different email) -->
+        <div class="border-t border-gray-100 pt-4 text-center text-sm">
+          <span class="font-light text-gray-500">
+            Don't want to use your institutional email?
+          </span>
+          <a
+            routerLink="/register"
+            class="ml-1 font-medium text-biocommons-primary hover:underline"
+          >
+            Register with a different email
+          </a>
+        </div>
       </form>
     } @else {
       <div
@@ -134,17 +215,15 @@
           Registration complete
         </h1>
         <p class="font-light text-gray-600">
-          Your AAF account has been registered.
+          Your account has been registered. Please log in to continue.
         </p>
         <div class="flex justify-center">
-          <app-button
-            type="button"
-            variant="primary"
-            widthClass="w-auto"
-            (click)="navigateToProfile()"
+          <a
+            routerLink="/login"
+            class="font-medium text-biocommons-primary hover:underline"
           >
-            Continue to profile
-          </app-button>
+            Go to login
+          </a>
         </div>
       </div>
     }
