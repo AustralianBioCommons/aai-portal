@@ -197,7 +197,13 @@
           <!-- Your Details Section -->
           <div id="your-details" class="flex scroll-mt-24 flex-col gap-6">
             <h2 class="text-3xl font-semibold text-gray-900">Your details</h2>
-            @if (showRegistrationFields()) {
+            @if (aafMode()) {
+              <p class="font-light text-gray-600">
+                You're signing in with your institutional (AAF) account. Your
+                name and email are provided by your institution — just choose a
+                username and finish your BioCommons Access registration below.
+              </p>
+            } @else if (showRegistrationFields()) {
               <p class="font-light text-gray-600">
                 To create your BioCommons Access account, simply provide your
                 full name, email address, and password. This single account
@@ -225,14 +231,28 @@
                 id="email"
                 formControlName="email"
                 placeholder="john.doe@example.com"
+                [readonly]="aafMode()"
                 class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
                 [class.border-red-500]="isFieldInvalid('email')"
+                [class.bg-gray-50]="aafMode()"
+                [class.text-gray-700]="aafMode()"
               />
               @if (isFieldInvalid("email")) {
                 <div class="mt-0.5 text-xs text-red-500">
                   @for (error of getErrorMessages("email"); track error) {
                     {{ error }}<br />
                   }
+                </div>
+              }
+              @if (aafMode()) {
+                <div class="mt-1 text-xs text-gray-500">
+                  Don't want to use your institutional email?
+                  <a
+                    routerLink="/register"
+                    class="font-medium text-biocommons-primary hover:underline"
+                  >
+                    Register with a different email
+                  </a>
                 </div>
               }
             </div>
@@ -265,8 +285,11 @@
                     id="firstName"
                     formControlName="firstName"
                     placeholder="John"
+                    [readonly]="aafMode()"
                     class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
                     [class.border-red-500]="isFieldInvalid('firstName')"
+                    [class.bg-gray-50]="aafMode()"
+                    [class.text-gray-700]="aafMode()"
                   />
                   @if (isFieldInvalid("firstName")) {
                     <div class="mt-0.5 text-xs text-red-500">
@@ -292,8 +315,11 @@
                     id="lastName"
                     formControlName="lastName"
                     placeholder="Doe"
+                    [readonly]="aafMode()"
                     class="mt-1 block w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-100"
                     [class.border-red-500]="isFieldInvalid('lastName')"
+                    [class.bg-gray-50]="aafMode()"
+                    [class.text-gray-700]="aafMode()"
                   />
                   @if (isFieldInvalid("lastName")) {
                     <div class="mt-0.5 text-xs text-red-500">
@@ -332,6 +358,7 @@
                 }
               </div>
 
+              @if (!aafMode()) {
               <div class="relative">
                 <label
                   for="password"
@@ -387,6 +414,7 @@
                   </div>
                 }
               </div>
+              }
             }
           </div>
 

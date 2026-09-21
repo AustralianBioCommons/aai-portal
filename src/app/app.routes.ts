@@ -11,6 +11,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { rootRedirectGuard } from './core/guards/root-redirect.guard';
 import { RegisterComponent } from './pages/register/register.component';
+// /aaf-register reuses RegisterComponent in "AAF mode" (see data.aafMode below).
 import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
 import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
@@ -19,7 +20,6 @@ import { FirstMigrationComponent } from './pages/first-migration/first-migration
 import { BiocommonsTermsComponent } from './pages/terms/biocommons-terms/biocommons-terms.component';
 import { EmailVerificationRequiredComponent } from './pages/email-verification-required/email-verification-required.component';
 import { EnvironmentConfig } from '../environments/runtime-config';
-import { AafRegisterComponent } from './pages/aaf-register/aaf-register.component';
 
 // Helper function to create routes based on environment configuration
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,9 +38,14 @@ export function createRoutes(env: EnvironmentConfig): Routes {
       data: { title: 'Register | BioCommons Access' },
     },
     {
+      // Post-AAF-login registration — reuses RegisterComponent via aafMode so
+      // the form/styling stay in sync with the standard registration page.
       path: 'aaf-register',
-      component: AafRegisterComponent,
-      data: { title: 'AAF Registration | BioCommons Access' },
+      component: RegisterComponent,
+      data: {
+        title: 'Complete Registration | BioCommons Access',
+        aafMode: true,
+      },
     },
     {
       path: 'terms/biocommons',
