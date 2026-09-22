@@ -1,5 +1,12 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, DestroyRef, OnInit, signal, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  signal,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
@@ -105,6 +112,14 @@ export class ProfileComponent implements OnInit {
   };
 
   user = signal<UserProfileData | null>(null);
+  // AAF users authenticate via the federation, so their name/password are
+  // IdP-managed (edits hidden) and their email is treated as verified.
+  readonly isAafUser = computed(
+    () => this.user()?.account_type?.toLowerCase() === 'aaf',
+  );
+  readonly emailIsVerified = computed(
+    () => this.isAafUser() || !!this.user()?.email_verified,
+  );
   pageLoading = signal(true);
   pageError = signal<string | null>(null);
   alert = signal<{ type: AlertType; message: string } | null>(null);

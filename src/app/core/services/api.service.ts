@@ -101,6 +101,9 @@ export interface UserProfileData {
   family_name?: string;
   email: string;
   email_verified: boolean;
+  // 'aaf' for federated users, 'auth0' otherwise. Used to lock IdP-managed
+  // fields (name/password) and treat AAF users as email-verified.
+  account_type?: string;
   username: string;
   picture: string;
   created_at: string;
