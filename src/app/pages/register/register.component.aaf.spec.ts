@@ -41,7 +41,10 @@ describe('RegisterComponent (AAF mode)', () => {
       key === 'session_token' ? sessionToken : key === 'state' ? state : null,
     );
 
-    const authSpy = jasmine.createSpyObj('AuthService', ['refreshUser', 'login']);
+    const authSpy = jasmine.createSpyObj('AuthService', [
+      'refreshUser',
+      'login',
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
