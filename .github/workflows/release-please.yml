@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout release tag
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ needs.release.outputs.tag_name }}
 
@@ -56,7 +56,7 @@ jobs:
           echo "version=${NORMALIZED_VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: Set up Node.js 24
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -91,7 +91,7 @@ jobs:
           fi
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6.2.0
+        uses: aws-actions/configure-aws-credentials@v6.2.4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND }}
           role-session-name: portal-release-upload
@@ -121,7 +121,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.1
 
       - name: Tag JIRA tickets with fix version
         env:

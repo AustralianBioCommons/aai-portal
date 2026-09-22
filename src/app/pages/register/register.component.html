@@ -73,95 +73,98 @@
                 @let valid = isSectionValid(section.id);
                 @let last = section.id === "terms";
 
-                <div class="group relative flex flex-1 flex-col items-center">
-                  <div class="flex w-full items-center">
-                    <!-- Circle Indicator -->
-                    <div class="flex w-full justify-center">
-                      <a
-                        [href]="'#' + section.id"
-                        class="cursor-pointer"
-                        (click)="scrollToSection($event, section.id)"
-                      >
-                        <div
-                          class="relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
-                          [ngClass]="{
-                            'border-gray-300': !visited,
-                            'border-biocommons-primary group-hover:border-sky-900':
-                              active || ((visited || completed) && valid),
-                            'border-red-600 group-hover:border-red-700':
-                              !active && !valid && (completed || visited),
-                            'bg-biocommons-primary group-hover:bg-sky-900':
-                              (completed && valid) || (last && active && valid),
-                            'bg-red-600 group-hover:bg-red-700':
-                              completed && !valid,
-                            'bg-white hover:bg-gray-100':
-                              !completed && !(last && active && valid),
-                          }"
-                        >
-                          @if (last && active && !valid) {
-                            <div
-                              class="h-2 w-2 rounded-full bg-biocommons-primary"
-                            ></div>
-                          } @else if (last && active && valid) {
-                            <ng-icon
-                              name="heroCheck"
-                              size="20"
-                              class="z-10 text-white"
-                            ></ng-icon>
-                          } @else if (active) {
-                            <div
-                              class="h-2 w-2 rounded-full bg-biocommons-primary"
-                            ></div>
-                          } @else if (completed && valid) {
-                            <ng-icon
-                              name="heroCheck"
-                              size="20"
-                              class="z-10 text-white"
-                            ></ng-icon>
-                          } @else if (completed && !valid) {
-                            <span class="text-white">!</span>
-                          } @else if (visited && valid) {
-                            <ng-icon
-                              name="heroCheck"
-                              size="20"
-                              class="text-biocommons-primary"
-                            ></ng-icon>
-                          } @else if (visited && !valid) {
-                            <span class="text-red-600">!</span>
-                          }
-                        </div>
-                      </a>
-                    </div>
-
-                    <!-- Connecting line -->
-                    @if (index < sections.length - 1) {
+              <div class="group relative flex flex-1 flex-col items-center">
+                <div class="flex w-full items-center">
+                  <!-- Circle Indicator -->
+                  <div class="flex w-full justify-center">
+                    <a
+                      [href]="'#' + section.id"
+                      class="cursor-pointer"
+                      (click)="scrollToSection($event, section.id)"
+                    >
                       <div
-                        class="absolute left-1/2 top-4 h-0.5 w-full transition-all"
-                        [class]="
-                          completed ? 'bg-biocommons-primary' : 'bg-gray-300'
-                        "
-                      ></div>
-                    }
+                        class="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 text-sm font-medium transition-all"
+                        [ngClass]="{
+                          'border-gray-300': !visited,
+                          'border-biocommons-primary group-hover:border-sky-900':
+                            active || ((visited || completed) && valid),
+                          'border-red-600 group-hover:border-red-700':
+                            !active && !valid && (completed || visited),
+                          'bg-biocommons-primary group-hover:bg-sky-900':
+                            (completed && valid) || (last && active && valid),
+                          'bg-red-600 group-hover:bg-red-700':
+                            completed && !valid,
+                          'bg-white hover:bg-gray-100':
+                            !completed && !(last && active && valid),
+                        }"
+                      >
+                        @if (last && active && !valid) {
+                          <div
+                            class="h-2 w-2 rounded-full bg-biocommons-primary"
+                          ></div>
+                        } @else if (last && active && valid) {
+                          <ng-icon
+                            name="heroCheck"
+                            size="14"
+                            strokeWidth="2.5"
+                            class="z-10 text-white"
+                          ></ng-icon>
+                        } @else if (active) {
+                          <div
+                            class="h-2 w-2 rounded-full bg-biocommons-primary"
+                          ></div>
+                        } @else if (completed && valid) {
+                          <ng-icon
+                            name="heroCheck"
+                            size="14"
+                            strokeWidth="2.5"
+                            class="z-10 text-white"
+                          ></ng-icon>
+                        } @else if (completed && !valid) {
+                          <span class="text-white">!</span>
+                        } @else if (visited && valid) {
+                          <ng-icon
+                            name="heroCheck"
+                            size="14"
+                            strokeWidth="2.5"
+                            class="text-biocommons-primary"
+                          ></ng-icon>
+                        } @else if (visited && !valid) {
+                          <span class="text-red-600">!</span>
+                        }
+                      </div>
+                    </a>
                   </div>
 
-                  <!-- Label -->
-                  <a
-                    [href]="'#' + section.id"
-                    class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
-                    [class]="
-                      active || completed
-                        ? 'text-biocommons-primary'
-                        : 'text-gray-900'
-                    "
-                    (click)="scrollToSection($event, section.id)"
-                  >
-                    <span class="hidden sm:inline">{{ section.label }}</span>
-                    <span class="inline sm:hidden">
-                      {{ section.mobileLabel }}
-                    </span>
-                  </a>
+                  <!-- Connecting line -->
+                  @if (index < sections.length - 1) {
+                    <div
+                      class="absolute left-1/2 top-3 h-0.5 w-full transition-all"
+                      [class]="
+                        completed ? 'bg-biocommons-primary' : 'bg-gray-300'
+                      "
+                    ></div>
+                  }
                 </div>
-              }
+
+                <!-- Label -->
+                <a
+                  [href]="'#' + section.id"
+                  class="mt-2 cursor-pointer text-center text-sm font-medium transition-all"
+                  [class]="
+                    active || completed
+                      ? 'text-biocommons-primary'
+                      : 'text-gray-900'
+                  "
+                  (click)="scrollToSection($event, section.id)"
+                >
+                  <span class="hidden sm:inline">{{ section.label }}</span>
+                  <span class="inline sm:hidden">
+                    {{ section.mobileLabel }}
+                  </span>
+                </a>
+              </div>
+            }
             </div>
           </div>
         </div>

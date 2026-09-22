@@ -145,11 +145,7 @@
     >
       <div
         class="flex-1"
-        [ngClass]="
-          adminType() !== 'bundle' && adminType() !== 'platform-bundle'
-            ? 'w-6/12'
-            : 'w-8/12'
-        "
+        [ngClass]="adminType() !== 'bundle' ? 'w-6/12' : 'w-8/12'"
       >
         Total:
         <span class="font-light text-gray-300">{{ totalUsers() }} users</span>
@@ -169,8 +165,7 @@
             {{
               adminType() === "biocommons"
                 ? "Services"
-                : adminType() === "platform" ||
-                    adminType() === "platform-bundle"
+                : adminType() === "platform"
                   ? adminPlatforms()[0].name + " Access"
                   : "Access"
             }}
@@ -402,8 +397,7 @@
                       track platform.id
                     ) {
                       @if (
-                        (adminType() === "platform" ||
-                          adminType() === "platform-bundle") &&
+                        adminType() === "platform" &&
                         platform.platform_id === adminPlatforms()[0].id
                       ) {
                         <div
@@ -492,8 +486,7 @@
                         platform.approval_status === "approved" &&
                         ((adminType() === "biocommons" &&
                           user.platform_memberships.length === 1) ||
-                          ((adminType() === "platform" ||
-                            adminType() === "platform-bundle") &&
+                          (adminType() === "platform" &&
                             platform.platform_id === adminPlatforms()[0].id))
                       ) {
                         <button
@@ -531,7 +524,6 @@
                       !isCurrentAdminUser(user.id) &&
                       !user.email_verified &&
                       (adminType() === "platform" ||
-                        adminType() === "platform-bundle" ||
                         adminType() === "biocommons")
                     ) {
                       <button

@@ -135,10 +135,7 @@ export class NavbarComponent {
 
     if (this.adminType() === 'biocommons') {
       return `BioCommons Admin ${suffix}`;
-    } else if (
-      this.adminType() === 'platform' ||
-      this.adminType() === 'platform-bundle'
-    ) {
+    } else if (this.adminType() === 'platform') {
       return `${this.adminPlatforms()[0].name} Admin ${suffix}`;
     }
 

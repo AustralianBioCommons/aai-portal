@@ -104,6 +104,24 @@ function setNestedValue(target, keys, value) {
   current[keys[keys.length - 1]] = value;
 }
 
+function parseBoolean(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (["true", "1", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["false", "0", "no", "off"].includes(normalized)) {
+    return false;
+  }
+  return undefined;
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.config) {
@@ -142,6 +160,14 @@ function main() {
     if (value !== undefined && value !== null && value !== "") {
       setNestedValue(config, pathParts, value);
     }
+  }
+
+  if (secret.SBP_ENABLED !== undefined && secret.SBP_ENABLED !== null) {
+    const sbpEnabled = parseBoolean(secret.SBP_ENABLED);
+    if (sbpEnabled === undefined) {
+      usage("SBP_ENABLED must be a boolean value.");
+    }
+    setNestedValue(config, ["features", "sbpEnabled"], sbpEnabled);
   }
 
   if (args.backendUrl) {

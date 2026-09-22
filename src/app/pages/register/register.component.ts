@@ -20,7 +20,11 @@ import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
-import { BIOCOMMONS_BUNDLES, Bundle } from '../../core/constants/constants';
+import {
+  Bundle,
+  getVisibleBiocommonsBundles,
+  isSbpBundleId,
+} from '../../core/constants/constants';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginProxyService } from '../../core/services/login-proxy.service';
 import { ValidationService } from '../../core/services/validation.service';
@@ -121,8 +125,9 @@ export class RegisterComponent implements AfterViewInit {
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
   private readonly galaxyPlatformUrl =
     environment.platformUrls.galaxyPlatform.replace(/\/+$/, '');
+  private readonly sbpEnabled = environment.features.sbpEnabled;
 
-  readonly bundles = BIOCOMMONS_BUNDLES;
+  readonly bundles = getVisibleBiocommonsBundles(this.sbpEnabled);
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   readonly sections: Section[] = [
     { id: 'introduction', label: 'Introduction', mobileLabel: 'Introduction' },
@@ -453,9 +458,13 @@ export class RegisterComponent implements AfterViewInit {
 
     const formValue = this.registrationForm.getRawValue();
 
-    const bundles: BundleRequest[] | undefined = Object.keys(formValue.bundles)
-      .length
-      ? Object.entries(formValue.bundles).map(([bundle_id, reason]) => ({
+    // Drop SBP bundle selections when SBP is disabled (from main); AAF mode
+    // reuses the same computed bundles.
+    const selectedBundles = Object.entries(formValue.bundles).filter(
+      ([bundleId]) => this.sbpEnabled || !isSbpBundleId(bundleId),
+    );
+    const bundles: BundleRequest[] | undefined = selectedBundles.length
+      ? selectedBundles.map(([bundle_id, reason]) => ({
           bundle_id,
           ...(reason ? { reason } : {}),
         }))

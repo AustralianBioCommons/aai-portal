@@ -9,7 +9,9 @@ export interface Bundle {
   pending?: boolean;
 }
 
-export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp';
+export type PlatformId = 'galaxy' | 'bpa_data_portal' | 'sbp' | 'edna_explorer';
+export const SBP_PLATFORM_ID: PlatformId = 'sbp';
+export const SBP_BUNDLE_ID = 'sbp_workflow_execution';
 
 export interface Platform {
   id: PlatformId;
@@ -31,11 +33,17 @@ export const PLATFORMS: Record<PlatformId, Platform> = {
     logoUrl: '/assets/bpa-logo.png',
     url: 'https://data.bioplatforms.com/',
   },
-  sbp: {
-    id: 'sbp',
+  [SBP_PLATFORM_ID]: {
+    id: SBP_PLATFORM_ID,
     name: 'Structural Biology Platform',
     logoUrl: '/assets/biocommons-logo.png',
     url: 'https://sbp.biocommons.org.au/',
+  },
+  edna_explorer: {
+    id: 'edna_explorer',
+    name: 'eDNA Explorer',
+    logoUrl: '/assets/edna-explorer-logo.png',
+    url: 'https://amotu.it.csiro.au/',
   },
 } as const;
 
@@ -54,7 +62,7 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
     ],
   },
   {
-    id: 'sbp_workflow_execution',
+    id: SBP_BUNDLE_ID,
     name: 'SBP Workflow Execution Bundle',
     logoUrls: ['/assets/biocommons-favicon.png'],
     listItems: [
@@ -67,11 +75,16 @@ export const BIOCOMMONS_BUNDLES: Bundle[] = [
   },
 ];
 
-/**
- * Maps platform IDs to the bundle group ID whose admin access is granted by
- * the same Auth0 role as the platform admin role (biocommons/role/{platform}/admin).
- * Mirrors the backend PLATFORM_BUNDLE_GROUP_MAP in scheduled_tasks/tasks.py.
- */
-export const PLATFORM_BUNDLE_GROUP_MAP: Partial<Record<PlatformId, string>> = {
-  sbp: 'biocommons/group/sbp_workflow_execution',
-};
+export function isSbpBundleId(bundleId: string): boolean {
+  return bundleId === SBP_BUNDLE_ID;
+}
+
+export function isSbpGroupId(groupId: string): boolean {
+  return groupId.split('/').pop() === SBP_BUNDLE_ID;
+}
+
+export function getVisibleBiocommonsBundles(sbpEnabled: boolean): Bundle[] {
+  return sbpEnabled
+    ? BIOCOMMONS_BUNDLES
+    : BIOCOMMONS_BUNDLES.filter((bundle) => !isSbpBundleId(bundle.id));
+}
