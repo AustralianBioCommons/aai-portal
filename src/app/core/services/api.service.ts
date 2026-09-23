@@ -475,4 +475,17 @@ export class ApiService {
       )
       .pipe(map((data) => data.is_australian_research_institution));
   }
+
+  /**
+   * Whether an email is free to register. Searches all Auth0 connections
+   * (AAF, social, database), so it catches an existing account of any type.
+   */
+  checkEmailAvailability(email: string): Observable<boolean> {
+    return this.http
+      .get<{ available: boolean }>(
+        `${environment.auth0.backend}/utils/register/check-email-availability`,
+        { params: { email } },
+      )
+      .pipe(map((data) => data.available));
+  }
 }

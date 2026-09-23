@@ -269,11 +269,23 @@ describe('RegisterComponent', () => {
       '',
     );
 
+    // The email gate first checks availability, then (if free) the AAF check.
+    function flushAvailability(email: string, available = true) {
+      const req = httpMock.expectOne(
+        (request) =>
+          request.url ===
+            `${environment.auth0.backend}/utils/register/check-email-availability` &&
+          request.params.get('email') === email,
+      );
+      req.flush({ available });
+    }
+
     it('should check AAF email when a valid email is finished', () => {
       component.registrationForm.get('email')?.setValue('john@example.com');
 
       component.checkInstitutionalEmail();
 
+      flushAvailability('john@example.com');
       const req = httpMock.expectOne(
         (request) =>
           request.url === `${loginProxyBaseUrl}/aaf/email-check` &&
@@ -301,6 +313,7 @@ describe('RegisterComponent', () => {
 
       component.checkInstitutionalEmail();
 
+      flushAvailability('john@example.edu.au');
       const req = httpMock.expectOne(
         (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
       );
@@ -318,6 +331,7 @@ describe('RegisterComponent', () => {
 
       component.continueFromEmail();
 
+      flushAvailability('john@example.com');
       const req = httpMock.expectOne(
         (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
       );
@@ -336,6 +350,7 @@ describe('RegisterComponent', () => {
 
       component.checkInstitutionalEmail();
 
+      flushAvailability('john@example.edu.au');
       const req = httpMock.expectOne(
         (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
       );
@@ -344,6 +359,23 @@ describe('RegisterComponent', () => {
 
       expect(component.showInstitutionalLoginModal()).toBe(false);
       expect(component.showRegistrationFields()).toBe(false);
+    });
+
+    it('should error and not proceed when the email is already registered', () => {
+      component.registrationForm.get('email')?.setValue('taken@example.com');
+
+      component.checkInstitutionalEmail();
+
+      flushAvailability('taken@example.com', false);
+      // No AAF check when the email is taken.
+      httpMock.expectNone(`${loginProxyBaseUrl}/aaf/email-check`);
+
+      expect(component.showInstitutionalLoginModal()).toBe(false);
+      expect(component.showRegistrationFields()).toBe(false);
+      expect(component.isFieldInvalid('email')).toBe(true);
+      expect(component.getErrorMessages('email')).toContain(
+        'An account with this email already exists. Please log in instead.',
+      );
     });
 
     it('should login with Auth0 from the institutional login modal', () => {

@@ -16,7 +16,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
+import {
+  catchError,
+  fromEvent,
+  of,
+  animationFrameScheduler,
+  switchMap,
+  map,
+} from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
@@ -27,6 +34,7 @@ import {
 } from '../../core/constants/constants';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginProxyService } from '../../core/services/login-proxy.service';
+import { ApiService } from '../../core/services/api.service';
 import { ValidationService } from '../../core/services/validation.service';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -107,6 +115,7 @@ export class RegisterComponent implements AfterViewInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly loginProxyService = inject(LoginProxyService);
+  private readonly apiService = inject(ApiService);
   private readonly validationService = inject(ValidationService);
   private readonly http = inject(HttpClient);
   private readonly document = inject(DOCUMENT);
@@ -387,16 +396,32 @@ export class RegisterComponent implements AfterViewInit {
     this.lastAafEmailCheck = email;
     this.isCheckingInstitutionalEmail.set(true);
 
-    this.loginProxyService
-      .checkAafEmail(email)
+    // Reject a taken email at this first step (before username/password),
+    // instead of only finding out at submit. The availability check spans all
+    // Auth0 connections, so it also catches an existing AAF/social account. On a
+    // check failure we fail open and let the normal flow (and backend) guard.
+    this.apiService
+      .checkEmailAvailability(email)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         catchError((error: unknown) => {
-          console.error('Institutional email check failed:', error);
-          return of(false);
+          console.error('Email availability check failed:', error);
+          return of(true);
+        }),
+        switchMap((available) => {
+          if (!available) {
+            return of<'taken' | boolean>('taken');
+          }
+          return this.loginProxyService.checkAafEmail(email).pipe(
+            map((isAafEmail): 'taken' | boolean => isAafEmail),
+            catchError((error: unknown) => {
+              console.error('Institutional email check failed:', error);
+              return of<'taken' | boolean>(false);
+            }),
+          );
         }),
       )
-      .subscribe((isAafEmail) => {
+      .subscribe((result) => {
         this.isCheckingInstitutionalEmail.set(false);
         const currentEmail = toAsciiEmail(
           this.registrationForm.get('email')?.value.trim() ?? '',
@@ -405,7 +430,16 @@ export class RegisterComponent implements AfterViewInit {
           return;
         }
 
-        if (isAafEmail) {
+        if (result === 'taken') {
+          this.validationService.setFieldBackendError(
+            'email',
+            'An account with this email already exists. Please log in instead.',
+          );
+          this.registrationForm.get('email')?.markAsTouched();
+          return;
+        }
+
+        if (result) {
           this.showInstitutionalLoginModal.set(true);
         } else {
           this.showRegistrationFields.set(true);
