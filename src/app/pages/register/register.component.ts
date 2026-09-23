@@ -155,6 +155,9 @@ export class RegisterComponent implements AfterViewInit {
   isRegistrationComplete = signal(false);
   showInstitutionalLoginModal = signal(false);
   showRegistrationFields = signal(false);
+  // Set when the entered email already belongs to an account, so we can offer a
+  // "Log in" button instead of letting them register a duplicate.
+  emailAlreadyRegistered = signal(false);
 
   activeSection = signal<string>('introduction');
   visitedSections = signal<Set<string>>(new Set(['introduction']));
@@ -203,6 +206,7 @@ export class RegisterComponent implements AfterViewInit {
           this.lastAafEmailCheck = null;
           this.showInstitutionalLoginModal.set(false);
           this.showRegistrationFields.set(false);
+          this.emailAlreadyRegistered.set(false);
         });
     }
 
@@ -436,6 +440,7 @@ export class RegisterComponent implements AfterViewInit {
             'An account with this email already exists. Please log in instead.',
           );
           this.registrationForm.get('email')?.markAsTouched();
+          this.emailAlreadyRegistered.set(true);
           return;
         }
 
@@ -457,6 +462,17 @@ export class RegisterComponent implements AfterViewInit {
     const emailControl = this.registrationForm.get('email');
     emailControl?.markAsTouched();
     this.checkInstitutionalEmail();
+  }
+
+  /**
+   * Send an existing user to the login screen with their email pre-filled. Used
+   * by the "Log in" button shown when the entered email is already registered.
+   */
+  logInWithExistingAccount(): void {
+    const email = toAsciiEmail(
+      this.registrationForm.get('email')?.value?.trim() ?? '',
+    );
+    this.authService.login(email || undefined);
   }
 
   loginWithInstitutionalCredentials(): void {

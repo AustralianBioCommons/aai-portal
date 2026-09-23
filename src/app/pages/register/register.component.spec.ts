@@ -376,6 +376,18 @@ describe('RegisterComponent', () => {
       expect(component.getErrorMessages('email')).toContain(
         'An account with this email already exists. Please log in instead.',
       );
+      expect(component.emailAlreadyRegistered()).toBe(true);
+    });
+
+    it('should log in with the entered email from the "Log in" button', () => {
+      component.registrationForm.get('email')?.setValue('taken@example.com');
+      component.checkInstitutionalEmail();
+      flushAvailability('taken@example.com', false);
+      httpMock.expectNone(`${loginProxyBaseUrl}/aaf/email-check`);
+
+      component.logInWithExistingAccount();
+
+      expect(authService.login).toHaveBeenCalledWith('taken@example.com');
     });
 
     it('should login with Auth0 from the institutional login modal', () => {

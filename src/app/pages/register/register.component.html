@@ -262,14 +262,24 @@
 
             @if (!showRegistrationFields()) {
               <div>
-                <app-button
-                  type="button"
-                  variant="primary"
-                  (click)="continueFromEmail()"
-                  [loading]="isCheckingInstitutionalEmail()"
-                >
-                  Continue
-                </app-button>
+                @if (emailAlreadyRegistered()) {
+                  <app-button
+                    type="button"
+                    variant="primary"
+                    (click)="logInWithExistingAccount()"
+                  >
+                    Log in
+                  </app-button>
+                } @else {
+                  <app-button
+                    type="button"
+                    variant="primary"
+                    (click)="continueFromEmail()"
+                    [loading]="isCheckingInstitutionalEmail()"
+                  >
+                    Continue
+                  </app-button>
+                }
               </div>
             }
 
