@@ -139,7 +139,6 @@ export class RegisterComponent implements AfterViewInit {
   readonly bundles = getVisibleBiocommonsBundles(this.sbpEnabled);
   readonly recaptchaSiteKeyV2 = environment.recaptcha.siteKeyV2;
   readonly sections: Section[] = [
-    { id: 'introduction', label: 'Introduction', mobileLabel: 'Introduction' },
     { id: 'your-details', label: 'Your Details', mobileLabel: 'Details' },
     { id: 'add-bundle', label: 'Add a Bundle', mobileLabel: 'Bundle' },
     { id: 'terms', label: 'Accept T&Cs', mobileLabel: 'T&Cs' },
@@ -155,12 +154,15 @@ export class RegisterComponent implements AfterViewInit {
   isRegistrationComplete = signal(false);
   showInstitutionalLoginModal = signal(false);
   showRegistrationFields = signal(false);
+  // First step: the "Register an account" intro page, shown before the email
+  // step. Skipped in AAF mode (identity is already known).
+  showIntro = signal(true);
   // Set when the entered email already belongs to an account, so we can offer a
   // "Log in" button instead of letting them register a duplicate.
   emailAlreadyRegistered = signal(false);
 
-  activeSection = signal<string>('introduction');
-  visitedSections = signal<Set<string>>(new Set(['introduction']));
+  activeSection = signal<string>('your-details');
+  visitedSections = signal<Set<string>>(new Set(['your-details']));
   private lastAafEmailCheck: string | null = null;
 
   registrationForm: FormGroup<RegistrationForm> =
@@ -264,7 +266,8 @@ export class RegisterComponent implements AfterViewInit {
       control?.updateValueAndValidity();
     }
 
-    // Skip the email-first gate; show the full form immediately.
+    // Skip the intro + email-first gate; show the full form immediately.
+    this.showIntro.set(false);
     this.showRegistrationFields.set(true);
   }
 
@@ -351,8 +354,6 @@ export class RegisterComponent implements AfterViewInit {
 
   isSectionValid(sectionId: string): boolean {
     switch (sectionId) {
-      case 'introduction':
-        return true;
       case 'your-details':
         return (
           this.areDetailsFieldsValid() &&
@@ -456,6 +457,10 @@ export class RegisterComponent implements AfterViewInit {
     const emailControl = this.registrationForm.get('email');
     emailControl?.reset('');
     this.showInstitutionalLoginModal.set(false);
+  }
+
+  continueFromIntro(): void {
+    this.showIntro.set(false);
   }
 
   continueFromEmail(): void {

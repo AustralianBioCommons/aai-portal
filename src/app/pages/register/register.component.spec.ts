@@ -84,16 +84,15 @@ describe('RegisterComponent', () => {
   });
 
   describe('Form Initialization', () => {
-    it('should initialize with introduction section active', () => {
-      expect(component.activeSection()).toBe('introduction');
+    it('should initialize with your-details section active', () => {
+      expect(component.activeSection()).toBe('your-details');
     });
 
-    it('should have 4 sections', () => {
-      expect(component.sections.length).toBe(4);
-      expect(component.sections[0].id).toBe('introduction');
-      expect(component.sections[1].id).toBe('your-details');
-      expect(component.sections[2].id).toBe('add-bundle');
-      expect(component.sections[3].id).toBe('terms');
+    it('should have 3 form sections (intro is a separate step)', () => {
+      expect(component.sections.length).toBe(3);
+      expect(component.sections[0].id).toBe('your-details');
+      expect(component.sections[1].id).toBe('add-bundle');
+      expect(component.sections[2].id).toBe('terms');
     });
 
     it('should initialize bundles field with empty selection', () => {
@@ -107,33 +106,38 @@ describe('RegisterComponent', () => {
       expect(component.registrationForm.get('username')?.value).toBe('');
     });
 
-    it('should initially show only the email field from the registration form', () => {
-      expect(fixture.debugElement.query(By.css('#email'))).toBeTruthy();
+    it('should show the intro step first, before any fields', () => {
+      expect(component.showIntro()).toBe(true);
+      expect(fixture.debugElement.query(By.css('#email-step'))).toBeNull();
       expect(fixture.debugElement.query(By.css('#firstName'))).toBeNull();
-      expect(fixture.debugElement.query(By.css('#lastName'))).toBeNull();
-      expect(fixture.debugElement.query(By.css('#username'))).toBeNull();
+    });
+
+    it('should show the email step after continuing from the intro', () => {
+      component.continueFromIntro();
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.css('#email-step'))).toBeTruthy();
+      expect(fixture.debugElement.query(By.css('#firstName'))).toBeNull();
       expect(fixture.debugElement.query(By.css('#password'))).toBeNull();
       expect(fixture.debugElement.query(By.css('re-captcha'))).toBeNull();
     });
   });
 
   describe('Section Navigation', () => {
-    it('should mark introduction as visited initially', () => {
-      expect(component.isSectionVisited('introduction')).toBe(true);
+    it('should mark your-details as visited initially', () => {
+      expect(component.isSectionVisited('your-details')).toBe(true);
     });
 
     it('should determine if section is valid', () => {
-      expect(component.isSectionValid('introduction')).toBe(true);
       expect(component.isSectionValid('your-details')).toBe(false);
       expect(component.isSectionValid('add-bundle')).toBe(true);
     });
 
     it('should determine if section is completed', () => {
-      component.visitedSections.set(new Set(['introduction', 'your-details']));
-      component.activeSection.set('add-bundle');
-      expect(component.isSectionCompleted('introduction')).toBe(true);
+      component.visitedSections.set(new Set(['your-details', 'add-bundle']));
+      component.activeSection.set('terms');
       expect(component.isSectionCompleted('your-details')).toBe(true);
-      expect(component.isSectionCompleted('add-bundle')).toBe(false);
+      expect(component.isSectionCompleted('add-bundle')).toBe(true);
+      expect(component.isSectionCompleted('terms')).toBe(false);
     });
   });
 
