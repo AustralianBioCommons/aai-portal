@@ -9,6 +9,7 @@ describe('createRoutes', () => {
       clientId: 'test-client-id',
       redirectUri: 'https://example.test/portal',
       backend: 'http://localhost:8000',
+      loginProxyUrl: 'https://aaf-login.example.com/',
     },
     recaptcha: {
       siteKeyV2: 'test-site-key',
@@ -30,5 +31,11 @@ describe('createRoutes', () => {
     expect(
       routes.some((route) => keyRoutes.includes(route.path as string)),
     ).toBeTrue();
+  });
+
+  it('defines the AAF registration route', () => {
+    const routes = createRoutes(baseEnv);
+
+    expect(routes.some((route) => route.path === 'aaf-register')).toBeTrue();
   });
 });

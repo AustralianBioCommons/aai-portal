@@ -1,6 +1,12 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -10,7 +16,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { catchError, fromEvent, of, animationFrameScheduler } from 'rxjs';
+import {
+  catchError,
+  fromEvent,
+  of,
+  animationFrameScheduler,
+  switchMap,
+  map,
+} from 'rxjs';
 import { auditTime } from 'rxjs/operators';
 import { RecaptchaModule } from 'ng-recaptcha-2';
 import { environment } from '../../../environments/environment';
@@ -19,6 +32,9 @@ import {
   getVisibleBiocommonsBundles,
   isSbpBundleId,
 } from '../../core/constants/constants';
+import { AuthService } from '../../core/services/auth.service';
+import { LoginProxyService } from '../../core/services/login-proxy.service';
+import { ApiService } from '../../core/services/api.service';
 import { ValidationService } from '../../core/services/validation.service';
 import { AlertComponent } from '../../shared/components/alert/alert.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -40,6 +56,7 @@ import { fullNameLengthValidator } from '../../shared/validators/full-name';
 import { passwordRequirements } from '../../shared/validators/passwords';
 import { usernameRequirements } from '../../shared/validators/usernames';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { ModalComponent } from '../../shared/components/modal/modal.component';
 
 export interface RegistrationForm {
   firstName: FormControl<string>;
@@ -86,6 +103,7 @@ interface Section {
     NgIcon,
     RouterModule,
     TooltipComponent,
+    ModalComponent,
   ],
   styleUrl: './register.component.css',
   viewProviders: [provideIcons({ heroCheck, heroArrowTopRightOnSquare })],
@@ -93,9 +111,24 @@ interface Section {
 export class RegisterComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly formBuilder = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly loginProxyService = inject(LoginProxyService);
+  private readonly apiService = inject(ApiService);
   private readonly validationService = inject(ValidationService);
   private readonly http = inject(HttpClient);
+  private readonly document = inject(DOCUMENT);
+
+  // AAF mode: this same form serves the post-AAF-login registration at
+  // /aaf-register. In that mode email/first/last are prefilled read-only from
+  // the Auth0 session token, there's no password, and submit goes to
+  // /biocommons/register-aaf then follows the returned redirect_url to resume
+  // the Auth0 login. Everything AAF-specific is gated behind this flag so the
+  // standard registration flow is unchanged.
+  readonly aafMode = signal(false);
+  private aafSessionToken: string | null = null;
+  private aafState: string | null = null;
 
   private readonly bpaPlatformUrl =
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
@@ -118,10 +151,17 @@ export class RegisterComponent implements AfterViewInit {
   errorAlert = signal<string | null>(null);
   registrationEmail = signal<string | null>(null);
   isSubmitting = signal(false);
+  isCheckingInstitutionalEmail = signal(false);
   isRegistrationComplete = signal(false);
+  showInstitutionalLoginModal = signal(false);
+  showRegistrationFields = signal(false);
+  // Set when the entered email already belongs to an account, so we can offer a
+  // "Log in" button instead of letting them register a duplicate.
+  emailAlreadyRegistered = signal(false);
 
   activeSection = signal<string>('introduction');
   visitedSections = signal<Set<string>>(new Set(['introduction']));
+  private lastAafEmailCheck: string | null = null;
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group(
@@ -148,17 +188,27 @@ export class RegisterComponent implements AfterViewInit {
     ) as FormGroup<RegistrationForm>;
 
   constructor() {
-    this.validationService.setupPasswordConfirmationValidation(
-      this.registrationForm,
-    );
+    this.aafMode.set(this.route.snapshot.data['aafMode'] === true);
 
-    this.registrationForm
-      .get('email')
-      ?.valueChanges.pipe(takeUntilDestroyed())
-      .subscribe(() => {
-        if (this.validationService.hasFieldBackendError('email'))
-          this.validationService.clearFieldBackendError('email');
-      });
+    if (this.aafMode()) {
+      this.initAafMode();
+    } else {
+      this.validationService.setupPasswordConfirmationValidation(
+        this.registrationForm,
+      );
+
+      this.registrationForm
+        .get('email')
+        ?.valueChanges.pipe(takeUntilDestroyed())
+        .subscribe(() => {
+          if (this.validationService.hasFieldBackendError('email'))
+            this.validationService.clearFieldBackendError('email');
+          this.lastAafEmailCheck = null;
+          this.showInstitutionalLoginModal.set(false);
+          this.showRegistrationFields.set(false);
+          this.emailAlreadyRegistered.set(false);
+        });
+    }
 
     this.registrationForm
       .get('username')
@@ -177,6 +227,58 @@ export class RegisterComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.updateActiveSection();
+  }
+
+  /**
+   * Prepare the form for the post-AAF-login registration flow: read the Auth0
+   * session token + state, prefill (read-only) identity, drop the password
+   * requirement, and skip the email/institutional-check gate.
+   */
+  private initAafMode(): void {
+    const token = this.route.snapshot.queryParamMap.get('session_token');
+    const state = this.route.snapshot.queryParamMap.get('state');
+    if (!token || !state) {
+      this.errorAlert.set(
+        'Invalid or missing registration link. Please try logging in again.',
+      );
+      return;
+    }
+    this.aafSessionToken = token;
+    this.aafState = state;
+
+    const payload = this.decodeJwtPayload(token);
+    const [fallbackFirst, ...fallbackRest] = (
+      (payload?.['name'] as string) ?? ''
+    ).split(' ');
+    this.registrationForm.patchValue({
+      email: (payload?.['email'] as string) ?? '',
+      firstName: (payload?.['given_name'] as string) || fallbackFirst || '',
+      lastName:
+        (payload?.['family_name'] as string) || fallbackRest.join(' ') || '',
+    });
+
+    // No password in the AAF flow — clear those validators so the form is valid.
+    for (const name of ['password', 'confirmPassword'] as const) {
+      const control = this.registrationForm.get(name);
+      control?.clearValidators();
+      control?.updateValueAndValidity();
+    }
+
+    // Skip the email-first gate; show the full form immediately.
+    this.showRegistrationFields.set(true);
+  }
+
+  /** Decode a JWT payload for display only (backend verifies it). */
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
+    try {
+      const part = token.split('.')[1];
+      if (!part) return null;
+      const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+      return JSON.parse(atob(padded));
+    } catch {
+      return null;
+    }
   }
 
   private updateActiveSection(): void {
@@ -266,19 +368,121 @@ export class RegisterComponent implements AfterViewInit {
   }
 
   private areDetailsFieldsValid(): boolean {
-    const fields: (keyof RegistrationForm)[] = [
-      'firstName',
-      'lastName',
-      'email',
-      'username',
-      'password',
-      'confirmPassword',
-    ];
+    const fields: (keyof RegistrationForm)[] = this.aafMode()
+      ? ['firstName', 'lastName', 'email', 'username']
+      : [
+          'firstName',
+          'lastName',
+          'email',
+          'username',
+          'password',
+          'confirmPassword',
+        ];
     return fields.every((field) => this.registrationForm.get(field)?.valid);
   }
 
   resolved(captchaResponse: string | null): void {
     this.recaptchaToken.set(captchaResponse);
+  }
+
+  checkInstitutionalEmail(): void {
+    const emailControl = this.registrationForm.get('email');
+    if (!emailControl?.valid) {
+      return;
+    }
+
+    const email = toAsciiEmail(emailControl.value.trim());
+    // Skip check if this value was already checked
+    if (!email || email === this.lastAafEmailCheck) {
+      return;
+    }
+
+    this.lastAafEmailCheck = email;
+    this.isCheckingInstitutionalEmail.set(true);
+
+    // Reject a taken email at this first step (before username/password),
+    // instead of only finding out at submit. The availability check spans all
+    // Auth0 connections, so it also catches an existing AAF/social account. On a
+    // check failure we fail open and let the normal flow (and backend) guard.
+    this.apiService
+      .checkEmailAvailability(email)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError((error: unknown) => {
+          console.error('Email availability check failed:', error);
+          return of(true);
+        }),
+        switchMap((available) => {
+          if (!available) {
+            return of<'taken' | boolean>('taken');
+          }
+          return this.loginProxyService.checkAafEmail(email).pipe(
+            map((isAafEmail): 'taken' | boolean => isAafEmail),
+            catchError((error: unknown) => {
+              console.error('Institutional email check failed:', error);
+              return of<'taken' | boolean>(false);
+            }),
+          );
+        }),
+      )
+      .subscribe((result) => {
+        this.isCheckingInstitutionalEmail.set(false);
+        const currentEmail = toAsciiEmail(
+          this.registrationForm.get('email')?.value.trim() ?? '',
+        );
+        if (currentEmail !== email) {
+          return;
+        }
+
+        if (result === 'taken') {
+          this.validationService.setFieldBackendError(
+            'email',
+            'An account with this email already exists. Please log in instead.',
+          );
+          this.registrationForm.get('email')?.markAsTouched();
+          this.emailAlreadyRegistered.set(true);
+          return;
+        }
+
+        if (result) {
+          this.showInstitutionalLoginModal.set(true);
+        } else {
+          this.showRegistrationFields.set(true);
+        }
+      });
+  }
+
+  closeInstitutionalLoginModal(): void {
+    const emailControl = this.registrationForm.get('email');
+    emailControl?.reset('');
+    this.showInstitutionalLoginModal.set(false);
+  }
+
+  continueFromEmail(): void {
+    const emailControl = this.registrationForm.get('email');
+    emailControl?.markAsTouched();
+    this.checkInstitutionalEmail();
+  }
+
+  /**
+   * Send an existing user to the login screen with their email pre-filled. Used
+   * by the "Log in" button shown when the entered email is already registered.
+   */
+  logInWithExistingAccount(): void {
+    const email = toAsciiEmail(
+      this.registrationForm.get('email')?.value?.trim() ?? '',
+    );
+    this.authService.login(email || undefined);
+  }
+
+  loginWithInstitutionalCredentials(): void {
+    // The email here is a known AAF-domain address (this modal only shows for
+    // those), so pass it as login_hint AND force the AAF connection, so Auth0
+    // skips its identifier screen and routes straight to AAF.
+    const email = toAsciiEmail(
+      this.registrationForm.get('email')?.value?.trim() ?? '',
+    );
+    this.authService.login(email || undefined, 'AAF');
   }
 
   getSelectedBundles(): Bundle[] {
@@ -304,6 +508,23 @@ export class RegisterComponent implements AfterViewInit {
 
     const formValue = this.registrationForm.getRawValue();
 
+    // Drop SBP bundle selections when SBP is disabled (from main); AAF mode
+    // reuses the same computed bundles.
+    const selectedBundles = Object.entries(formValue.bundles).filter(
+      ([bundleId]) => this.sbpEnabled || !isSbpBundleId(bundleId),
+    );
+    const bundles: BundleRequest[] | undefined = selectedBundles.length
+      ? selectedBundles.map(([bundle_id, reason]) => ({
+          bundle_id,
+          ...(reason ? { reason } : {}),
+        }))
+      : undefined;
+
+    if (this.aafMode()) {
+      this.submitAafRegistration(formValue.username, bundles);
+      return;
+    }
+
     const requestBody: RegistrationRequest = {
       first_name: formValue.firstName,
       last_name: formValue.lastName,
@@ -313,15 +534,8 @@ export class RegisterComponent implements AfterViewInit {
       recaptcha_token: this.recaptchaToken()!,
     };
 
-    const selectedBundles = Object.entries(formValue.bundles).filter(
-      ([bundleId]) => this.sbpEnabled || !isSbpBundleId(bundleId),
-    );
-
-    if (selectedBundles.length) {
-      requestBody.bundles = selectedBundles.map(([bundle_id, reason]) => ({
-        bundle_id,
-        ...(reason ? { reason } : {}),
-      }));
+    if (bundles) {
+      requestBody.bundles = bundles;
     }
 
     this.http
@@ -347,6 +561,58 @@ export class RegisterComponent implements AfterViewInit {
           this.registrationEmail.set(requestBody.email);
           this.isRegistrationComplete.set(true);
         }
+      });
+  }
+
+  private submitAafRegistration(
+    username: string,
+    bundles: BundleRequest[] | undefined,
+  ): void {
+    if (!this.aafSessionToken || !this.aafState) {
+      this.errorAlert.set(
+        'Invalid or missing registration link. Please try logging in again.',
+      );
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    const requestBody = {
+      session_token: this.aafSessionToken,
+      state: this.aafState,
+      username,
+      bundles: bundles ?? [],
+      recaptcha_token: this.recaptchaToken()!,
+    };
+
+    this.http
+      .post<{ redirect_url?: string }>(
+        `${environment.auth0.backend}/biocommons/register-aaf`,
+        requestBody,
+      )
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('AAF registration failed:', error);
+          this.errorAlert.set(
+            error?.error?.message ||
+              error?.error?.detail ||
+              'Registration failed. Please try again.',
+          );
+          this.isSubmitting.set(false);
+          return of(null);
+        }),
+      )
+      .subscribe((result) => {
+        if (!result) {
+          this.isSubmitting.set(false);
+          return;
+        }
+        // Resume the Auth0 login by following the signed /continue URL.
+        if (result.redirect_url) {
+          this.document.location.href = result.redirect_url;
+          return;
+        }
+        this.isSubmitting.set(false);
+        this.isRegistrationComplete.set(true);
       });
   }
 

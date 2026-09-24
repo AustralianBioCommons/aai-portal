@@ -1,0 +1,82 @@
+name: build-and-deploy-aaf-dev
+# Builds the portal from the aaf-dev branch and deploys it straight to the
+# dev-aaf portal bucket + CloudFront, so AAF work can be tested on
+# https://dev-aaf.portal.aai.test.biocommons.org.au without merging into main.
+#
+# Unlike the dev/staging/prod pipeline (upload-portal-builds-dev.yml), dev-aaf
+# has no build bucket or release Lambda, so this syncs the built bundle
+# directly to the target bucket.
+#
+# IMPORTANT: the sync EXCLUDES *app-config.json. The runtime config
+# (assets/config/app-config.json) is written out-of-band for the dev-aaf
+# tenant; the copy committed under src/assets/config/ points at dev/localhost
+# and would blank the site if it landed in S3. Never sync it here.
+on:
+  push:
+    branches: [aaf-dev]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy dev-aaf portal
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+
+      - name: Validate required secrets
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ROLE_FRONTEND_DEPLOY_DEV_AAF: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_DEV_AAF }}
+          AWS_DEV_AAF_PORTAL_BUCKET: ${{ secrets.AWS_DEV_AAF_PORTAL_BUCKET }}
+          AWS_DEV_AAF_CLOUDFRONT_ID: ${{ secrets.AWS_DEV_AAF_CLOUDFRONT_ID }}
+        run: |
+          set -euo pipefail
+          for var in AWS_REGION AWS_ROLE_FRONTEND_DEPLOY_DEV_AAF AWS_DEV_AAF_PORTAL_BUCKET AWS_DEV_AAF_CLOUDFRONT_ID; do
+            if [ -z "${!var}" ]; then
+              echo "Missing required secret ${var}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npx ng build --configuration production --output-path dist/aai-portal
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_FRONTEND_DEPLOY_DEV_AAF }}
+          role-session-name: portal-aaf-dev-deploy
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync bundle to dev-aaf portal bucket
+        env:
+          AWS_DEV_AAF_PORTAL_BUCKET: ${{ secrets.AWS_DEV_AAF_PORTAL_BUCKET }}
+        run: |
+          set -euo pipefail
+          # --delete prunes old hashed bundles; the exclude keeps the live
+          # runtime config (and never uploads the dev/localhost committed copy).
+          aws s3 sync dist/aai-portal/browser/ "s3://${AWS_DEV_AAF_PORTAL_BUCKET}/" \
+            --delete \
+            --exclude '*app-config.json'
+
+      - name: Invalidate CloudFront
+        env:
+          AWS_DEV_AAF_CLOUDFRONT_ID: ${{ secrets.AWS_DEV_AAF_CLOUDFRONT_ID }}
+        run: |
+          set -euo pipefail
+          aws cloudfront create-invalidation \
+            --distribution-id "${AWS_DEV_AAF_CLOUDFRONT_ID}" \
+            --paths '/*'

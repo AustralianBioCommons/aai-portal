@@ -101,6 +101,9 @@ export interface UserProfileData {
   family_name?: string;
   email: string;
   email_verified: boolean;
+  // 'aaf' for federated users, 'auth0' otherwise. Used to lock IdP-managed
+  // fields (name/password) and treat AAF users as email-verified.
+  account_type?: string;
   username: string;
   picture: string;
   created_at: string;
@@ -471,5 +474,18 @@ export class ApiService {
         { params: { email } },
       )
       .pipe(map((data) => data.is_australian_research_institution));
+  }
+
+  /**
+   * Whether an email is free to register. Searches all Auth0 connections
+   * (AAF, social, database), so it catches an existing account of any type.
+   */
+  checkEmailAvailability(email: string): Observable<boolean> {
+    return this.http
+      .get<{ available: boolean }>(
+        `${environment.auth0.backend}/utils/register/check-email-availability`,
+        { params: { email } },
+      )
+      .pipe(map((data) => data.available));
   }
 }

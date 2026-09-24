@@ -428,25 +428,29 @@
                     <div class="col-span-4 break-all">
                       {{ user()?.family_name }}
                     </div>
-                    <button
-                      type="button"
-                      class="justify-self-end text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                      (click)="openModal('name')"
-                    >
-                      Edit
-                    </button>
+                    @if (!isAafUser()) {
+                      <button
+                        type="button"
+                        class="justify-self-end text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
+                        (click)="openModal('name')"
+                      >
+                        Edit
+                      </button>
+                    }
                   </div>
                 } @else {
                   <div class="text-sm font-light text-gray-500">Name</div>
                   <div class="flex items-center justify-between gap-6">
                     <div class="break-all">{{ user()?.name }}</div>
-                    <button
-                      type="button"
-                      class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                      (click)="openModal('name')"
-                    >
-                      Edit
-                    </button>
+                    @if (!isAafUser()) {
+                      <button
+                        type="button"
+                        class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
+                        (click)="openModal('name')"
+                      >
+                        Edit
+                      </button>
+                    }
                   </div>
                 }
               </div>
@@ -475,12 +479,12 @@
                     <span
                       class="rounded px-2 py-1 text-xs font-semibold uppercase"
                       [class]="
-                        user()?.email_verified
+                        emailIsVerified()
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       "
                     >
-                      {{ user()?.email_verified ? "Verified" : "Unverified" }}
+                      {{ emailIsVerified() ? "Verified" : "Unverified" }}
                     </span>
                   </div>
                   <button
@@ -493,19 +497,21 @@
                 </div>
               </div>
 
-              <div>
-                <div class="text-sm font-light text-gray-500">Password</div>
-                <div class="flex items-center justify-between gap-6">
-                  <div>••••••••••••</div>
-                  <button
-                    type="button"
-                    class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
-                    (click)="openModal('password')"
-                  >
-                    Edit
-                  </button>
+              @if (!isAafUser()) {
+                <div>
+                  <div class="text-sm font-light text-gray-500">Password</div>
+                  <div class="flex items-center justify-between gap-6">
+                    <div>••••••••••••</div>
+                    <button
+                      type="button"
+                      class="text-sm font-medium text-biocommons-primary transition-all hover:text-sky-900"
+                      (click)="openModal('password')"
+                    >
+                      Edit
+                    </button>
+                  </div>
                 </div>
-              </div>
+              }
             </div>
           </div>
 

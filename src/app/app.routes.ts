@@ -11,6 +11,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { rootRedirectGuard } from './core/guards/root-redirect.guard';
 import { RegisterComponent } from './pages/register/register.component';
+// /aaf-register reuses RegisterComponent in "AAF mode" (see data.aafMode below).
 import { UserDetailsComponent } from './pages/admin/user-details/user-details.component';
 import { UnverifiedUsersComponent } from './pages/admin/unverified-users/unverified-users.component';
 import { ProfileComponent } from './pages/user/profile/profile.component';
@@ -35,6 +36,16 @@ export function createRoutes(env: EnvironmentConfig): Routes {
       component: RegisterComponent,
       canActivate: [loginGuard],
       data: { title: 'Register | BioCommons Access' },
+    },
+    {
+      // Post-AAF-login registration — reuses RegisterComponent via aafMode so
+      // the form/styling stay in sync with the standard registration page.
+      path: 'aaf-register',
+      component: RegisterComponent,
+      data: {
+        title: 'Complete Registration | BioCommons Access',
+        aafMode: true,
+      },
     },
     {
       path: 'terms/biocommons',
