@@ -12,7 +12,7 @@ import { environment } from '../../../environments/environment';
 
 function createUnsignedJwt(payload: Record<string, unknown>): string {
   const enc = (v: Record<string, unknown>) =>
-    btoa(JSON.stringify(v))
+    btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(v))))
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
@@ -78,7 +78,7 @@ describe('RegisterComponent (AAF mode)', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('enters AAF mode and prefills read-only identity from the token', () => {
+  it('enters AAF mode and prefills the identity from the token', () => {
     fixture.detectChanges();
 
     expect(component.aafMode()).toBe(true);
@@ -90,6 +90,95 @@ describe('RegisterComponent (AAF mode)', () => {
     // Password is not required in AAF mode.
     expect(component.registrationForm.get('password')?.valid).toBe(true);
     expect(component.registrationForm.get('confirmPassword')?.valid).toBe(true);
+  });
+
+  it('preserves UTF-8 institution-provided names', () => {
+    const token = createUnsignedJwt({
+      email: 'jose@example.edu.au',
+      given_name: 'José',
+      family_name: 'Gonçalves 李',
+    });
+    mockQueryParamMap.get.and.callFake((key: string) =>
+      key === 'session_token' ? token : key === 'state' ? state : null,
+    );
+    fixture.destroy();
+    fixture = TestBed.createComponent(RegisterComponent);
+    component = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    expect(component.registrationForm.get('firstName')?.value).toBe('José');
+    expect(component.registrationForm.get('lastName')?.value).toBe(
+      'Gonçalves 李',
+    );
+  });
+
+  it('preserves UTF-8 names when falling back to the full name', () => {
+    const token = createUnsignedJwt({ name: 'José Gonçalves' });
+    mockQueryParamMap.get.and.callFake((key: string) =>
+      key === 'session_token' ? token : key === 'state' ? state : null,
+    );
+    fixture.destroy();
+    fixture = TestBed.createComponent(RegisterComponent);
+    component = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    expect(component.registrationForm.get('firstName')?.value).toBe('José');
+    expect(component.registrationForm.get('lastName')?.value).toBe('Gonçalves');
+  });
+
+  it('ignores a saved standard-registration email in AAF mode', () => {
+    const key = 'aai-portal.registration-email';
+    sessionStorage.setItem(key, 'other@example.com');
+    try {
+      fixture.destroy();
+      fixture = TestBed.createComponent(RegisterComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.registrationForm.controls.email.value).toBe(
+        'ada@example.edu.au',
+      );
+      expect(sessionStorage.getItem(key)).toBe('other@example.com');
+    } finally {
+      sessionStorage.removeItem(key);
+    }
+  });
+
+  it('disables the prefilled identity fields but not the username', () => {
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    for (const id of ['email', 'firstName', 'lastName']) {
+      expect(el.querySelector<HTMLInputElement>(`#${id}`)?.disabled)
+        .withContext(id)
+        .toBe(true);
+    }
+    expect(el.querySelector<HTMLInputElement>('#username')?.disabled).toBe(
+      false,
+    );
+  });
+
+  it('treats the details section as valid once a username is chosen', () => {
+    fixture.detectChanges();
+    expect(component.isSectionValid('your-details')).toBe(false);
+
+    component.registrationForm.patchValue({ username: 'ada_lovelace' });
+
+    expect(component.isSectionValid('your-details')).toBe(true);
+  });
+
+  it('does not block submit on a long institution-provided name', () => {
+    fixture.detectChanges();
+    component.registrationForm.patchValue({
+      firstName: 'A'.repeat(200),
+      lastName: 'L'.repeat(120),
+      username: 'ada_lovelace',
+      terms: true,
+    });
+
+    expect(component.registrationForm.valid).toBe(true);
   });
 
   it('submits to register-aaf with session_token/state and follows redirect_url', () => {

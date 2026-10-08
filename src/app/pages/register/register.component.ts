@@ -4,6 +4,8 @@ import {
   AfterViewInit,
   Component,
   DestroyRef,
+  Injector,
+  afterNextRender,
   inject,
   signal,
 } from '@angular/core';
@@ -112,6 +114,7 @@ export class RegisterComponent implements AfterViewInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly loginProxyService = inject(LoginProxyService);
@@ -121,8 +124,8 @@ export class RegisterComponent implements AfterViewInit {
   private readonly document = inject(DOCUMENT);
 
   // AAF mode: this same form serves the post-AAF-login registration at
-  // /aaf-register. In that mode email/first/last are prefilled read-only from
-  // the Auth0 session token, there's no password, and submit goes to
+  // /aaf-register. In that mode email/first/last are prefilled from the Auth0
+  // session token and disabled, there's no password, and submit goes to
   // /biocommons/register-aaf then follows the returned redirect_url to resume
   // the Auth0 login. Everything AAF-specific is gated behind this flag so the
   // standard registration flow is unchanged.
@@ -162,6 +165,8 @@ export class RegisterComponent implements AfterViewInit {
   activeSection = signal<string>('introduction');
   visitedSections = signal<Set<string>>(new Set(['introduction']));
   private lastAafEmailCheck: string | null = null;
+  private readonly registrationEmailStorageKey =
+    'aai-portal.registration-email';
 
   registrationForm: FormGroup<RegistrationForm> =
     this.formBuilder.nonNullable.group(
@@ -203,11 +208,14 @@ export class RegisterComponent implements AfterViewInit {
         .subscribe(() => {
           if (this.validationService.hasFieldBackendError('email'))
             this.validationService.clearFieldBackendError('email');
+          this.storeRegistrationEmail(null);
           this.lastAafEmailCheck = null;
           this.showInstitutionalLoginModal.set(false);
           this.showRegistrationFields.set(false);
           this.emailAlreadyRegistered.set(false);
         });
+
+      this.restoreRegistrationEmail();
     }
 
     this.registrationForm
@@ -231,10 +239,18 @@ export class RegisterComponent implements AfterViewInit {
 
   /**
    * Prepare the form for the post-AAF-login registration flow: read the Auth0
-   * session token + state, prefill (read-only) identity, drop the password
+   * session token + state, prefill (disabled) identity, drop the password
    * requirement, and skip the email/institutional-check gate.
    */
   private initAafMode(): void {
+    // Identity comes from the institution and the backend reads it from the
+    // session token, so show it without letting it be edited or validated.
+    // Disabling skips the field checks; the full-name check is on the group.
+    this.registrationForm.clearValidators();
+    for (const name of ['email', 'firstName', 'lastName'] as const) {
+      this.registrationForm.get(name)?.disable();
+    }
+
     const token = this.route.snapshot.queryParamMap.get('session_token');
     const state = this.route.snapshot.queryParamMap.get('state');
     if (!token || !state) {
@@ -275,13 +291,20 @@ export class RegisterComponent implements AfterViewInit {
       if (!part) return null;
       const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
       const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
-      return JSON.parse(atob(padded));
+      const bytes = Uint8Array.from(atob(padded), (char) => char.charCodeAt(0));
+      return JSON.parse(
+        new TextDecoder('utf-8', { fatal: true }).decode(bytes),
+      );
     } catch {
       return null;
     }
   }
 
   private updateActiveSection(): void {
+    if (!this.showRegistrationFields()) {
+      return;
+    }
+
     const scrollPosition = window.scrollY;
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
@@ -369,7 +392,7 @@ export class RegisterComponent implements AfterViewInit {
 
   private areDetailsFieldsValid(): boolean {
     const fields: (keyof RegistrationForm)[] = this.aafMode()
-      ? ['firstName', 'lastName', 'email', 'username']
+      ? ['username']
       : [
           'firstName',
           'lastName',
@@ -407,7 +430,6 @@ export class RegisterComponent implements AfterViewInit {
     this.apiService
       .checkEmailAvailability(email)
       .pipe(
-        takeUntilDestroyed(this.destroyRef),
         catchError((error: unknown) => {
           console.error('Email availability check failed:', error);
           return of(true);
@@ -424,6 +446,7 @@ export class RegisterComponent implements AfterViewInit {
             }),
           );
         }),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((result) => {
         this.isCheckingInstitutionalEmail.set(false);
@@ -447,9 +470,56 @@ export class RegisterComponent implements AfterViewInit {
         if (result) {
           this.showInstitutionalLoginModal.set(true);
         } else {
-          this.showRegistrationFields.set(true);
+          this.revealRegistrationFields();
         }
       });
+  }
+
+  private storeRegistrationEmail(email: string | null): void {
+    try {
+      const storage = this.document.defaultView?.sessionStorage;
+      if (email) {
+        storage?.setItem(this.registrationEmailStorageKey, email);
+      } else {
+        storage?.removeItem(this.registrationEmailStorageKey);
+      }
+    } catch {
+      // Registration still works when browser storage is unavailable.
+    }
+  }
+
+  private restoreRegistrationEmail(): void {
+    let email: string | null;
+    try {
+      email =
+        this.document.defaultView?.sessionStorage.getItem(
+          this.registrationEmailStorageKey,
+        ) ?? null;
+    } catch {
+      return;
+    }
+    if (!email) return;
+
+    const control = this.registrationForm.controls.email;
+    control.setValue(email, { emitEvent: false });
+    if (control.invalid) {
+      control.reset('', { emitEvent: false });
+      this.storeRegistrationEmail(null);
+      return;
+    }
+
+    this.lastAafEmailCheck = toAsciiEmail(email.trim());
+    this.revealRegistrationFields();
+  }
+
+  private revealRegistrationFields(): void {
+    this.storeRegistrationEmail(this.registrationForm.controls.email.value);
+    this.activeSection.set('introduction');
+    this.visitedSections.set(new Set(['introduction']));
+    this.showRegistrationFields.set(true);
+    afterNextRender(() => this.updateActiveSection(), {
+      injector: this.injector,
+    });
   }
 
   closeInstitutionalLoginModal(): void {
@@ -558,6 +628,7 @@ export class RegisterComponent implements AfterViewInit {
       .subscribe((result) => {
         this.isSubmitting.set(false);
         if (result) {
+          this.storeRegistrationEmail(null);
           this.registrationEmail.set(requestBody.email);
           this.isRegistrationComplete.set(true);
         }

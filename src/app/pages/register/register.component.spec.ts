@@ -40,8 +40,10 @@ describe('RegisterComponent', () => {
   let fixture: ComponentFixture<RegisterComponent>;
   let httpMock: HttpTestingController;
   let authService: jasmine.SpyObj<AuthService>;
+  const registrationEmailStorageKey = 'aai-portal.registration-email';
 
   beforeEach(async () => {
+    sessionStorage.removeItem(registrationEmailStorageKey);
     environment.features.sbpEnabled = true;
     const authSpy = jasmine.createSpyObj('AuthService', [
       'refreshUser',
@@ -75,6 +77,7 @@ describe('RegisterComponent', () => {
 
   afterEach(() => {
     httpMock.verify();
+    sessionStorage.removeItem(registrationEmailStorageKey);
     fixture.destroy();
     updateEnvironment();
   });
@@ -134,6 +137,29 @@ describe('RegisterComponent', () => {
       expect(component.isSectionCompleted('introduction')).toBe(true);
       expect(component.isSectionCompleted('your-details')).toBe(true);
       expect(component.isSectionCompleted('add-bundle')).toBe(false);
+    });
+
+    it('should not track sections while only the email step is shown', () => {
+      // Use the real tracking with a viewport taller than the page, like the
+      // short email-only step, which counts as scrolled to the bottom.
+      component['updateActiveSection'] =
+        RegisterComponent.prototype['updateActiveSection'];
+      const originalHeight = Object.getOwnPropertyDescriptor(
+        window,
+        'innerHeight',
+      )!;
+      Object.defineProperty(window, 'innerHeight', {
+        configurable: true,
+        value: 100_000,
+      });
+      try {
+        component['updateActiveSection']();
+
+        expect(component.activeSection()).toBe('introduction');
+        expect(component.visitedSections()).toEqual(new Set(['introduction']));
+      } finally {
+        Object.defineProperty(window, 'innerHeight', originalHeight);
+      }
     });
   });
 
@@ -298,6 +324,78 @@ describe('RegisterComponent', () => {
       expect(component.showRegistrationFields()).toBe(true);
     });
 
+    it('should keep the checked email and full form after a refresh', () => {
+      component.registrationForm.controls.email.setValue('john@example.com');
+      component.continueFromEmail();
+      flushAvailability('john@example.com');
+      httpMock
+        .expectOne(
+          (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+        )
+        .flush({ is_aaf: false });
+      component.registrationForm.controls.password.setValue('Password123!');
+      expect(sessionStorage.getItem(registrationEmailStorageKey)).toBe(
+        'john@example.com',
+      );
+
+      fixture.destroy();
+      fixture = TestBed.createComponent(RegisterComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.registrationForm.controls.email.value).toBe(
+        'john@example.com',
+      );
+      expect(component.showRegistrationFields()).toBe(true);
+      expect(fixture.debugElement.query(By.css('#firstName'))).toBeTruthy();
+      expect(component.registrationForm.controls.password.value).toBe('');
+      httpMock.expectNone((request) => request.url.includes('email-check'));
+
+      component.registrationForm.controls.email.setValue('changed@example.com');
+      expect(component.showRegistrationFields()).toBe(false);
+      expect(sessionStorage.getItem(registrationEmailStorageKey)).toBeNull();
+    });
+
+    it('should cancel a pending institution check when leaving registration', () => {
+      component.registrationForm.controls.email.setValue('john@example.com');
+      component.continueFromEmail();
+      flushAvailability('john@example.com');
+      const req = httpMock.expectOne(
+        (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+      );
+
+      fixture.destroy();
+
+      expect(req.cancelled).toBe(true);
+      expect(sessionStorage.getItem(registrationEmailStorageKey)).toBeNull();
+    });
+
+    it('should discard an invalid saved email', () => {
+      sessionStorage.setItem(registrationEmailStorageKey, 'invalid-email');
+      fixture.destroy();
+      fixture = TestBed.createComponent(RegisterComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(component.registrationForm.controls.email.value).toBe('');
+      expect(component.showRegistrationFields()).toBe(false);
+      expect(sessionStorage.getItem(registrationEmailStorageKey)).toBeNull();
+    });
+
+    it('should continue registration when browser storage is blocked', () => {
+      spyOn(Storage.prototype, 'setItem').and.throwError('Storage blocked');
+      component.registrationForm.controls.email.setValue('john@example.com');
+      component.continueFromEmail();
+      flushAvailability('john@example.com');
+      httpMock
+        .expectOne(
+          (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+        )
+        .flush({ is_aaf: false });
+
+      expect(component.showRegistrationFields()).toBe(true);
+    });
+
     it('should not check AAF email when the email is invalid', () => {
       component.registrationForm.get('email')?.setValue('invalid-email');
 
@@ -343,6 +441,35 @@ describe('RegisterComponent', () => {
       expect(fixture.debugElement.query(By.css('#username'))).toBeTruthy();
       expect(fixture.debugElement.query(By.css('#password'))).toBeTruthy();
       expect(fixture.debugElement.query(By.css('re-captcha'))).toBeTruthy();
+    });
+
+    it('should start the progress bar fresh when revealing registration fields', () => {
+      // Stale progress, e.g. from before the email was edited.
+      component.activeSection.set('terms');
+      component.visitedSections.set(
+        new Set(component.sections.map((section) => section.id)),
+      );
+      const updateActiveSection = component[
+        'updateActiveSection'
+      ] as jasmine.Spy;
+      updateActiveSection.calls.reset();
+      component.registrationForm.get('email')?.setValue('john@example.com');
+
+      component.continueFromEmail();
+
+      flushAvailability('john@example.com');
+      httpMock
+        .expectOne(
+          (request) => request.url === `${loginProxyBaseUrl}/aaf/email-check`,
+        )
+        .flush({ email: 'john@example.com', is_aaf: false });
+
+      expect(component.activeSection()).toBe('introduction');
+      expect(component.visitedSections()).toEqual(new Set(['introduction']));
+
+      // Then syncs to the scroll position once the new sections render.
+      fixture.detectChanges();
+      expect(updateActiveSection).toHaveBeenCalled();
     });
 
     it('should not show institutional login modal for a stale email response', () => {
@@ -525,6 +652,7 @@ describe('RegisterComponent', () => {
     });
 
     it('should complete registration successfully', () => {
+      sessionStorage.setItem(registrationEmailStorageKey, 'john@example.com');
       component.submitRegistration();
 
       const req = httpMock.expectOne(
@@ -533,6 +661,7 @@ describe('RegisterComponent', () => {
       req.flush({ success: true });
 
       expect(component.isRegistrationComplete()).toBe(true);
+      expect(sessionStorage.getItem(registrationEmailStorageKey)).toBeNull();
       expect(component.registrationEmail()).toBe('john@example.com');
       expect(component.isSubmitting()).toBe(false);
     });

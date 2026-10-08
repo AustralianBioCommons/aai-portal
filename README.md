@@ -72,7 +72,11 @@ For more information on using the Angular CLI, including detailed command refere
 ## AAF integration — `dev-aaf` deployment
 
 The `aaf-dev` branch targets the **`biocloud-dev-aaf`** Auth0 tenant
-(`dev-aaf` environment), isolated from `dev-bc`. Deploys are **manual** for now.
+(`dev-aaf` environment), isolated from `dev-bc`. Every push to `aaf-dev`
+automatically builds and deploys the portal through
+[build-and-deploy-aaf-dev.yml](.github/workflows/build-and-deploy-aaf-dev.yml).
+The workflow syncs the production bundle to S3 and invalidates CloudFront.
+It excludes `*app-config.json` to preserve the hosted tenant's runtime config.
 
 Point the app at the tenant via runtime config — edit
 `src/assets/config/app-config.json`:
@@ -91,22 +95,31 @@ Run locally (set `backend` to `http://localhost:8000` if running the API locally
 npm ci && npm start        # http://localhost:4200
 ```
 
-Deploy to the hosted dev-aaf portal:
+For a manual deployment to the hosted dev-aaf portal, preserve its runtime config:
 
 ```bash
 aws sso login --profile aai
 export AWS_PROFILE=aai AWS_REGION=ap-southeast-2
 npm ci && npm run build
-aws s3 sync ./dist/aai-portal/browser/ s3://aai-dev-aaf-portal/ --delete
+aws s3 sync ./dist/aai-portal/browser/ s3://aai-dev-aaf-portal/ --delete \
+  --exclude '*app-config.json'
 DIST=$(aws cloudfront list-distributions \
   --query "DistributionList.Items[?contains(Aliases.Items,'dev-aaf.portal.aai.test.biocommons.org.au')].Id | [0]" \
   --output text)
 aws cloudfront create-invalidation --distribution-id "$DIST" --paths "/*"
 ```
 
-AAF login: **no portal change needed.** AAF uses Identifier-First / Home-Realm
-Discovery configured in Auth0 (see `aai-infrastructure`) — the portal's standard
-`loginWithRedirect()` shows an email-only screen, and institutional emails (any
-AAF-federated domain) route to AAF automatically. There is deliberately **no
-"Login with AAF" button** and no `connection` parameter. Hosted at
-<https://dev-aaf.portal.aai.test.biocommons.org.au>.
+AAF registration starts with the portal's email check. If the email is available
+and the login proxy identifies an AAF institution, the portal offers institutional
+login. Continuing passes `login_hint` with the entered email and
+`connection: 'AAF'` to Auth0, routing directly to the AAF connection. Standard
+login still uses Auth0's Identifier-First / Home-Realm Discovery configuration
+(see `aai-infrastructure`).
+
+After institutional authentication, new AAF users complete registration at
+`/aaf-register` using the session token and state supplied by Auth0. The portal
+prefills institution-provided identity details and submits to the backend's
+`/biocommons/register-aaf` endpoint, then follows the returned Auth0 continuation
+URL.
+
+Hosted at <https://dev-aaf.portal.aai.test.biocommons.org.au>.
