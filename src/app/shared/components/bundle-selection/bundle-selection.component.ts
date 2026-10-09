@@ -34,6 +34,14 @@ const DEFAULT_REASON_MODAL_TEXT: BundleModalText = {
   primaryButtonText: 'Save',
 };
 
+// Reusable base; add bundle-specific caveats via that bundle's own `notice`.
+const INSTITUTIONAL_EMAIL_REQUIRED_MODAL_TEXT: BundleModalText = {
+  title: 'Institutional email required',
+  description:
+    'Only those with an <a href="https://site.usegalaxy.org.au/list-of-institutions.html" target="_blank" rel="noopener noreferrer" class="font-medium text-sky-600 hover:text-sky-700 hover:underline">Australian institutional email address</a> are eligible for this bundle. Please use your institutional email before proceeding.',
+  primaryButtonText: 'Add',
+};
+
 export const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
   tsi: {
     title: 'Reason for request',
@@ -44,10 +52,9 @@ export const BUNDLE_MODAL_TEXT_BY_BUNDLE_ID: Record<string, BundleModalText> = {
       'Please note: Only <a href="https://bioplatforms.com/project/threatened-species/" target="_blank" rel="noopener noreferrer" class="font-semibold text-yellow-800 underline hover:text-yellow-700">TSI Consortium</a> members are eligible to apply for this bundle.',
   },
   sbp_workflow_execution: {
-    title: 'Institutional email required',
-    description:
-      'Only those with an <a href="https://site.usegalaxy.org.au/list-of-institutions.html" target="_blank" rel="noopener noreferrer" class="font-medium text-sky-600 hover:text-sky-700 hover:underline">Australian institutional email address</a> are eligible for this bundle. Please use your institutional email before proceeding.',
-    primaryButtonText: 'Add',
+    ...INSTITUTIONAL_EMAIL_REQUIRED_MODAL_TEXT,
+    notice:
+      'Please note: The SBP bundle is currently only available for <u>invited users</u>. Please come back in Q1 2027 to access the full release.',
   },
 };
 
