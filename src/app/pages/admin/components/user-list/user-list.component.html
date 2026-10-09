@@ -73,13 +73,13 @@
 >
   <ng-template #searchAndHeader>
     <div
-      [ngClass]="isLargeLayout() ? 'mb-4 mt-4' : 'mb-4 mt-6'"
+      [class]="isLargeLayout() ? 'mb-4 mt-4' : 'mb-4 mt-6'"
       class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
     >
       <!-- Search bar -->
       <div
         class="w-full"
-        [ngClass]="adminType() === 'bundle' ? 'md:w-full' : 'md:w-2/3'"
+        [class]="adminType() === 'bundle' ? 'md:w-full' : 'md:w-2/3'"
       >
         <label
           for="search-input"
@@ -101,6 +101,7 @@
           />
           <button
             type="button"
+            aria-label="Search users"
             class="flex items-center justify-center rounded-full p-2 transition-all hover:bg-gray-200"
             (click)="onSearchSubmit()"
           >
@@ -142,39 +143,65 @@
     <!-- List header -->
     <div
       class="flex items-center gap-2 rounded-t-md bg-sky-900 p-2 px-4 text-sm font-medium text-white"
+      [class]="isLargeLayout() ? '' : 'sm:gap-x-4'"
     >
-      <div
-        class="flex-1"
-        [ngClass]="adminType() !== 'bundle' ? 'w-6/12' : 'w-8/12'"
-      >
+      <div class="min-w-0 flex-1">
         Total:
         <span class="font-light text-gray-300">{{ totalUsers() }} users</span>
       </div>
-      <div class="w-2/12">
+      <div
+        class="hidden w-2/12 shrink-0"
+        [class]="isLargeLayout() ? '' : 'sm:block'"
+      >
         {{
           adminType() !== "bundle"
             ? "Bundles"
             : adminGroups()[0].short_name + " Bundle Access"
         }}
       </div>
-      @if (adminType() !== "bundle") {
-        <div class="w-3/12">
-          @if (showSignedUpColumn()) {
-            Signed Up
-          } @else {
-            {{
-              adminType() === "biocommons"
-                ? "Services"
-                : adminType() === "platform"
-                  ? adminPlatforms()[0].name + " Access"
-                  : "Access"
-            }}
-          }
+      @if (adminType() !== "bundle" && showPlatformColumn()) {
+        <div
+          class="hidden w-2/12 shrink-0"
+          [class]="isLargeLayout() ? '' : 'sm:block'"
+        >
+          {{
+            adminType() === "biocommons"
+              ? "Services"
+              : adminType() === "platform"
+                ? adminPlatforms()[0].name + " Access"
+                : "Access"
+          }}
         </div>
       }
-      <div class="w-1/12"></div>
+      <div class="shrink-0" [class]="isLargeLayout() ? '' : 'sm:w-3/12'">
+        <button
+          type="button"
+          class="flex min-h-6 items-center gap-1 rounded text-left transition-all hover:text-sky-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          [attr.aria-label]="sortLabel()"
+          [attr.aria-disabled]="loading()"
+          (click)="toggleSignedUpSort()"
+        >
+          Signed Up
+          <ng-icon
+            [name]="sortOrder() === 'asc' ? 'heroArrowUp' : 'heroArrowDown'"
+            size="12"
+            strokeWidth="2"
+            class="shrink-0"
+            aria-hidden="true"
+          ></ng-icon>
+        </button>
+      </div>
+      <div
+        class="hidden w-8 shrink-0"
+        [class]="isLargeLayout() ? '' : 'sm:block'"
+      ></div>
     </div>
   </ng-template>
+
+  <span class="sr-only" role="status">
+    Sorted by signup date,
+    {{ sortOrder() === "asc" ? "oldest" : "newest" }} first
+  </span>
 
   @if (isLargeLayout()) {
     <!-- High zoom/Bigger system font settings: title + message scroll away, only search + header sticks -->
@@ -197,16 +224,20 @@
     <div
       class="sticky top-40 z-20 -mx-6 bg-gray-50 px-6 pt-6 sm:top-32 md:-mx-12 md:px-12 lg:-mx-24 lg:px-24 xl:-mx-48 xl:px-48"
     >
-      <div class="flex items-center justify-between gap-6">
+      <div
+        class="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
+      >
         <div
           class="text-3xl font-semibold text-gray-900"
-          [ngClass]="hasTitleMessage() ? 'w-1/3' : 'w-full'"
+          [class]="hasTitleMessage() ? 'w-full sm:w-1/3' : 'w-full'"
         >
           {{ title() }}
         </div>
-        <div class="w-2/3 text-right">
-          <ng-content></ng-content>
-        </div>
+        @if (hasTitleMessage()) {
+          <div class="w-full text-left sm:w-2/3 sm:text-right">
+            <ng-content></ng-content>
+          </div>
+        }
       </div>
       <ng-container [ngTemplateOutlet]="searchAndHeader"></ng-container>
     </div>
@@ -229,14 +260,17 @@
         <div class="divide-y rounded-b-md bg-white shadow">
           @for (user of users(); track user.id; let even = $even) {
             <div
-              class="flex items-center gap-2 p-4 font-normal last:rounded-b-md"
-              [class]="
-                isCurrentAdminUser(user.id) ? 'bg-amber-50' : 'even:bg-sky-50'
-              "
+              class="relative flex flex-wrap items-center gap-2 p-4 font-normal last:rounded-b-md"
+              [class]="{
+                'bg-amber-50': isCurrentAdminUser(user.id),
+                'even:bg-sky-50': !isCurrentAdminUser(user.id),
+                'sm:flex-nowrap': !isLargeLayout(),
+                'sm:gap-x-4': !isLargeLayout(),
+              }"
             >
               <div
-                class="min-w-0 flex-1"
-                [ngClass]="adminType() !== 'bundle' ? 'w-5/12' : 'w-8/12'"
+                class="min-w-0 basis-full pr-8"
+                [class]="isLargeLayout() ? '' : 'sm:flex-1 sm:basis-0 sm:pr-0'"
               >
                 <div class="flex flex-wrap items-center gap-2">
                   <button
@@ -262,21 +296,23 @@
                   }
                 </div>
               </div>
-              <div class="flex w-2/12 flex-wrap gap-2">
+              <div
+                class="flex w-full shrink-0 flex-wrap items-center gap-2"
+                [class]="isLargeLayout() ? '' : 'sm:w-2/12'"
+              >
+                <span
+                  class="text-sm font-medium text-gray-700"
+                  [class]="isLargeLayout() ? '' : 'sm:hidden'"
+                  >{{
+                    adminType() === "bundle" ? "Bundle access:" : "Bundles:"
+                  }}</span
+                >
                 @if (user.group_memberships.length) {
                   @if (adminType() !== "bundle") {
                     @for (group of user.group_memberships; track group.id) {
                       <span
                         class="rounded-md border px-2 py-0.5 text-sm font-medium"
-                        [ngClass]="{
-                          'border-green-600/20 bg-green-50 text-green-700':
-                            group.approval_status === 'approved',
-                          'border-yellow-600/20 bg-yellow-50 text-yellow-800':
-                            group.approval_status === 'pending',
-                          'border-red-600/20 bg-red-50 text-red-700':
-                            group.approval_status === 'revoked' ||
-                            group.approval_status === 'rejected',
-                        }"
+                        [class]="groupStatusClasses[group.approval_status]"
                       >
                         {{ group.group_short_name }}
                       </span>
@@ -287,12 +323,12 @@
                       @if (canManageGroup(group.group_id)) {
                         <div
                           class="flex items-center gap-2 text-sm font-medium"
-                          [ngClass]="{
-                            'text-green-500':
+                          [class]="{
+                            'text-green-600':
                               group.approval_status === 'approved',
-                            'text-yellow-500':
+                            'text-yellow-700':
                               group.approval_status === 'pending',
-                            'text-red-500':
+                            'text-red-600':
                               group.approval_status === 'revoked' ||
                               group.approval_status === 'rejected',
                           }"
@@ -329,7 +365,7 @@
                                   group.requested_at
                                 )
                               "
-                              iconColor="text-yellow-500 hover:text-yellow-600"
+                              iconColor="text-yellow-600 hover:text-yellow-700"
                             />
                           }
                         </div>
@@ -340,13 +376,19 @@
                   <div class="text-sm text-gray-500">None</div>
                 }
               </div>
-              @if (adminType() !== "bundle") {
-                <div class="w-3/12">
-                  @if (showSignedUpColumn()) {
-                    <span class="text-sm text-gray-700">{{
-                      user.created_at | date: "MMM d y, h:mm a"
-                    }}</span>
-                  } @else if (adminType() === "biocommons") {
+              @if (adminType() !== "bundle" && showPlatformColumn()) {
+                <div
+                  class="w-full shrink-0"
+                  [class]="isLargeLayout() ? '' : 'sm:w-2/12'"
+                >
+                  <span
+                    class="text-sm font-medium text-gray-700"
+                    [class]="isLargeLayout() ? '' : 'sm:hidden'"
+                    >{{
+                      adminType() === "biocommons" ? "Services:" : "Access:"
+                    }}</span
+                  >
+                  @if (adminType() === "biocommons") {
                     <!-- Show all platforms with names for multi-platform (biocommons) admins -->
                     @for (
                       platform of user.platform_memberships;
@@ -354,12 +396,12 @@
                     ) {
                       <div
                         class="flex items-center gap-2 text-sm font-medium"
-                        [ngClass]="{
-                          'text-green-500':
+                        [class]="{
+                          'text-green-600':
                             platform.approval_status === 'approved',
-                          'text-yellow-500':
+                          'text-yellow-700':
                             platform.approval_status === 'pending',
-                          'text-red-500':
+                          'text-red-600':
                             platform.approval_status === 'revoked',
                         }"
                       >
@@ -385,7 +427,7 @@
                             [message]="
                               'Reason for request: ' + platform.request_reason
                             "
-                            iconColor="text-yellow-500 hover:text-yellow-600"
+                            iconColor="text-yellow-600 hover:text-yellow-700"
                           />
                         }
                       </div>
@@ -402,12 +444,12 @@
                       ) {
                         <div
                           class="flex items-center gap-2 text-sm font-medium"
-                          [ngClass]="{
-                            'text-green-500':
+                          [class]="{
+                            'text-green-600':
                               platform.approval_status === 'approved',
-                            'text-yellow-500':
+                            'text-yellow-700':
                               platform.approval_status === 'pending',
-                            'text-red-500':
+                            'text-red-600':
                               platform.approval_status === 'revoked',
                           }"
                         >
@@ -433,7 +475,7 @@
                               [message]="
                                 'Reason for request: ' + platform.request_reason
                               "
-                              iconColor="text-yellow-500 hover:text-yellow-600"
+                              iconColor="text-yellow-600 hover:text-yellow-700"
                             />
                           }
                         </div>
@@ -442,7 +484,23 @@
                   }
                 </div>
               }
-              <div class="relative flex w-1/12 justify-end">
+              <div
+                class="w-full shrink-0 text-sm text-gray-700"
+                [class]="isLargeLayout() ? '' : 'sm:w-3/12'"
+              >
+                <span
+                  class="font-medium"
+                  [class]="isLargeLayout() ? '' : 'sm:hidden'"
+                  >Signed Up:
+                </span>
+                <time [attr.datetime]="user.created_at">{{
+                  user.created_at | date: "MMM d y, h:mm a"
+                }}</time>
+              </div>
+              <div
+                class="absolute right-4 top-4 flex w-8 shrink-0 justify-end"
+                [class]="isLargeLayout() ? '' : 'sm:static'"
+              >
                 <app-dropdown-menu
                   [isOpen]="isMenuOpen(user.id)"
                   (isOpenChange)="openMenuUserId.set($event ? user.id : null)"
@@ -450,6 +508,7 @@
                   <ng-template #trigger>
                     <button
                       type="button"
+                      [attr.aria-label]="'Actions for ' + user.email"
                       class="flex flex-col items-center justify-center rounded-full p-1 transition-all hover:bg-gray-200"
                       (click)="
                         openMenuUserId.set(isMenuOpen(user.id) ? null : user.id)
