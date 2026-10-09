@@ -6,7 +6,7 @@ import {
 } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { signal, WritableSignal } from '@angular/core';
 
 import { DEFAULT_PAGE_SIZE, UserListComponent } from './user-list.component';
@@ -35,6 +35,7 @@ describe('UserListComponent', () => {
   let adminGroupsSignal: WritableSignal<AdminGroupResponse[]>;
   let userSignal: WritableSignal<BiocommonsAuth0User | null>;
   let router: Router;
+  let historyStateSpy: jasmine.Spy<() => unknown>;
 
   const currentUserSub = 'auth0|admin123';
 
@@ -67,6 +68,9 @@ describe('UserListComponent', () => {
   const mockUserCounts = { pages: 2, total: 100, per_page: 50 };
 
   beforeEach(async () => {
+    historyStateSpy = spyOnProperty(history, 'state', 'get').and.returnValue(
+      {},
+    );
     mockApiService = jasmine.createSpyObj('ApiService', [
       'getFilterOptions',
       'resendVerificationEmail',
@@ -130,6 +134,7 @@ describe('UserListComponent', () => {
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: '',
     });
@@ -143,6 +148,121 @@ describe('UserListComponent', () => {
       fixture.debugElement.nativeElement.querySelector('.text-3xl');
     expect(titleElement.textContent).toContain('Test Users');
   });
+
+  for (const adminType of ['biocommons', 'platform', 'bundle'] as const) {
+    it(`should show signup dates for ${adminType} admins alongside access`, () => {
+      adminTypeSignal.set(adminType);
+      adminPlatformsSignal.set([{ id: 'galaxy', name: 'Galaxy' }]);
+      adminGroupsSignal.set([{ id: 'tsi', name: 'TSI', short_name: 'TSI' }]);
+      fixture.detectChanges();
+
+      const element = fixture.nativeElement as HTMLElement;
+      const dates = element.querySelectorAll('time');
+      expect(dates.length).toBe(mockUsers.length);
+      expect(dates[0].dateTime).toBe(mockUsers[0].created_at);
+      expect(dates[0].textContent?.trim()).toBeTruthy();
+      expect(element.textContent).toContain(
+        adminType === 'biocommons'
+          ? 'Services'
+          : adminType === 'platform'
+            ? 'Galaxy Access'
+            : 'TSI Bundle Access',
+      );
+    });
+  }
+
+  it('should retain signup dates when the platform column is hidden', () => {
+    adminTypeSignal.set('biocommons');
+    fixture.componentRef.setInput('showPlatformColumn', false);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelectorAll('time').length).toBe(mockUsers.length);
+    expect(element.textContent).not.toContain('Services');
+  });
+
+  it('should toggle signup sorting, reset pagination and preserve filters', fakeAsync(() => {
+    fixture.componentRef.setInput('defaultQueryParams', {
+      approvalStatus: 'pending',
+    });
+    mockApiService.getAdminAllUsers.and.returnValue(
+      of([...mockUsers].reverse()),
+    );
+    fixture.detectChanges();
+    tick(250);
+    component.page.set(2);
+    component.searchTerm.set('user');
+    component.selectedFilter.set('galaxy');
+    mockApiService.getAdminAllUsers.and.returnValue(of(mockUsers));
+
+    const element = fixture.nativeElement as HTMLElement;
+    const button = element.querySelector<HTMLButtonElement>(
+      'button[aria-label^="Signed Up"]',
+    )!;
+    button.click();
+    tick(250);
+    fixture.detectChanges();
+
+    expect(component.page()).toBe(1);
+    expect(component.users()).toEqual(mockUsers);
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
+      page: 1,
+      perPage: DEFAULT_PAGE_SIZE,
+      approvalStatus: 'pending',
+      search: 'user',
+      filterBy: 'galaxy',
+      sortOrder: 'asc',
+    });
+    expect(button.getAttribute('aria-label')).toBe(
+      'Signed Up, oldest first. Sort newest first',
+    );
+    expect(element.querySelector('[role="status"]')?.textContent).toContain(
+      'oldest',
+    );
+
+    component.page.set(2);
+    component.loadUsers();
+    tick(250);
+    expect(
+      mockApiService.getAdminAllUsers.calls.mostRecent().args[0]?.sortOrder,
+    ).toBe('asc');
+
+    button.click();
+    tick(250);
+    expect(component.sortOrder()).toBe('desc');
+    expect(component.page()).toBe(1);
+  }));
+
+  it('should ignore sorting while a page is loading', fakeAsync(() => {
+    fixture.detectChanges();
+    component.toggleSignedUpSort();
+    expect(component.sortOrder()).toBe('desc');
+    expect(mockApiService.getAdminAllUsers).toHaveBeenCalledTimes(1);
+    tick(250);
+  }));
+
+  it('should restore signup sorting from navigation state', fakeAsync(() => {
+    historyStateSpy.and.returnValue({ sortOrder: 'asc' });
+    fixture.detectChanges();
+    tick(250);
+    expect(component.sortOrder()).toBe('asc');
+    expect(
+      mockApiService.getAdminAllUsers.calls.mostRecent().args[0]?.sortOrder,
+    ).toBe('asc');
+  }));
+
+  it('should cancel an older page request when the list is reset', fakeAsync(() => {
+    const previousPage = new Subject<BiocommonsUserResponse[]>();
+    mockApiService.getAdminAllUsers.and.returnValue(previousPage);
+    fixture.detectChanges();
+
+    mockApiService.getAdminAllUsers.and.returnValue(of([mockUsers[1]]));
+    component.onSearchSubmit();
+    previousPage.next([mockUsers[0]]);
+    tick(250);
+
+    expect(component.users()).toEqual([mockUsers[1]]);
+    expect(component.loading()).toBeFalse();
+  }));
 
   it('should display user count', () => {
     mockApiService.getAdminUsersPageInfo.and.returnValue(
@@ -203,6 +323,7 @@ describe('UserListComponent', () => {
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: 'user1',
     });
@@ -220,6 +341,7 @@ describe('UserListComponent', () => {
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: 'group1',
       search: '',
     });
@@ -242,6 +364,7 @@ describe('UserListComponent', () => {
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: '',
     });
@@ -268,6 +391,7 @@ describe('UserListComponent', () => {
     expect(mockApiService.getAdminAllUsers).toHaveBeenCalledWith({
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: 'abc',
     });
@@ -303,6 +427,7 @@ describe('UserListComponent', () => {
         returnUrl: '/pending-users',
         searchTerm: '',
         selectedFilter: '',
+        sortOrder: 'desc',
       },
     });
   });
@@ -313,7 +438,12 @@ describe('UserListComponent', () => {
     component.navigateToUserDetails('123');
 
     expect(router.navigate).toHaveBeenCalledWith(['/user', '123'], {
-      state: { returnUrl: '', searchTerm: '', selectedFilter: '' },
+      state: {
+        returnUrl: '',
+        searchTerm: '',
+        selectedFilter: '',
+        sortOrder: 'desc',
+      },
     });
   });
 

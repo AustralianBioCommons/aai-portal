@@ -59,6 +59,7 @@ describe('AllUsersComponent', () => {
     const expectedParams = {
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc' as const,
       filterBy: '',
       search: '',
       ...component.defaultQueryParams,

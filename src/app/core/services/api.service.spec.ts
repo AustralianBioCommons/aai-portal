@@ -28,6 +28,34 @@ describe('ApiService', () => {
     expect(service).toBeTruthy();
   });
 
+  it('should send signup sorting with pagination and user filters', () => {
+    service
+      .getAdminAllUsers({
+        page: 2,
+        perPage: 50,
+        search: ' user ',
+        filterBy: 'galaxy',
+        emailVerified: false,
+        sortOrder: 'desc',
+      })
+      .subscribe();
+
+    const req = httpMock.expectOne((request) => {
+      const url = new URL(request.url);
+      return (
+        url.pathname === '/admin/users' &&
+        url.searchParams.get('sort_order') === 'desc' &&
+        url.searchParams.get('page') === '2' &&
+        url.searchParams.get('per_page') === '50' &&
+        url.searchParams.get('search') === 'user' &&
+        url.searchParams.get('filter_by') === 'galaxy' &&
+        url.searchParams.get('email_verified') === 'false'
+      );
+    });
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
   it('should fetch platforms the user has admin rights to', () => {
     const mockResponse: AdminPlatformResponse[] = [
       { id: 'galaxy', name: 'Galaxy' },

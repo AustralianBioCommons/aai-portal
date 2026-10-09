@@ -6,6 +6,7 @@ import {
   model,
   input,
   inject,
+  DestroyRef,
 } from '@angular/core';
 import {
   FormsModule,
@@ -16,13 +17,12 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  NgClass,
   NgTemplateOutlet,
   TitleCasePipe,
   DatePipe,
   Location,
 } from '@angular/common';
-import { Subject, fromEvent } from 'rxjs';
+import { Subject, Subscription, fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -32,6 +32,8 @@ import {
   FilterOption,
   ApiService,
   AdminGetUsersApiParams,
+  SortOrder,
+  Status,
 } from '../../../../core/services/api.service';
 import { AlertComponent } from '../../../../shared/components/alert/alert.component';
 import { PlatformId } from '../../../../core/constants/constants';
@@ -45,6 +47,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { DropdownMenuComponent } from '../../../../shared/components/dropdown-menu/dropdown-menu.component';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
+  heroArrowUp,
+  heroArrowDown,
   heroMagnifyingGlass,
   heroEllipsisHorizontal,
   heroEnvelope,
@@ -68,11 +72,10 @@ export const DEFAULT_PAGE_SIZE = 50;
  */
 @Component({
   selector: 'app-user-list',
-  standalone: true,
+  host: { class: 'flex flex-1 flex-col' },
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    NgClass,
     NgTemplateOutlet,
     TitleCasePipe,
     DatePipe,
@@ -88,6 +91,8 @@ export const DEFAULT_PAGE_SIZE = 50;
   styleUrl: './user-list.component.css',
   viewProviders: [
     provideIcons({
+      heroArrowUp,
+      heroArrowDown,
       heroMagnifyingGlass,
       heroEllipsisHorizontal,
       heroEnvelope,
@@ -98,12 +103,22 @@ export const DEFAULT_PAGE_SIZE = 50;
   ],
 })
 export class UserListComponent implements OnInit {
+  protected readonly groupStatusClasses: Record<Status, string> = {
+    approved: 'border-green-600/20 bg-green-50 text-green-600',
+    pending: 'border-yellow-600/20 bg-yellow-50 text-yellow-700',
+    revoked: 'border-red-600/20 bg-red-50 text-red-600',
+    rejected: 'border-red-600/20 bg-red-50 text-red-600',
+  };
+
   private router = inject(Router);
   private location = inject(Location);
   private apiService = inject(ApiService);
   private dataRefreshService = inject(DataRefreshService);
   private authService = inject(AuthService);
   private datePipe = inject(DatePipe);
+  private destroyRef = inject(DestroyRef);
+  private usersRequest?: Subscription;
+  private usersRequestId = 0;
 
   // Cleanup subject for search
   private searchSubject$ = new Subject<string>();
@@ -125,6 +140,12 @@ export class UserListComponent implements OnInit {
   searchTerm = model('');
   filterOptions = signal<FilterOption[]>([]);
   selectedFilter = model('');
+  sortOrder = signal<SortOrder>('desc');
+  sortLabel = computed(() =>
+    this.sortOrder() === 'asc'
+      ? 'Signed Up, oldest first. Sort newest first'
+      : 'Signed Up, newest first. Sort oldest first',
+  );
   openMenuUserId = signal<string | null>(null);
   showRevokeModal = signal(false);
   selectedUserForRevoke = signal<{
@@ -158,7 +179,7 @@ export class UserListComponent implements OnInit {
 
   hasTitleMessage = input(false);
   showEmailVerifiedTag = input(false);
-  showSignedUpColumn = input(false);
+  showPlatformColumn = input(true);
 
   // Form controls
   revokeReasonControl = new FormControl('', {
@@ -201,12 +222,16 @@ export class UserListComponent implements OnInit {
     const navState = history.state as {
       searchTerm?: string;
       selectedFilter?: string;
+      sortOrder?: SortOrder;
     };
     if (navState?.searchTerm) {
       this.searchTerm.set(navState.searchTerm);
     }
     if (navState?.selectedFilter) {
       this.selectedFilter.set(navState.selectedFilter);
+    }
+    if (navState?.sortOrder === 'asc' || navState?.sortOrder === 'desc') {
+      this.sortOrder.set(navState.sortOrder);
     }
     this.loadUserCounts();
     this.loadUsers(true);
@@ -239,6 +264,7 @@ export class UserListComponent implements OnInit {
         returnUrl: this.returnUrl(),
         searchTerm: this.searchTerm(),
         selectedFilter: this.selectedFilter(),
+        sortOrder: this.sortOrder(),
       },
     });
   }
@@ -398,6 +424,7 @@ export class UserListComponent implements OnInit {
       ...history.state,
       searchTerm: this.searchTerm(),
       selectedFilter: this.selectedFilter(),
+      sortOrder: this.sortOrder(),
     });
   }
 
@@ -434,6 +461,8 @@ export class UserListComponent implements OnInit {
   }
 
   loadUsers(reset = false): void {
+    this.usersRequest?.unsubscribe();
+    const requestId = ++this.usersRequestId;
     if (reset) {
       this.users.set([]);
     }
@@ -442,26 +471,26 @@ export class UserListComponent implements OnInit {
     const append = !isInitialLoad;
     const start = Date.now();
     this.loading.set(true);
-    if (!isInitialLoad) {
-      this.loadingMore.set(true);
-    }
-    this.apiService
+    this.loadingMore.set(!isInitialLoad);
+    this.usersRequest = this.apiService
       .getAdminAllUsers({
         ...this.defaultQueryParams(),
         page: this.page(),
         perPage: DEFAULT_PAGE_SIZE,
         filterBy: this.selectedFilter(),
         search: this.searchTerm(),
+        sortOrder: this.sortOrder(),
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (users: BiocommonsUserResponse[]) => {
           this.users.set(append ? [...this.users(), ...users] : users);
-          this.finishLoading(start);
+          this.finishLoading(start, requestId);
         },
         error: (error: unknown) => {
           console.error('Error loading users:', error);
           this.users.set([]);
-          this.finishLoading(start);
+          this.finishLoading(start, requestId);
         },
       });
   }
@@ -472,6 +501,17 @@ export class UserListComponent implements OnInit {
     this.users.set([]);
     this.loadUserCounts();
     this.loadUsers();
+  }
+
+  toggleSignedUpSort(): void {
+    if (this.loading()) {
+      return;
+    }
+    this.sortOrder.update((order) => (order === 'asc' ? 'desc' : 'asc'));
+    this.syncSearchState();
+    this.page.set(1);
+    this.openMenuUserId.set(null);
+    this.loadUsers(true);
   }
 
   onSearchInput(): void {
@@ -509,10 +549,13 @@ export class UserListComponent implements OnInit {
     this.loadUsers();
   }
 
-  private finishLoading(startTimestamp: number): void {
+  private finishLoading(startTimestamp: number, requestId: number): void {
     const elapsed = Date.now() - startTimestamp;
     const remaining = Math.max(0, 200 - elapsed);
     setTimeout(() => {
+      if (requestId !== this.usersRequestId) {
+        return;
+      }
       this.loading.set(false);
       this.loadingMore.set(false);
     }, remaining);

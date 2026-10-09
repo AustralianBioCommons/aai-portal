@@ -18,6 +18,7 @@ import {
   ApiService,
   BiocommonsUserDetails,
   Status,
+  SortOrder,
 } from '../../../core/services/api.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { TooltipComponent } from '../../../shared/components/tooltip/tooltip.component';
@@ -188,6 +189,7 @@ export class UserDetailsComponent implements OnInit {
   returnUrl = signal<string>('/all-users');
   returnSearchTerm = signal<string>('');
   returnSelectedFilter = signal<string>('');
+  returnSortOrder = signal<SortOrder>('desc');
   profileImageLoaded = signal(false);
 
   openMenuAction = signal(false);
@@ -244,6 +246,11 @@ export class UserDetailsComponent implements OnInit {
       history.state?.selectedFilter;
     if (stateSelectedFilter) {
       this.returnSelectedFilter.set(stateSelectedFilter);
+    }
+    const stateSortOrder =
+      navigation?.extras?.state?.['sortOrder'] ?? history.state?.sortOrder;
+    if (stateSortOrder === 'asc' || stateSortOrder === 'desc') {
+      this.returnSortOrder.set(stateSortOrder);
     }
 
     this.usernameForm.get('username')?.valueChanges.subscribe(() => {

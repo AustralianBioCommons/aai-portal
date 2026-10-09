@@ -440,6 +440,7 @@ describe('UserDetailsComponent', () => {
 
     spyOnProperty(history, 'state', 'get').and.returnValue({
       returnUrl: '/revoked-users',
+      sortOrder: 'asc',
     });
 
     fixture = TestBed.createComponent(UserDetailsComponent);
@@ -450,6 +451,7 @@ describe('UserDetailsComponent', () => {
     fixture.detectChanges();
 
     expect(component.returnUrl()).toBe('/revoked-users');
+    expect(component.returnSortOrder()).toBe('asc');
   });
 
   describe('Platform Approval and Revoke Modal', () => {
