@@ -1,5 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Navigation, Router, UrlTree } from '@angular/router';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
+import {
+  ActivatedRoute,
+  Navigation,
+  Router,
+  RouterLink,
+  UrlTree,
+} from '@angular/router';
 import { Renderer2 } from '@angular/core';
 import { of, throwError, Observable, EMPTY } from 'rxjs';
 import { By } from '@angular/platform-browser';
@@ -75,6 +86,7 @@ describe('UserDetailsComponent', () => {
       'revokeGroupAccess',
       'unrejectGroupAccess',
       'deleteUser',
+      'deleteUserInvalidEmail',
       'updateUserUsername',
     ]);
     const rendererSpy = jasmine.createSpyObj('Renderer2', [
@@ -803,7 +815,17 @@ describe('UserDetailsComponent', () => {
       expect(component.actionModalData()?.action).toBe('delete');
     });
 
-    it('should delete user with reason', () => {
+    it('should delete user with reason and preserve the originating list state', fakeAsync(() => {
+      const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+      const returnState = {
+        searchTerm: 'test',
+        selectedFilter: 'galaxy',
+        sortOrder: 'asc',
+      } as const;
+      spyOnProperty(history, 'state', 'get').and.returnValue({
+        returnUrl: '/pending-users',
+        ...returnState,
+      });
       mockApiService.deleteUser.and.returnValue(
         of('User deleted successfully'),
       );
@@ -826,7 +848,54 @@ describe('UserDetailsComponent', () => {
         'Deleting user',
       );
       expect(component.actionModalData()).toBeNull();
-    });
+      tick(2000);
+      expect(mockRouter.navigate).toHaveBeenCalledOnceWith(['/pending-users'], {
+        state: returnState,
+      });
+    }));
+
+    it('should preserve the back link state when returning after invalid-email deletion', fakeAsync(() => {
+      const mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+      const returnState = {
+        searchTerm: 'test',
+        selectedFilter: 'galaxy',
+        sortOrder: 'asc',
+      } as const;
+      spyOnProperty(history, 'state', 'get').and.returnValue({
+        returnUrl: '/unverified-users',
+        ...returnState,
+      });
+      mockApiService.getUserDetails.and.returnValue(
+        of({ ...mockUserDetails, email_verified: false }),
+      );
+      mockApiService.deleteUserInvalidEmail.and.returnValue(
+        of({ message: 'User deleted' }),
+      );
+      fixture.detectChanges();
+
+      const backLink = fixture.debugElement
+        .query(By.directive(RouterLink))
+        .injector.get(RouterLink);
+      expect(backLink.state).toEqual(returnState);
+
+      component.deleteUserInvalidEmailBegin();
+      component.deleteInvalidEmailForm.setValue({
+        correctEmail: 'correct@example.com',
+      });
+      component['onModalPrimaryButtonClick']();
+
+      expect(mockApiService.deleteUserInvalidEmail).toHaveBeenCalledOnceWith(
+        '123',
+        'correct@example.com',
+      );
+      tick(2000);
+      expect(mockRouter.navigate).toHaveBeenCalledOnceWith(
+        ['/unverified-users'],
+        {
+          state: returnState,
+        },
+      );
+    }));
 
     it('should handle error when deleting user', () => {
       mockApiService.deleteUser.and.returnValue(

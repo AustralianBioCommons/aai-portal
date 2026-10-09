@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import {
@@ -190,6 +190,11 @@ export class UserDetailsComponent implements OnInit {
   returnSearchTerm = signal<string>('');
   returnSelectedFilter = signal<string>('');
   returnSortOrder = signal<SortOrder>('desc');
+  protected readonly returnNavigationState = computed(() => ({
+    searchTerm: this.returnSearchTerm(),
+    selectedFilter: this.returnSelectedFilter(),
+    sortOrder: this.returnSortOrder(),
+  }));
   profileImageLoaded = signal(false);
 
   openMenuAction = signal(false);
@@ -490,7 +495,7 @@ export class UserDetailsComponent implements OnInit {
             message:
               'User deleted and notification sent successfully, returning to dashboard',
           });
-          setTimeout(() => this.router.navigate([this.returnUrl()]), 2000);
+          setTimeout(() => this.returnToUsers(), 2000);
         },
         error: (error) => {
           this.modalLoading.set(false);
@@ -502,6 +507,12 @@ export class UserDetailsComponent implements OnInit {
           this.closeModal();
         },
       });
+  }
+
+  private returnToUsers(): void {
+    this.router.navigate([this.returnUrl()], {
+      state: this.returnNavigationState(),
+    });
   }
 
   getPlatformName(platformId: string): string {
@@ -837,7 +848,7 @@ export class UserDetailsComponent implements OnInit {
           type: 'success',
           message: 'User deleted successfully, returning to dashboard',
         });
-        setTimeout(() => this.router.navigate(['/all-users']), 2000);
+        setTimeout(() => this.returnToUsers(), 2000);
       },
       error: (error) => {
         this.closeActionModal();
