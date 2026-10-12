@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.7.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.6.0...v1.7.0) (2026-10-09)
+
+
+### Features
+
+* add eDNA Explorer service ([92ba21c](https://github.com/AustralianBioCommons/aai-portal/commit/92ba21c5c2c25a228078f438d12d0a73b3aaa2b8))
+* add eDNA Explorer service ([9ce41d1](https://github.com/AustralianBioCommons/aai-portal/commit/9ce41d1ac2823d8de2d837a7dd96e793aa42985d))
+* add invite-only notice to SBP bundle modal ([659373e](https://github.com/AustralianBioCommons/aai-portal/commit/659373e08ea80aff5055e92d2300f975ada66392))
+* add reminder when selecting SBP bundle ([7df8311](https://github.com/AustralianBioCommons/aai-portal/commit/7df831134859eaf3bd397644939e55414f938f6a))
+* add sorting functionality for user lists ([2c212ae](https://github.com/AustralianBioCommons/aai-portal/commit/2c212aea2bb2d03c615b426f1f95085d6ddfd1fc))
+* add sorting functionality for user lists ([f8d6949](https://github.com/AustralianBioCommons/aai-portal/commit/f8d6949a22bfefc674a4047dff4d0c9d03ec2aa0))
+
+
+### Bug Fixes
+
+* copilot comment about persisting state from delete ([d5a1d55](https://github.com/AustralianBioCommons/aai-portal/commit/d5a1d55ba626ebd7ccc44008764ae1030206ae67))
+
 ## [1.6.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.5.0...v1.6.0) (2026-07-21)
 
 
