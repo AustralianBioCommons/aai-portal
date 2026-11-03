@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/AustralianBioCommons/aai-portal/compare/v1.7.0...v1.7.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* update outdated dependencies ([#272](https://github.com/AustralianBioCommons/aai-portal/issues/272)) ([c795298](https://github.com/AustralianBioCommons/aai-portal/commit/c7952982904687f0e5c5d194794cd9c775a30814))
+
 ## [1.7.0](https://github.com/AustralianBioCommons/aai-portal/compare/v1.6.0...v1.7.0) (2026-10-09)
 
 
