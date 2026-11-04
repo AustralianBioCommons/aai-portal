@@ -417,6 +417,9 @@ describe('ProfileComponent', () => {
       expect(fixture.nativeElement.textContent).toContain(
         'Enter your new email address to continue.',
       );
+      expect(fixture.nativeElement.textContent).not.toContain(
+        migrationReminder,
+      );
       expect(
         fixture.nativeElement.querySelector('#migration-new-password'),
       ).toBeNull();
@@ -492,6 +495,10 @@ describe('ProfileComponent', () => {
       expect(component.emailFlowState()).toBe('otp-sent');
       expect(component.emailMigrationDirection()).toBeNull();
       expect(fixture.nativeElement.textContent).toContain(migrationReminder);
+      const form: HTMLFormElement =
+        fixture.nativeElement.querySelector('app-modal form');
+      expect(form.firstElementChild?.textContent).toContain(migrationReminder);
+      expect(form.firstElementChild?.getAttribute('role')).toBe('note');
     });
 
     it('rechecks the updated email after changing from an institutional email to a non-AAF email', () => {

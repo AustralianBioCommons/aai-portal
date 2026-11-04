@@ -103,6 +103,15 @@
         }
         @case ("email") {
           <form [formGroup]="emailForm" class="space-y-6">
+            @if (emailFlowState() !== "idle") {
+              <div
+                class="rounded-md border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900"
+                role="note"
+              >
+                Please complete this process within 10 minutes to ensure a
+                successful change
+              </div>
+            }
             <div>
               <label
                 class="block text-sm font-medium text-gray-900"
@@ -161,15 +170,6 @@
                 </div>
               }
             </div>
-            @if (emailFlowState() !== "idle") {
-              <div
-                class="rounded-md border border-amber-400 bg-amber-50 p-4 text-sm text-amber-900"
-                role="note"
-              >
-                Please complete this process within 10 minutes to ensure a
-                successful change
-              </div>
-            }
             @if (emailFlowState() === "aaf-to-auth0") {
               <div [formGroup]="migrationPasswordForm" class="space-y-6">
                 <div>
