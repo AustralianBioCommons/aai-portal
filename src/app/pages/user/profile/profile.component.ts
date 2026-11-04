@@ -39,6 +39,7 @@ import { usernameRequirements } from '../../../shared/validators/usernames';
 import { passwordRequirements } from '../../../shared/validators/passwords';
 import { fullNameLengthValidator } from '../../../shared/validators/full-name';
 import { AuthService } from '../../../core/services/auth.service';
+import { LoginProxyService } from '../../../core/services/login-proxy.service';
 import { RouterLink } from '@angular/router';
 import {
   emailLengthValidator,
@@ -54,23 +55,27 @@ import {
   heroTrash,
   heroUser,
 } from '@ng-icons/heroicons/outline';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   map,
+  Observable,
   of,
+  Subject,
   switchMap,
+  takeUntil,
 } from 'rxjs';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 import { FormControl } from '@angular/forms';
 
 type ProfileModal = 'name' | 'username' | 'email' | 'password';
+type EmailMigrationDirection = 'auth0-to-aaf' | 'aaf-to-auth0';
+type EmailFlowState = 'idle' | 'otp-sent' | EmailMigrationDirection;
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
   imports: [
     LoadingSpinnerComponent,
     AlertComponent,
@@ -96,12 +101,15 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
 export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
+  private loginProxyService = inject(LoginProxyService);
   private dataRefreshService = inject(DataRefreshService);
   private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private readonly emailFlowReset = new Subject<void>();
+  private emailMigrationId: string | null = null;
 
   private readonly sbpEnabled = environment.features.sbpEnabled;
   protected readonly platforms = PLATFORMS;
@@ -151,7 +159,12 @@ export class ProfileComponent implements OnInit {
       [Validators.required, internationalEmailValidator, emailLengthValidator],
     ],
   });
-  emailFlowState = signal<'idle' | 'otp-sent'>('idle');
+  emailFlowState = signal<EmailFlowState>('idle');
+  emailMigrationDirection = signal<EmailMigrationDirection | null>(null);
+  migrationPasswordForm = this.formBuilder.nonNullable.group({
+    newPassword: ['', passwordRequirements],
+    confirmNewPassword: ['', Validators.required],
+  });
   emailOtp = signal('');
   emailLoading = signal(false);
   otpLoading = signal(false);
@@ -190,6 +203,17 @@ export class ProfileComponent implements OnInit {
       'newPassword',
       'confirmNewPassword',
     );
+    this.validationService.setupPasswordConfirmationValidation(
+      this.migrationPasswordForm,
+      'newPassword',
+      'confirmNewPassword',
+    );
+    this.emailForm.controls.email.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.resetEmailFlowState();
+        this.validationService.clearFieldBackendError('email');
+      });
     this.usernameForm.get('username')?.valueChanges.subscribe(() => {
       if (this.validationService.hasFieldBackendError('username')) {
         this.validationService.clearFieldBackendError('username');
@@ -281,7 +305,12 @@ export class ProfileComponent implements OnInit {
   }
 
   private resetEmailFlowState(): void {
+    this.emailFlowReset.next();
     this.emailFlowState.set('idle');
+    this.emailMigrationDirection.set(null);
+    this.emailMigrationId = null;
+    this.migrationPasswordForm.reset();
+    this.validationService.clearFieldBackendError('newPassword');
     this.emailOtp.set('');
     this.otpError.set(null);
     this.emailLoading.set(false);
@@ -332,20 +361,38 @@ export class ProfileComponent implements OnInit {
   }
 
   protected modalDescription(): string {
-    return this.activeModal() === 'email'
-      ? 'To verify your email, we will send a one-time-password (OTP) to your new email address.'
-      : '';
+    if (this.activeModal() !== 'email') return '';
+
+    switch (this.emailFlowState()) {
+      case 'idle':
+        return 'Enter your new email address to continue.';
+      case 'auth0-to-aaf':
+        return 'Institutional login available. Please click "Log in" and sign in using your institutional credentials to continue changing your email address.';
+      case 'aaf-to-auth0':
+        return 'You will log in to BioCommons Access directly with a password, please create one now';
+      case 'otp-sent':
+        return 'To verify your email, we have sent a one-time-password (OTP) to your new email address.';
+    }
   }
 
   protected modalPrimaryButtonText(): string {
-    return this.activeModal() === 'email'
-      ? this.emailFlowState() === 'idle'
-        ? 'Send OTP'
-        : 'Confirm OTP'
-      : 'Save';
+    if (this.activeModal() !== 'email') return 'Save';
+
+    switch (this.emailFlowState()) {
+      case 'idle':
+        return 'Continue';
+      case 'auth0-to-aaf':
+        return 'Log in';
+      case 'aaf-to-auth0':
+        return 'Send OTP';
+      case 'otp-sent':
+        return 'Confirm OTP';
+    }
   }
 
   protected onModalPrimaryButtonClick(): void {
+    if (this.isModalLoading()) return;
+
     switch (this.activeModal()) {
       case 'name':
         this.updateName();
@@ -354,10 +401,19 @@ export class ProfileComponent implements OnInit {
         this.updateUsername();
         break;
       case 'email':
-        if (this.emailFlowState() === 'idle') {
-          this.sendEmailOtp();
-        } else {
-          this.confirmEmailChange();
+        switch (this.emailFlowState()) {
+          case 'idle':
+            this.continueFromEmail();
+            break;
+          case 'auth0-to-aaf':
+            this.startAafMigration();
+            break;
+          case 'aaf-to-auth0':
+            this.sendAuth0MigrationOtp();
+            break;
+          case 'otp-sent':
+            this.confirmEmailChange();
+            break;
         }
         break;
       case 'password':
@@ -534,6 +590,61 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  protected continueFromEmail(): void {
+    this.emailForm.markAllAsTouched();
+    if (this.emailForm.invalid || this.emailLoading()) return;
+
+    const email = toAsciiEmail(this.emailForm.controls.email.value.trim());
+    this.emailLoading.set(true);
+    this.alert.set(null);
+    this.loginProxyService
+      .checkAafEmail(email)
+      .pipe(takeUntil(this.emailFlowReset), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (isAafEmail) => {
+          this.emailLoading.set(false);
+          if (isAafEmail && !this.isAafUser()) {
+            this.emailMigrationDirection.set('auth0-to-aaf');
+            this.emailFlowState.set('auth0-to-aaf');
+          } else if (!isAafEmail && this.isAafUser()) {
+            this.emailMigrationDirection.set('aaf-to-auth0');
+            this.emailFlowState.set('aaf-to-auth0');
+          } else {
+            this.sendEmailOtp();
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          this.emailLoading.set(false);
+          this.showEmailChangeError(
+            err,
+            'Failed to check your institution. Please try again.',
+          );
+        },
+      });
+  }
+
+  private startAafMigration(): void {
+    const email = toAsciiEmail(this.emailForm.controls.email.value.trim());
+    this.emailLoading.set(true);
+    this.alert.set(null);
+    this.validationService.clearFieldBackendError('email');
+    this.apiService
+      .migrateAuth0ToAaf(email)
+      .pipe(
+        switchMap(({ migration_id }) =>
+          this.authService.loginForAafMigration(email, migration_id),
+        ),
+        takeUntil(this.emailFlowReset),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        error: (err: HttpErrorResponse) => {
+          this.emailLoading.set(false);
+          this.showEmailMigrationError(err);
+        },
+      });
+  }
+
   protected sendEmailOtp(): void {
     this.emailForm.markAllAsTouched();
     if (this.emailForm.invalid) {
@@ -543,31 +654,58 @@ export class ProfileComponent implements OnInit {
     this.emailLoading.set(true);
     this.validationService.clearFieldBackendError('email');
     this.alert.set(null);
-    this.apiService.requestEmailChange(email).subscribe({
-      next: ({ message }) => {
-        this.emailLoading.set(false);
-        this.emailFlowState.set('otp-sent');
-        this.emailModalNotice.set(
-          message || 'OTP sent to the requested email address.',
-        );
-      },
-      error: (err) => {
-        this.emailLoading.set(false);
-        console.error('Failed to send OTP: ', err);
-        this.validationService.setBackendErrorMessages(err);
-        this.emailForm.markAllAsTouched();
+    this.apiService
+      .requestEmailChange(email)
+      .pipe(takeUntil(this.emailFlowReset), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ message }) => {
+          this.emailLoading.set(false);
+          this.emailFlowState.set('otp-sent');
+          this.emailModalNotice.set(
+            message || 'OTP sent to the requested email address.',
+          );
+        },
+        error: (err: HttpErrorResponse) => {
+          this.emailLoading.set(false);
+          console.error('Failed to send OTP: ', err);
+          this.validationService.setBackendErrorMessages(err);
+          this.emailForm.markAllAsTouched();
 
-        if (!this.validationService.hasFieldBackendError('email')) {
-          this.alert.set({
-            type: 'error',
-            message:
-              err.error?.message ??
-              'Failed to send OTP. If this issue persists contact the administrators.',
-          });
-          this.closeModal();
-        }
-      },
-    });
+          if (!this.validationService.hasFieldBackendError('email')) {
+            this.showEmailChangeError(
+              err,
+              'Failed to send OTP. Please try again.',
+            );
+          }
+        },
+      });
+  }
+
+  private sendAuth0MigrationOtp(): void {
+    this.migrationPasswordForm.markAllAsTouched();
+    if (this.migrationPasswordForm.invalid) return;
+
+    const email = toAsciiEmail(this.emailForm.controls.email.value.trim());
+    const password = this.migrationPasswordForm.controls.newPassword.value;
+    this.emailLoading.set(true);
+    this.alert.set(null);
+    this.validationService.clearFieldBackendError('email');
+    this.apiService
+      .migrateAafToAuth0(email, password)
+      .pipe(takeUntil(this.emailFlowReset), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ migration_id }) => {
+          this.emailLoading.set(false);
+          this.emailMigrationId = migration_id;
+          this.emailFlowState.set('otp-sent');
+          this.emailModalNotice.set('OTP sent to the requested email address.');
+          this.migrationPasswordForm.reset();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.emailLoading.set(false);
+          this.showEmailMigrationError(err);
+        },
+      });
   }
 
   protected confirmEmailChange(): void {
@@ -576,34 +714,113 @@ export class ProfileComponent implements OnInit {
       this.otpError.set('Please enter the verification code.');
       return;
     }
+    if (!/^\d{6}$/.test(otp)) {
+      this.otpError.set('Please enter a 6-digit verification code.');
+      return;
+    }
+    const isAuth0Migration = this.emailMigrationDirection() === 'aaf-to-auth0';
+    if (isAuth0Migration && !this.emailMigrationId) {
+      this.otpError.set(
+        'Please restart the email change and request a new code.',
+      );
+      return;
+    }
     this.otpLoading.set(true);
     this.otpError.set(null);
     this.alert.set(null);
-    this.apiService.continueEmailChange(otp).subscribe({
-      next: () => {
-        this.otpLoading.set(false);
-        this.closeModal();
-        this.loadUserProfile();
-      },
-      error: (err) => {
-        this.otpLoading.set(false);
-        const status = err.status;
-        const detail = err.error?.detail;
-        const message =
-          status === 409
-            ? 'That email is already used by another account.'
-            : (detail ?? 'Invalid code. Please try again.');
-        this.otpError.set(message);
-        if (status === 429) {
-          this.alert.set({
-            type: 'error',
-            message:
-              'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
-          });
+    const request: Observable<unknown> = isAuth0Migration
+      ? this.apiService.completeAafToAuth0(this.emailMigrationId!, otp)
+      : this.apiService.continueEmailChange(otp);
+    request
+      .pipe(takeUntil(this.emailFlowReset), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.otpLoading.set(false);
           this.closeModal();
-        }
-      },
+          this.loadUserProfile();
+          if (isAuth0Migration) {
+            this.authService.refreshUser();
+            this.dataRefreshService.triggerRefresh();
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          this.otpLoading.set(false);
+          const status = err.status;
+          const detail: unknown = err.error?.detail;
+          if (
+            status === 401 ||
+            status === 403 ||
+            status === 0 ||
+            status >= 500 ||
+            (isAuth0Migration &&
+              status === 409 &&
+              detail !== 'Email is already in use by another user.')
+          ) {
+            this.showEmailChangeError(
+              err,
+              'Failed to verify email address. Please try again.',
+            );
+            return;
+          }
+          const message =
+            status === 409
+              ? 'That email is already used by another account.'
+              : typeof detail === 'string'
+                ? detail
+                : 'Invalid code. Please try again.';
+          this.otpError.set(message);
+          if (status === 429) {
+            this.alert.set({
+              type: 'error',
+              message:
+                'Too many failed attempts. Please wait before trying again or contact the administrators if this issue persists.',
+            });
+            this.closeModal();
+          }
+        },
+      });
+  }
+
+  private showEmailMigrationError(error: HttpErrorResponse): void {
+    const detail: unknown = error.error?.detail;
+    if (
+      error.status === 409 &&
+      detail === 'Email is already in use by another user.'
+    ) {
+      this.validationService.setFieldBackendError('email', detail);
+    } else {
+      this.validationService.setBackendErrorMessages(error);
+    }
+    if (this.validationService.hasFieldBackendError('email')) {
+      this.emailForm.controls.email.markAsTouched();
+      return;
+    }
+    this.showEmailChangeError(error);
+  }
+
+  private showEmailChangeError(
+    error: HttpErrorResponse,
+    fallback = 'Failed to change email address. Please try again.',
+  ): void {
+    const detail: unknown = error.error?.detail;
+    const message: unknown = error.error?.message;
+    const backendMessage =
+      typeof message === 'string'
+        ? message
+        : typeof detail === 'string'
+          ? detail
+          : fallback;
+
+    this.alert.set({
+      type: 'error',
+      message:
+        error.status === 403
+          ? 'Unable to change your email address. Please contact support.'
+          : error.status === 401
+            ? 'Your session has expired. Please log in again.'
+            : backendMessage,
     });
+    this.closeModal();
   }
 
   protected isFieldInvalid(form: FormGroup, fieldName: string): boolean {

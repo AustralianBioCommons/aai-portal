@@ -11,7 +11,8 @@ import {
   UserProfileData,
 } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { of, throwError } from 'rxjs';
+import { LoginProxyService } from '../../../core/services/login-proxy.service';
+import { of, Subject, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -27,6 +28,7 @@ describe('ProfileComponent', () => {
   let fixture: ComponentFixture<ProfileComponent>;
   let mockApiService: jasmine.SpyObj<ApiService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockLoginProxyService: jasmine.SpyObj<LoginProxyService>;
 
   type ProfileTestHarness = ProfileComponent & {
     openModal(type: 'username' | 'password' | 'name' | 'email'): void;
@@ -35,6 +37,7 @@ describe('ProfileComponent', () => {
     updatePassword(): void;
     sendEmailOtp(): void;
     confirmEmailChange(): void;
+    onModalPrimaryButtonClick(): void;
   };
   let harness: ProfileTestHarness;
 
@@ -96,12 +99,15 @@ describe('ProfileComponent', () => {
       'updateName',
       'requestEmailChange',
       'continueEmailChange',
+      'migrateAuth0ToAaf',
+      'migrateAafToAuth0',
+      'completeAafToAuth0',
       'checkAustralianResearchInstitution',
       'deleteAccount',
     ]);
     const authSpy = jasmine.createSpyObj(
       'AuthService',
-      ['refreshUser', 'logout'],
+      ['refreshUser', 'logout', 'loginForAafMigration'],
       {
         isGeneralAdmin: signal(false),
       },
@@ -114,6 +120,12 @@ describe('ProfileComponent', () => {
         provideHttpClientTesting(),
         { provide: ApiService, useValue: apiSpy },
         { provide: AuthService, useValue: authSpy },
+        {
+          provide: LoginProxyService,
+          useValue: jasmine.createSpyObj('LoginProxyService', [
+            'checkAafEmail',
+          ]),
+        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -134,6 +146,31 @@ describe('ProfileComponent', () => {
     mockAuthService = TestBed.inject(
       AuthService,
     ) as jasmine.SpyObj<AuthService>;
+    mockLoginProxyService = TestBed.inject(
+      LoginProxyService,
+    ) as jasmine.SpyObj<LoginProxyService>;
+    mockLoginProxyService.checkAafEmail.and.returnValue(of(false));
+    mockApiService.migrateAuth0ToAaf.and.returnValue(
+      of({
+        migration_id: 'migration-123',
+        expires_at: '2026-10-29T03:10:00Z',
+      }),
+    );
+    mockAuthService.loginForAafMigration.and.returnValue(of(void 0));
+    mockApiService.migrateAafToAuth0.and.returnValue(
+      of({
+        migration_id: 'reverse-migration-123',
+        expires_at: '2026-10-29T03:10:00Z',
+        new_email: 'new@example.com',
+      }),
+    );
+    mockApiService.completeAafToAuth0.and.returnValue(
+      of({
+        migration_id: 'reverse-migration-123',
+        user_id: mockUser.user_id,
+        new_email: 'new@example.com',
+      }),
+    );
     mockApiService.getUserProfile.and.returnValue(of(mockUser));
     mockApiService.updateUsername.and.returnValue(of(mockAuth0User));
     mockApiService.updatePassword.and.returnValue(of(true));
@@ -160,6 +197,7 @@ describe('ProfileComponent', () => {
   const updatePassword = () => harness.updatePassword();
   const sendEmailOtp = () => harness.sendEmailOtp();
   const confirmEmailChange = () => harness.confirmEmailChange();
+  const primaryClick = () => harness.onModalPrimaryButtonClick();
 
   it('should create', () => {
     fixture.detectChanges();
@@ -355,6 +393,578 @@ describe('ProfileComponent', () => {
     expect(component.activeModal()).toBe('username');
   });
 
+  describe('email migration', () => {
+    const migrationReminder =
+      'Please complete this process within 10 minutes to ensure a successful change';
+    const institutionalLoginMessage =
+      'Institutional login available. Please click "Log in" and sign in using your institutional credentials to continue changing your email address.';
+
+    const enterEmail = (email: string, accountType = 'auth0') => {
+      mockApiService.getUserProfile.and.returnValue(
+        of({ ...mockUser, account_type: accountType }),
+      );
+      fixture.detectChanges();
+      openModal('email');
+      component.emailForm.controls.email.setValue(email);
+      fixture.detectChanges();
+    };
+
+    it('asks for an email before offering a migration', () => {
+      fixture.detectChanges();
+      openModal('email');
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain(
+        'Enter your new email address to continue.',
+      );
+      expect(
+        fixture.nativeElement.querySelector('#migration-new-password'),
+      ).toBeNull();
+      expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
+    });
+
+    it('does not check invalid or unchanged emails', () => {
+      enterEmail(mockUser.email);
+      primaryClick();
+      component.emailForm.controls.email.setValue('invalid');
+      primaryClick();
+
+      expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
+      expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+    });
+
+    it('creates the Auth0 to AAF migration only after Log in is clicked', () => {
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      enterEmail('new@sydney.edu.au');
+
+      primaryClick();
+      fixture.detectChanges();
+
+      expect(mockLoginProxyService.checkAafEmail).toHaveBeenCalledWith(
+        'new@sydney.edu.au',
+      );
+      expect(component.emailFlowState()).toBe('auth0-to-aaf');
+      expect(fixture.nativeElement.textContent).toContain(
+        institutionalLoginMessage,
+      );
+      expect(fixture.nativeElement.textContent).toContain(migrationReminder);
+      expect(mockApiService.migrateAuth0ToAaf).not.toHaveBeenCalled();
+      expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+
+      primaryClick();
+
+      expect(mockApiService.migrateAuth0ToAaf).toHaveBeenCalledWith(
+        'new@sydney.edu.au',
+      );
+      expect(mockAuthService.loginForAafMigration).toHaveBeenCalledWith(
+        'new@sydney.edu.au',
+        'migration-123',
+      );
+    });
+
+    it('shows password fields and the reminder for AAF to Auth0', () => {
+      enterEmail('new@example.com', 'AAF');
+      primaryClick();
+      fixture.detectChanges();
+
+      expect(component.emailFlowState()).toBe('aaf-to-auth0');
+      expect(fixture.nativeElement.textContent).toContain(
+        'You will log in to BioCommons Access directly with a password, please create one now',
+      );
+      expect(fixture.nativeElement.textContent).toContain(migrationReminder);
+      expect(
+        fixture.nativeElement.querySelector('#migration-new-password'),
+      ).toBeTruthy();
+      expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+    });
+
+    it('uses the ordinary OTP flow when the account type stays Auth0', () => {
+      enterEmail('new@example.com');
+      expect(fixture.nativeElement.textContent).not.toContain(
+        migrationReminder,
+      );
+      primaryClick();
+      fixture.detectChanges();
+
+      expect(mockApiService.requestEmailChange).toHaveBeenCalledWith(
+        'new@example.com',
+      );
+      expect(component.emailFlowState()).toBe('otp-sent');
+      expect(component.emailMigrationDirection()).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain(migrationReminder);
+    });
+
+    it('rechecks the updated email after changing from an institutional email to a non-AAF email', () => {
+      mockLoginProxyService.checkAafEmail.and.callFake((email) =>
+        of(email.endsWith('@sydney.edu.au')),
+      );
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+      fixture.detectChanges();
+      expect(component.emailFlowState()).toBe('auth0-to-aaf');
+
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('#modal-email');
+      input.value = 'new@example.com';
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+
+      expect(component.emailFlowState()).toBe('idle');
+      expect(component.emailMigrationDirection()).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain(
+        'Enter your new email address to continue.',
+      );
+      expect(fixture.nativeElement.textContent).not.toContain(
+        institutionalLoginMessage,
+      );
+      expect(fixture.nativeElement.textContent).not.toContain(
+        migrationReminder,
+      );
+
+      primaryClick();
+      fixture.detectChanges();
+
+      expect(mockLoginProxyService.checkAafEmail.calls.allArgs()).toEqual([
+        ['new@sydney.edu.au'],
+        ['new@example.com'],
+      ]);
+      expect(mockApiService.requestEmailChange).toHaveBeenCalledWith(
+        'new@example.com',
+      );
+      expect(component.emailFlowState()).toBe('otp-sent');
+      expect(mockApiService.migrateAuth0ToAaf).not.toHaveBeenCalled();
+      expect(mockApiService.migrateAafToAuth0).not.toHaveBeenCalled();
+      expect(mockAuthService.loginForAafMigration).not.toHaveBeenCalled();
+    });
+
+    it('requires a valid matching password before requesting migration and OTP', () => {
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      primaryClick();
+      expect(mockApiService.migrateAafToAuth0).not.toHaveBeenCalled();
+
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Valid123!',
+        confirmNewPassword: 'Different123!',
+      });
+      primaryClick();
+      expect(mockApiService.migrateAafToAuth0).not.toHaveBeenCalled();
+
+      component.migrationPasswordForm.controls.confirmNewPassword.setValue(
+        'Valid123!',
+      );
+      primaryClick();
+      fixture.detectChanges();
+
+      expect(mockApiService.migrateAafToAuth0).toHaveBeenCalledWith(
+        'new@example.com',
+        'Valid123!',
+      );
+      expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+      expect(component.emailFlowState()).toBe('otp-sent');
+      expect(fixture.nativeElement.textContent).toContain(migrationReminder);
+      expect(component.emailModalNotice()).toBe(
+        'OTP sent to the requested email address.',
+      );
+      expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+        '',
+      );
+      expect(
+        component.migrationPasswordForm.controls.confirmNewPassword.value,
+      ).toBe('');
+    });
+
+    it('sends the password at migration creation and verifies using only the ID and OTP', () => {
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: ' Valid123! ',
+        confirmNewPassword: ' Valid123! ',
+      });
+      primaryClick();
+      expect(mockApiService.migrateAafToAuth0).toHaveBeenCalledWith(
+        'new@example.com',
+        ' Valid123! ',
+      );
+      expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+        '',
+      );
+      component.emailOtp.set('123456');
+      primaryClick();
+
+      expect(mockApiService.completeAafToAuth0).toHaveBeenCalledWith(
+        'reverse-migration-123',
+        '123456',
+      );
+      expect(mockApiService.continueEmailChange).not.toHaveBeenCalled();
+      expect(component.activeModal()).toBeNull();
+      expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+        '',
+      );
+      expect(mockAuthService.refreshUser).toHaveBeenCalled();
+    });
+
+    for (const accountType of ['auth0', 'aaf'] as const) {
+      it(`requires a six-digit OTP before confirming an email change from ${accountType}`, () => {
+        enterEmail('new@example.com', accountType);
+        primaryClick();
+        if (accountType === 'aaf') {
+          component.migrationPasswordForm.setValue({
+            newPassword: 'Valid123!',
+            confirmNewPassword: 'Valid123!',
+          });
+          primaryClick();
+        }
+
+        for (const otp of ['12345', '12345a']) {
+          component.emailOtp.set(otp);
+          primaryClick();
+
+          expect(component.otpError()).toBe(
+            'Please enter a 6-digit verification code.',
+          );
+          expect(component.activeModal()).toBe('email');
+          expect(mockApiService.completeAafToAuth0).not.toHaveBeenCalled();
+          expect(mockApiService.continueEmailChange).not.toHaveBeenCalled();
+        }
+      });
+    }
+
+    it('keeps an invalid migration OTP inline and retries completion with the same migration ID', () => {
+      mockApiService.completeAafToAuth0.and.returnValue(
+        throwError(() => ({ status: 400, error: { detail: 'Invalid OTP.' } })),
+      );
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Valid123!',
+        confirmNewPassword: 'Valid123!',
+      });
+      primaryClick();
+      component.emailOtp.set('123456');
+      primaryClick();
+
+      expect(component.otpError()).toBe('Invalid OTP.');
+      expect(component.activeModal()).toBe('email');
+      expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+        '',
+      );
+
+      mockApiService.completeAafToAuth0.and.returnValue(
+        of({
+          migration_id: 'reverse-migration-123',
+          user_id: mockUser.user_id,
+          new_email: 'new@example.com',
+        }),
+      );
+      component.emailOtp.set('654321');
+      primaryClick();
+
+      expect(mockApiService.completeAafToAuth0.calls.allArgs()).toEqual([
+        ['reverse-migration-123', '123456'],
+        ['reverse-migration-123', '654321'],
+      ]);
+      expect(mockApiService.migrateAafToAuth0).toHaveBeenCalledTimes(1);
+      expect(mockApiService.continueEmailChange).not.toHaveBeenCalled();
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('shows migration identity conflicts as general errors rather than duplicate-email errors', () => {
+      const message = 'Migration database identity is not ready.';
+      mockApiService.completeAafToAuth0.and.returnValue(
+        throwError(() => ({ status: 409, error: { detail: message } })),
+      );
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Valid123!',
+        confirmNewPassword: 'Valid123!',
+      });
+      primaryClick();
+      component.emailOtp.set('123456');
+      primaryClick();
+
+      expect(component.alert()).toEqual({ type: 'error', message });
+      expect(component.activeModal()).toBeNull();
+    });
+
+    it('shows duplicate emails from the AAF to Auth0 endpoint beside the email field', () => {
+      const message = 'Email is already in use by another user.';
+      mockApiService.migrateAafToAuth0.and.returnValue(
+        throwError(() => ({ status: 409, error: { detail: message } })),
+      );
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Valid123!',
+        confirmNewPassword: 'Valid123!',
+      });
+      primaryClick();
+      fixture.detectChanges();
+
+      const input: HTMLInputElement =
+        fixture.nativeElement.querySelector('#modal-email');
+      expect(input.classList).toContain('border-red-500');
+      expect(
+        fixture.nativeElement.querySelector('#modal-email-error').textContent,
+      ).toContain(message);
+      expect(component.alert()).toBeNull();
+      expect(component.activeModal()).toBe('email');
+      expect(mockApiService.completeAafToAuth0).not.toHaveBeenCalled();
+    });
+
+    it('shows migration OTP failures in the existing error alert', () => {
+      mockApiService.migrateAafToAuth0.and.returnValue(
+        throwError(() => ({ error: { detail: 'Mail unavailable' } })),
+      );
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Valid123!',
+        confirmNewPassword: 'Valid123!',
+      });
+      primaryClick();
+
+      expect(component.activeModal()).toBeNull();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Mail unavailable',
+      });
+      expect(component.emailLoading()).toBeFalse();
+    });
+
+    it('clears the code and migration when the email is edited after OTP is sent', () => {
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Valid123!',
+        confirmNewPassword: 'Valid123!',
+      });
+      primaryClick();
+      component.emailOtp.set('123456');
+      component.emailForm.controls.email.setValue('other@example.com');
+
+      expect(component.emailFlowState()).toBe('idle');
+      expect(component.emailOtp()).toBe('');
+      expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+        '',
+      );
+    });
+
+    it('shows an error alert when institutional lookup fails and allows reopening', () => {
+      mockLoginProxyService.checkAafEmail.and.returnValue(
+        throwError(() => new Error('network')),
+      );
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+
+      expect(component.emailFlowState()).toBe('idle');
+      expect(component.activeModal()).toBeNull();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to check your institution. Please try again.',
+      });
+      expect(component.emailLoading()).toBeFalse();
+      expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      openModal('email');
+      component.emailForm.controls.email.setValue('new@sydney.edu.au');
+      primaryClick();
+      expect(component.emailFlowState()).toBe('auth0-to-aaf');
+      expect(component.alert()).toBeNull();
+    });
+
+    it('shows duplicate migration email errors on the email field and clears them when edited', () => {
+      const message = 'Email is already in use by another user.';
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      mockApiService.migrateAuth0ToAaf.and.returnValue(
+        throwError(() => ({ status: 409, error: { detail: message } })),
+      );
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+      primaryClick();
+      fixture.detectChanges();
+
+      const emailInput: HTMLInputElement =
+        fixture.nativeElement.querySelector('#modal-email');
+      const emailError: HTMLElement =
+        fixture.nativeElement.querySelector('#modal-email-error');
+      expect(emailInput.classList).toContain('border-red-500');
+      expect(emailInput.getAttribute('aria-invalid')).toBe('true');
+      expect(emailInput.getAttribute('aria-describedby')).toBe(
+        'modal-email-error',
+      );
+      expect(emailError.textContent).toContain(message);
+      expect(emailError.classList).toContain('text-red-700');
+      expect(component.alert()).toBeNull();
+      expect(component.activeModal()).toBe('email');
+      expect(mockAuthService.loginForAafMigration).not.toHaveBeenCalled();
+
+      component.emailForm.controls.email.setValue('other@sydney.edu.au');
+      fixture.detectChanges();
+
+      expect(emailInput.classList).not.toContain('border-red-500');
+      expect(emailInput.getAttribute('aria-invalid')).toBe('false');
+      expect(
+        fixture.nativeElement.querySelector('#modal-email-error'),
+      ).toBeNull();
+    });
+
+    it('shows other migration conflicts in the existing alert without marking the email invalid', () => {
+      const message =
+        'A pending migration request already exists for this user. Please try again.';
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      mockApiService.migrateAuth0ToAaf.and.returnValue(
+        throwError(() => ({ status: 409, error: { detail: message } })),
+      );
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+      primaryClick();
+      fixture.detectChanges();
+
+      expect(component.emailLoading()).toBeFalse();
+      expect(component.activeModal()).toBeNull();
+      expect(component.alert()).toEqual({ type: 'error', message });
+      expect(fixture.nativeElement.textContent).toContain(message);
+      expect(
+        component['getErrorMessages'](component.emailForm, 'email'),
+      ).toEqual([]);
+      expect(mockAuthService.loginForAafMigration).not.toHaveBeenCalled();
+    });
+
+    it('handles an Auth0 redirect failure so the user can retry', () => {
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      mockAuthService.loginForAafMigration.and.returnValue(
+        throwError(() => new Error('redirect failed')),
+      );
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+      primaryClick();
+
+      expect(component.emailLoading()).toBeFalse();
+      expect(component.activeModal()).toBeNull();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to change email address. Please try again.',
+      });
+    });
+
+    for (const stage of [
+      'auth0-to-aaf',
+      'aaf-to-auth0',
+      'otp-request',
+      'otp-confirm',
+    ] as const) {
+      it(`shows a consistent error alert for permission failures during ${stage}`, () => {
+        const denied = throwError(() => ({
+          status: 403,
+          error: {
+            detail: 'You do not have permission to perform this action.',
+          },
+        }));
+        if (stage === 'auth0-to-aaf') {
+          mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+          mockApiService.migrateAuth0ToAaf.and.returnValue(denied);
+          enterEmail('new@sydney.edu.au');
+          primaryClick();
+          primaryClick();
+        } else if (stage === 'aaf-to-auth0') {
+          mockApiService.migrateAafToAuth0.and.returnValue(denied);
+          enterEmail('new@example.com', 'aaf');
+          primaryClick();
+          component.migrationPasswordForm.setValue({
+            newPassword: 'Valid123!',
+            confirmNewPassword: 'Valid123!',
+          });
+          primaryClick();
+        } else if (stage === 'otp-request') {
+          mockApiService.requestEmailChange.and.returnValue(denied);
+          enterEmail('new@example.com');
+          primaryClick();
+        } else {
+          mockApiService.continueEmailChange.and.returnValue(denied);
+          enterEmail('new@example.com');
+          primaryClick();
+          component.emailOtp.set('123456');
+          primaryClick();
+        }
+        fixture.detectChanges();
+
+        expect(component.activeModal()).toBeNull();
+        expect(component.alert()).toEqual({
+          type: 'error',
+          message:
+            'Unable to change your email address. Please contact support.',
+        });
+        expect(
+          fixture.nativeElement.querySelector('app-alert')?.textContent,
+        ).toContain(
+          'Unable to change your email address. Please contact support.',
+        );
+        expect(fixture.nativeElement.textContent).not.toContain(
+          'You do not have permission to perform this action.',
+        );
+        expect(
+          component['getErrorMessages'](component.emailForm, 'email'),
+        ).toEqual([]);
+        expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+          '',
+        );
+      });
+    }
+
+    it('resets the migration and clears passwords when the new email changes', () => {
+      enterEmail('new@example.com', 'aaf');
+      primaryClick();
+      component.migrationPasswordForm.setValue({
+        newPassword: 'Secret123!',
+        confirmNewPassword: 'Secret123!',
+      });
+      component.emailForm.controls.email.setValue('other@sydney.edu.au');
+
+      expect(component.emailFlowState()).toBe('idle');
+      expect(component.emailMigrationDirection()).toBeNull();
+      expect(component.migrationPasswordForm.controls.newPassword.value).toBe(
+        '',
+      );
+    });
+
+    it('ignores a late institution lookup after Cancel', () => {
+      const lookup = new Subject<boolean>();
+      mockLoginProxyService.checkAafEmail.and.returnValue(lookup);
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+      component['closeModal']();
+      lookup.next(true);
+
+      expect(component.activeModal()).toBeNull();
+      expect(component.emailFlowState()).toBe('idle');
+      expect(mockApiService.migrateAuth0ToAaf).not.toHaveBeenCalled();
+    });
+
+    it('prevents duplicate requests and a late redirect after Cancel', () => {
+      const migration = new Subject<{
+        migration_id: string;
+        expires_at: string;
+      }>();
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      mockApiService.migrateAuth0ToAaf.and.returnValue(migration);
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+      primaryClick();
+      primaryClick();
+      expect(mockApiService.migrateAuth0ToAaf).toHaveBeenCalledTimes(1);
+
+      component['closeModal']();
+      migration.next({
+        migration_id: 'late',
+        expires_at: '2026-10-29T03:10:00Z',
+      });
+      expect(mockAuthService.loginForAafMigration).not.toHaveBeenCalled();
+    });
+  });
+
   it('sends an OTP when a new email address is entered', () => {
     mockApiService.requestEmailChange.and.returnValue(
       of({ message: 'Please check your inbox' }),
@@ -376,7 +986,7 @@ describe('ProfileComponent', () => {
     expect(component.emailModalNotice()).toBe('Please check your inbox');
   });
 
-  it('shows an inline error when the email OTP request fails', () => {
+  it('shows the existing error alert when the email OTP request fails', () => {
     mockApiService.requestEmailChange.and.returnValue(
       throwError(() => ({ error: { detail: 'Rate limited' } })),
     );
@@ -391,6 +1001,11 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     expect(component.emailFlowState()).toBe('idle');
+    expect(component.activeModal()).toBeNull();
+    expect(component.alert()).toEqual({
+      type: 'error',
+      message: 'Rate limited',
+    });
   });
 
   it('confirms the email change when a valid OTP is submitted', () => {
