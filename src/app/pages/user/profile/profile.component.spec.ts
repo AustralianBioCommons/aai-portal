@@ -796,7 +796,7 @@ describe('ProfileComponent', () => {
         'modal-email-error',
       );
       expect(emailError.textContent).toContain(message);
-      expect(emailError.classList).toContain('text-red-700');
+      expect(emailError.classList).toContain('text-red-500');
       expect(component.alert()).toBeNull();
       expect(component.activeModal()).toBe('email');
       expect(mockAuthService.loginForAafMigration).not.toHaveBeenCalled();

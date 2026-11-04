@@ -133,7 +133,7 @@
               @if (isFieldInvalid(emailForm, "email")) {
                 <div
                   id="modal-email-error"
-                  class="mt-0.5 text-xs text-red-700"
+                  class="mt-0.5 text-xs text-red-500"
                   role="alert"
                 >
                   @for (
@@ -145,14 +145,14 @@
                 </div>
               }
               @if (sbpEmailNotInstitutional()) {
-                <div class="mt-0.5 text-xs text-red-700" role="alert">
+                <div class="mt-0.5 text-xs text-red-500" role="alert">
                   Access to the Structural Biology Platform Bundle requires
                   affiliation with an
                   <a
                     href="https://site.usegalaxy.org.au/list-of-institutions.html"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="underline hover:text-red-800"
+                    class="underline hover:text-red-600"
                   >
                     Australian Research Institute </a
                   >. Changing to a non-institutional email address will
@@ -199,7 +199,7 @@
                     special character.
                   </p>
                   @if (isFieldInvalid(migrationPasswordForm, "newPassword")) {
-                    <div class="mt-0.5 text-xs text-red-700" role="alert">
+                    <div class="mt-0.5 text-xs text-red-500" role="alert">
                       @for (
                         error of getErrorMessages(
                           migrationPasswordForm,
@@ -235,7 +235,7 @@
                   @if (
                     isFieldInvalid(migrationPasswordForm, "confirmNewPassword")
                   ) {
-                    <div class="mt-0.5 text-xs text-red-700" role="alert">
+                    <div class="mt-0.5 text-xs text-red-500" role="alert">
                       @for (
                         error of getErrorMessages(
                           migrationPasswordForm,
@@ -280,14 +280,14 @@
                 @if (otpError()) {
                   <div
                     id="modal-otp-error"
-                    class="mt-0.5 text-xs text-red-700"
+                    class="mt-0.5 text-xs text-red-500"
                     role="alert"
                   >
                     {{ otpError() }}
                   </div>
                 }
                 @if (emailModalNotice()) {
-                  <div class="mt-1 text-xs text-green-700">
+                  <div class="mt-1 text-xs text-green-600">
                     {{ emailModalNotice() }}
                   </div>
                 }
