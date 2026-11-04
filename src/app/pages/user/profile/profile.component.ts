@@ -211,7 +211,9 @@ export class ProfileComponent implements OnInit {
     this.emailForm.controls.email.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
+        const institutionWarning = this.sbpEmailNotInstitutional();
         this.resetEmailFlowState();
+        this.sbpEmailNotInstitutional.set(institutionWarning);
         this.validationService.clearFieldBackendError('email');
       });
     this.usernameForm.get('username')?.valueChanges.subscribe(() => {

@@ -1167,6 +1167,33 @@ describe('ProfileComponent', () => {
       );
     }));
 
+    it('keeps the SBP warning when only the email domain case changes', fakeAsync(() => {
+      mockApiService.getUserProfile.and.returnValue(
+        of(userWithSbp('approved')),
+      );
+      mockApiService.checkAustralianResearchInstitution.and.returnValue(
+        of(false),
+      );
+      fixture.detectChanges();
+
+      typeNewEmail('new@gmail.com');
+      expect(component.sbpEmailNotInstitutional()).toBeTrue();
+
+      component.emailForm.controls.email.setValue('new@GMAIL.COM');
+      fixture.detectChanges();
+      expect(component.sbpEmailNotInstitutional()).toBeTrue();
+      tick(400);
+      fixture.detectChanges();
+
+      expect(component.sbpEmailNotInstitutional()).toBeTrue();
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+        sbpReminder,
+      );
+      expect(
+        mockApiService.checkAustralianResearchInstitution,
+      ).toHaveBeenCalledOnceWith('new@gmail.com');
+    }));
+
     it('does not show the reminder when the typed email is institutional', fakeAsync(() => {
       mockApiService.getUserProfile.and.returnValue(
         of(userWithSbp('approved')),

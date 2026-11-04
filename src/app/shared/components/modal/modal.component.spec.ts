@@ -22,6 +22,25 @@ describe('ModalComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('keeps long dialogs within the viewport and lets actions scroll into view', () => {
+    const panel: HTMLElement = fixture.nativeElement.querySelector('.bg-white');
+    const actions = panel.lastElementChild!;
+    const content = document.createElement('div');
+    content.style.height = '200vh';
+    panel.insertBefore(content, actions);
+
+    const bounds = panel.getBoundingClientRect();
+    expect(bounds.top).toBeGreaterThanOrEqual(16);
+    expect(bounds.bottom).toBeLessThanOrEqual(window.innerHeight - 16);
+    expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight);
+
+    panel.scrollTop = panel.scrollHeight;
+    expect(panel.scrollTop).toBeGreaterThan(0);
+    const actionBounds = actions.getBoundingClientRect();
+    expect(actionBounds.top).toBeGreaterThanOrEqual(bounds.top);
+    expect(actionBounds.bottom).toBeLessThanOrEqual(bounds.bottom);
+  });
+
   it('should emit primaryOutput event when onPrimary is called', () => {
     spyOn(component.primaryOutput, 'emit');
     component.onPrimary();
