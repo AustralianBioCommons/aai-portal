@@ -748,6 +748,10 @@ export class ProfileComponent implements OnInit {
         error: (err: HttpErrorResponse) => {
           this.otpLoading.set(false);
           const status = err.status;
+          console.error('Failed to verify email address:', {
+            status,
+            error: err,
+          });
           const detail: unknown = err.error?.detail;
           if (
             status === 401 ||
