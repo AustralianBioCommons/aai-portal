@@ -155,6 +155,21 @@ export interface CheckAustralianResearchInstitutionResponse {
   is_australian_research_institution: boolean;
 }
 
+export interface AccountMigrationResponse {
+  migration_id: string;
+  expires_at: string;
+}
+
+export interface AafToAuth0MigrationResponse extends AccountMigrationResponse {
+  new_email: string;
+}
+
+export interface AafToAuth0MigrationCompleteResponse {
+  migration_id: string;
+  user_id: string;
+  new_email: string;
+}
+
 export interface GroupAccessRequestResult {
   group_id: string;
   status: string;
@@ -419,6 +434,33 @@ export class ApiService {
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/me/profile/email/update`,
       { email },
+    );
+  }
+
+  migrateAuth0ToAaf(newEmail: string): Observable<AccountMigrationResponse> {
+    return this.http.post<AccountMigrationResponse>(
+      `${environment.auth0.backend}/aaf/migrate/auth0-to-aaf`,
+      { new_email: newEmail },
+    );
+  }
+
+  migrateAafToAuth0(
+    email: string,
+    password: string,
+  ): Observable<AafToAuth0MigrationResponse> {
+    return this.http.post<AafToAuth0MigrationResponse>(
+      `${environment.auth0.backend}/aaf/migrate/aaf-to-auth0`,
+      { new_email: email, password },
+    );
+  }
+
+  completeAafToAuth0(
+    migrationId: string,
+    otp: string,
+  ): Observable<AafToAuth0MigrationCompleteResponse> {
+    return this.http.post<AafToAuth0MigrationCompleteResponse>(
+      `${environment.auth0.backend}/aaf/migrate/aaf-to-auth0/complete`,
+      { migration_id: migrationId, otp },
     );
   }
 

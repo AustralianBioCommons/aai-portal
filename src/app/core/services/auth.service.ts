@@ -210,6 +210,18 @@ export class AuthService {
     });
   }
 
+  loginForAafMigration(email: string, migrationId: string): Observable<void> {
+    return this.auth0Service.loginWithRedirect({
+      appState: { target: '/profile' },
+      authorizationParams: {
+        login_hint: email,
+        connection: 'AAF',
+        migration_id: migrationId,
+        prompt: 'login',
+      },
+    });
+  }
+
   /**
    * Attempt a silent authentication with Auth0, allowing SSO sessions from
    * other applications to flow through without user interaction.
