@@ -98,6 +98,22 @@ describe('ApiService', () => {
     req.flush(null);
   });
 
+  it('checks profile email availability using the authenticated profile endpoint', () => {
+    const email = 'taken@example.com';
+    service.checkProfileEmailAvailability(email).subscribe((available) => {
+      expect(available).toBeFalse();
+    });
+
+    const req = httpMock.expectOne(
+      (request) =>
+        request.url ===
+          `${environment.auth0.backend}/me/profile/email/check-availability` &&
+        request.params.get('email') === email,
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ available: false });
+  });
+
   it('should fetch platforms the user has admin rights to', () => {
     const mockResponse: AdminPlatformResponse[] = [
       { id: 'galaxy', name: 'Galaxy' },

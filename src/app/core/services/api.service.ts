@@ -430,6 +430,15 @@ export class ApiService {
     );
   }
 
+  checkProfileEmailAvailability(email: string): Observable<boolean> {
+    return this.http
+      .get<{ available: boolean }>(
+        `${environment.auth0.backend}/me/profile/email/check-availability`,
+        { params: { email } },
+      )
+      .pipe(map((data) => data.available));
+  }
+
   requestEmailChange(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
       `${environment.auth0.backend}/me/profile/email/update`,
