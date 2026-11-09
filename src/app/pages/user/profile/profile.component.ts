@@ -599,12 +599,28 @@ export class ProfileComponent implements OnInit {
     const email = toAsciiEmail(this.emailForm.controls.email.value.trim());
     this.emailLoading.set(true);
     this.alert.set(null);
-    this.loginProxyService
-      .checkAafEmail(email)
-      .pipe(takeUntil(this.emailFlowReset), takeUntilDestroyed(this.destroyRef))
+    this.validationService.clearFieldBackendError('email');
+    this.apiService
+      .checkProfileEmailAvailability(email)
+      .pipe(
+        switchMap((available) =>
+          available
+            ? this.loginProxyService.checkAafEmail(email)
+            : of('taken' as const),
+        ),
+        takeUntil(this.emailFlowReset),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (isAafEmail) => {
           this.emailLoading.set(false);
+          if (isAafEmail === 'taken') {
+            this.validationService.setFieldBackendError(
+              'email',
+              'Email is already in use by another user',
+            );
+            return;
+          }
           if (isAafEmail && !this.isAafUser()) {
             this.emailMigrationDirection.set('auth0-to-aaf');
             this.emailFlowState.set('auth0-to-aaf');
@@ -619,7 +635,7 @@ export class ProfileComponent implements OnInit {
           this.emailLoading.set(false);
           this.showEmailChangeError(
             err,
-            'Failed to check your institution. Please try again.',
+            'Failed to check your email address. Please try again.',
           );
         },
       });
@@ -760,7 +776,7 @@ export class ProfileComponent implements OnInit {
             status >= 500 ||
             (isAuth0Migration &&
               status === 409 &&
-              detail !== 'Email is already in use by another user.')
+              detail !== 'Email is already in use by another user')
           ) {
             this.showEmailChangeError(
               err,
@@ -791,7 +807,7 @@ export class ProfileComponent implements OnInit {
     const detail: unknown = error.error?.detail;
     if (
       error.status === 409 &&
-      detail === 'Email is already in use by another user.'
+      detail === 'Email is already in use by another user'
     ) {
       this.validationService.setFieldBackendError('email', detail);
     } else {

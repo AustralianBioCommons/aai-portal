@@ -97,6 +97,7 @@ describe('ProfileComponent', () => {
       'updateUsername',
       'updatePassword',
       'updateName',
+      'checkProfileEmailAvailability',
       'requestEmailChange',
       'continueEmailChange',
       'migrateAuth0ToAaf',
@@ -150,6 +151,7 @@ describe('ProfileComponent', () => {
       LoginProxyService,
     ) as jasmine.SpyObj<LoginProxyService>;
     mockLoginProxyService.checkAafEmail.and.returnValue(of(false));
+    mockApiService.checkProfileEmailAvailability.and.returnValue(of(true));
     mockApiService.migrateAuth0ToAaf.and.returnValue(
       of({
         migration_id: 'migration-123',
@@ -432,9 +434,129 @@ describe('ProfileComponent', () => {
       component.emailForm.controls.email.setValue('invalid');
       primaryClick();
 
+      expect(
+        mockApiService.checkProfileEmailAvailability,
+      ).not.toHaveBeenCalled();
       expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
       expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
     });
+
+    it('waits for email availability before checking AAF and prevents duplicate requests', () => {
+      const availability = new Subject<boolean>();
+      mockApiService.checkProfileEmailAvailability.and.returnValue(
+        availability,
+      );
+      mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
+      enterEmail('new@b\u00fccher.de');
+      primaryClick();
+      primaryClick();
+
+      expect(
+        mockApiService.checkProfileEmailAvailability,
+      ).toHaveBeenCalledOnceWith('new@xn--bcher-kva.de');
+      expect(component.emailLoading()).toBeTrue();
+      expect(component.emailFlowState()).toBe('idle');
+      expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
+
+      availability.next(true);
+
+      expect(mockLoginProxyService.checkAafEmail).toHaveBeenCalledOnceWith(
+        'new@xn--bcher-kva.de',
+      );
+      expect(component.emailLoading()).toBeFalse();
+      expect(component.emailFlowState()).toBe('auth0-to-aaf');
+    });
+
+    for (const accountType of ['auth0', 'aaf']) {
+      it(`rejects an email in use before checking AAF for an ${accountType} user`, () => {
+        mockApiService.checkProfileEmailAvailability.and.returnValue(of(false));
+        enterEmail('taken@sydney.edu.au', accountType);
+        primaryClick();
+        fixture.detectChanges();
+
+        const emailInput: HTMLInputElement =
+          fixture.nativeElement.querySelector('#modal-email');
+        expect(emailInput.getAttribute('aria-invalid')).toBe('true');
+        expect(emailInput.getAttribute('aria-describedby')).toBe(
+          'modal-email-error',
+        );
+        expect(
+          fixture.nativeElement.querySelector('#modal-email-error')
+            ?.textContent,
+        ).toContain('Email is already in use by another user');
+        expect(component.activeModal()).toBe('email');
+        expect(component.emailFlowState()).toBe('idle');
+        expect(component.emailLoading()).toBeFalse();
+        expect(component.alert()).toBeNull();
+        expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
+        expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+        expect(mockApiService.migrateAuth0ToAaf).not.toHaveBeenCalled();
+        expect(mockApiService.migrateAafToAuth0).not.toHaveBeenCalled();
+
+        component.emailForm.controls.email.setValue('available@example.com');
+        fixture.detectChanges();
+
+        expect(emailInput.getAttribute('aria-invalid')).toBe('false');
+        expect(
+          fixture.nativeElement.querySelector('#modal-email-error'),
+        ).toBeNull();
+        mockApiService.checkProfileEmailAvailability.and.returnValue(of(true));
+        primaryClick();
+
+        expect(
+          mockApiService.checkProfileEmailAvailability,
+        ).toHaveBeenCalledWith('available@example.com');
+        expect(mockLoginProxyService.checkAafEmail).toHaveBeenCalledOnceWith(
+          'available@example.com',
+        );
+        expect(component.emailFlowState()).toBe(
+          accountType === 'aaf' ? 'aaf-to-auth0' : 'otp-sent',
+        );
+      });
+    }
+
+    it('stops before AAF when email availability cannot be checked', () => {
+      mockApiService.checkProfileEmailAvailability.and.returnValue(
+        throwError(() => new Error('network')),
+      );
+      enterEmail('new@sydney.edu.au');
+      primaryClick();
+
+      expect(component.emailLoading()).toBeFalse();
+      expect(component.activeModal()).toBeNull();
+      expect(component.alert()).toEqual({
+        type: 'error',
+        message: 'Failed to check your email address. Please try again.',
+      });
+      expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
+      expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+    });
+
+    for (const action of ['cancel', 'edit'] as const) {
+      it(`ignores a late availability response after ${action}`, () => {
+        const availability = new Subject<boolean>();
+        mockApiService.checkProfileEmailAvailability.and.returnValue(
+          availability,
+        );
+        enterEmail('new@sydney.edu.au');
+        primaryClick();
+
+        if (action === 'cancel') {
+          component['closeModal']();
+        } else {
+          component.emailForm.controls.email.setValue('other@example.com');
+        }
+        availability.next(true);
+
+        expect(component.emailLoading()).toBeFalse();
+        expect(component.emailFlowState()).toBe('idle');
+        expect(component.activeModal()).toBe(
+          action === 'cancel' ? null : 'email',
+        );
+        expect(mockLoginProxyService.checkAafEmail).not.toHaveBeenCalled();
+        expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
+      });
+    }
 
     it('creates the Auth0 to AAF migration only after Log in is clicked', () => {
       mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
@@ -696,7 +818,7 @@ describe('ProfileComponent', () => {
     });
 
     it('shows duplicate emails from the AAF to Auth0 endpoint beside the email field', () => {
-      const message = 'Email is already in use by another user.';
+      const message = 'Email is already in use by another user';
       mockApiService.migrateAafToAuth0.and.returnValue(
         throwError(() => ({ status: 409, error: { detail: message } })),
       );
@@ -769,7 +891,7 @@ describe('ProfileComponent', () => {
       expect(component.activeModal()).toBeNull();
       expect(component.alert()).toEqual({
         type: 'error',
-        message: 'Failed to check your institution. Please try again.',
+        message: 'Failed to check your email address. Please try again.',
       });
       expect(component.emailLoading()).toBeFalse();
       expect(mockApiService.requestEmailChange).not.toHaveBeenCalled();
@@ -783,7 +905,7 @@ describe('ProfileComponent', () => {
     });
 
     it('shows duplicate migration email errors on the email field and clears them when edited', () => {
-      const message = 'Email is already in use by another user.';
+      const message = 'Email is already in use by another user';
       mockLoginProxyService.checkAafEmail.and.returnValue(of(true));
       mockApiService.migrateAuth0ToAaf.and.returnValue(
         throwError(() => ({ status: 409, error: { detail: message } })),
