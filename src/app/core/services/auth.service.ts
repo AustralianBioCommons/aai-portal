@@ -202,6 +202,13 @@ export class AuthService {
     );
   }
 
+  loginAfterAafRegistration(): void {
+    this.auth0Service.loginWithRedirect({
+      appState: { target: '/' },
+      authorizationParams: { prompt: 'login' },
+    });
+  }
+
   logout(): void {
     this.auth0Service.logout({
       logoutParams: {

@@ -532,6 +532,28 @@
         </form>
       </div>
     </div>
+  } @else if (aafMode()) {
+    <main
+      class="flex flex-1 flex-col items-center justify-center gap-12 bg-gray-50 p-12 text-center"
+    >
+      <h1
+        #successHeading
+        tabindex="-1"
+        class="text-4xl font-semibold sm:text-5xl lg:text-6xl"
+      >
+        Thank you
+      </h1>
+      <p class="max-w-2xl font-light text-gray-700">
+        Your account has been successfully created. You can now log in.
+      </p>
+      <app-button
+        type="button"
+        variant="primary"
+        (click)="loginAfterAafRegistration()"
+      >
+        Continue
+      </app-button>
+    </main>
   } @else {
     <!-- Success Page -->
     <div
@@ -543,9 +565,11 @@
       <div class="max-w-2xl font-light text-gray-700">
         @if (registrationEmail()) {
           We've sent a verification email to
-          <span class="font-medium text-gray-900">
-            {{ registrationEmail() }} </span
-          >. Please verify your email to log in.
+          <span class="font-medium text-gray-900">{{
+            registrationEmail()
+          }}</span
+          >.<br />
+          Please verify your email to log in.
         } @else {
           We've sent a verification email to the email address you provided.
           Please verify your email to log in.

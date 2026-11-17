@@ -4,10 +4,12 @@ import {
   AfterViewInit,
   Component,
   DestroyRef,
+  ElementRef,
   Injector,
   afterNextRender,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -126,12 +128,14 @@ export class RegisterComponent implements AfterViewInit {
   // AAF mode: this same form serves the post-AAF-login registration at
   // /aaf-register. In that mode email/first/last are prefilled from the Auth0
   // session token and disabled, there's no password, and submit goes to
-  // /biocommons/register-aaf then follows the returned redirect_url to resume
-  // the Auth0 login. Everything AAF-specific is gated behind this flag so the
-  // standard registration flow is unchanged.
+  // /biocommons/register-aaf. Continue requests a fresh Auth0 login.
+  // Everything AAF-specific is gated behind this flag so
+  // the standard registration flow is unchanged.
   readonly aafMode = signal(false);
   private aafSessionToken: string | null = null;
   private aafState: string | null = null;
+  private readonly successHeading =
+    viewChild<ElementRef<HTMLHeadingElement>>('successHeading');
 
   private readonly bpaPlatformUrl =
     environment.platformUrls.bpaPlatform.replace(/\/+$/, '');
@@ -656,10 +660,7 @@ export class RegisterComponent implements AfterViewInit {
     };
 
     this.http
-      .post<{ redirect_url?: string }>(
-        `${environment.auth0.backend}/biocommons/register-aaf`,
-        requestBody,
-      )
+      .post(`${environment.auth0.backend}/biocommons/register-aaf`, requestBody)
       .pipe(
         catchError((error: HttpErrorResponse) => {
           console.error('AAF registration failed:', error);
@@ -677,14 +678,17 @@ export class RegisterComponent implements AfterViewInit {
           this.isSubmitting.set(false);
           return;
         }
-        // Resume the Auth0 login by following the signed /continue URL.
-        if (result.redirect_url) {
-          this.document.location.href = result.redirect_url;
-          return;
-        }
         this.isSubmitting.set(false);
         this.isRegistrationComplete.set(true);
+        this.document.defaultView?.scrollTo({ top: 0 });
+        afterNextRender(() => this.successHeading()?.nativeElement.focus(), {
+          injector: this.injector,
+        });
       });
+  }
+
+  loginAfterAafRegistration(): void {
+    this.authService.loginAfterAafRegistration();
   }
 
   private scrollToFirstError(): void {

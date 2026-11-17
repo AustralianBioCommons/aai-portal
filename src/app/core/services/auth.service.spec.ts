@@ -115,6 +115,20 @@ describe('AuthService', () => {
     req.flush(false);
   });
 
+  it('requires Auth0 login and targets the root after AAF registration', () => {
+    const { httpMock } = createService(true);
+
+    service.loginAfterAafRegistration();
+
+    expect(mockAuth0Service.loginWithRedirect).toHaveBeenCalledOnceWith({
+      appState: { target: '/' },
+      authorizationParams: { prompt: 'login' },
+    });
+    httpMock
+      .expectOne(`${environment.auth0.backend}/me/is-general-admin`)
+      .flush(false);
+  });
+
   it('starts a fresh AAF login with the email and migration ID', () => {
     const { httpMock } = createService();
     mockAuth0Service.loginWithRedirect.and.returnValue(of(void 0));
