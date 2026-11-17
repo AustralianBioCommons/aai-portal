@@ -25,6 +25,7 @@ describe('RegisterComponent (AAF mode)', () => {
   let httpMock: HttpTestingController;
   let mockQueryParamMap: jasmine.SpyObj<ParamMap>;
   let mockLocation: { href: string };
+  let authService: jasmine.SpyObj<AuthService>;
 
   const sessionToken = createUnsignedJwt({
     purpose: 'aaf_registration',
@@ -44,6 +45,7 @@ describe('RegisterComponent (AAF mode)', () => {
     const authSpy = jasmine.createSpyObj('AuthService', [
       'refreshUser',
       'login',
+      'loginAfterAafRegistration',
     ]);
 
     await TestBed.configureTestingModule({
@@ -68,6 +70,7 @@ describe('RegisterComponent (AAF mode)', () => {
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
 
     // Capture navigation instead of performing it.
     mockLocation = { href: '' };
@@ -181,7 +184,7 @@ describe('RegisterComponent (AAF mode)', () => {
     expect(component.registrationForm.valid).toBe(true);
   });
 
-  it('submits to register-aaf with session_token/state and follows redirect_url', () => {
+  it('shows registration success and requests a fresh login only when Continue is clicked', () => {
     fixture.detectChanges();
     component.registrationForm.patchValue({
       username: 'ada_lovelace',
@@ -208,8 +211,28 @@ describe('RegisterComponent (AAF mode)', () => {
       redirect_url: 'https://biocloud-dev-aaf.au.auth0.com/continue?state=abc',
     });
 
-    expect(mockLocation.href).toBe(
-      'https://biocloud-dev-aaf.au.auth0.com/continue?state=abc',
+    fixture.detectChanges();
+
+    expect(mockLocation.href).toBe('');
+    expect(component.isSubmitting()).toBeFalse();
+    expect(component.isRegistrationComplete()).toBeTrue();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('h1')?.textContent).toContain('Thank you');
+    expect(
+      el.querySelector('main p')?.textContent?.replace(/\s+/g, ' ').trim(),
+    ).toBe('Your account has been successfully created. You can now log in.');
+    expect(el.textContent).not.toContain('Please verify your email to log in');
+    const button = el.querySelector<HTMLButtonElement>(
+      'main app-button button',
     );
+    expect(button?.textContent).toContain('Continue');
+    expect(document.activeElement).toBe(el.querySelector('h1'));
+    expect(authService.login).not.toHaveBeenCalled();
+    expect(authService.loginAfterAafRegistration).not.toHaveBeenCalled();
+    button?.click();
+
+    expect(authService.loginAfterAafRegistration).toHaveBeenCalledOnceWith();
+    expect(authService.login).not.toHaveBeenCalled();
+    expect(mockLocation.href).toBe('');
   });
 });
