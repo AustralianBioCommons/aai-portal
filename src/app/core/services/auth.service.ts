@@ -204,7 +204,7 @@ export class AuthService {
 
   loginAfterAafRegistration(): void {
     this.auth0Service.loginWithRedirect({
-      appState: { target: '/profile' },
+      appState: { target: '/' },
       authorizationParams: { prompt: 'login' },
     });
   }

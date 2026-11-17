@@ -115,13 +115,13 @@ describe('AuthService', () => {
     req.flush(false);
   });
 
-  it('requires Auth0 login after AAF registration even with an authenticated session', () => {
+  it('requires Auth0 login and targets the root after AAF registration', () => {
     const { httpMock } = createService(true);
 
     service.loginAfterAafRegistration();
 
     expect(mockAuth0Service.loginWithRedirect).toHaveBeenCalledOnceWith({
-      appState: { target: '/profile' },
+      appState: { target: '/' },
       authorizationParams: { prompt: 'login' },
     });
     httpMock
