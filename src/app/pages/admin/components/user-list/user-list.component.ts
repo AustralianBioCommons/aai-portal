@@ -175,6 +175,17 @@ export class UserListComponent implements OnInit {
   adminPlatforms = this.authService.adminPlatforms;
   adminGroups = this.authService.adminGroups;
 
+  protected readonly platformColumnTitle = computed(() => {
+    if (this.adminType() === 'biocommons') {
+      return 'Services';
+    }
+    if (this.adminType() === 'platform') {
+      const platform = this.adminPlatforms()[0];
+      return platform ? `${platform.name} Access` : 'Access';
+    }
+    return 'Access';
+  });
+
   currentUserId = computed(() => this.authService.user()?.sub ?? null);
 
   hasTitleMessage = input(false);

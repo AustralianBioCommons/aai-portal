@@ -164,13 +164,7 @@
           class="hidden w-2/12 shrink-0"
           [class]="isLargeLayout() ? '' : 'sm:block'"
         >
-          {{
-            adminType() === "biocommons"
-              ? "Services"
-              : adminType() === "platform"
-                ? adminPlatforms()[0].name + " Access"
-                : "Access"
-          }}
+          {{ platformColumnTitle() }}
         </div>
       }
       <div class="shrink-0" [class]="isLargeLayout() ? '' : 'sm:w-3/12'">
@@ -384,9 +378,7 @@
                   <span
                     class="text-sm font-medium text-gray-700"
                     [class]="isLargeLayout() ? '' : 'sm:hidden'"
-                    >{{
-                      adminType() === "biocommons" ? "Services:" : "Access:"
-                    }}</span
+                    >{{ platformColumnTitle() }}:</span
                   >
                   @if (adminType() === "biocommons") {
                     <!-- Show all platforms with names for multi-platform (biocommons) admins -->
