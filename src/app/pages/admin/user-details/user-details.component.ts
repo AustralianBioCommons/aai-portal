@@ -183,6 +183,14 @@ export class UserDetailsComponent implements OnInit {
 
   // State signals
   user = signal<BiocommonsUserDetails | null>(null);
+  // AAF users authenticate via the federation (a linked "AAF" identity), so
+  // their password is IdP-managed (reset hidden) and email is treated verified.
+  readonly isAafUser = computed(
+    () => !!this.user()?.identities?.some((i) => i.connection === 'AAF'),
+  );
+  readonly emailIsVerified = computed(
+    () => this.isAafUser() || !!this.user()?.email_verified,
+  );
   pageLoading = signal(true);
   pageError = signal<string | null>(null);
   alert = signal<{ type: 'success' | 'error'; message: string } | null>(null);
