@@ -1,8 +1,8 @@
 {
   "production": false,
   "auth0": {
-    "domain": "dev.login.aai.test.biocommons.org.au",
-    "clientId": "toU0HJPZZ9iDI5sFkjhE7dphiDhOY9wt",
+    "domain": "dev-aaf.login.aai.test.biocommons.org.au",
+    "clientId": "ZtroVyP0eDfVzpCBSnfYfXBCE6iCmo1R",
     "redirectUri": "",
     "backend": "http://localhost:8000"
   },

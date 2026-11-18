@@ -63,6 +63,7 @@ describe('UnverifiedUsersComponent', () => {
     const expectedParams = {
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: '',
       emailVerified: false,

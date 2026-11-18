@@ -72,6 +72,7 @@ describe('RevokedUsersComponent', () => {
     const expectedParams = {
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: '',
       approvalStatus: 'revoked',
@@ -89,6 +90,7 @@ describe('RevokedUsersComponent', () => {
     const expectedParams = {
       page: 1,
       perPage: DEFAULT_PAGE_SIZE,
+      sortOrder: 'desc',
       filterBy: '',
       search: '',
       platform: 'galaxy',
