@@ -7,6 +7,7 @@ import { PlatformId } from '../constants/constants';
 import { map } from 'rxjs/operators';
 
 export type Status = 'approved' | 'revoked' | 'pending' | 'rejected';
+export type SortOrder = 'asc' | 'desc';
 
 // Platform membership data for user profile: shouldn't include
 // revoked platforms
@@ -132,6 +133,7 @@ export interface AdminGetUsersApiParams {
   platformApprovalStatus?: Status;
   group?: string;
   groupApprovalStatus?: Status;
+  sortOrder?: SortOrder;
 }
 
 export interface UsersPageInfoResponse {
@@ -236,6 +238,7 @@ export class ApiService {
       platformApprovalStatus,
       group,
       groupApprovalStatus,
+      sortOrder,
     } = params;
     const urlParams = new URLSearchParams({
       page: page.toString(),
@@ -265,6 +268,9 @@ export class ApiService {
     }
     if (groupApprovalStatus) {
       urlParams.append('group_approval_status', groupApprovalStatus);
+    }
+    if (sortOrder) {
+      urlParams.append('sort_order', sortOrder);
     }
 
     return urlParams;
