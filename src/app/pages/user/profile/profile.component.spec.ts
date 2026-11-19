@@ -855,7 +855,7 @@ describe('ProfileComponent', () => {
     expect(open).not.toHaveBeenCalled();
     TestBed.inject(HttpTestingController).verify();
     expect(launchButton.disabled).toBeTrue();
-    expect(launchButton.textContent?.trim()).toBe('Launching...');
+    expect(launchButton.querySelector('svg.animate-spin')).not.toBeNull();
 
     tick(1000);
     window.dispatchEvent(
@@ -864,6 +864,7 @@ describe('ProfileComponent', () => {
     fixture.detectChanges();
 
     expect(launchButton.disabled).toBeFalse();
+    expect(launchButton.querySelector('svg.animate-spin')).toBeNull();
     expect(launchButton.textContent?.trim()).toBe('Launch');
 
     launchButton.click();

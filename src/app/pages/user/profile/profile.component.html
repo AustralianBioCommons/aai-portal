@@ -586,10 +586,10 @@
                           type="button"
                           variant="primary"
                           widthClass="w-auto"
-                          [disabled]="launching"
+                          [loading]="launching"
                           (click)="launchPlatform(membership.platform_id)"
                         >
-                          {{ launching ? "Launching..." : "Launch" }}
+                          Launch
                         </app-button>
                       } @else {
                         <span class="text-end text-sm font-medium text-red-500">
