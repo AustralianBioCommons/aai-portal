@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/AustralianBioCommons/aai-portal/compare/v1.7.1...v1.7.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* Galaxy launch button causing authentication errors (AAI-902) ([#279](https://github.com/AustralianBioCommons/aai-portal/issues/279)) ([e08539b](https://github.com/AustralianBioCommons/aai-portal/commit/e08539bd174e7617939e79da640c2fedb3b801b2))
+
 ## [1.7.1](https://github.com/AustralianBioCommons/aai-portal/compare/v1.7.0...v1.7.1) (2026-11-03)
 
 
