@@ -115,6 +115,28 @@ describe('AuthService', () => {
     req.flush(false);
   });
 
+  it('starts a fresh AAF login with the email and migration ID', () => {
+    const { httpMock } = createService();
+    mockAuth0Service.loginWithRedirect.and.returnValue(of(void 0));
+
+    service
+      .loginForAafMigration('new@sydney.edu.au', 'migration-123')
+      .subscribe();
+
+    expect(mockAuth0Service.loginWithRedirect).toHaveBeenCalledWith({
+      appState: { target: '/profile' },
+      authorizationParams: {
+        login_hint: 'new@sydney.edu.au',
+        connection: 'AAF',
+        migration_id: 'migration-123',
+        prompt: 'login',
+      },
+    });
+    httpMock
+      .expectOne(`${environment.auth0.backend}/me/is-general-admin`)
+      .flush(false);
+  });
+
   it('should return authentication state', () => {
     const { httpMock } = createService();
     expect(service.isAuthenticated()).toBe(true);
