@@ -55,7 +55,7 @@ import {
   heroTrash,
   heroUser,
 } from '@ng-icons/heroicons/outline';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   catchError,
   debounceTime,
@@ -65,6 +65,8 @@ import {
   of,
   Subject,
   switchMap,
+  timer,
+  type Subscription,
   takeUntil,
 } from 'rxjs';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
@@ -88,6 +90,9 @@ type EmailFlowState = 'idle' | 'otp-sent' | EmailMigrationDirection;
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
+  host: {
+    '(window:pageshow)': '$event.persisted && resetGalaxyLaunch()',
+  },
   viewProviders: [
     provideIcons({
       heroArrowLeft,
@@ -103,11 +108,11 @@ export class ProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private loginProxyService = inject(LoginProxyService);
   private dataRefreshService = inject(DataRefreshService);
-  private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private galaxyLaunchReset?: Subscription;
   private readonly emailFlowReset = new Subject<void>();
   private emailMigrationId: string | null = null;
 
@@ -138,6 +143,7 @@ export class ProfileComponent implements OnInit {
   pageError = signal<string | null>(null);
   alert = signal<{ type: AlertType; message: string } | null>(null);
   profileImageLoaded = signal(false);
+  protected readonly galaxyLaunching = signal(false);
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
@@ -447,30 +453,23 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    const normalizedBase = launchUrl.endsWith('/')
-      ? launchUrl
-      : `${launchUrl}/`;
-    const loginEndpoint = `${normalizedBase}authnz/auth0/login`;
+    if (this.galaxyLaunching()) {
+      return;
+    }
 
-    this.httpClient
-      .get<{ redirect_uri?: string }>(loginEndpoint)
-      .pipe(
-        catchError((err) => {
-          console.error('Galaxy launch request failed:', err);
-          windowRef.open(launchUrl, '_blank');
-          return of(null);
-        }),
-      )
-      .subscribe((data) => {
-        const redirect = data?.redirect_uri;
+    const normalizedBase = launchUrl.replace(/\/+$/, '');
+    this.galaxyLaunching.set(true);
+    this.galaxyLaunchReset = timer(5000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.galaxyLaunching.set(false));
+    windowRef.location.assign(
+      `${normalizedBase}/authnz/auth0/login?redirect=true`,
+    );
+  }
 
-        if (redirect) {
-          windowRef.open(redirect, '_blank');
-        } else {
-          console.error('No redirect_uri found in response:', data);
-          windowRef.open(launchUrl, '_blank');
-        }
-      });
+  protected resetGalaxyLaunch(): void {
+    this.galaxyLaunchReset?.unsubscribe();
+    this.galaxyLaunching.set(false);
   }
 
   private withLoginFlag(url: string): string {

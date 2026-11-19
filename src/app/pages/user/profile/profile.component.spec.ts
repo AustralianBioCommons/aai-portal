@@ -17,7 +17,10 @@ import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import {
   environment,
   updateEnvironment,
@@ -1594,6 +1597,60 @@ describe('ProfileComponent', () => {
     );
     expect(component.pageLoading()).toBeFalse();
   });
+
+  it('guards Galaxy launch until timeout or page restore', fakeAsync(() => {
+    fixture.detectChanges();
+
+    const assign = jasmine.createSpy('assign');
+    const open = jasmine.createSpy('open');
+    spyOnProperty(document, 'defaultView', 'get').and.returnValue({
+      location: { assign },
+      open,
+    } as unknown as typeof window);
+    const launchButton = fixture.debugElement
+      .queryAll(By.css('app-button button'))
+      .map((button) => button.nativeElement as HTMLButtonElement)
+      .find((button) => button.textContent?.trim() === 'Launch')!;
+
+    launchButton.click();
+    launchButton.click();
+    fixture.detectChanges();
+
+    const galaxyBase = environment.platformUrls.galaxyPlatform.replace(
+      /\/+$/,
+      '',
+    );
+    expect(assign).toHaveBeenCalledOnceWith(
+      `${galaxyBase}/authnz/auth0/login?redirect=true`,
+    );
+    expect(open).not.toHaveBeenCalled();
+    TestBed.inject(HttpTestingController).verify();
+    expect(launchButton.disabled).toBeTrue();
+    expect(launchButton.querySelector('svg.animate-spin')).not.toBeNull();
+
+    tick(1000);
+    window.dispatchEvent(
+      new PageTransitionEvent('pageshow', { persisted: true }),
+    );
+    fixture.detectChanges();
+
+    expect(launchButton.disabled).toBeFalse();
+    expect(launchButton.querySelector('svg.animate-spin')).toBeNull();
+    expect(launchButton.textContent?.trim()).toBe('Launch');
+
+    launchButton.click();
+    tick(4999);
+    fixture.detectChanges();
+
+    expect(assign).toHaveBeenCalledTimes(2);
+    expect(launchButton.disabled).toBeTrue();
+
+    tick(1);
+    fixture.detectChanges();
+
+    expect(launchButton.disabled).toBeFalse();
+    expect(launchButton.textContent?.trim()).toBe('Launch');
+  }));
 
   it('shows a message when a launch URL is unavailable', () => {
     (

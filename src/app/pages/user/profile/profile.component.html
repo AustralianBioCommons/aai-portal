@@ -664,6 +664,8 @@
                   track membership.platform_id
                 ) {
                   @let launchUrl = platformLaunchUrls[membership.platform_id];
+                  @let launching =
+                    membership.platform_id === "galaxy" && galaxyLaunching();
                   <div class="flex items-center justify-between gap-6">
                     <div class="flex items-center gap-6">
                       <img
@@ -695,6 +697,7 @@
                           type="button"
                           variant="primary"
                           widthClass="w-auto"
+                          [loading]="launching"
                           (click)="launchPlatform(membership.platform_id)"
                         >
                           Launch
