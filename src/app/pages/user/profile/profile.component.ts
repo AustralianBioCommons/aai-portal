@@ -47,7 +47,6 @@ import {
   heroTrash,
   heroUser,
 } from '@ng-icons/heroicons/outline';
-import { HttpClient } from '@angular/common/http';
 import {
   catchError,
   debounceTime,
@@ -76,6 +75,9 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
+  host: {
+    '(window:pageshow)': '$event.persisted && galaxyLaunching.set(false)',
+  },
   viewProviders: [
     provideIcons({
       heroArrowLeft,
@@ -90,7 +92,6 @@ export class ProfileComponent implements OnInit {
   private apiService = inject(ApiService);
   private authService = inject(AuthService);
   private dataRefreshService = inject(DataRefreshService);
-  private httpClient = inject(HttpClient);
   private document = inject(DOCUMENT);
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
@@ -115,6 +116,7 @@ export class ProfileComponent implements OnInit {
   pageError = signal<string | null>(null);
   alert = signal<{ type: AlertType; message: string } | null>(null);
   profileImageLoaded = signal(false);
+  protected readonly galaxyLaunching = signal(false);
 
   isGeneralAdmin = this.authService.isGeneralAdmin;
 
@@ -374,30 +376,15 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    const normalizedBase = launchUrl.endsWith('/')
-      ? launchUrl
-      : `${launchUrl}/`;
-    const loginEndpoint = `${normalizedBase}authnz/auth0/login`;
+    if (this.galaxyLaunching()) {
+      return;
+    }
 
-    this.httpClient
-      .get<{ redirect_uri?: string }>(loginEndpoint)
-      .pipe(
-        catchError((err) => {
-          console.error('Galaxy launch request failed:', err);
-          windowRef.open(launchUrl, '_blank');
-          return of(null);
-        }),
-      )
-      .subscribe((data) => {
-        const redirect = data?.redirect_uri;
-
-        if (redirect) {
-          windowRef.open(redirect, '_blank');
-        } else {
-          console.error('No redirect_uri found in response:', data);
-          windowRef.open(launchUrl, '_blank');
-        }
-      });
+    const normalizedBase = launchUrl.replace(/\/+$/, '');
+    this.galaxyLaunching.set(true);
+    windowRef.location.assign(
+      `${normalizedBase}/authnz/auth0/login?redirect=true`,
+    );
   }
 
   private withLoginFlag(url: string): string {
