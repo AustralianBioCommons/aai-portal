@@ -3,6 +3,7 @@ export interface Auth0Config {
   clientId: string;
   redirectUri: string;
   backend: string;
+  loginProxyUrl: string;
 }
 
 export interface RecaptchaConfig {

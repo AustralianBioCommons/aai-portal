@@ -181,14 +181,50 @@ export class AuthService {
     }
   }
 
-  login(): void {
-    this.auth0Service.loginWithRedirect();
+  login(loginHint?: string, connection?: string): void {
+    // login_hint pre-fills Auth0's identifier-first screen so users who already
+    // entered their email on the portal don't retype it. When the connection is
+    // known (e.g. the institutional/AAF path), also passing `connection` makes
+    // Auth0 skip the identifier screen entirely and go straight to that
+    // connection (→ AAF via the login proxy, which resolves the institution
+    // from the login_hint domain).
+    const authorizationParams: Record<string, string> = {};
+    if (loginHint) {
+      authorizationParams['login_hint'] = loginHint;
+    }
+    if (connection) {
+      authorizationParams['connection'] = connection;
+    }
+    this.auth0Service.loginWithRedirect(
+      Object.keys(authorizationParams).length > 0
+        ? { authorizationParams }
+        : undefined,
+    );
+  }
+
+  loginAfterAafRegistration(): void {
+    this.auth0Service.loginWithRedirect({
+      appState: { target: '/' },
+      authorizationParams: { prompt: 'login' },
+    });
   }
 
   logout(): void {
     this.auth0Service.logout({
       logoutParams: {
         returnTo: this.document.location.origin,
+      },
+    });
+  }
+
+  loginForAafMigration(email: string, migrationId: string): Observable<void> {
+    return this.auth0Service.loginWithRedirect({
+      appState: { target: '/profile' },
+      authorizationParams: {
+        login_hint: email,
+        connection: 'AAF',
+        migration_id: migrationId,
+        prompt: 'login',
       },
     });
   }

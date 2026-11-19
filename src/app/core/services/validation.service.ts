@@ -109,6 +109,14 @@ export class ValidationService {
   }
 
   /**
+   * Sets a backend error message for a single field directly (e.g. from a
+   * pre-submit availability check that returns 200, not an error response).
+   */
+  setFieldBackendError(fieldName: string, message: string) {
+    this.backendErrorMessages[fieldName] = message;
+  }
+
+  /**
    * Checks if a specific field has a backend error.
    * @param fieldName The field name to check
    * @returns True if the field has a backend error
