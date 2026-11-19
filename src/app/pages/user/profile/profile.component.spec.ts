@@ -827,7 +827,7 @@ describe('ProfileComponent', () => {
     expect(component.pageLoading()).toBeFalse();
   });
 
-  it('navigates to Galaxy once and resets the launch button when the page is restored', () => {
+  it('guards Galaxy launch until timeout or page restore', fakeAsync(() => {
     fixture.detectChanges();
 
     const assign = jasmine.createSpy('assign');
@@ -857,6 +857,7 @@ describe('ProfileComponent', () => {
     expect(launchButton.disabled).toBeTrue();
     expect(launchButton.textContent?.trim()).toBe('Launching...');
 
+    tick(1000);
     window.dispatchEvent(
       new PageTransitionEvent('pageshow', { persisted: true }),
     );
@@ -864,7 +865,20 @@ describe('ProfileComponent', () => {
 
     expect(launchButton.disabled).toBeFalse();
     expect(launchButton.textContent?.trim()).toBe('Launch');
-  });
+
+    launchButton.click();
+    tick(4999);
+    fixture.detectChanges();
+
+    expect(assign).toHaveBeenCalledTimes(2);
+    expect(launchButton.disabled).toBeTrue();
+
+    tick(1);
+    fixture.detectChanges();
+
+    expect(launchButton.disabled).toBeFalse();
+    expect(launchButton.textContent?.trim()).toBe('Launch');
+  }));
 
   it('shows a message when a launch URL is unavailable', () => {
     (

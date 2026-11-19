@@ -54,6 +54,8 @@ import {
   map,
   of,
   switchMap,
+  timer,
+  type Subscription,
 } from 'rxjs';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 import { FormControl } from '@angular/forms';
@@ -76,7 +78,7 @@ type ProfileModal = 'name' | 'username' | 'email' | 'password';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
   host: {
-    '(window:pageshow)': '$event.persisted && galaxyLaunching.set(false)',
+    '(window:pageshow)': '$event.persisted && resetGalaxyLaunch()',
   },
   viewProviders: [
     provideIcons({
@@ -96,6 +98,7 @@ export class ProfileComponent implements OnInit {
   private validationService = inject(ValidationService);
   private formBuilder = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
+  private galaxyLaunchReset?: Subscription;
 
   private readonly sbpEnabled = environment.features.sbpEnabled;
   protected readonly platforms = PLATFORMS;
@@ -382,9 +385,17 @@ export class ProfileComponent implements OnInit {
 
     const normalizedBase = launchUrl.replace(/\/+$/, '');
     this.galaxyLaunching.set(true);
+    this.galaxyLaunchReset = timer(5000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.galaxyLaunching.set(false));
     windowRef.location.assign(
       `${normalizedBase}/authnz/auth0/login?redirect=true`,
     );
+  }
+
+  protected resetGalaxyLaunch(): void {
+    this.galaxyLaunchReset?.unsubscribe();
+    this.galaxyLaunching.set(false);
   }
 
   private withLoginFlag(url: string): string {
